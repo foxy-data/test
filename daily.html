@@ -3,85 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Щоденні продажі — Аналітика</title>
+    <title>Daily Sales — Apple Style</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
     <style>
-        :root {
-            --bg: #f5f5f7;
-            --text: #1d1d1f;
-            --secondary: #6e6e73;
-            --accent: #0071e3;
-        }
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 40px 20px;
-            line-height: 1.5;
-        }
-        .container { max-width: 1100px; margin: 0 auto; }
-        .back-btn {
-            display: inline-block;
-            text-decoration: none;
-            color: var(--accent);
-            font-weight: 500;
-            margin-bottom: 20px;
-            transition: opacity 0.2s;
-        }
-        .header-section { margin-bottom: 40px; }
-        h1 { font-size: 48px; font-weight: 600; letter-spacing: -0.02em; margin: 0; }
+        :root { --bg: #f5f5f7; --text: #1d1d1f; --accent: #0071e3; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .container { max-width: 1100px; margin: 40px auto; }
+        .back-link { color: var(--accent); text-decoration: none; font-weight: 500; display: inline-block; margin-bottom: 20px; transition: opacity 0.2s; }
+        .back-link:hover { opacity: 0.7; }
+        h1 { font-size: 40px; font-weight: 600; margin-bottom: 30px; letter-spacing: -0.5px; }
         
-        .table-wrapper {
-            background: white;
-            border-radius: 28px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            overflow-x: auto;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 800px;
-        }
-        th {
-            text-align: left;
-            padding: 16px;
-            color: var(--secondary);
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            border-bottom: 1px solid #d2d2d7;
-        }
-        td {
-            padding: 20px 16px;
-            border-bottom: 1px solid #f5f5f7;
-            font-size: 16px;
-        }
+        .table-card { background: white; border-radius: 22px; padding: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th { text-align: left; padding: 16px; color: #86868b; font-size: 12px; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #d2d2d7; }
+        td { padding: 16px; border-bottom: 1px solid #f5f5f7; font-size: 15px; }
         tr:last-child td { border-bottom: none; }
         tr:hover { background: #fafafa; }
         
-        .name-cell { font-weight: 600; color: var(--text); }
-        .badge {
-            background: #e8f2ff;
-            color: var(--accent);
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-        }
+        .name-cell { font-weight: 600; color: #1d1d1f; }
+        .error-msg { background: #fff2f2; color: #d70000; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: none; }
+        .loading { padding: 40px; text-align: center; color: #86868b; }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="index.html" class="back-btn">← Команда</a>
-        <div class="header-section">
-            <h1>Щоденні продажі</h1>
-            <p style="color: var(--secondary); font-size: 19px;">Огляд активності ПК департаменту за сьогодні</p>
-        </div>
-
-        <div class="table-wrapper">
-            <table id="salesTable">
+        <a href="index.html" class="back-link">← Назад до карток</a>
+        <h1>Щоденні продажі ПК</h1>
+        
+        <div id="error" class="error-msg"></div>
+        
+        <div class="table-card">
+            <div id="loader" class="loading">Завантаження даних...</div>
+            <table id="dataTable" style="display: none;">
                 <thead><tr id="headerRow"></tr></thead>
                 <tbody id="tableBody"></tbody>
             </table>
@@ -89,14 +42,29 @@
     </div>
 
     <script>
-        async function loadTable() {
+        async function loadDailyData() {
+            const loader = document.getElementById('loader');
+            const table = document.getElementById('dataTable');
+            const errorDiv = document.getElementById('error');
+
             try {
-                const response = await fetch('daily-sales.json');
+                // Додаємо timestamp щоб уникнути кешування браузером
+                const response = await fetch('daily-sales.json?t=' + Date.now());
+                if (!response.ok) throw new Error('Файл daily-sales.json не знайдено на сервері');
+                
                 const data = await response.json();
                 
-                if (data.length === 0) return;
+                if (!Array.isArray(data) || data.length === 0) {
+                    throw new Error('Файл з даними порожній або має неправильний формат');
+                }
 
+                loader.style.display = 'none';
+                table.style.display = 'table';
+
+                // Отримуємо всі унікальні ключі (заголовки)
                 const headers = Object.keys(data[0]);
+                
+                // Створюємо заголовки таблиці
                 const headerRow = document.getElementById('headerRow');
                 headers.forEach(h => {
                     const th = document.createElement('th');
@@ -104,27 +72,34 @@
                     headerRow.appendChild(th);
                 });
 
+                // Створюємо рядки
                 const tbody = document.getElementById('tableBody');
                 data.forEach(row => {
                     const tr = document.createElement('tr');
                     headers.forEach(h => {
                         const td = document.createElement('td');
-                        let value = row[h];
+                        const val = row[h];
                         
-                        if (h.includes('Продавець') || h.includes('ПІБ')) {
+                        // Якщо це колонка з ім'ям
+                        if (h.toLowerCase().includes('продавець') || h.toLowerCase().includes('піб')) {
                             td.className = 'name-cell';
                         }
                         
-                        td.textContent = value === null ? '-' : value;
+                        td.textContent = (val === null || val === undefined) ? '-' : val;
                         tr.appendChild(td);
                     });
                     tbody.appendChild(tr);
                 });
-            } catch (e) {
-                console.error("Помилка завантаження даних:", e);
+
+            } catch (err) {
+                loader.style.display = 'none';
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = 'Помилка: ' + err.message;
+                console.error(err);
             }
         }
-        loadTable();
+
+        window.onload = loadDailyData;
     </script>
 </body>
 </html>
