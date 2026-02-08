@@ -7,99 +7,66 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
     <style>
         :root { --bg: #f5f5f7; --text: #1d1d1f; --accent: #0071e3; }
-        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        .container { max-width: 1100px; margin: 40px auto; }
-        .back-link { color: var(--accent); text-decoration: none; font-weight: 500; display: inline-block; margin-bottom: 20px; transition: opacity 0.2s; }
-        .back-link:hover { opacity: 0.7; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 40px auto; }
+        .back-link { color: var(--accent); text-decoration: none; font-weight: 500; display: inline-block; margin-bottom: 20px; }
         h1 { font-size: 40px; font-weight: 600; margin-bottom: 30px; letter-spacing: -0.5px; }
-        
         .table-card { background: white; border-radius: 22px; padding: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
         th { text-align: left; padding: 16px; color: #86868b; font-size: 12px; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #d2d2d7; }
-        td { padding: 16px; border-bottom: 1px solid #f5f5f7; font-size: 15px; }
-        tr:last-child td { border-bottom: none; }
+        td { padding: 18px 16px; border-bottom: 1px solid #f5f5f7; font-size: 15px; }
         tr:hover { background: #fafafa; }
-        
         .name-cell { font-weight: 600; color: #1d1d1f; }
-        .error-msg { background: #fff2f2; color: #d70000; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: none; }
         .loading { padding: 40px; text-align: center; color: #86868b; }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="index.html" class="back-link">← Назад до карток</a>
+        <a href="index.html" class="back-link">← Назад</a>
         <h1>Щоденні продажі ПК</h1>
-        
-        <div id="error" class="error-msg"></div>
-        
         <div class="table-card">
-            <div id="loader" class="loading">Завантаження даних...</div>
+            <div id="loader" class="loading">Оновлення даних...</div>
             <table id="dataTable" style="display: none;">
                 <thead><tr id="headerRow"></tr></thead>
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
     </div>
-
     <script>
-        async function loadDailyData() {
-            const loader = document.getElementById('loader');
-            const table = document.getElementById('dataTable');
-            const errorDiv = document.getElementById('error');
-
+        async function loadTable() {
             try {
-                // Додаємо timestamp щоб уникнути кешування браузером
-                const response = await fetch('daily-sales.json?t=' + Date.now());
-                if (!response.ok) throw new Error('Файл daily-sales.json не знайдено на сервері');
-                
-                const data = await response.json();
-                
-                if (!Array.isArray(data) || data.length === 0) {
-                    throw new Error('Файл з даними порожній або має неправильний формат');
-                }
+                const r = await fetch('daily-sales.json?t=' + Date.now());
+                const data = await r.json();
+                if (!data.length) return;
 
-                loader.style.display = 'none';
-                table.style.display = 'table';
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('dataTable').style.display = 'table';
 
-                // Отримуємо всі унікальні ключі (заголовки)
                 const headers = Object.keys(data[0]);
-                
-                // Створюємо заголовки таблиці
-                const headerRow = document.getElementById('headerRow');
+                const hRow = document.getElementById('headerRow');
                 headers.forEach(h => {
-                    const th = document.createElement('th');
+                    let th = document.createElement('th');
                     th.textContent = h;
-                    headerRow.appendChild(th);
+                    hRow.appendChild(th);
                 });
 
-                // Створюємо рядки
                 const tbody = document.getElementById('tableBody');
                 data.forEach(row => {
-                    const tr = document.createElement('tr');
+                    let tr = document.createElement('tr');
                     headers.forEach(h => {
-                        const td = document.createElement('td');
-                        const val = row[h];
-                        
-                        // Якщо це колонка з ім'ям
-                        if (h.toLowerCase().includes('продавець') || h.toLowerCase().includes('піб')) {
-                            td.className = 'name-cell';
-                        }
-                        
-                        td.textContent = (val === null || val === undefined) ? '-' : val;
+                        let td = document.createElement('td');
+                        let val = row[h];
+                        td.textContent = (val === 0 && h.toLowerCase().includes('продавець')) ? '-' : val;
+                        if(h.toLowerCase().includes('продавець')) td.className = 'name-cell';
                         tr.appendChild(td);
                     });
                     tbody.appendChild(tr);
                 });
-
-            } catch (err) {
-                loader.style.display = 'none';
-                errorDiv.style.display = 'block';
-                errorDiv.textContent = 'Помилка: ' + err.message;
-                console.error(err);
+            } catch (e) {
+                document.getElementById('loader').textContent = "Помилка завантаження: " + e.message;
             }
         }
-
-        window.onload = loadDailyData;
+        loadTable();
     </script>
 </body>
 </html>
