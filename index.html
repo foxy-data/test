@@ -345,6 +345,65 @@
             <div class="logo">SalesTeam</div>
             <a href="#" class="back-btn" id="backBtn" onclick="showHome(); return false;">← Назад</a>
         </nav>
+        <div class="container" style="margin-top: 20px;">
+    <div class="apple-card-hero" onclick="location.href='daily.html'">
+        <div class="hero-content">
+            <span class="hero-label">Нове</span>
+            <h2 class="hero-title">Щоденні продажі ПК</h2>
+            <p class="hero-subtitle">Детальна аналітика по кожному продавцю за сьогодні.</p>
+        </div>
+        <div class="hero-action">
+            <span class="arrow-icon">→</span>
+        </div>
+    </div>
+</div>
+
+<style>
+    .apple-card-hero {
+        background: #ffffff;
+        border-radius: 22px;
+        padding: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #d2d2d7;
+        margin-bottom: 30px;
+    }
+    .apple-card-hero:hover {
+        transform: scale(1.02);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    }
+    .hero-label {
+        color: #bf4800;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+    .hero-title {
+        font-size: 28px;
+        font-weight: 600;
+        margin: 5px 0;
+        color: #1d1d1f;
+    }
+    .hero-subtitle {
+        color: #6e6e73;
+        font-size: 17px;
+    }
+    .arrow-icon {
+        font-size: 24px;
+        background: #f5f5f7;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        color: #0071e3;
+    }
+</style>
     </header>
 
     <div id="home-page">
