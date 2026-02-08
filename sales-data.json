@@ -1,5 +1,89 @@
 [
   {
+    "id": 0,
+    "name": "Показники магазину",
+    "position": "Всі продавці",
+    "initials": "ALL",
+    "gradient": "linear-gradient(135deg, #434343 0%, #000000 100%)",
+    "metrics": {
+      "ТО": {
+        "value": 1147300.19,
+        "label": "ТО",
+        "unit": "грн"
+      },
+      "Шт.": {
+        "value": 724.0,
+        "label": "Шт.",
+        "unit": "грн"
+      },
+      "Чеки": {
+        "value": 500.0,
+        "label": "Чеки",
+        "unit": "грн"
+      },
+      "ASP": {
+        "value": 46.51,
+        "label": "ASP",
+        "unit": "грн"
+      },
+      "Ср. Чек": {
+        "value": 66.81,
+        "label": "Ср. Чек",
+        "unit": "грн"
+      },
+      "КПЧ": {
+        "value": 11.91,
+        "label": "КПЧ",
+        "unit": "грн"
+      },
+      "ACC": {
+        "value": 492951.9,
+        "label": "ACC",
+        "unit": "грн"
+      },
+      "% Доля ACC": {
+        "value": 12.79,
+        "label": "% Доля ACC",
+        "unit": "%"
+      },
+      "Послуги грн": {
+        "value": 245.15,
+        "label": "Послуги грн",
+        "unit": "грн"
+      },
+      "Доля Послуг": {
+        "value": 2.66,
+        "label": "Доля Послуг",
+        "unit": "%"
+      },
+      "ПЧ": {
+        "value": 34.0,
+        "label": "ПЧ",
+        "unit": "грн"
+      },
+      "Конверсія ПК": {
+        "value": 19.38,
+        "label": "Конверсія ПК",
+        "unit": "%"
+      },
+      "Конверсія ПК Offline": {
+        "value": 15.56,
+        "label": "Конверсія ПК Offline",
+        "unit": "%"
+      },
+      "УДС": {
+        "value": 1078679.4,
+        "label": "УДС",
+        "unit": "грн"
+      },
+      "Доля УДС": {
+        "value": 20.43,
+        "label": "Доля УДС",
+        "unit": "%"
+      }
+    }
+  },
+  {
     "id": 1,
     "name": "Бондаренко Володимир Володимирович",
     "position": "продавец-консультант",
@@ -256,7 +340,7 @@
     "name": "Алтухов Олександр Сергійович",
     "position": "продавец-консультант",
     "initials": "АО",
-    "gradient": "linear-gradient(135deg, #FF6B6B 0%, #EE5253 100%)",
+    "gradient": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
     "metrics": {
       "ТО": {
         "value": 568.363,
@@ -340,7 +424,7 @@
     "name": "Колодяжний Сергій Васильович",
     "position": "продавец-консультант",
     "initials": "КС",
-    "gradient": "linear-gradient(135deg, #4834d4 0%, #686de0 100%)",
+    "gradient": "linear-gradient(135deg, #FF6B6B 0%, #EE5253 100%)",
     "metrics": {
       "ТО": {
         "value": 500.061,
@@ -424,7 +508,7 @@
     "name": "Сторожук Артем Олегович",
     "position": "продавец-консультант",
     "initials": "СА",
-    "gradient": "linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)",
+    "gradient": "linear-gradient(135deg, #4834d4 0%, #686de0 100%)",
     "metrics": {
       "ТО": {
         "value": 357.672,
@@ -508,7 +592,7 @@
     "name": "Пінчук Поліна Вікторівна",
     "position": "продавец-консультант",
     "initials": "ПП",
-    "gradient": "linear-gradient(135deg, #FF6B6B 0%, #EE5253 100%)",
+    "gradient": "linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)",
     "metrics": {
       "ТО": {
         "value": 350.027,
@@ -592,7 +676,7 @@
     "name": "Котенков Нікіта Олександрович",
     "position": "продавец-консультант",
     "initials": "КН",
-    "gradient": "linear-gradient(135deg, #4834d4 0%, #686de0 100%)",
+    "gradient": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
     "metrics": {
       "ТО": {
         "value": 88.728,
