@@ -7,41 +7,82 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <style>
         :root { --bg: #f5f5f7; --text: #1d1d1f; --accent: #0071e3; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        .container { max-width: 1300px; margin: 40px auto; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; }
+        .container { max-width: 1400px; margin: 20px auto; }
         .back-link { color: var(--accent); text-decoration: none; font-weight: 500; display: inline-block; margin-bottom: 20px; }
-        h1 { font-size: 40px; font-weight: 600; margin-bottom: 30px; letter-spacing: -0.5px; }
-        .table-card { background: white; border-radius: 22px; padding: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        th { text-align: left; padding: 16px; color: #86868b; font-size: 12px; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #d2d2d7; }
-        td { padding: 18px 16px; border-bottom: 1px solid #f5f5f7; font-size: 15px; white-space: nowrap; }
+        h1 { font-size: 32px; font-weight: 600; margin-bottom: 20px; letter-spacing: -0.5px; padding-left: 10px; }
+        
+        .table-card { 
+            background: white; 
+            border-radius: 22px; 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.04); 
+            overflow-x: auto; 
+            position: relative;
+        }
+
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        th { text-align: left; padding: 16px; color: #86868b; font-size: 11px; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #d2d2d7; background: white; }
+        td { padding: 16px; border-bottom: 1px solid #f5f5f7; font-size: 14px; white-space: nowrap; }
         tr:hover { background: #fafafa; }
         
-        /* ПІБ / Продавець */
-        .name-cell { font-weight: 600; color: #1d1d1f; position: sticky; left: 0; background: white; z-index: 5; }
-        
-        /* 1. ВИДІЛЕННЯ КОЛЬОРОМ СТОВПЦІВ */
-        .col-to { color: #0071e3; font-weight: 600; }      /* Синій для ТО */
-        .col-poslugi { color: #af52de; font-weight: 600; } /* Фіолетовий для Послуг */
-        .col-acc { color: #ff9500; font-weight: 600; }     /* Помаранчевий для АСС */
-        .col-cheky { color: #34c759; font-weight: 600; }   /* Зелений для Чеків */
+        /* ФІКСОВАНА КОЛОНКА ПІБ */
+        .name-cell, th:first-child { 
+            position: sticky; 
+            left: 0; 
+            background: white; 
+            z-index: 10; 
+            min-width: 200px; 
+            box-shadow: 4px 0 8px -4px rgba(0,0,0,0.05);
+        }
+        th:first-child { z-index: 11; }
 
-        /* 2. ВИДІЛЕННЯ СТРОКИ З ЧАСОМ */
-        .time-row { background: #f5f5f7 !important; font-weight: 800 !important; border-top: 2px solid #d2d2d7; }
+        /* КОЛЬОРИ СТОВПЦІВ */
+        .col-to { color: #0071e3; font-weight: 600; }
+        .col-poslugi { color: #af52de; font-weight: 600; }
+        .col-acc { color: #ff9500; font-weight: 600; }
+        .col-cheky { color: #34c759; font-weight: 600; }
+
+        /* СТРОКА З ЧАСОМ */
+        .time-row { background: #f5f5f7 !important; font-weight: 800 !important; }
         .time-row td { color: #000; }
+        .time-row .name-cell { background: #f5f5f7 !important; }
 
         .loading { padding: 40px; text-align: center; color: #86868b; }
 
-        /* 3. СКОРОЧЕННЯ В МОБ ВЕРСІЇ (АВАТАР 3 ЛІТЕРИ) */
+        /* МОБІЛЬНА ВЕРСІЯ: ТРАНСФОРМАЦІЯ ПРИ СКРОЛІ */
         @media (max-width: 600px) {
-            .name-cell span { display: none; }
+            h1 { font-size: 24px; }
+            
+            /* Звужуємо першу колонку до іконки */
+            .name-cell, th:first-child { 
+                min-width: 60px; 
+                width: 60px; 
+                text-align: center; 
+                padding: 10px 5px;
+            }
+
+            .name-cell span { display: none; } /* Ховаємо повний текст ПІБ */
+            
+            /* Створюємо іконку (аватар) */
             .name-cell::before {
                 content: attr(data-initials);
-                display: flex; width: 42px; height: 42px; background: var(--accent);
-                color: white; border-radius: 50%; align-items: center; justify-content: center;
-                font-size: 11px; font-weight: 700; margin: 0 auto;
+                display: flex; 
+                width: 40px; 
+                height: 40px; 
+                background: #e8e8ed;
+                color: #1d1d1f; 
+                border-radius: 12px; 
+                align-items: center; 
+                justify-content: center;
+                font-size: 10px; 
+                font-weight: 700; 
+                margin: 0 auto;
+                border: 1px solid #d2d2d7;
             }
-            th:first-child, td:first-child { min-width: 60px; text-align: center; padding: 10px 5px; }
+            
+            /* Для рядка часу на мобілці іконка не потрібна */
+            .time-row .name-cell::before { display: none; }
+            .time-row .name-cell span { display: block; font-size: 12px; }
         }
     </style>
 </head>
@@ -50,7 +91,7 @@
         <a href="index.html" class="back-link">← Назад</a>
         <h1>Щоденні звіти</h1>
         <div class="table-card">
-            <div id="loader" class="loading">Оновлення даних...</div>
+            <div id="loader" class="loading">Завантаження даних...</div>
             <table id="dataTable" style="display: none;">
                 <thead><tr id="headerRow"></tr></thead>
                 <tbody id="tableBody"></tbody>
@@ -58,10 +99,10 @@
         </div>
     </div>
     <script>
-        // Функція для ініціалів (3 символи)
         function getInitials(name) {
             if (!name || name === "-" || name.includes(":")) return "";
-            return name.split(' ').filter(n => n).map(n => n[0]).join('').toUpperCase().substring(0, 3);
+            const parts = name.split(' ').filter(n => n.length > 0);
+            return parts.map(n => n[0]).join('').toUpperCase().substring(0, 3);
         }
 
         async function loadTable() {
@@ -84,33 +125,34 @@
                 const tbody = document.getElementById('tableBody');
                 data.forEach(row => {
                     let tr = document.createElement('tr');
+                    const firstKey = headers[0];
+                    const nameVal = String(row[firstKey] || "");
                     
-                    // Перевірка на рядок з часом (містить ":")
-                    const nameVal = String(row[headers[0]] || "");
                     if (nameVal.includes(":")) tr.className = 'time-row';
 
-                    headers.forEach(h => {
+                    headers.forEach((h, index) => {
                         let td = document.createElement('td');
                         let val = row[h];
-                        td.textContent = (val === 0 && h.toLowerCase().includes('піб')) ? '-' : val;
                         
-                        // Присвоєння класів для виділення кольором
-                        const headerName = h.toUpperCase();
-                        if (headerName.includes('ПІБ') || headerName.includes('ПРОДАВЕЦЬ')) {
+                        // ПІБ (перша колонка)
+                        if (index === 0) {
                             td.className = 'name-cell';
                             td.setAttribute('data-initials', getInitials(nameVal));
+                            td.innerHTML = `<span>${val}</span>`;
+                        } else {
+                            td.textContent = val;
+                            const hName = h.toUpperCase();
+                            if (hName === 'ТО') td.classList.add('col-to');
+                            else if (hName.includes('ПОСЛУГИ')) td.classList.add('col-poslugi');
+                            else if (hName === 'АСС') td.classList.add('col-acc');
+                            else if (hName === 'ЧЕКИ') td.classList.add('col-cheky');
                         }
-                        else if (headerName === 'ТО') td.classList.add('col-to');
-                        else if (headerName === 'ПОСЛУГИ') td.classList.add('col-poslugi');
-                        else if (headerName === 'АСС') td.classList.add('col-acc');
-                        else if (headerName === 'ЧЕКИ') td.classList.add('col-cheky');
-                        
                         tr.appendChild(td);
                     });
                     tbody.appendChild(tr);
                 });
             } catch (e) {
-                document.getElementById('loader').textContent = "Помилка завантаження: " + e.message;
+                document.getElementById('loader').textContent = "Помилка: " + e.message;
             }
         }
         loadTable();
