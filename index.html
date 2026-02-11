@@ -17,7 +17,6 @@
             --color-border: #d2d2d7;
             --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
             
-            /* Кольори для груп метрик */
             --group-sales: #0071e3;    
             --group-eff: #af52de;      
             --group-acc: #ff9500;      
@@ -207,6 +206,19 @@
                 <div class="main-metric"><div class="main-metric-value" style="font-size:22px">Переглянути звіти</div></div>
             `;
             container.appendChild(dailyCard);
+
+            // 1.5 ПРОДАЖІ ПЛАН / ФАКТ
+            const planFactCard = document.createElement('a');
+            planFactCard.className = 'card special-card';
+            planFactCard.href = 'plan-fact.html';
+            planFactCard.innerHTML = `
+                <div class="card-header">
+                    <div class="avatar" style="background: #34c759">📈</div>
+                    <div class="card-title"><h2>Продажі План/Факт</h2><p>Порівняння показників</p></div>
+                </div>
+                <div class="main-metric"><div class="main-metric-value" style="font-size:22px">Переглянути звіт</div></div>
+            `;
+            container.appendChild(planFactCard);
 
             // 2. ГРАФІК
             const chartCard = document.createElement('a');
