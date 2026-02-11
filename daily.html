@@ -3,135 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Sales</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <title>Daily Sales — Apple Style</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #f5f5f7; color: #1d1d1f; padding: 10px; }
-        
-        .nav-back { margin-bottom: 15px; }
-        .nav-back a { text-decoration: none; color: #0071e3; font-size: 14px; }
-
-        .table-container {
-            background: white;
-            border-radius: 12px;
-            border: 1px solid #d2d2d7;
-            overflow-x: auto;
-        }
-
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        
-        th, td { padding: 12px; border-bottom: 1px solid #f0f0f2; white-space: nowrap; }
-        
-        thead th { background: #f5f5f7; font-weight: 600; text-align: left; position: sticky; top: 0; z-index: 10; }
-        
-        /* Фіксована колонка ПІБ */
-        .name-col { 
-            position: sticky; left: 0; background: white; z-index: 11; 
-            min-width: 180px; border-right: 1px solid #d2d2d7; 
-        }
-
-        /* ВИДІЛЕННЯ СТРОКИ З ЧАСОМ */
-        .time-row { background: #f5f5f7 !important; font-weight: 700 !important; }
-
-        .num { text-align: right; font-variant-numeric: tabular-nums; }
-
-        /* МОБІЛЬНА ВЕРСІЯ */
-        @media (max-width: 600px) {
-            .name-col { min-width: 65px; width: 65px; padding: 8px 4px; text-align: center; }
-            .name-col span { display: none; }
-            .avatar { 
-                display: flex !important; width: 40px; height: 40px; border-radius: 50%; 
-                margin: 0 auto; align-items: center; justify-content: center; 
-                font-size: 10px; color: white; font-weight: 700; background: #86868b;
-            }
-        }
-        .avatar { display: none; }
+        :root { --bg: #f5f5f7; --text: #1d1d1f; --accent: #0071e3; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 40px auto; }
+        .back-link { color: var(--accent); text-decoration: none; font-weight: 500; display: inline-block; margin-bottom: 20px; }
+        h1 { font-size: 40px; font-weight: 600; margin-bottom: 30px; letter-spacing: -0.5px; }
+        .table-card { background: white; border-radius: 22px; padding: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        th { text-align: left; padding: 16px; color: #86868b; font-size: 12px; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #d2d2d7; }
+        td { padding: 18px 16px; border-bottom: 1px solid #f5f5f7; font-size: 15px; }
+        tr:hover { background: #fafafa; }
+        .name-cell { font-weight: 600; color: #1d1d1f; }
+        .loading { padding: 40px; text-align: center; color: #86868b; }
     </style>
 </head>
 <body>
-
-    <div class="nav-back"><a href="index.html">← Назад</a></div>
-
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th class="name-col">ПІБ</th>
-                    <th class="num">ТО</th>
-                    <th class="num">Послуги</th>
-                    <th class="num">АСС</th>
-                    <th class="num">Чеки</th>
-                    <th class="num">Шт.</th>
-                    <th class="num">ПЧ</th>
-                    <th class="num">КПЧ</th>
-                    <th class="num">Маржа</th>
-                    <th class="num">Бонус</th>
-                    <th class="num">Ср. Чек</th>
-                    <th class="num">ASP</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-        </table>
+    <div class="container">
+        <a href="index.html" class="back-link">← Назад</a>
+        <h1>Щоденні продажі ПК</h1>
+        <div class="table-card">
+            <div id="loader" class="loading">Оновлення даних...</div>
+            <table id="dataTable" style="display: none;">
+                <thead><tr id="headerRow"></tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
     </div>
-
     <script>
-        // Ініціали (3 символи)
-        function getInitials(name) {
-            if (!name || name === "-" || name.includes(":")) return "";
-            return name.split(' ').filter(n => n).map(n => n[0]).join('').toUpperCase().substring(0, 3);
-        }
-
-        function getColor(name) {
-            const colors = ['#0071e3', '#af52de', '#34c759', '#ff9500', '#ff3b30'];
-            let hash = 0;
-            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-            return colors[Math.abs(hash) % colors.length];
-        }
-
-        async function loadData() {
+        async function loadTable() {
             try {
-                const response = await fetch('daily-sales.json?t=' + Date.now());
-                const data = await response.json();
-                const body = document.getElementById('tableBody');
-                body.innerHTML = '';
+                const r = await fetch('daily-sales.json?t=' + Date.now());
+                const data = await r.json();
+                if (!data.length) return;
 
-                data.forEach(row => {
-                    const name = row['ПІБ'] || "";
-                    const isTime = name.includes(":"); // Перевірка на час
-                    const tr = document.createElement('tr');
-                    if (isTime) tr.className = 'time-row';
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('dataTable').style.display = 'table';
 
-                    // Функція отримання значення "як є"
-                    const val = (key) => {
-                        let v = row[key];
-                        if (v === undefined || v === null) return "";
-                        return (typeof v === 'object') ? v.value : v;
-                    };
-
-                    tr.innerHTML = `
-                        <td class="name-col">
-                            ${!isTime && name !== "-" ? `<div class="avatar" style="background:${getColor(name)}">${getInitials(name)}</div>` : ''}
-                            <span>${name}</span>
-                        </td>
-                        <td class="num">${val('ТО')}</td>
-                        <td class="num">${val('Послуги')}</td>
-                        <td class="num">${val('АСС')}</td>
-                        <td class="num">${val('Чеки')}</td>
-                        <td class="num">${val('Шт.')}</td>
-                        <td class="num">${val('ПЧ')}</td>
-                        <td class="num">${val('КПЧ')}</td>
-                        <td class="num">${val('Маржа')}</td>
-                        <td class="num">${val('Бонус')}</td>
-                        <td class="num">${val('Ср. Чек')}</td>
-                        <td class="num">${val('ASP')}</td>
-                    `;
-                    body.appendChild(tr);
+                const headers = Object.keys(data[0]);
+                const hRow = document.getElementById('headerRow');
+                headers.forEach(h => {
+                    let th = document.createElement('th');
+                    th.textContent = h;
+                    hRow.appendChild(th);
                 });
-            } catch (e) { console.error("Data error:", e); }
-        }
 
-        window.onload = loadData;
+                const tbody = document.getElementById('tableBody');
+                data.forEach(row => {
+                    let tr = document.createElement('tr');
+                    headers.forEach(h => {
+                        let td = document.createElement('td');
+                        let val = row[h];
+                        td.textContent = (val === 0 && h.toLowerCase().includes('продавець')) ? '-' : val;
+                        if(h.toLowerCase().includes('продавець')) td.className = 'name-cell';
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                document.getElementById('loader').textContent = "Помилка завантаження: " + e.message;
+            }
+        }
+        loadTable();
     </script>
 </body>
 </html>
