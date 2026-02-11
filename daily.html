@@ -19,19 +19,19 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--color-bg);
             color: var(--color-text);
-            padding: 20px;
+            padding: 10px;
         }
 
-        .nav-back { max-width: 1300px; margin: 0 auto 20px; }
-        .nav-back a { text-decoration: none; color: var(--color-accent); font-weight: 500; }
+        .nav-back { max-width: 1300px; margin: 0 auto 15px; }
+        .nav-back a { text-decoration: none; color: var(--color-accent); font-weight: 500; font-size: 14px; }
 
         .table-container {
             max-width: 1300px;
             margin: 0 auto;
             background: white;
-            border-radius: 16px;
+            border-radius: 12px;
             border: 1px solid var(--color-border);
-            overflow-x: auto; /* Скрол для мобільних */
+            overflow-x: auto;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
@@ -44,7 +44,7 @@
 
         /* Шапка груп */
         .group-header th {
-            padding: 10px;
+            padding: 8px;
             font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -53,13 +53,13 @@
             border-bottom: 1px solid var(--color-border);
         }
 
-        .border-sales { border-top: 4px solid #0071e3; }
-        .border-eff { border-top: 4px solid #af52de; }
-        .border-income { border-top: 4px solid #34c759; }
-        .border-avg { border-top: 4px solid #ff9500; }
+        .border-sales { border-top: 3px solid #0071e3; }
+        .border-eff { border-top: 3px solid #af52de; }
+        .border-income { border-top: 3px solid #34c759; }
+        .border-avg { border-top: 3px solid #ff9500; }
 
         th, td {
-            padding: 12px 15px;
+            padding: 10px 12px;
             border-bottom: 1px solid #f0f0f2;
             white-space: nowrap;
         }
@@ -68,35 +68,62 @@
             background: white;
             position: sticky;
             top: 0;
-            z-index: 10;
+            z-index: 20;
             font-weight: 600;
             border-bottom: 2px solid var(--color-border);
         }
 
-        /* Закріплена колонка з іменем */
+        /* ЗАКРІПЛЕНА КОЛОНКА ПІБ */
         .name-col {
             position: sticky;
             left: 0;
             background: white;
-            z-index: 11;
+            z-index: 21;
             font-weight: 600;
             border-right: 1px solid var(--color-border);
+            min-width: 140px;
         }
 
-        tbody tr:hover { background-color: #f9f9fb; cursor: pointer; }
+        /* МОБІЛЬНА ВЕРСІЯ: Компактне ім'я */
+        @media (max-width: 600px) {
+            .name-col {
+                min-width: 50px;
+                width: 50px;
+                padding: 10px 5px;
+                text-align: center;
+            }
+            .name-col .full-name { display: none; } /* Сховати повне ім'я */
+            .name-col .compact-avatar { 
+                display: flex; 
+                width: 32px; height: 32px; 
+                border-radius: 50%; 
+                background: #eee; 
+                margin: 0 auto;
+                align-items: center; justify-content: center;
+                font-size: 11px; color: white;
+                box-shadow: inset 0 0 2px rgba(0,0,0,0.1);
+            }
+            h1 { font-size: 20px; }
+        }
+
+        /* ДЕСТОП ВЕРСІЯ: Сховати аватар */
+        @media (min-width: 601px) {
+            .compact-avatar { display: none; }
+        }
+
+        tbody tr:hover { background-color: #f9f9fb; }
         tbody tr.selected { background-color: var(--highlight) !important; }
         tbody tr.selected .name-col { background-color: var(--highlight); }
-        tbody tr.selected td { color: #000; font-weight: 500; }
 
         .num { font-variant-numeric: tabular-nums; text-align: right; }
         .positive { color: #27ae60; font-weight: 600; }
 
-        h1 { max-width: 1300px; margin: 0 auto 24px; font-size: 28px; font-weight: 600; }
+        h1 { max-width: 1300px; margin: 0 auto 15px; font-size: 24px; font-weight: 600; }
     </style>
 </head>
 <body>
 
-    <div class="nav-back"><a href="index.html">← Назад до команди</a></div>
+    <div class="nav-back"><a href="index.html">← Назад</a></div>
     <h1>Щоденні звіти</h1>
 
     <div class="table-container">
@@ -104,47 +131,43 @@
             <thead>
                 <tr class="group-header">
                     <th class="name-col"></th>
-                    <th colspan="3" class="border-sales">Основні показники (грн)</th>
-                    <th colspan="4" class="border-eff">Ефективність</th>
+                    <th colspan="3" class="border-sales">Гроші</th>
+                    <th colspan="4" class="border-eff">Ефект</th>
                     <th colspan="2" class="border-income">Фінанси</th>
-                    <th colspan="2" class="border-avg">Середні</th>
+                    <th colspan="2" class="border-avg">Сер.</th>
                 </tr>
                 <tr>
                     <th class="name-col">ПІБ</th>
                     <th class="num">ТО</th>
-                    <th class="num">Послуги</th>
+                    <th class="num">Посл.</th>
                     <th class="num">ACC</th>
-                    <th class="num">Чеки</th>
+                    <th class="num">Чек</th>
                     <th class="num">Шт.</th>
                     <th class="num">ПЧ</th>
                     <th class="num">КПЧ</th>
-                    <th class="num">Маржа</th>
-                    <th class="num">Бонус</th>
-                    <th class="num">Ср. Чек</th>
+                    <th class="num">Марж</th>
+                    <th class="num">Бон</th>
+                    <th class="num">С.Чек</th>
                     <th class="num">ASP</th>
                 </tr>
             </thead>
-            <tbody id="tableBody">
-                </tbody>
+            <tbody id="tableBody"></tbody>
         </table>
     </div>
 
     <script>
         async function loadData() {
             try {
-                // Використовуємо той самий файл, що й головна сторінка
                 const response = await fetch('sales-data.json?t=' + Date.now());
                 const data = await response.json();
                 renderTable(data);
-            } catch (e) {
-                console.error("Помилка завантаження:", e);
-            }
+            } catch (e) { console.error(e); }
         }
 
         function format(val) {
             if (val === undefined || val === null) return '0';
-            if (typeof val === 'object') val = val.value;
-            return Number(val).toLocaleString('uk-UA', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+            let v = (typeof val === 'object') ? val.value : val;
+            return Number(v).toLocaleString('uk-UA', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         }
 
         function renderTable(data) {
@@ -154,8 +177,6 @@
             data.forEach(person => {
                 const tr = document.createElement('tr');
                 const m = person.metrics;
-
-                // Функція-хелпер для безпечного отримання значень
                 const getVal = (key) => (m[key] ? format(m[key]) : '0');
 
                 tr.onclick = function() {
@@ -163,8 +184,12 @@
                     this.classList.add('selected');
                 };
 
+                // Використовуємо градієнт та ініціали з JSON для аватара
                 tr.innerHTML = `
-                    <td class="name-col">${person.name}</td>
+                    <td class="name-col" title="${person.name}">
+                        <div class="compact-avatar" style="background: ${person.gradient}">${person.initials}</div>
+                        <span class="full-name">${person.name}</span>
+                    </td>
                     <td class="num">${getVal('ТО')}</td>
                     <td class="num">${getVal('Послуги грн') || getVal('Послуги')}</td>
                     <td class="num">${getVal('ACC')}</td>
@@ -180,7 +205,6 @@
                 body.appendChild(tr);
             });
         }
-
         window.onload = loadData;
     </script>
 </body>
