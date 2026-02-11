@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Щоденні продажі — Apple Sales</title>
+    <title>Щоденні звіти — Apple Sales</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -39,10 +39,10 @@
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            font-size: 13px;
+            font-size: 12px;
         }
 
-        /* Шапка груп */
+        /* Заголовки груп */
         .group-header th {
             padding: 8px;
             font-size: 10px;
@@ -73,7 +73,7 @@
             border-bottom: 2px solid var(--color-border);
         }
 
-        /* ЗАКРІПЛЕНА КОЛОНКА ПІБ */
+        /* Фіксована колонка ПІБ */
         .name-col {
             position: sticky;
             left: 0;
@@ -81,10 +81,10 @@
             z-index: 21;
             font-weight: 600;
             border-right: 1px solid var(--color-border);
-            min-width: 140px;
+            min-width: 160px;
         }
 
-        /* МОБІЛЬНА ВЕРСІЯ: Компактне ім'я */
+        /* МОБІЛЬНА ВЕРСІЯ: тільки ініціали */
         @media (max-width: 600px) {
             .name-col {
                 min-width: 50px;
@@ -92,38 +92,32 @@
                 padding: 10px 5px;
                 text-align: center;
             }
-            .name-col .full-name { display: none; } /* Сховати повне ім'я */
-            .name-col .compact-avatar { 
-                display: flex; 
+            .name-col span { display: none; }
+            .compact-avatar { 
+                display: flex !important; 
                 width: 32px; height: 32px; 
                 border-radius: 50%; 
-                background: #eee; 
                 margin: 0 auto;
                 align-items: center; justify-content: center;
-                font-size: 11px; color: white;
-                box-shadow: inset 0 0 2px rgba(0,0,0,0.1);
+                font-size: 11px; color: white; font-weight: 600;
             }
             h1 { font-size: 20px; }
         }
 
-        /* ДЕСТОП ВЕРСІЯ: Сховати аватар */
-        @media (min-width: 601px) {
-            .compact-avatar { display: none; }
-        }
+        .compact-avatar { display: none; }
 
-        tbody tr:hover { background-color: #f9f9fb; }
+        tbody tr:hover { background-color: #f9f9fb; cursor: pointer; }
         tbody tr.selected { background-color: var(--highlight) !important; }
         tbody tr.selected .name-col { background-color: var(--highlight); }
 
         .num { font-variant-numeric: tabular-nums; text-align: right; }
         .positive { color: #27ae60; font-weight: 600; }
-
         h1 { max-width: 1300px; margin: 0 auto 15px; font-size: 24px; font-weight: 600; }
     </style>
 </head>
 <body>
 
-    <div class="nav-back"><a href="index.html">← Назад</a></div>
+    <div class="nav-back"><a href="index.html">← Назад до команди</a></div>
     <h1>Щоденні звіти</h1>
 
     <div class="table-container">
@@ -131,23 +125,23 @@
             <thead>
                 <tr class="group-header">
                     <th class="name-col"></th>
-                    <th colspan="3" class="border-sales">Гроші</th>
-                    <th colspan="4" class="border-eff">Ефект</th>
+                    <th colspan="3" class="border-sales">Гроші (грн)</th>
+                    <th colspan="4" class="border-eff">Ефективність</th>
                     <th colspan="2" class="border-income">Фінанси</th>
-                    <th colspan="2" class="border-avg">Сер.</th>
+                    <th colspan="2" class="border-avg">Середні</th>
                 </tr>
                 <tr>
                     <th class="name-col">ПІБ</th>
                     <th class="num">ТО</th>
-                    <th class="num">Посл.</th>
+                    <th class="num">Послуги</th>
                     <th class="num">ACC</th>
-                    <th class="num">Чек</th>
+                    <th class="num">Чеки</th>
                     <th class="num">Шт.</th>
                     <th class="num">ПЧ</th>
                     <th class="num">КПЧ</th>
-                    <th class="num">Марж</th>
-                    <th class="num">Бон</th>
-                    <th class="num">С.Чек</th>
+                    <th class="num">Маржа</th>
+                    <th class="num">Бонус</th>
+                    <th class="num">Ср. Чек</th>
                     <th class="num">ASP</th>
                 </tr>
             </thead>
@@ -161,13 +155,21 @@
                 const response = await fetch('sales-data.json?t=' + Date.now());
                 const data = await response.json();
                 renderTable(data);
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Помилка завантаження даних:", e); }
         }
 
-        function format(val) {
-            if (val === undefined || val === null) return '0';
-            let v = (typeof val === 'object') ? val.value : val;
-            return Number(v).toLocaleString('uk-UA', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        // Функція для безпечного отримання числа з об'єкта або значення
+        function getValue(obj) {
+            if (!obj) return 0;
+            const val = (typeof obj === 'object') ? obj.value : obj;
+            return parseFloat(val) || 0;
+        }
+
+        function format(num) {
+            return num.toLocaleString('uk-UA', { 
+                minimumFractionDigits: 0, 
+                maximumFractionDigits: 1 
+            });
         }
 
         function renderTable(data) {
@@ -177,34 +179,34 @@
             data.forEach(person => {
                 const tr = document.createElement('tr');
                 const m = person.metrics;
-                const getVal = (key) => (m[key] ? format(m[key]) : '0');
 
                 tr.onclick = function() {
                     document.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
                     this.classList.add('selected');
                 };
 
-                // Використовуємо градієнт та ініціали з JSON для аватара
+                // Назви ключів мають точно відповідати тим, що в sales-data.json
                 tr.innerHTML = `
-                    <td class="name-col" title="${person.name}">
+                    <td class="name-col">
                         <div class="compact-avatar" style="background: ${person.gradient}">${person.initials}</div>
-                        <span class="full-name">${person.name}</span>
+                        <span>${person.name}</span>
                     </td>
-                    <td class="num">${getVal('ТО')}</td>
-                    <td class="num">${getVal('Послуги грн') || getVal('Послуги')}</td>
-                    <td class="num">${getVal('ACC')}</td>
-                    <td class="num">${getVal('Чеки')}</td>
-                    <td class="num">${getVal('Шт.')}</td>
-                    <td class="num">${getVal('ПЧ')}</td>
-                    <td class="num">${getVal('КПЧ')}</td>
-                    <td class="num positive">${getVal('Маржа')}</td>
-                    <td class="num" style="font-weight:600">${getVal('Бонус')}</td>
-                    <td class="num">${getVal('Ср. Чек')}</td>
-                    <td class="num">${getVal('ASP')}</td>
+                    <td class="num">${format(getValue(m['ТО']))}</td>
+                    <td class="num">${format(getValue(m['Послуги грн']) || getValue(m['Доля Послуг']))}</td>
+                    <td class="num">${format(getValue(m['ACC']))}</td>
+                    <td class="num">${format(getValue(m['Чеки']))}</td>
+                    <td class="num">${format(getValue(m['Шт.']))}</td>
+                    <td class="num">${format(getValue(m['ПЧ']))}</td>
+                    <td class="num">${format(getValue(m['КПЧ']))}</td>
+                    <td class="num positive">${format(getValue(m['Маржа']))}</td>
+                    <td class="num" style="font-weight:600">${format(getValue(m['Бонус']))}</td>
+                    <td class="num">${format(getValue(m['Ср. Чек']))}</td>
+                    <td class="num">${format(getValue(m['ASP']))}</td>
                 `;
                 body.appendChild(tr);
             });
         }
+
         window.onload = loadData;
     </script>
 </body>
