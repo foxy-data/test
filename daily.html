@@ -19,14 +19,14 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--color-bg);
             color: var(--color-text);
-            padding: 10px;
+            padding: 15px;
         }
 
-        .nav-back { max-width: 1300px; margin: 0 auto 15px; }
-        .nav-back a { text-decoration: none; color: var(--color-accent); font-weight: 500; font-size: 14px; }
+        .nav-back { max-width: 1400px; margin: 0 auto 15px; }
+        .nav-back a { text-decoration: none; color: var(--color-accent); font-weight: 500; }
 
         .table-container {
-            max-width: 1300px;
+            max-width: 1400px;
             margin: 0 auto;
             background: white;
             border-radius: 12px;
@@ -39,12 +39,11 @@
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            font-size: 12px;
+            font-size: 13px;
         }
 
-        /* Шапка груп */
         .group-header th {
-            padding: 8px;
+            padding: 10px;
             font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -59,9 +58,9 @@
         .border-avg { border-top: 3px solid #ff9500; }
 
         th, td {
-            padding: 10px 12px;
+            padding: 12px 15px;
             border-bottom: 1px solid #f0f0f2;
-            white-space: nowrap;
+            white-space: nowrap; /* Забороняє розрив рядків у цифрах */
         }
 
         thead tr:last-child th {
@@ -73,7 +72,7 @@
             border-bottom: 2px solid var(--color-border);
         }
 
-        /* Фіксована колонка ПІБ */
+        /* КОЛОНКА ПРОДАВЦЯ */
         .name-col {
             position: sticky;
             left: 0;
@@ -81,28 +80,25 @@
             z-index: 21;
             font-weight: 600;
             border-right: 1px solid var(--color-border);
-            min-width: 160px;
+            min-width: 200px; /* Достатньо місця для ПІБ на десктопі */
         }
 
-        /* МОБІЛЬНА ВЕРСІЯ: тільки ініціали */
         @media (max-width: 600px) {
             .name-col {
-                min-width: 55px;
-                width: 55px;
+                min-width: 60px;
+                width: 60px;
                 padding: 10px 5px;
                 text-align: center;
             }
             .name-col span { display: none; }
             .compact-avatar { 
                 display: flex !important; 
-                width: 34px; height: 34px; 
+                width: 36px; height: 36px; 
                 border-radius: 50%; 
                 margin: 0 auto;
                 align-items: center; justify-content: center;
-                font-size: 11px; color: white; font-weight: 600;
-                background: var(--color-accent); /* Фолбек колір */
+                font-size: 12px; color: white; font-weight: 600;
             }
-            h1 { font-size: 20px; }
         }
 
         .compact-avatar { display: none; }
@@ -113,7 +109,7 @@
 
         .num { font-variant-numeric: tabular-nums; text-align: right; }
         .positive { color: #27ae60; font-weight: 600; }
-        h1 { max-width: 1300px; margin: 0 auto 15px; font-size: 24px; font-weight: 600; }
+        h1 { max-width: 1400px; margin: 0 auto 15px; font-size: 24px; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -126,13 +122,13 @@
             <thead>
                 <tr class="group-header">
                     <th class="name-col"></th>
-                    <th colspan="3" class="border-sales">Гроші (грн)</th>
+                    <th colspan="3" class="border-sales">Грошові показники</th>
                     <th colspan="4" class="border-eff">Ефективність</th>
                     <th colspan="2" class="border-income">Дохід</th>
                     <th colspan="2" class="border-avg">Середні</th>
                 </tr>
                 <tr>
-                    <th class="name-col">ПІБ</th>
+                    <th class="name-col">Продавець</th>
                     <th class="num">ТО</th>
                     <th class="num">Послуги</th>
                     <th class="num">ACC</th>
@@ -151,18 +147,14 @@
     </div>
 
     <script>
-        // ГЕНЕРАЦІЯ ІНІЦІАЛІВ ТА ГРАДІЄНТА, ЯКЩО ЇХ НЕМАЄ В ДАНИХ
+        // Допоміжні функції для візуалізації
         function getInitials(name) {
-            return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+            if (!name) return "?";
+            return name.split(' ').filter(n => n.length > 0).map(n => n[0]).join('').toUpperCase().substring(0, 2);
         }
 
         function getGradient(name) {
-            const colors = [
-                'linear-gradient(135deg, #0071e3 0%, #3498db 100%)',
-                'linear-gradient(135deg, #af52de 0%, #8e44ad 100%)',
-                'linear-gradient(135deg, #34c759 0%, #2ecc71 100%)',
-                'linear-gradient(135deg, #ff9500 0%, #f39c12 100%)'
-            ];
+            const colors = ['#0071e3', '#af52de', '#34c759', '#ff9500', '#ff3b30', '#5856d6'];
             let hash = 0;
             for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
             return colors[Math.abs(hash) % colors.length];
@@ -170,30 +162,34 @@
 
         async function loadData() {
             try {
-                // ПІДКЛЮЧАЄМО ВАШ ПРАВИЛЬНИЙ ФАЙЛ (daily-sales.json)
+                // ПЕРЕКОНАЙТЕСЯ, ЩО ЦЕЙ ФАЙЛ ІСНУЄ В РЕПОЗИТОРІЇ
                 const response = await fetch('daily-sales.json?t=' + Date.now());
                 const data = await response.json();
                 renderTable(data);
-            } catch (e) { console.error("Помилка:", e); }
+            } catch (e) {
+                console.error("Помилка завантаження:", e);
+                document.getElementById('tableBody').innerHTML = '<tr><td colspan="12" style="text-align:center; padding:20px;">Помилка завантаження файлу daily-sales.json</td></tr>';
+            }
         }
 
         function getValue(row, keys) {
-            // Перевіряємо різні варіанти назв колонок
             for (let key of keys) {
                 if (row[key] !== undefined) {
                     let val = row[key];
-                    // Якщо це об'єкт {"value": 100, "unit": "грн"}
                     if (val && typeof val === 'object' && val.value !== undefined) return val.value;
-                    // Якщо це просте число або рядок
                     return val;
                 }
             }
             return 0;
         }
 
-        function format(num) {
+        function formatFull(num) {
             let n = parseFloat(num) || 0;
-            return n.toLocaleString('uk-UA', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+            // Показує повне число з роздільником тисяч
+            return n.toLocaleString('uk-UA', { 
+                minimumFractionDigits: 0, 
+                maximumFractionDigits: 0 
+            }).replace(/,/g, ' '); 
         }
 
         function renderTable(data) {
@@ -202,7 +198,9 @@
 
             data.forEach(row => {
                 const tr = document.createElement('tr');
-                const name = row['ПІБ'] || row['Name'] || 'Продавець';
+                
+                // Пріоритет пошуку імені
+                const fullName = row['ПІБ'] || row['Name'] || row['name'] || "Невідомо";
                 
                 tr.onclick = function() {
                     document.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
@@ -211,20 +209,20 @@
 
                 tr.innerHTML = `
                     <td class="name-col">
-                        <div class="compact-avatar" style="background: ${getGradient(name)}">${getInitials(name)}</div>
-                        <span>${name}</span>
+                        <div class="compact-avatar" style="background: ${getGradient(fullName)}">${getInitials(fullName)}</div>
+                        <span>${fullName}</span>
                     </td>
-                    <td class="num">${format(getValue(row, ['ТО', 'Обіг']))}</td>
-                    <td class="num">${format(getValue(row, ['Послуги грн', 'Послуги']))}</td>
-                    <td class="num">${format(getValue(row, ['ACC', 'Аксесуари']))}</td>
-                    <td class="num">${format(getValue(row, ['Чеки']))}</td>
-                    <td class="num">${format(getValue(row, ['Шт.']))}</td>
-                    <td class="num">${format(getValue(row, ['ПЧ', 'Правильні чеки']))}</td>
-                    <td class="num">${format(getValue(row, ['КПЧ']))}</td>
-                    <td class="num positive">${format(getValue(row, ['Маржа', 'Дохід']))}</td>
-                    <td class="num" style="font-weight:600">${format(getValue(row, ['Бонус', 'Премія']))}</td>
-                    <td class="num">${format(getValue(row, ['Ср. Чек', 'Середній чек']))}</td>
-                    <td class="num">${format(getValue(row, ['ASP']))}</td>
+                    <td class="num">${formatFull(getValue(row, ['ТО', 'Обіг']))}</td>
+                    <td class="num">${formatFull(getValue(row, ['Послуги грн', 'Послуги']))}</td>
+                    <td class="num">${formatFull(getValue(row, ['ACC', 'Аксесуари']))}</td>
+                    <td class="num">${formatFull(getValue(row, ['Чеки']))}</td>
+                    <td class="num">${formatFull(getValue(row, ['Шт.']))}</td>
+                    <td class="num">${formatFull(getValue(row, ['ПЧ', 'Правильні чеки']))}</td>
+                    <td class="num">${getValue(row, ['КПЧ']).toFixed(2)}</td>
+                    <td class="num positive">${formatFull(getValue(row, ['Маржа', 'Дохід']))}</td>
+                    <td class="num" style="font-weight:600">${formatFull(getValue(row, ['Бонус', 'Премія']))}</td>
+                    <td class="num">${formatFull(getValue(row, ['Ср. Чек', 'Середній чек']))}</td>
+                    <td class="num">${formatFull(getValue(row, ['ASP']))}</td>
                 `;
                 body.appendChild(tr);
             });
