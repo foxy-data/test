@@ -12,7 +12,7 @@
             --color-text: #1d1d1f;
             --color-border: #d2d2d7;
             --color-accent: #0071e3;
-            --highlight: #f2f7ff; /* Колір виділення рядка */
+            --highlight: #f2f7ff; 
         }
 
         body {
@@ -22,37 +22,30 @@
             padding: 20px;
         }
 
-        .nav-back {
-            max-width: 1200px;
-            margin: 0 auto 20px;
-        }
-        .nav-back a {
-            text-decoration: none;
-            color: var(--color-accent);
-            font-weight: 500;
-        }
+        .nav-back { max-width: 1300px; margin: 0 auto 20px; }
+        .nav-back a { text-decoration: none; color: var(--color-accent); font-weight: 500; }
 
         .table-container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
             background: white;
             border-radius: 16px;
             border: 1px solid var(--color-border);
-            overflow: hidden;
+            overflow-x: auto; /* Скрол для мобільних */
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
         table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             font-size: 13px;
-            text-align: left;
         }
 
-        /* Стиль заголовків груп */
+        /* Шапка груп */
         .group-header th {
-            padding: 8px 12px;
-            font-size: 11px;
+            padding: 10px;
+            font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: #86868b;
@@ -60,79 +53,60 @@
             border-bottom: 1px solid var(--color-border);
         }
 
-        /* Кольорові мітки для груп */
-        .border-sales { border-top: 3px solid #0071e3; }
-        .border-eff { border-top: 3px solid #af52de; }
-        .border-income { border-top: 3px solid #34c759; }
-        .border-avg { border-top: 3px solid #ff9500; }
+        .border-sales { border-top: 4px solid #0071e3; }
+        .border-eff { border-top: 4px solid #af52de; }
+        .border-income { border-top: 4px solid #34c759; }
+        .border-avg { border-top: 4px solid #ff9500; }
 
         th, td {
-            padding: 12px;
+            padding: 12px 15px;
             border-bottom: 1px solid #f0f0f2;
             white-space: nowrap;
         }
 
-        thead th {
+        thead tr:last-child th {
             background: white;
             position: sticky;
             top: 0;
             z-index: 10;
             font-weight: 600;
+            border-bottom: 2px solid var(--color-border);
         }
 
-        /* Виділення рядка при натисканні */
-        tbody tr {
-            transition: background 0.2s ease;
-            cursor: pointer;
-        }
-        tbody tr:hover {
-            background-color: #f9f9fb;
-        }
-        tbody tr.selected {
-            background-color: var(--highlight) !important;
-        }
-        tbody tr.selected td {
-            font-weight: 500;
-            color: #000;
-        }
-
+        /* Закріплена колонка з іменем */
         .name-col {
             position: sticky;
             left: 0;
             background: white;
-            z-index: 5;
+            z-index: 11;
+            font-weight: 600;
             border-right: 1px solid var(--color-border);
-            font-weight: 500;
-        }
-        tr.selected .name-col {
-            background: var(--highlight);
         }
 
+        tbody tr:hover { background-color: #f9f9fb; cursor: pointer; }
+        tbody tr.selected { background-color: var(--highlight) !important; }
+        tbody tr.selected .name-col { background-color: var(--highlight); }
+        tbody tr.selected td { color: #000; font-weight: 500; }
+
         .num { font-variant-numeric: tabular-nums; text-align: right; }
-        
-        h1 {
-            max-width: 1200px;
-            margin: 0 auto 24px;
-            font-size: 28px;
-            font-weight: 600;
-        }
+        .positive { color: #27ae60; font-weight: 600; }
+
+        h1 { max-width: 1300px; margin: 0 auto 24px; font-size: 28px; font-weight: 600; }
     </style>
 </head>
 <body>
 
-    <div class="nav-back">
-        <a href="index.html">← Назад до команди</a>
-    </div>
-
+    <div class="nav-back"><a href="index.html">← Назад до команди</a></div>
     <h1>Щоденні звіти</h1>
 
     <div class="table-container">
         <table id="dailyTable">
             <thead>
                 <tr class="group-header">
-                    <th colspan="1"></th> <th colspan="3" class="border-sales">Продажі (грн)</th>
-                    <th colspan="3" class="border-eff">Ефективність (шт)</th>
-                    <th colspan="2" class="border-income">Дохід</th>
+                    <th class="name-col"></th>
+                    <th colspan="3" class="border-sales">Основні показники (грн)</th>
+                    <th colspan="4" class="border-eff">Ефективність</th>
+                    <th colspan="2" class="border-income">Фінанси</th>
                     <th colspan="2" class="border-avg">Середні</th>
                 </tr>
                 <tr>
@@ -143,6 +117,7 @@
                     <th class="num">Чеки</th>
                     <th class="num">Шт.</th>
                     <th class="num">ПЧ</th>
+                    <th class="num">КПЧ</th>
                     <th class="num">Маржа</th>
                     <th class="num">Бонус</th>
                     <th class="num">Ср. Чек</th>
@@ -155,54 +130,58 @@
     </div>
 
     <script>
-        async function loadDailyData() {
+        async function loadData() {
             try {
-                const response = await fetch('daily-sales.json?t=' + Date.now());
+                // Використовуємо той самий файл, що й головна сторінка
+                const response = await fetch('sales-data.json?t=' + Date.now());
                 const data = await response.json();
                 renderTable(data);
             } catch (e) {
-                console.error("Помилка:", e);
+                console.error("Помилка завантаження:", e);
             }
         }
 
         function format(val) {
-            if (typeof val === 'number') {
-                return val.toLocaleString('uk-UA', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
-            }
-            return val;
+            if (val === undefined || val === null) return '0';
+            if (typeof val === 'object') val = val.value;
+            return Number(val).toLocaleString('uk-UA', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
         }
 
         function renderTable(data) {
             const body = document.getElementById('tableBody');
             body.innerHTML = '';
 
-            data.forEach(row => {
+            data.forEach(person => {
                 const tr = document.createElement('tr');
-                
-                // Додаємо обробник кліку для виділення
+                const m = person.metrics;
+
+                // Функція-хелпер для безпечного отримання значень
+                const getVal = (key) => (m[key] ? format(m[key]) : '0');
+
                 tr.onclick = function() {
                     document.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
                     this.classList.add('selected');
                 };
 
                 tr.innerHTML = `
-                    <td class="name-col">${row['ПІБ'] || row['Name'] || '-'}</td>
-                    <td class="num">${format(row['ТО'])}</td>
-                    <td class="num">${format(row['Послуги грн'] || row['Послуги'])}</td>
-                    <td class="num">${format(row['ACC'])}</td>
-                    <td class="num">${format(row['Чеки'])}</td>
-                    <td class="num">${format(row['Шт.'])}</td>
-                    <td class="num">${format(row['ПЧ'])}</td>
-                    <td class="num" style="color:#27ae60">${format(row['Маржа'] || 0)}</td>
-                    <td class="num" style="font-weight:600">${format(row['Бонус'] || 0)}</td>
-                    <td class="num">${format(row['Ср. Чек'])}</td>
-                    <td class="num">${format(row['ASP'])}</td>
+                    <td class="name-col">${person.name}</td>
+                    <td class="num">${getVal('ТО')}</td>
+                    <td class="num">${getVal('Послуги грн') || getVal('Послуги')}</td>
+                    <td class="num">${getVal('ACC')}</td>
+                    <td class="num">${getVal('Чеки')}</td>
+                    <td class="num">${getVal('Шт.')}</td>
+                    <td class="num">${getVal('ПЧ')}</td>
+                    <td class="num">${getVal('КПЧ')}</td>
+                    <td class="num positive">${getVal('Маржа')}</td>
+                    <td class="num" style="font-weight:600">${getVal('Бонус')}</td>
+                    <td class="num">${getVal('Ср. Чек')}</td>
+                    <td class="num">${getVal('ASP')}</td>
                 `;
                 body.appendChild(tr);
             });
         }
 
-        window.onload = loadDailyData;
+        window.onload = loadData;
     </script>
 </body>
 </html>
