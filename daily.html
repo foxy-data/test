@@ -16,81 +16,30 @@
             --summary-bg: #f5f5f7;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--color-bg);
-            color: var(--color-text);
-            padding: 15px;
-        }
-
+        body { font-family: 'Inter', sans-serif; background-color: var(--color-bg); color: var(--color-text); padding: 15px; }
         .nav-back { max-width: 1400px; margin: 0 auto 15px; }
         .nav-back a { text-decoration: none; color: var(--color-accent); font-weight: 500; }
 
         .table-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            border: 1px solid var(--color-border);
-            overflow-x: auto;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            max-width: 1400px; margin: 0 auto; background: white; border-radius: 12px;
+            border: 1px solid var(--color-border); overflow-x: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            font-size: 13px;
-        }
-
-        .group-header th {
-            padding: 10px;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #86868b;
-            background: #f5f5f7;
-            border-bottom: 1px solid var(--color-border);
-        }
-
+        table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+        .group-header th { padding: 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #86868b; background: #f5f5f7; border-bottom: 1px solid var(--color-border); }
         .border-sales { border-top: 3px solid #0071e3; }
         .border-eff { border-top: 3px solid #af52de; }
         .border-income { border-top: 3px solid #34c759; }
         .border-avg { border-top: 3px solid #ff9500; }
 
-        th, td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #f0f0f2;
-            white-space: nowrap;
-        }
+        th, td { padding: 12px 15px; border-bottom: 1px solid #f0f0f2; white-space: nowrap; }
+        thead tr:last-child th { background: white; position: sticky; top: 0; z-index: 20; font-weight: 600; border-bottom: 2px solid var(--color-border); }
 
-        thead tr:last-child th {
-            background: white;
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            font-weight: 600;
-            border-bottom: 2px solid var(--color-border);
-        }
+        .name-col { position: sticky; left: 0; background: white; z-index: 21; font-weight: 600; border-right: 1px solid var(--color-border); min-width: 220px; }
 
-        .name-col {
-            position: sticky;
-            left: 0;
-            background: white;
-            z-index: 21;
-            font-weight: 600;
-            border-right: 1px solid var(--color-border);
-            min-width: 220px;
-        }
-
-        /* Виділення рядка з часом або підсумками */
-        .summary-row {
-            background-color: var(--summary-bg) !important;
-            font-weight: 700 !important;
-        }
-        .summary-row td {
-            color: var(--color-accent);
-        }
+        /* Рядок з часом або підсумками */
+        .summary-row { background-color: var(--summary-bg) !important; font-weight: 700 !important; }
+        .summary-row td { color: #1d1d1f; }
 
         @media (max-width: 600px) {
             .name-col { min-width: 60px; width: 60px; text-align: center; padding: 10px 5px; }
@@ -142,7 +91,7 @@
 
     <script>
         function getInitials(name) {
-            if (!name || name === "Невідомо") return "?";
+            if (!name || name === "Невідомо" || name === "-") return "?";
             return name.split(' ').filter(n => n.length > 0).map(n => n[0]).join('').toUpperCase().substring(0, 2);
         }
 
@@ -158,20 +107,14 @@
                 const response = await fetch('daily-sales.json?t=' + Date.now());
                 const data = await response.json();
                 renderTable(data);
-            } catch (e) {
-                console.error(e);
-            }
+            } catch (e) { console.error(e); }
         }
 
-        function rawValue(val) {
-            if (val === undefined || val === null) return 0;
-            return (typeof val === 'object') ? (val.value || 0) : val;
-        }
-
-        function format(num) {
-            let n = parseFloat(num);
-            if (isNaN(n)) return num; // Якщо це текст (наприклад дата), повертаємо як є
-            return n.toLocaleString('uk-UA').replace(/,/g, ' ');
+        // Пряме відображення значення без примусового форматування
+        function displayValue(val) {
+            if (val === undefined || val === null) return "0";
+            if (typeof val === 'object') return val.value;
+            return val;
         }
 
         function renderTable(data) {
@@ -180,10 +123,10 @@
 
             data.forEach(row => {
                 const keys = Object.keys(row);
-                const fullName = row['ПІБ'] || row['Name'] || row['name'] || row[keys[0]] || "Невідомо";
+                const fullName = row['ПІБ'] || row['Name'] || row['name'] || row[keys[0]] || "-";
                 
-                // Перевірка, чи це рядок з підсумками або часом
-                const isSummary = fullName.includes("Разом") || fullName.includes(":") || /\d{2}\.\d{2}/.test(fullName);
+                // Рядок вважається службовим, якщо в імені "-" або є час/дата
+                const isSummary = fullName === "-" || fullName.includes(":") || /\d{2}\.\d{2}/.test(fullName) || fullName.includes("Разом");
 
                 const tr = document.createElement('tr');
                 if (isSummary) tr.classList.add('summary-row');
@@ -197,25 +140,24 @@
 
                 tr.innerHTML = `
                     <td class="name-col">
-                        ${!isSummary ? `<div class="compact-avatar" style="background: ${getGradient(fullName)}">${getInitials(fullName)}</div>` : ''}
+                        ${(!isSummary && fullName !== "-") ? `<div class="compact-avatar" style="background: ${getGradient(fullName)}">${getInitials(fullName)}</div>` : ''}
                         <span>${fullName}</span>
                     </td>
-                    <td class="num">${format(rawValue(row['ТО']))}</td>
-                    <td class="num">${format(rawValue(row['Послуги грн'] || row['Послуги']))}</td>
-                    <td class="num">${format(rawValue(row['ACC']))}</td>
-                    <td class="num">${format(rawValue(row['Чеки']))}</td>
-                    <td class="num">${format(rawValue(row['Шт.']))}</td>
-                    <td class="num">${format(rawValue(row['ПЧ']))}</td>
-                    <td class="num">${parseFloat(rawValue(row['КПЧ']) || 0).toFixed(2)}</td>
-                    <td class="num">${format(rawValue(row['Маржа']))}</td>
-                    <td class="num">${format(rawValue(row['Бонус']))}</td>
-                    <td class="num">${format(rawValue(row['Ср. Чек']))}</td>
-                    <td class="num">${format(rawValue(row['ASP']))}</td>
+                    <td class="num">${displayValue(row['ТО'])}</td>
+                    <td class="num">${displayValue(row['Послуги'] || row['Послуги грн'])}</td>
+                    <td class="num">${displayValue(row['ACC'])}</td>
+                    <td class="num">${displayValue(row['Чеки'])}</td>
+                    <td class="num">${displayValue(row['Шт.'])}</td>
+                    <td class="num">${displayValue(row['ПЧ'])}</td>
+                    <td class="num">${displayValue(row['КПЧ'])}</td>
+                    <td class="num">${displayValue(row['Маржа'])}</td>
+                    <td class="num">${displayValue(row['Бонус'])}</td>
+                    <td class="num">${displayValue(row['Ср. Чек'])}</td>
+                    <td class="num">${displayValue(row['ASP'])}</td>
                 `;
                 body.appendChild(tr);
             });
         }
-
         window.onload = loadData;
     </script>
 </body>
