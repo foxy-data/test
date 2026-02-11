@@ -3,74 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Щоденні звіти — Apple Sales</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <title>Daily Sales</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --color-bg: #fbfbfd;
-            --color-text: #1d1d1f;
-            --color-border: #d2d2d7;
-            --color-accent: #0071e3;
-            --highlight: #f2f7ff; 
-            --time-row-bg: #f5f5f7;
-        }
-
-        body { font-family: 'Inter', sans-serif; background-color: var(--color-bg); color: var(--color-text); padding: 15px; }
-        .nav-back { max-width: 1400px; margin: 0 auto 15px; }
-        .nav-back a { text-decoration: none; color: var(--color-accent); font-weight: 500; }
+        body { font-family: 'Inter', sans-serif; background: #f5f5f7; color: #1d1d1f; padding: 10px; }
+        
+        .nav-back { margin-bottom: 15px; }
+        .nav-back a { text-decoration: none; color: #0071e3; font-size: 14px; }
 
         .table-container {
-            max-width: 1400px; margin: 0 auto; background: white; border-radius: 12px;
-            border: 1px solid var(--color-border); overflow-x: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #d2d2d7;
+            overflow-x: auto;
         }
 
-        table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
         
-        /* Шапка груп */
-        .group-header th { padding: 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #86868b; background: #f5f5f7; border-bottom: 1px solid var(--color-border); }
-        .border-sales { border-top: 3px solid #0071e3; }
-        .border-eff { border-top: 3px solid #af52de; }
-        .border-income { border-top: 3px solid #34c759; }
-        .border-avg { border-top: 3px solid #ff9500; }
-
-        th, td { padding: 12px 15px; border-bottom: 1px solid #f0f0f2; white-space: nowrap; }
-        thead tr:last-child th { background: white; position: sticky; top: 0; z-index: 20; font-weight: 600; border-bottom: 2px solid var(--color-border); }
-
-        .name-col { position: sticky; left: 0; background: white; z-index: 21; font-weight: 600; border-right: 1px solid var(--color-border); min-width: 200px; }
-
-        /* Стиль для рядка з часом */
-        .time-row { background-color: var(--time-row-bg) !important; font-weight: 800 !important; color: #000; }
-
-        @media (max-width: 600px) {
-            .name-col { min-width: 70px; width: 70px; text-align: center; padding: 10px 5px; }
-            .name-col span { display: none; }
-            .compact-avatar { display: flex !important; width: 45px; height: 45px; border-radius: 50%; margin: 0 auto; align-items: center; justify-content: center; font-size: 11px; color: white; font-weight: 700; }
+        th, td { padding: 12px; border-bottom: 1px solid #f0f0f2; white-space: nowrap; }
+        
+        thead th { background: #f5f5f7; font-weight: 600; text-align: left; position: sticky; top: 0; z-index: 10; }
+        
+        /* Фіксована колонка ПІБ */
+        .name-col { 
+            position: sticky; left: 0; background: white; z-index: 11; 
+            min-width: 180px; border-right: 1px solid #d2d2d7; 
         }
 
-        .compact-avatar { display: none; }
-        tbody tr:hover:not(.time-row) { background-color: #f9f9fb; cursor: pointer; }
-        tbody tr.selected { background-color: var(--highlight) !important; }
+        /* ВИДІЛЕННЯ СТРОКИ З ЧАСОМ */
+        .time-row { background: #f5f5f7 !important; font-weight: 700 !important; }
 
-        .num { font-variant-numeric: tabular-nums; text-align: right; }
-        h1 { max-width: 1400px; margin: 0 auto 15px; font-size: 24px; font-weight: 600; }
+        .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+        /* МОБІЛЬНА ВЕРСІЯ */
+        @media (max-width: 600px) {
+            .name-col { min-width: 65px; width: 65px; padding: 8px 4px; text-align: center; }
+            .name-col span { display: none; }
+            .avatar { 
+                display: flex !important; width: 40px; height: 40px; border-radius: 50%; 
+                margin: 0 auto; align-items: center; justify-content: center; 
+                font-size: 10px; color: white; font-weight: 700; background: #86868b;
+            }
+        }
+        .avatar { display: none; }
     </style>
 </head>
 <body>
 
     <div class="nav-back"><a href="index.html">← Назад</a></div>
-    <h1>Щоденні звіти</h1>
 
     <div class="table-container">
-        <table id="dailyTable">
+        <table>
             <thead>
-                <tr class="group-header">
-                    <th class="name-col"></th>
-                    <th colspan="3" class="border-sales">Блок ТО послуги асс</th>
-                    <th colspan="4" class="border-eff">Блок Чеки</th>
-                    <th colspan="2" class="border-income">Блок дохід</th>
-                    <th colspan="2" class="border-avg">Середній чек</th>
-                </tr>
                 <tr>
                     <th class="name-col">ПІБ</th>
                     <th class="num">ТО</th>
@@ -91,13 +76,13 @@
     </div>
 
     <script>
-        // Ініціали 3 символи
+        // Ініціали (3 символи)
         function getInitials(name) {
             if (!name || name === "-" || name.includes(":")) return "";
-            return name.split(' ').filter(n => n.length > 0).map(n => n[0]).join('').toUpperCase().substring(0, 3);
+            return name.split(' ').filter(n => n).map(n => n[0]).join('').toUpperCase().substring(0, 3);
         }
 
-        function getGradient(name) {
+        function getColor(name) {
             const colors = ['#0071e3', '#af52de', '#34c759', '#ff9500', '#ff3b30'];
             let hash = 0;
             for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -108,53 +93,44 @@
             try {
                 const response = await fetch('daily-sales.json?t=' + Date.now());
                 const data = await response.json();
-                renderTable(data);
-            } catch (e) { console.error(e); }
+                const body = document.getElementById('tableBody');
+                body.innerHTML = '';
+
+                data.forEach(row => {
+                    const name = row['ПІБ'] || "";
+                    const isTime = name.includes(":"); // Перевірка на час
+                    const tr = document.createElement('tr');
+                    if (isTime) tr.className = 'time-row';
+
+                    // Функція отримання значення "як є"
+                    const val = (key) => {
+                        let v = row[key];
+                        if (v === undefined || v === null) return "";
+                        return (typeof v === 'object') ? v.value : v;
+                    };
+
+                    tr.innerHTML = `
+                        <td class="name-col">
+                            ${!isTime && name !== "-" ? `<div class="avatar" style="background:${getColor(name)}">${getInitials(name)}</div>` : ''}
+                            <span>${name}</span>
+                        </td>
+                        <td class="num">${val('ТО')}</td>
+                        <td class="num">${val('Послуги')}</td>
+                        <td class="num">${val('АСС')}</td>
+                        <td class="num">${val('Чеки')}</td>
+                        <td class="num">${val('Шт.')}</td>
+                        <td class="num">${val('ПЧ')}</td>
+                        <td class="num">${val('КПЧ')}</td>
+                        <td class="num">${val('Маржа')}</td>
+                        <td class="num">${val('Бонус')}</td>
+                        <td class="num">${val('Ср. Чек')}</td>
+                        <td class="num">${val('ASP')}</td>
+                    `;
+                    body.appendChild(tr);
+                });
+            } catch (e) { console.error("Data error:", e); }
         }
 
-        function raw(val) {
-            if (val === undefined || val === null) return "";
-            return (typeof val === 'object') ? (val.value ?? "") : val;
-        }
-
-        function renderTable(data) {
-            const body = document.getElementById('tableBody');
-            body.innerHTML = '';
-
-            data.forEach(row => {
-                const name = row['ПІБ'] || "-";
-                const isTimeRow = name.includes(":");
-                const tr = document.createElement('tr');
-                
-                if (isTimeRow) tr.classList.add('time-row');
-
-                tr.onclick = function() {
-                    if (!isTimeRow) {
-                        document.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
-                        this.classList.add('selected');
-                    }
-                };
-
-                tr.innerHTML = `
-                    <td class="name-col">
-                        ${(!isTimeRow && name !== "-") ? `<div class="compact-avatar" style="background: ${getGradient(name)}">${getInitials(name)}</div>` : ''}
-                        <span>${name}</span>
-                    </td>
-                    <td class="num">${raw(row['ТО'])}</td>
-                    <td class="num">${raw(row['Послуги'])}</td>
-                    <td class="num">${raw(row['АСС'])}</td>
-                    <td class="num">${raw(row['Чеки'])}</td>
-                    <td class="num">${raw(row['Шт.'])}</td>
-                    <td class="num">${raw(row['ПЧ'])}</td>
-                    <td class="num">${raw(row['КПЧ'])}</td>
-                    <td class="num">${raw(row['Маржа'])}</td>
-                    <td class="num">${raw(row['Бонус'])}</td>
-                    <td class="num">${raw(row['Ср. Чек'])}</td>
-                    <td class="num">${raw(row['ASP'])}</td>
-                `;
-                body.appendChild(tr);
-            });
-        }
         window.onload = loadData;
     </script>
 </body>
