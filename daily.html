@@ -42,7 +42,7 @@
             font-size: 12px;
         }
 
-        /* Заголовки груп */
+        /* Шапка груп */
         .group-header th {
             padding: 8px;
             font-size: 10px;
@@ -87,19 +87,20 @@
         /* МОБІЛЬНА ВЕРСІЯ: тільки ініціали */
         @media (max-width: 600px) {
             .name-col {
-                min-width: 50px;
-                width: 50px;
+                min-width: 55px;
+                width: 55px;
                 padding: 10px 5px;
                 text-align: center;
             }
             .name-col span { display: none; }
             .compact-avatar { 
                 display: flex !important; 
-                width: 32px; height: 32px; 
+                width: 34px; height: 34px; 
                 border-radius: 50%; 
                 margin: 0 auto;
                 align-items: center; justify-content: center;
                 font-size: 11px; color: white; font-weight: 600;
+                background: var(--color-accent); /* Фолбек колір */
             }
             h1 { font-size: 20px; }
         }
@@ -117,7 +118,7 @@
 </head>
 <body>
 
-    <div class="nav-back"><a href="index.html">← Назад до команди</a></div>
+    <div class="nav-back"><a href="index.html">← Назад</a></div>
     <h1>Щоденні звіти</h1>
 
     <div class="table-container">
@@ -127,7 +128,7 @@
                     <th class="name-col"></th>
                     <th colspan="3" class="border-sales">Гроші (грн)</th>
                     <th colspan="4" class="border-eff">Ефективність</th>
-                    <th colspan="2" class="border-income">Фінанси</th>
+                    <th colspan="2" class="border-income">Дохід</th>
                     <th colspan="2" class="border-avg">Середні</th>
                 </tr>
                 <tr>
@@ -150,58 +151,80 @@
     </div>
 
     <script>
-        async function loadData() {
-            try {
-                const response = await fetch('sales-data.json?t=' + Date.now());
-                const data = await response.json();
-                renderTable(data);
-            } catch (e) { console.error("Помилка завантаження даних:", e); }
+        // ГЕНЕРАЦІЯ ІНІЦІАЛІВ ТА ГРАДІЄНТА, ЯКЩО ЇХ НЕМАЄ В ДАНИХ
+        function getInitials(name) {
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
         }
 
-        // Функція для безпечного отримання числа з об'єкта або значення
-        function getValue(obj) {
-            if (!obj) return 0;
-            const val = (typeof obj === 'object') ? obj.value : obj;
-            return parseFloat(val) || 0;
+        function getGradient(name) {
+            const colors = [
+                'linear-gradient(135deg, #0071e3 0%, #3498db 100%)',
+                'linear-gradient(135deg, #af52de 0%, #8e44ad 100%)',
+                'linear-gradient(135deg, #34c759 0%, #2ecc71 100%)',
+                'linear-gradient(135deg, #ff9500 0%, #f39c12 100%)'
+            ];
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            return colors[Math.abs(hash) % colors.length];
+        }
+
+        async function loadData() {
+            try {
+                // ПІДКЛЮЧАЄМО ВАШ ПРАВИЛЬНИЙ ФАЙЛ (daily-sales.json)
+                const response = await fetch('daily-sales.json?t=' + Date.now());
+                const data = await response.json();
+                renderTable(data);
+            } catch (e) { console.error("Помилка:", e); }
+        }
+
+        function getValue(row, keys) {
+            // Перевіряємо різні варіанти назв колонок
+            for (let key of keys) {
+                if (row[key] !== undefined) {
+                    let val = row[key];
+                    // Якщо це об'єкт {"value": 100, "unit": "грн"}
+                    if (val && typeof val === 'object' && val.value !== undefined) return val.value;
+                    // Якщо це просте число або рядок
+                    return val;
+                }
+            }
+            return 0;
         }
 
         function format(num) {
-            return num.toLocaleString('uk-UA', { 
-                minimumFractionDigits: 0, 
-                maximumFractionDigits: 1 
-            });
+            let n = parseFloat(num) || 0;
+            return n.toLocaleString('uk-UA', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
         }
 
         function renderTable(data) {
             const body = document.getElementById('tableBody');
             body.innerHTML = '';
 
-            data.forEach(person => {
+            data.forEach(row => {
                 const tr = document.createElement('tr');
-                const m = person.metrics;
-
+                const name = row['ПІБ'] || row['Name'] || 'Продавець';
+                
                 tr.onclick = function() {
                     document.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
                     this.classList.add('selected');
                 };
 
-                // Назви ключів мають точно відповідати тим, що в sales-data.json
                 tr.innerHTML = `
                     <td class="name-col">
-                        <div class="compact-avatar" style="background: ${person.gradient}">${person.initials}</div>
-                        <span>${person.name}</span>
+                        <div class="compact-avatar" style="background: ${getGradient(name)}">${getInitials(name)}</div>
+                        <span>${name}</span>
                     </td>
-                    <td class="num">${format(getValue(m['ТО']))}</td>
-                    <td class="num">${format(getValue(m['Послуги грн']) || getValue(m['Доля Послуг']))}</td>
-                    <td class="num">${format(getValue(m['ACC']))}</td>
-                    <td class="num">${format(getValue(m['Чеки']))}</td>
-                    <td class="num">${format(getValue(m['Шт.']))}</td>
-                    <td class="num">${format(getValue(m['ПЧ']))}</td>
-                    <td class="num">${format(getValue(m['КПЧ']))}</td>
-                    <td class="num positive">${format(getValue(m['Маржа']))}</td>
-                    <td class="num" style="font-weight:600">${format(getValue(m['Бонус']))}</td>
-                    <td class="num">${format(getValue(m['Ср. Чек']))}</td>
-                    <td class="num">${format(getValue(m['ASP']))}</td>
+                    <td class="num">${format(getValue(row, ['ТО', 'Обіг']))}</td>
+                    <td class="num">${format(getValue(row, ['Послуги грн', 'Послуги']))}</td>
+                    <td class="num">${format(getValue(row, ['ACC', 'Аксесуари']))}</td>
+                    <td class="num">${format(getValue(row, ['Чеки']))}</td>
+                    <td class="num">${format(getValue(row, ['Шт.']))}</td>
+                    <td class="num">${format(getValue(row, ['ПЧ', 'Правильні чеки']))}</td>
+                    <td class="num">${format(getValue(row, ['КПЧ']))}</td>
+                    <td class="num positive">${format(getValue(row, ['Маржа', 'Дохід']))}</td>
+                    <td class="num" style="font-weight:600">${format(getValue(row, ['Бонус', 'Премія']))}</td>
+                    <td class="num">${format(getValue(row, ['Ср. Чек', 'Середній чек']))}</td>
+                    <td class="num">${format(getValue(row, ['ASP']))}</td>
                 `;
                 body.appendChild(tr);
             });
