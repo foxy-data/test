@@ -13,6 +13,7 @@
             --color-border: #d2d2d7;
             --color-accent: #0071e3;
             --highlight: #f2f7ff; 
+            --summary-bg: #f5f5f7;
         }
 
         body {
@@ -82,7 +83,15 @@
             min-width: 220px;
         }
 
-        /* Мобільна версія: аватар */
+        /* Виділення рядка з часом або підсумками */
+        .summary-row {
+            background-color: var(--summary-bg) !important;
+            font-weight: 700 !important;
+        }
+        .summary-row td {
+            color: var(--color-accent);
+        }
+
         @media (max-width: 600px) {
             .name-col { min-width: 60px; width: 60px; text-align: center; padding: 10px 5px; }
             .name-col span { display: none; }
@@ -90,11 +99,10 @@
         }
 
         .compact-avatar { display: none; }
-        tbody tr:hover { background-color: #f9f9fb; cursor: pointer; }
+        tbody tr:hover:not(.summary-row) { background-color: #f9f9fb; cursor: pointer; }
         tbody tr.selected { background-color: var(--highlight) !important; }
-        tbody tr.selected .name-col { background-color: var(--highlight); }
+
         .num { font-variant-numeric: tabular-nums; text-align: right; }
-        .positive { color: #27ae60; font-weight: 600; }
         h1 { max-width: 1400px; margin: 0 auto 15px; font-size: 24px; font-weight: 600; }
     </style>
 </head>
@@ -155,24 +163,15 @@
             }
         }
 
-        // УНІВЕРСАЛЬНА ФУНКЦІЯ ДЛЯ ДАНИХ
-        function smartValue(val, isMoney = false) {
+        function rawValue(val) {
             if (val === undefined || val === null) return 0;
-            
-            // Якщо це об'єкт з value
-            let raw = (typeof val === 'object') ? val.value : val;
-            let num = parseFloat(raw) || 0;
-
-            // ЛОГІКА ВИПРАВЛЕННЯ ТО: якщо в ТО маленьке число (наприклад 354 замість 354000)
-            // Припускаємо, що якщо ТО < 5000 і це грошовий показник — це тисячі.
-            if (isMoney && num > 0 && num < 5000) {
-                num = num * 1000;
-            }
-            return num;
+            return (typeof val === 'object') ? (val.value || 0) : val;
         }
 
         function format(num) {
-            return Math.round(num).toLocaleString('uk-UA').replace(/,/g, ' ');
+            let n = parseFloat(num);
+            if (isNaN(n)) return num; // Якщо це текст (наприклад дата), повертаємо як є
+            return n.toLocaleString('uk-UA').replace(/,/g, ' ');
         }
 
         function renderTable(data) {
@@ -180,32 +179,38 @@
             body.innerHTML = '';
 
             data.forEach(row => {
-                // ШУКАЄМО ІМ'Я: перевіряємо всі можливі ключі, які зазвичай є першими
                 const keys = Object.keys(row);
                 const fullName = row['ПІБ'] || row['Name'] || row['name'] || row[keys[0]] || "Невідомо";
+                
+                // Перевірка, чи це рядок з підсумками або часом
+                const isSummary = fullName.includes("Разом") || fullName.includes(":") || /\d{2}\.\d{2}/.test(fullName);
 
                 const tr = document.createElement('tr');
+                if (isSummary) tr.classList.add('summary-row');
+
                 tr.onclick = function() {
-                    document.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
-                    this.classList.add('selected');
+                    if (!isSummary) {
+                        document.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
+                        this.classList.add('selected');
+                    }
                 };
 
                 tr.innerHTML = `
                     <td class="name-col">
-                        <div class="compact-avatar" style="background: ${getGradient(fullName)}">${getInitials(fullName)}</div>
+                        ${!isSummary ? `<div class="compact-avatar" style="background: ${getGradient(fullName)}">${getInitials(fullName)}</div>` : ''}
                         <span>${fullName}</span>
                     </td>
-                    <td class="num">${format(smartValue(row['ТО'], true))}</td>
-                    <td class="num">${format(smartValue(row['Послуги грн'] || row['Послуги'], true))}</td>
-                    <td class="num">${format(smartValue(row['ACC'], true))}</td>
-                    <td class="num">${format(smartValue(row['Чеки']))}</td>
-                    <td class="num">${format(smartValue(row['Шт.']))}</td>
-                    <td class="num">${format(smartValue(row['ПЧ']))}</td>
-                    <td class="num">${smartValue(row['КПЧ']).toFixed(2)}</td>
-                    <td class="num positive">${format(smartValue(row['Маржа'], true))}</td>
-                    <td class="num" style="font-weight:600">${format(smartValue(row['Бонус'], true))}</td>
-                    <td class="num">${format(smartValue(row['Ср. Чек'], true))}</td>
-                    <td class="num">${format(smartValue(row['ASP'], true))}</td>
+                    <td class="num">${format(rawValue(row['ТО']))}</td>
+                    <td class="num">${format(rawValue(row['Послуги грн'] || row['Послуги']))}</td>
+                    <td class="num">${format(rawValue(row['ACC']))}</td>
+                    <td class="num">${format(rawValue(row['Чеки']))}</td>
+                    <td class="num">${format(rawValue(row['Шт.']))}</td>
+                    <td class="num">${format(rawValue(row['ПЧ']))}</td>
+                    <td class="num">${parseFloat(rawValue(row['КПЧ']) || 0).toFixed(2)}</td>
+                    <td class="num">${format(rawValue(row['Маржа']))}</td>
+                    <td class="num">${format(rawValue(row['Бонус']))}</td>
+                    <td class="num">${format(rawValue(row['Ср. Чек']))}</td>
+                    <td class="num">${format(rawValue(row['ASP']))}</td>
                 `;
                 body.appendChild(tr);
             });
