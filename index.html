@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>GORODOK Team — Dashboard</title>
+    <title> GORODOK Team — Dashboard</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -17,6 +17,7 @@
             --color-border: #d2d2d7;
             --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
             
+            /* Кольори для груп метрик */
             --group-sales: #0071e3;    
             --group-eff: #af52de;      
             --group-acc: #ff9500;      
@@ -113,10 +114,8 @@
         .detail-page {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--color-bg); z-index: 2000; overflow-y: auto; padding: 40px 20px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
         }
-        .detail-page.active { display: block; opacity: 1; }
+        .detail-page.active { display: block; }
         .detail-container { max-width: 900px; margin: 0 auto; }
         
         .metric-group {
@@ -145,35 +144,6 @@
         .group-acc .detail-metric-card { border-left-color: var(--group-acc); }
         .group-services .detail-metric-card { border-left-color: var(--group-services); }
 
-        /* Таблиця План/Факт */
-        #plan-fact-table-container {
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-        #plan-fact-table {
-            border-collapse: collapse;
-            width: 100%;
-            min-width: 800px;
-        }
-        #plan-fact-table th, #plan-fact-table td {
-            border: 1px solid var(--color-border);
-            padding: 8px;
-            text-align: left;
-            white-space: nowrap;
-        }
-        #plan-fact-table th {
-            background: #f0f0f0;
-            position: sticky;
-            top: 0;
-            z-index: 2;
-        }
-        #plan-fact-table th:first-child, #plan-fact-table td:first-child {
-            position: sticky;
-            left: 0;
-            background: #f0f0f0;
-            z-index: 3;
-        }
-
         @media (max-width: 600px) {
             header h1 { font-size: 32px; }
             .avatar { width: 50px; height: 50px; font-size: 18px; }
@@ -182,222 +152,161 @@
 </head>
 <body>
 
-<nav>
-    <div class="nav-content">
-        <div class="nav-logo" onclick="showHome()">Gorodok Sales Dashboard</div>
+    <nav>
+        <div class="nav-content">
+            <div class="nav-logo" onclick="showHome()">Gorodok Sales Dashboard</div>
+        </div>
+    </nav>
+
+    <div id="home-page" class="container">
+        <header>
+            <h1>Команда</h1>
+            <p>Статистика та графіки департаменту</p>
+        </header>
+
+        <div id="sales-cards" class="cards-grid"></div>
     </div>
-</nav>
 
-<div id="home-page" class="container">
-    <header>
-        <h1>Команда</h1>
-        <p>Статистика та графіки департаменту</p>
-    </header>
-
-    <div id="sales-cards" class="cards-grid"></div>
-</div>
-
-<div id="detail-page" class="detail-page">
-    <div class="detail-container">
-        <button onclick="showHome()" style="background:none; border:none; color:var(--color-accent); cursor:pointer; font-size:17px; margin-bottom:30px;">← Назад</button>
-        <div id="detail-content"></div>
+    <div id="detail-page" class="detail-page">
+        <div class="detail-container">
+            <button onclick="showHome()" style="background:none; border:none; color:var(--color-accent); cursor:pointer; font-size:17px; margin-bottom:30px;">← Назад</button>
+            <div id="detail-content"></div>
+        </div>
     </div>
-</div>
 
-<script>
-let currentData = [];
+    <script>
+        let currentData = [];
 
-// Завантаження даних
-async function loadData() {
-    try {
-        const response = await fetch('sales-data.json?t=' + Date.now());
-        currentData = await response.json();
-        renderCards(currentData);
-    } catch (error) { console.error(error); }
-}
+        async function loadData() {
+            try {
+                const response = await fetch('sales-data.json?t=' + Date.now());
+                currentData = await response.json();
+                renderCards(currentData);
+            } catch (error) { console.error(error); }
+        }
 
-// Форматування чисел
-function formatNumber(num) {
-    if (num >= 1000000) return (num / 1000000).toFixed(2) + 'М';
-    if (num >= 1000) return (num / 1000).toFixed(1) + 'К';
-    return num;
-}
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(2) + 'М';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'К';
+            return num;
+        }
 
-// Рендер карток
-function renderCards(data) {
-    const container = document.getElementById('sales-cards');
-    container.innerHTML = '';
+        function renderCards(data) {
+            const container = document.getElementById('sales-cards');
+            container.innerHTML = '';
 
-    // Щоденні продажі
-    const dailyCard = document.createElement('a');
-    dailyCard.className = 'card special-card';
-    dailyCard.href = 'daily.html';
-    dailyCard.innerHTML = `
-        <div class="card-header">
-            <div class="avatar" style="background: var(--color-accent)">📊</div>
-            <div class="card-title"><h2>Щоденні продажі</h2><p>Аналітика по днях</p></div>
-        </div>
-        <div class="main-metric"><div class="main-metric-value" style="font-size:22px">Переглянути звіти</div></div>
-    `;
-    container.appendChild(dailyCard);
-
-    // Продажі План/Факт
-    const planFactCard = document.createElement('div');
-    planFactCard.className = 'card special-card';
-    planFactCard.onclick = showPlanFact;
-    planFactCard.innerHTML = `
-        <div class="card-header">
-            <div class="avatar" style="background: #34c759">📈</div>
-            <div class="card-title"><h2>Продажі План/Факт</h2><p>Порівняння показників</p></div>
-        </div>
-        <div class="main-metric"><div class="main-metric-value" style="font-size:22px">Переглянути звіт</div></div>
-    `;
-    container.appendChild(planFactCard);
-
-    // Графік
-    const chartCard = document.createElement('a');
-    chartCard.className = 'card chart-card';
-    chartCard.href = 'https://docs.google.com/spreadsheets/d/1-sUZg6C6w3-lImTpIv2ezkW-mKtK8zXZ_zf4bCK83R8/edit#gid=973370496';
-    chartCard.target = '_blank';
-    chartCard.innerHTML = `
-        <div class="card-header">
-            <div class="avatar" style="background: #ff9500">📅</div>
-            <div class="card-title"><h2>Графік виходу</h2><p>Google Sheets</p></div>
-        </div>
-        <div class="main-metric"><div class="main-metric-value" style="font-size:22px">Зміни та розклад</div></div>
-    `;
-    container.appendChild(chartCard);
-
-    // Картки продавців
-    data.forEach(person => {
-        const to = person.metrics['ТО'] || {value: 0, unit: 'грн'};
-        const acc = person.metrics['% Доля ACC'] || {value: 0, unit: '%'};
-        const services = person.metrics['Доля Послуг'] || {value: 0, unit: '%'};
-
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.onclick = () => showDetail(person.id);
-        card.innerHTML = `
-            <div class="card-header">
-                <div class="avatar" style="background: ${person.gradient}">${person.initials}</div>
-                <div class="card-title"><h2>${person.name}</h2><p>${person.position}</p></div>
-            </div>
-            <div class="main-metric">
-                <div class="main-metric-label">Товарообіг</div>
-                <div class="main-metric-value">${formatNumber(to.value)} <span style="font-size:14px">${to.unit}</span></div>
-            </div>
-            <div class="secondary-metrics">
-                <div><div class="metric-mini-label">Доля ACC</div><div class="metric-mini-value">${acc.value}%</div></div>
-                <div><div class="metric-mini-label">Послуги</div><div class="metric-mini-value">${services.value}%</div></div>
-            </div>
-        `;
-        container.appendChild(card);
-    });
-}
-
-// Detail page картка продавця
-function showDetail(id) {
-    const person = currentData.find(p => p.id === id);
-    if (!person) return;
-
-    const m = person.metrics;
-    const detailContent = document.getElementById('detail-content');
-
-    const block = (key) => {
-        const item = m[key] || {value: 0, unit: '-'};
-        return `
-            <div class="detail-metric-card">
-                <div style="font-size:11px; color:var(--color-text-secondary); text-transform:uppercase">${key}</div>
-                <div style="font-size:22px; font-weight:600">
-                    ${item.value.toLocaleString('uk-UA')} <span style="font-size:14px; font-weight:400">${item.unit}</span>
+            // 1. ЩОДЕННІ ПРОДАЖІ
+            const dailyCard = document.createElement('a');
+            dailyCard.className = 'card special-card';
+            dailyCard.href = 'daily.html';
+            dailyCard.innerHTML = `
+                <div class="card-header">
+                    <div class="avatar" style="background: var(--color-accent)">📊</div>
+                    <div class="card-title"><h2>Щоденні продажі</h2><p>Аналітика по днях</p></div>
                 </div>
-            </div>
-        `;
-    };
+                <div class="main-metric"><div class="main-metric-value" style="font-size:22px">Переглянути звіти</div></div>
+            `;
+            container.appendChild(dailyCard);
 
-    detailContent.innerHTML = `
-        <div style="display:flex; align-items:center; margin-bottom:40px;">
-            <div class="avatar" style="width:80px; height:80px; font-size:28px; background:${person.gradient}">${person.initials}</div>
-            <div><h1 style="font-size:32px">${person.name}</h1><p style="color:var(--color-text-secondary)">${person.position}</p></div>
-        </div>
+            // 2. ГРАФІК
+            const chartCard = document.createElement('a');
+            chartCard.className = 'card chart-card';
+            chartCard.href = 'https://docs.google.com/spreadsheets/d/1-sUZg6C6w3-lImTpIv2ezkW-mKtK8zXZ_zf4bCK83R8/edit#gid=973370496';
+            chartCard.target = '_blank';
+            chartCard.innerHTML = `
+                <div class="card-header">
+                    <div class="avatar" style="background: #ff9500">📅</div>
+                    <div class="card-title"><h2>Графік виходу</h2><p>Google Sheets</p></div>
+                </div>
+                <div class="main-metric"><div class="main-metric-value" style="font-size:22px">Зміни та розклад</div></div>
+            `;
+            container.appendChild(chartCard);
 
-        <div class="group-title">💰 Продажі та Обіг</div>
-        <div class="metric-group group-sales">
-            ${block('ТО')} ${block('ASP')} ${block('Ср. Чек')}
-        </div>
+            // 3. ПРОДАВЦІ
+            data.forEach(person => {
+                const to = person.metrics['ТО'] || {value: 0, unit: 'грн'};
+                const acc = person.metrics['% Доля ACC'] || {value: 0, unit: '%'};
+                const services = person.metrics['Доля Послуг'] || {value: 0, unit: '%'};
 
-        <div class="group-title">⚡ Ефективність</div>
-        <div class="metric-group group-eff">
-            ${block('Шт.')} ${block('Чеки')} ${block('ПЧ')} ${block('КПЧ')} ${block('Конверсія ПК')}
-        </div>
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => showDetail(person.id);
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="avatar" style="background: ${person.gradient}">${person.initials}</div>
+                        <div class="card-title"><h2>${person.name}</h2><p>${person.position}</p></div>
+                    </div>
+                    <div class="main-metric">
+                        <div class="main-metric-label">Товарообіг</div>
+                        <div class="main-metric-value">${formatNumber(to.value)} <span style="font-size:14px">${to.unit}</span></div>
+                    </div>
+                    <div class="secondary-metrics">
+                        <div><div class="metric-mini-label">Доля ACC</div><div class="metric-mini-value">${acc.value}%</div></div>
+                        <div><div class="metric-mini-label">Послуги</div><div class="metric-mini-value">${services.value}%</div></div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
 
-        <div class="group-title">🎧 Аксесуари (ACC)</div>
-        <div class="metric-group group-acc">
-            ${block('ACC')} ${block('% Доля ACC')}
-        </div>
+        function showDetail(id) {
+            const person = currentData.find(p => p.id === id);
+            if (!person) return;
 
-        <div class="group-title">🛠 Послуги та УДС</div>
-        <div class="metric-group group-services">
-            ${block('Послуги грн')} ${block('Доля Послуг')} ${block('УДС')} ${block('Доля УДС')}
-        </div>
-    `;
+            const m = person.metrics;
+            const detailContent = document.getElementById('detail-content');
 
-    document.getElementById('detail-page').classList.add('active');
-    document.getElementById('home-page').style.display = 'none';
-    window.scrollTo(0,0);
-}
+            const block = (key) => {
+                const item = m[key] || {value: 0, unit: '-'};
+                return `
+                    <div class="detail-metric-card">
+                        <div style="font-size:11px; color:var(--color-text-secondary); text-transform:uppercase">${key}</div>
+                        <div style="font-size:22px; font-weight:600">
+                            ${item.value.toLocaleString('uk-UA')} <span style="font-size:14px; font-weight:400">${item.unit}</span>
+                        </div>
+                    </div>
+                `;
+            };
 
-// Показати домашню сторінку
-function showHome() {
-    document.getElementById('detail-page').classList.remove('active');
-    document.getElementById('home-page').style.display = 'block';
-    window.scrollTo(0,0);
-}
+            detailContent.innerHTML = `
+                <div style="display:flex; align-items:center; margin-bottom:40px;">
+                    <div class="avatar" style="width:80px; height:80px; font-size:28px; background:${person.gradient}">${person.initials}</div>
+                    <div><h1 style="font-size:32px">${person.name}</h1><p style="color:var(--color-text-secondary)">${person.position}</p></div>
+                </div>
 
-// Показати План/Факт таблицю
-async function showPlanFact() {
-    document.getElementById('detail-content').innerHTML = `
-        <h2>Продажі План/Факт</h2>
-        <div id="plan-fact-table-container">Завантаження...</div>
-    `;
-    document.getElementById('detail-page').classList.add('active');
-    document.getElementById('home-page').style.display = 'none';
-    window.scrollTo(0,0);
+                <div class="group-title">💰 Продажі та Обіг</div>
+                <div class="metric-group group-sales">
+                    ${block('ТО')} ${block('ASP')} ${block('Ср. Чек')}
+                </div>
 
-    try {
-        const res = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vTOUXHhUpCkh6tgvNpJzY-w5tVrhPkvEeC0W0ZWuy2YxPayuO3pvahfeKYmMZ1DwHnILTpsJFNtXLsH/pub?output=csv');
-        const text = await res.text();
-        const rows = text.trim().split('\n').map(r => r.split(','));
+                <div class="group-title">⚡ Ефективність</div>
+                <div class="metric-group group-eff">
+                    ${block('Шт.')} ${block('Чеки')} ${block('ПЧ')} ${block('КПЧ')} ${block('Конверсія ПК')}
+                </div>
 
-        const tableContainer = document.getElementById('plan-fact-table-container');
-        const table = document.createElement('table');
-        table.id = 'plan-fact-table';
-        table.innerHTML = `
-            ${rows.map((row,i) => i === 0
-                ? `<thead><tr>${row.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>`
-                : `<tr>${row.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}
-            </tbody>
-        `;
-        tableContainer.innerHTML = '';
-        tableContainer.appendChild(table);
-    } catch(e) {
-        document.getElementById('plan-fact-table-container').innerHTML = 'Помилка завантаження таблиці';
-        console.error(e);
-    }
-}
-// Swipe назад на мобільних
-let touchStartX = 0;
-let touchEndX = 0;
-const detailPage = document.getElementById('detail-page');
-detailPage.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive:true});
-detailPage.addEventListener('touchend', e => { touchEndX =
-touchEndX = e.changedTouches[0].screenX;
-    if (touchEndX - touchStartX > 50) { // свайп вправо
-        showHome();
-    }
-}, {passive:true});
+                <div class="group-title">🎧 Аксесуари (ACC)</div>
+                <div class="metric-group group-acc">
+                    ${block('ACC')} ${block('% Доля ACC')}
+                </div>
 
-window.onload = loadData;
-</script>
+                <div class="group-title">🛠 Послуги та УДС</div>
+                <div class="metric-group group-services">
+                    ${block('Послуги грн')} ${block('Доля Послуг')} ${block('УДС')} ${block('Доля УДС')}
+                </div>
+            `;
+
+            document.getElementById('detail-page').classList.add('active');
+            document.getElementById('home-page').style.display = 'none';
+            window.scrollTo(0, 0);
+        }
+
+        function showHome() {
+            document.getElementById('detail-page').classList.remove('active');
+            document.getElementById('home-page').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        window.onload = loadData;
+    </script>
 </body>
 </html>
