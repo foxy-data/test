@@ -26,8 +26,9 @@
         }
 
         table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
-        .group-header th { padding: 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #86868b; background: #f5f5f7; border-bottom: 1px solid var(--color-border); }
         
+        /* Шапка груп */
+        .group-header th { padding: 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #86868b; background: #f5f5f7; border-bottom: 1px solid var(--color-border); }
         .border-sales { border-top: 3px solid #0071e3; }
         .border-eff { border-top: 3px solid #af52de; }
         .border-income { border-top: 3px solid #34c759; }
@@ -36,23 +37,15 @@
         th, td { padding: 12px 15px; border-bottom: 1px solid #f0f0f2; white-space: nowrap; }
         thead tr:last-child th { background: white; position: sticky; top: 0; z-index: 20; font-weight: 600; border-bottom: 2px solid var(--color-border); }
 
-        .name-col { position: sticky; left: 0; background: white; z-index: 21; font-weight: 600; border-right: 1px solid var(--color-border); min-width: 220px; }
+        .name-col { position: sticky; left: 0; background: white; z-index: 21; font-weight: 600; border-right: 1px solid var(--color-border); min-width: 200px; }
 
-        /* ВИДІЛЕННЯ ТІЛЬКИ ДЛЯ РЯДКА З ЧАСОМ */
-        .time-row { background-color: var(--time-row-bg) !important; font-weight: 800 !important; }
-        .time-row td { color: #000; }
+        /* Стиль для рядка з часом */
+        .time-row { background-color: var(--time-row-bg) !important; font-weight: 800 !important; color: #000; }
 
         @media (max-width: 600px) {
-            .name-col { min-width: 65px; width: 65px; text-align: center; padding: 10px 5px; }
+            .name-col { min-width: 70px; width: 70px; text-align: center; padding: 10px 5px; }
             .name-col span { display: none; }
-            .compact-avatar { 
-                display: flex !important; 
-                width: 42px; height: 42px; 
-                border-radius: 50%; 
-                margin: 0 auto; 
-                align-items: center; justify-content: center; 
-                font-size: 11px; color: white; font-weight: 700; 
-            }
+            .compact-avatar { display: flex !important; width: 45px; height: 45px; border-radius: 50%; margin: 0 auto; align-items: center; justify-content: center; font-size: 11px; color: white; font-weight: 700; }
         }
 
         .compact-avatar { display: none; }
@@ -73,16 +66,16 @@
             <thead>
                 <tr class="group-header">
                     <th class="name-col"></th>
-                    <th colspan="3" class="border-sales">Продажі (грн)</th>
-                    <th colspan="4" class="border-eff">Ефективність (шт)</th>
-                    <th colspan="2" class="border-income">Дохід</th>
-                    <th colspan="2" class="border-avg">Середні</th>
+                    <th colspan="3" class="border-sales">Блок ТО послуги асс</th>
+                    <th colspan="4" class="border-eff">Блок Чеки</th>
+                    <th colspan="2" class="border-income">Блок дохід</th>
+                    <th colspan="2" class="border-avg">Середній чек</th>
                 </tr>
                 <tr>
                     <th class="name-col">ПІБ</th>
                     <th class="num">ТО</th>
                     <th class="num">Послуги</th>
-                    <th class="num">ACC</th>
+                    <th class="num">АСС</th>
                     <th class="num">Чеки</th>
                     <th class="num">Шт.</th>
                     <th class="num">ПЧ</th>
@@ -98,15 +91,10 @@
     </div>
 
     <script>
-        // Ініціали з 3 символів
+        // Ініціали 3 символи
         function getInitials(name) {
-            if (!name || name === "Невідомо" || name === "-") return "???";
-            return name.split(' ')
-                       .filter(n => n.length > 0)
-                       .map(n => n[0])
-                       .join('')
-                       .toUpperCase()
-                       .substring(0, 3);
+            if (!name || name === "-" || name.includes(":")) return "";
+            return name.split(' ').filter(n => n.length > 0).map(n => n[0]).join('').toUpperCase().substring(0, 3);
         }
 
         function getGradient(name) {
@@ -124,11 +112,9 @@
             } catch (e) { console.error(e); }
         }
 
-        // Чисте отримання значень без зайвих ключів
-        function getRaw(row, key) {
-            let val = row[key];
-            if (val === undefined || val === null) return "0";
-            return (typeof val === 'object') ? (val.value ?? "0") : val;
+        function raw(val) {
+            if (val === undefined || val === null) return "";
+            return (typeof val === 'object') ? (val.value ?? "") : val;
         }
 
         function renderTable(data) {
@@ -136,12 +122,10 @@
             body.innerHTML = '';
 
             data.forEach(row => {
-                const keys = Object.keys(row);
-                // Беремо ПІБ із першого знайденого ключа
-                const fullName = row['ПІБ'] || row['Name'] || row[keys[0]] || "-";
-                
-                const isTimeRow = fullName.includes(":");
+                const name = row['ПІБ'] || "-";
+                const isTimeRow = name.includes(":");
                 const tr = document.createElement('tr');
+                
                 if (isTimeRow) tr.classList.add('time-row');
 
                 tr.onclick = function() {
@@ -153,20 +137,20 @@
 
                 tr.innerHTML = `
                     <td class="name-col">
-                        ${(!isTimeRow && fullName !== "-") ? `<div class="compact-avatar" style="background: ${getGradient(fullName)}">${getInitials(fullName)}</div>` : ''}
-                        <span>${fullName}</span>
+                        ${(!isTimeRow && name !== "-") ? `<div class="compact-avatar" style="background: ${getGradient(name)}">${getInitials(name)}</div>` : ''}
+                        <span>${name}</span>
                     </td>
-                    <td class="num">${getRaw(row, 'ТО')}</td>
-                    <td class="num">${getRaw(row, 'Послуги')}</td>
-                    <td class="num">${getRaw(row, 'ACC')}</td>
-                    <td class="num">${getRaw(row, 'Чеки')}</td>
-                    <td class="num">${getRaw(row, 'Шт.')}</td>
-                    <td class="num">${getRaw(row, 'ПЧ')}</td>
-                    <td class="num">${getRaw(row, 'КПЧ')}</td>
-                    <td class="num">${getRaw(row, 'Маржа')}</td>
-                    <td class="num">${getRaw(row, 'Бонус')}</td>
-                    <td class="num">${getRaw(row, 'Ср. Чек')}</td>
-                    <td class="num">${getRaw(row, 'ASP')}</td>
+                    <td class="num">${raw(row['ТО'])}</td>
+                    <td class="num">${raw(row['Послуги'])}</td>
+                    <td class="num">${raw(row['АСС'])}</td>
+                    <td class="num">${raw(row['Чеки'])}</td>
+                    <td class="num">${raw(row['Шт.'])}</td>
+                    <td class="num">${raw(row['ПЧ'])}</td>
+                    <td class="num">${raw(row['КПЧ'])}</td>
+                    <td class="num">${raw(row['Маржа'])}</td>
+                    <td class="num">${raw(row['Бонус'])}</td>
+                    <td class="num">${raw(row['Ср. Чек'])}</td>
+                    <td class="num">${raw(row['ASP'])}</td>
                 `;
                 body.appendChild(tr);
             });
