@@ -10,20 +10,18 @@
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; }
         .container { max-width: 1400px; margin: 20px auto; }
         .back-link { color: var(--accent); text-decoration: none; font-weight: 500; display: inline-block; margin-bottom: 20px; }
-        h1 { font-size: 32px; font-weight: 600; margin-bottom: 20px; letter-spacing: -0.5px; padding-left: 10px; }
+        h1 { font-size: 32px; font-weight: 600; margin-bottom: 20px; letter-spacing: -0.5px; }
         
         .table-card { 
             background: white; 
             border-radius: 22px; 
             box-shadow: 0 8px 30px rgba(0,0,0,0.04); 
             overflow-x: auto; 
-            position: relative;
         }
 
         table { width: 100%; border-collapse: collapse; min-width: 1000px; }
         th { text-align: left; padding: 16px; color: #86868b; font-size: 11px; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #d2d2d7; background: white; }
         td { padding: 16px; border-bottom: 1px solid #f5f5f7; font-size: 14px; white-space: nowrap; }
-        tr:hover { background: #fafafa; }
         
         /* ФІКСОВАНА КОЛОНКА ПІБ */
         .name-cell, th:first-child { 
@@ -31,8 +29,8 @@
             left: 0; 
             background: white; 
             z-index: 10; 
-            min-width: 200px; 
-            box-shadow: 4px 0 8px -4px rgba(0,0,0,0.05);
+            min-width: 180px; 
+            box-shadow: 4px 0 8px -4px rgba(0,0,0,0.1);
         }
         th:first-child { z-index: 11; }
 
@@ -49,40 +47,23 @@
 
         .loading { padding: 40px; text-align: center; color: #86868b; }
 
-        /* МОБІЛЬНА ВЕРСІЯ: ТРАНСФОРМАЦІЯ ПРИ СКРОЛІ */
+        /* МОБІЛЬНА ВЕРСІЯ: ЗМЕНШЕННЯ ШРИФТУ ПІБ */
         @media (max-width: 600px) {
-            h1 { font-size: 24px; }
-            
-            /* Звужуємо першу колонку до іконки */
             .name-cell, th:first-child { 
-                min-width: 60px; 
-                width: 60px; 
-                text-align: center; 
+                min-width: 80px; 
+                max-width: 80px;
                 padding: 10px 5px;
-            }
-
-            .name-cell span { display: none; } /* Ховаємо повний текст ПІБ */
-            
-            /* Створюємо іконку (аватар) */
-            .name-cell::before {
-                content: attr(data-initials);
-                display: flex; 
-                width: 40px; 
-                height: 40px; 
-                background: #e8e8ed;
-                color: #1d1d1f; 
-                border-radius: 12px; 
-                align-items: center; 
-                justify-content: center;
-                font-size: 10px; 
-                font-weight: 700; 
-                margin: 0 auto;
-                border: 1px solid #d2d2d7;
+                font-size: 10px; /* Дуже дрібний шрифт для ПІБ */
+                white-space: normal; /* Дозволяємо перенос тексту, щоб влізло у вузьку колонку */
+                line-height: 1.1;
+                text-align: center;
             }
             
-            /* Для рядка часу на мобілці іконка не потрібна */
-            .time-row .name-cell::before { display: none; }
-            .time-row .name-cell span { display: block; font-size: 12px; }
+            /* Робимо цифри трохи компактнішими */
+            td:not(.name-cell) {
+                padding: 12px 8px;
+                font-size: 13px;
+            }
         }
     </style>
 </head>
@@ -91,7 +72,7 @@
         <a href="index.html" class="back-link">← Назад</a>
         <h1>Щоденні звіти</h1>
         <div class="table-card">
-            <div id="loader" class="loading">Завантаження даних...</div>
+            <div id="loader" class="loading">Оновлення...</div>
             <table id="dataTable" style="display: none;">
                 <thead><tr id="headerRow"></tr></thead>
                 <tbody id="tableBody"></tbody>
@@ -99,12 +80,6 @@
         </div>
     </div>
     <script>
-        function getInitials(name) {
-            if (!name || name === "-" || name.includes(":")) return "";
-            const parts = name.split(' ').filter(n => n.length > 0);
-            return parts.map(n => n[0]).join('').toUpperCase().substring(0, 3);
-        }
-
         async function loadTable() {
             try {
                 const r = await fetch('daily-sales.json?t=' + Date.now());
@@ -125,8 +100,7 @@
                 const tbody = document.getElementById('tableBody');
                 data.forEach(row => {
                     let tr = document.createElement('tr');
-                    const firstKey = headers[0];
-                    const nameVal = String(row[firstKey] || "");
+                    const nameVal = String(row[headers[0]] || "");
                     
                     if (nameVal.includes(":")) tr.className = 'time-row';
 
@@ -134,11 +108,9 @@
                         let td = document.createElement('td');
                         let val = row[h];
                         
-                        // ПІБ (перша колонка)
                         if (index === 0) {
                             td.className = 'name-cell';
-                            td.setAttribute('data-initials', getInitials(nameVal));
-                            td.innerHTML = `<span>${val}</span>`;
+                            td.textContent = val;
                         } else {
                             td.textContent = val;
                             const hName = h.toUpperCase();
