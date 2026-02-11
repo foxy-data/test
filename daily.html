@@ -13,7 +13,7 @@
             --color-border: #d2d2d7;
             --color-accent: #0071e3;
             --highlight: #f2f7ff; 
-            --summary-bg: #f5f5f7;
+            --time-row-bg: #f5f5f7;
         }
 
         body { font-family: 'Inter', sans-serif; background-color: var(--color-bg); color: var(--color-text); padding: 15px; }
@@ -37,9 +37,9 @@
 
         .name-col { position: sticky; left: 0; background: white; z-index: 21; font-weight: 600; border-right: 1px solid var(--color-border); min-width: 220px; }
 
-        /* Рядок з часом або підсумками */
-        .summary-row { background-color: var(--summary-bg) !important; font-weight: 700 !important; }
-        .summary-row td { color: #1d1d1f; }
+        /* ВИДІЛЕННЯ ТІЛЬКИ ДЛЯ РЯДКА З ЧАСОМ */
+        .time-row { background-color: var(--time-row-bg) !important; font-weight: 800 !important; color: #000; }
+        .time-row td { border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); }
 
         @media (max-width: 600px) {
             .name-col { min-width: 60px; width: 60px; text-align: center; padding: 10px 5px; }
@@ -48,7 +48,7 @@
         }
 
         .compact-avatar { display: none; }
-        tbody tr:hover:not(.summary-row) { background-color: #f9f9fb; cursor: pointer; }
+        tbody tr:hover:not(.time-row) { background-color: #f9f9fb; cursor: pointer; }
         tbody tr.selected { background-color: var(--highlight) !important; }
 
         .num { font-variant-numeric: tabular-nums; text-align: right; }
@@ -110,11 +110,15 @@
             } catch (e) { console.error(e); }
         }
 
-        // Пряме відображення значення без примусового форматування
-        function displayValue(val) {
-            if (val === undefined || val === null) return "0";
-            if (typeof val === 'object') return val.value;
-            return val;
+        // Функція для пошуку значення за кількома можливими ключами
+        function findValue(row, possibleKeys) {
+            for (let key of possibleKeys) {
+                if (row[key] !== undefined) {
+                    let val = row[key];
+                    return (typeof val === 'object') ? (val.value ?? "0") : val;
+                }
+            }
+            return "0";
         }
 
         function renderTable(data) {
@@ -125,14 +129,14 @@
                 const keys = Object.keys(row);
                 const fullName = row['ПІБ'] || row['Name'] || row['name'] || row[keys[0]] || "-";
                 
-                // Рядок вважається службовим, якщо в імені "-" або є час/дата
-                const isSummary = fullName === "-" || fullName.includes(":") || /\d{2}\.\d{2}/.test(fullName) || fullName.includes("Разом");
+                // Рядок з часом (шукаємо двокрапку як ознаку часу)
+                const isTimeRow = fullName.includes(":");
 
                 const tr = document.createElement('tr');
-                if (isSummary) tr.classList.add('summary-row');
+                if (isTimeRow) tr.classList.add('time-row');
 
                 tr.onclick = function() {
-                    if (!isSummary) {
+                    if (!isTimeRow) {
                         document.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
                         this.classList.add('selected');
                     }
@@ -140,20 +144,20 @@
 
                 tr.innerHTML = `
                     <td class="name-col">
-                        ${(!isSummary && fullName !== "-") ? `<div class="compact-avatar" style="background: ${getGradient(fullName)}">${getInitials(fullName)}</div>` : ''}
+                        ${(!isTimeRow && fullName !== "-") ? `<div class="compact-avatar" style="background: ${getGradient(fullName)}">${getInitials(fullName)}</div>` : ''}
                         <span>${fullName}</span>
                     </td>
-                    <td class="num">${displayValue(row['ТО'])}</td>
-                    <td class="num">${displayValue(row['Послуги'] || row['Послуги грн'])}</td>
-                    <td class="num">${displayValue(row['ACC'])}</td>
-                    <td class="num">${displayValue(row['Чеки'])}</td>
-                    <td class="num">${displayValue(row['Шт.'])}</td>
-                    <td class="num">${displayValue(row['ПЧ'])}</td>
-                    <td class="num">${displayValue(row['КПЧ'])}</td>
-                    <td class="num">${displayValue(row['Маржа'])}</td>
-                    <td class="num">${displayValue(row['Бонус'])}</td>
-                    <td class="num">${displayValue(row['Ср. Чек'])}</td>
-                    <td class="num">${displayValue(row['ASP'])}</td>
+                    <td class="num">${findValue(row, ['ТО', 'Обіг', 'Товарообіг'])}</td>
+                    <td class="num">${findValue(row, ['Послуги', 'Послуги грн'])}</td>
+                    <td class="num">${findValue(row, ['ACC', 'Аксесуари', 'Асс'])}</td>
+                    <td class="num">${findValue(row, ['Чеки', 'К-сть чеків'])}</td>
+                    <td class="num">${findValue(row, ['Шт.', 'Кількість шт'])}</td>
+                    <td class="num">${findValue(row, ['ПЧ', 'Правильні чеки'])}</td>
+                    <td class="num">${findValue(row, ['КПЧ'])}</td>
+                    <td class="num">${findValue(row, ['Маржа', 'Дохід', 'Прибуток'])}</td>
+                    <td class="num">${findValue(row, ['Бонус', 'Премія'])}</td>
+                    <td class="num">${findValue(row, ['Ср. Чек', 'Середній чек'])}</td>
+                    <td class="num">${findValue(row, ['ASP'])}</td>
                 `;
                 body.appendChild(tr);
             });
