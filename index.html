@@ -322,26 +322,25 @@
 
         window.onload = loadData;
 
-        // СВАЙП-НАВІГАЦІЯ
+      // СВАЙП-НАВІГАЦІЯ
         let touchStartX = 0;
-        let touchStartY = 0;
-        let touchEndX = 0;
-        let touchEndY = 0;
-        let isSwiping = false;
         
-        function handleSwipe() {
-            const swipeThreshold = 120; // Збільшено поріг
-            const swipeDistanceX = touchEndX - touchStartX;
-            const swipeDistanceY = Math.abs(touchEndY - touchStartY);
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        
+        document.addEventListener('touchend', e => {
+            const touchEndX = e.changedTouches[0].screenX;
+            const swipeDistance = touchEndX - touchStartX;
             
-            // Свайп тільки якщо чіткий горизонтальний рух
-            if (isSwiping && Math.abs(swipeDistanceX) > swipeThreshold && swipeDistanceX > 0 && swipeDistanceY < 50) {
-                // Свайп вправо - назад з деталей
-                if (document.getElementById('detail-page').classList.contains('active')) {
+            // Якщо свайп вправо > 100px ТА відкрита сторінка деталей
+            if (swipeDistance > 100) {
+                const detailPage = document.getElementById('detail-page');
+                if (detailPage.classList.contains('active')) {
                     showHome();
                 }
             }
-        }
+        }, { passive: true });
         
         document.addEventListener('touchstart', e => {
             touchStartX = e.changedTouches[0].screenX;
