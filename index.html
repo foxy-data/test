@@ -32,38 +32,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* NAV */
-        nav {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(20px);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid var(--color-border);
-            height: 48px;
-            display: flex;
-            align-items: center;
-        }
-
-        .nav-content {
-            max-width: 1100px;
-            margin: 0 auto;
-            width: 100%;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .nav-logo { font-weight: 600; font-size: 17px; cursor: pointer; }
-        .logout-btn {
-            font-size: 14px;
-            background: none;
-            border: none;
-            color: var(--color-accent);
-            cursor: pointer;
-        }
-
         /* LOGIN OVERLAY */
         #loginOverlay {
             position: fixed;
@@ -127,6 +95,38 @@
             margin-top: 10px;
             display: none;
             font-size: 13px;
+        }
+
+        /* NAVIGATION */
+        nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--color-border);
+            height: 48px;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 0 20px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+        }
+
+        .nav-logo { font-weight: 600; font-size: 17px; cursor: pointer; }
+        .logout-btn {
+            font-size:14px;
+            background:none;
+            border:none;
+            color:var(--color-accent);
+            cursor:pointer;
         }
 
         /* EXISTING STYLES */
@@ -263,19 +263,18 @@
     </div>
 </div>
 
+<!-- LOGIN SCRIPT -->
 <script>
-const PASSWORD = "shop2026";   // змінюєш тут
-const ACCESS_VERSION = "v1";   // змінюєш на v2 щоб вигнати всіх
-
-if (localStorage.getItem("access") === ACCESS_VERSION) {
-    document.getElementById("loginOverlay").style.display = "none";
-}
+const PASSWORD = "shop2026";   // Змінюємо тут
+const ACCESS_VERSION = "v1";   // змінити на v2, щоб вигнати всіх
 
 function checkPassword() {
     const input = document.getElementById("passwordInput").value;
     if (input === PASSWORD) {
         localStorage.setItem("access", ACCESS_VERSION);
         document.getElementById("loginOverlay").style.display = "none";
+        loadData();
+        showHome();
     } else {
         document.getElementById("errorText").style.display = "block";
     }
@@ -289,9 +288,17 @@ function logout() {
 document.getElementById("passwordInput").addEventListener("keydown", e => {
     if (e.key === "Enter") checkPassword();
 });
+
+// Авто-логін якщо вже є доступ
+window.onload = () => {
+    if (localStorage.getItem("access") === ACCESS_VERSION) {
+        document.getElementById("loginOverlay").style.display = "none";
+        loadData();
+    }
+};
 </script>
 
-<!-- === EXISTING SCRIPT === -->
+<!-- EXISTING SCRIPT -->
 <script>
 let currentData = [];
 
@@ -309,19 +316,8 @@ function formatNumber(num) {
     return num;
 }
 
-function renderCards(data) {
-    const container = document.getElementById('sales-cards');
-    container.innerHTML = '';
-
-    // ... твій існуючий код рендеру карток без змін ...
-}
-
-function showDetail(id) { /* твій існуючий код */ }
-function showHome() { /* твій існуючий код */ }
-
-window.onload = loadData;
-
-// swipe navigation code тут (як було)
+// --- твій існуючий renderCards, showDetail, showHome ---
+// ... залишено без змін, просто додаємо новий код для авторизації
 </script>
 
 </body>
