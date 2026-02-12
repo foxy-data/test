@@ -23,7 +23,6 @@
         th { text-align: left; padding: 16px; color: #86868b; font-size: 11px; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #d2d2d7; background: white; }
         td { padding: 16px; border-bottom: 1px solid #f5f5f7; font-size: 14px; white-space: nowrap; }
         
-        /* ФІКСОВАНА КОЛОНКА ПІБ */
         .name-cell, th:first-child { 
             position: sticky; 
             left: 0; 
@@ -34,7 +33,6 @@
         }
         th:first-child { z-index: 11; }
 
-        /* КОЛЬОРИ СТОВПЦІВ */
         .col-plan { color: #0071e3; font-weight: 600; }
         .col-fact { color: #34c759; font-weight: 600; }
         .col-percent { color: #ff9500; font-weight: 600; }
@@ -42,14 +40,12 @@
         .col-diff.positive { color: #34c759; }
         .col-diff.negative { color: #ff3b30; }
 
-        /* РЯДОК ПІДСУМКУ */
         .total-row { background: #f5f5f7 !important; font-weight: 800 !important; }
         .total-row td { color: #000; }
         .total-row .name-cell { background: #f5f5f7 !important; }
 
         .loading { padding: 40px; text-align: center; color: #86868b; }
 
-        /* МОБІЛЬНА ВЕРСІЯ */
         @media (max-width: 600px) {
             .name-cell, th:first-child { 
                 min-width: 80px; 
@@ -60,11 +56,7 @@
                 line-height: 1.1;
                 text-align: center;
             }
-            
-            td:not(.name-cell) {
-                padding: 12px 8px;
-                font-size: 13px;
-            }
+            td:not(.name-cell) { padding: 12px 8px; font-size: 13px; }
         }
     </style>
 </head>
@@ -73,7 +65,7 @@
         <a href="index.html" class="back-link">← Назад</a>
         <h1>Продажі План Факт</h1>
         <div class="table-card">
-            <div id="loader" class="loading">Оновлення...</div>
+            <div id="loader" class="loading">Завантаження даних з Google Sheets...</div>
             <table id="dataTable" style="display: none;">
                 <thead>
                     <tr>
@@ -89,40 +81,54 @@
         </div>
     </div>
     <script>
+        // Функція для очищення тексту та перетворення в число
+        function parseValue(val) {
+            if (!val) return 0;
+            // Видаляємо пробіли, грн, %, та замінюємо кому на крапку
+            let clean = val.toString().replace(/\s/g, '').replace('грн', '').replace('%', '').replace(',', '.');
+            return parseFloat(clean) || 0;
+        }
+
         async function loadTable() {
+            const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTOUXHhUpCkh6tgvNpJzY-w5tVrhPkvEeC0W0ZWuy2YxPayuO3pvahfeKYmMZ1DwHnILTpsJFNtXLsH/pub?output=csv";
+            
             try {
-                // Завантажуємо дані з sales-data.json
-                const r = await fetch('sales-data.json?t=' + Date.now());
-                const data = await r.json();
-                if (!data.length) return;
+                const response = await fetch(SHEET_URL + '&t=' + Date.now());
+                const csvText = await response.text();
+                
+                // Простий парсинг CSV (розділення по рядках та комам)
+                const rows = csvText.split('\n').map(row => row.split(','));
+                
+                // Пропускаємо заголовок (перший рядок)
+                const dataRows = rows.slice(1);
 
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('dataTable').style.display = 'table';
 
                 const tbody = document.getElementById('tableBody');
-                
-                // Для прикладу створюємо план як 120% від факту
-                // В реальному проекті ці дані мають братися з окремої таблиці
-                data.forEach(person => {
-                    if (!person.metrics || !person.metrics['ТО']) return;
-                    
-                    const fact = person.metrics['ТО'].value;
-                    const plan = Math.round(fact * 1.2); // План = 120% від факту (приклад)
-                    const percent = plan > 0 ? Math.round((fact / plan) * 100) : 0;
-                    const diff = fact - plan;
+                tbody.innerHTML = ''; // Очищуємо перед завантаженням
+
+                dataRows.forEach(row => {
+                    if (row.length < 5 || !row[0].trim()) return;
+
+                    const name = row[0].trim();
+                    const plan = parseValue(row[1]);
+                    const fact = parseValue(row[2]);
+                    const percent = row[3].trim(); // Беремо готовий % з таблиці
+                    const diff = parseValue(row[4]);
                     
                     let tr = document.createElement('tr');
                     
-                    // Виділяємо підсумковий рядок
-                    if (person.id === 0) {
+                    // Перевірка на рядок підсумку (якщо ім'я містить "Разом" або "Сума")
+                    if (name.toLowerCase().includes('разом') || name.toLowerCase().includes('сума')) {
                         tr.className = 'total-row';
                     }
                     
                     tr.innerHTML = `
-                        <td class="name-cell">${person.name}</td>
-                        <td class="col-plan">${plan.toLocaleString('uk-UA')} грн</td>
+                        <td class="name-cell">${name}</td>
+                        <td class="col-plan">${Math.round(plan).toLocaleString('uk-UA')} грн</td>
                         <td class="col-fact">${Math.round(fact).toLocaleString('uk-UA')} грн</td>
-                        <td class="col-percent">${percent}%</td>
+                        <td class="col-percent">${percent}</td>
                         <td class="col-diff ${diff >= 0 ? 'positive' : 'negative'}">
                             ${diff >= 0 ? '+' : ''}${Math.round(diff).toLocaleString('uk-UA')} грн
                         </td>
@@ -131,52 +137,29 @@
                     tbody.appendChild(tr);
                 });
             } catch (e) {
-                document.getElementById('loader').textContent = "Помилка: " + e.message;
+                document.getElementById('loader').textContent = "Помилка завантаження: " + e.message;
             }
         }
         
         loadTable();
 
-        // СВАЙП-НАВІГАЦІЯ
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let touchEndX = 0;
-        let touchEndY = 0;
-        let isSwiping = false;
-        
+        // Свайп-навігація залишена без змін
+        let touchStartX = 0; let touchStartY = 0; let touchEndX = 0; let touchEndY = 0; let isSwiping = false;
         function handleSwipe() {
-            const swipeThreshold = 120; // Збільшено поріг
+            const swipeThreshold = 120;
             const swipeDistanceX = touchEndX - touchStartX;
             const swipeDistanceY = Math.abs(touchEndY - touchStartY);
-            
-            // Свайп тільки якщо чіткий горизонтальний рух
             if (isSwiping && Math.abs(swipeDistanceX) > swipeThreshold && swipeDistanceX > 0 && swipeDistanceY < 50) {
-                // Свайп вправо - повернутися на головну
                 window.location.href = 'index.html';
             }
         }
-        
-        document.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-            touchStartY = e.changedTouches[0].screenY;
-            isSwiping = true;
-        }, { passive: true });
-        
+        document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY; isSwiping = true; }, { passive: true });
         document.addEventListener('touchmove', e => {
             const moveY = Math.abs(e.changedTouches[0].screenY - touchStartY);
             const moveX = Math.abs(e.changedTouches[0].screenX - touchStartX);
-            // Якщо більше вертикальний рух - це не свайп
-            if (moveY > 20 || moveX < 30) {
-                isSwiping = false;
-            }
+            if (moveY > 20 || moveX < 30) isSwiping = false;
         }, { passive: true });
-        
-        document.addEventListener('touchend', e => {
-            touchEndX = e.changedTouches[0].screenX;
-            touchEndY = e.changedTouches[0].screenY;
-            handleSwipe();
-            isSwiping = false;
-        }, { passive: true });
+        document.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; touchEndY = e.changedTouches[0].screenY; handleSwipe(); isSwiping = false; }, { passive: true });
     </script>
 </body>
 </html>
