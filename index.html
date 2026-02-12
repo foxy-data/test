@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>GORODOK Team — Dashboard</title>
+    <title> GORODOK Team — Dashboard</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -32,72 +32,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* LOGIN OVERLAY */
-        #loginOverlay {
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(135deg, #f0f7ff, #eef2ff);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-
-        .login-box {
-            background: white;
-            padding: 32px;
-            border-radius: 22px;
-            width: 100%;
-            max-width: 360px;
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--color-border);
-            text-align: center;
-        }
-
-        .login-box h2 {
-            margin-bottom: 10px;
-            font-size: 22px;
-        }
-
-        .login-box p {
-            font-size: 14px;
-            color: var(--color-text-secondary);
-            margin-bottom: 15px;
-        }
-
-        .login-box input {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-            font-size: 16px;
-            border-radius: 10px;
-            border: 1px solid var(--color-border);
-        }
-
-        .login-box button {
-            margin-top: 15px;
-            width: 100%;
-            padding: 12px;
-            background: var(--color-accent);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .login-box button:hover {
-            opacity: 0.9;
-        }
-
-        .error {
-            color: red;
-            margin-top: 10px;
-            display: none;
-            font-size: 13px;
-        }
-
-        /* NAVIGATION */
         nav {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(20px);
@@ -115,22 +49,12 @@
             margin: 0 auto;
             width: 100%;
             padding: 0 20px;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
         }
 
         .nav-logo { font-weight: 600; font-size: 17px; cursor: pointer; }
-        .logout-btn {
-            font-size:14px;
-            background:none;
-            border:none;
-            color:var(--color-accent);
-            cursor:pointer;
-        }
 
-        /* EXISTING STYLES */
         .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+        
         header { margin-bottom: 40px; }
         header h1 { font-size: 40px; font-weight: 600; letter-spacing: -0.02em; }
         header p { color: var(--color-text-secondary); font-size: 21px; }
@@ -229,96 +153,217 @@
 </head>
 <body>
 
-<!-- LOGIN OVERLAY -->
-<div id="loginOverlay">
-    <div class="login-box">
-        <h2>🔐 Вхід</h2>
-        <p>Dashboard команди Gorodok</p>
-        <input type="password" id="passwordInput" placeholder="Введіть пароль">
-        <button onclick="checkPassword()">Увійти</button>
-        <div class="error" id="errorText">Невірний пароль</div>
+    <nav>
+        <div class="nav-content">
+            <div class="nav-logo" onclick="showHome()">Gorodok Sales Dashboard</div>
+        </div>
+    </nav>
+
+    <div id="home-page" class="container">
+        <header>
+            <h1>Команда</h1>
+            <p>Статистика та графіки департаменту</p>
+        </header>
+
+        <div id="sales-cards" class="cards-grid"></div>
     </div>
-</div>
 
-<nav>
-    <div class="nav-content">
-        <div class="nav-logo" onclick="showHome()">Gorodok Sales Dashboard</div>
-        <button class="logout-btn" onclick="logout()">Вийти</button>
+    <div id="detail-page" class="detail-page">
+        <div class="detail-container">
+            <button onclick="showHome()" style="background:none; border:none; color:var(--color-accent); cursor:pointer; font-size:17px; margin-bottom:30px;">← Назад</button>
+            <div id="detail-content"></div>
+        </div>
     </div>
-</nav>
 
-<div id="home-page" class="container">
-    <header>
-        <h1>Команда</h1>
-        <p>Статистика та графіки департаменту</p>
-    </header>
+    <script>
+        let currentData = [];
 
-    <div id="sales-cards" class="cards-grid"></div>
-</div>
+        async function loadData() {
+            try {
+                const response = await fetch('sales-data.json?t=' + Date.now());
+                currentData = await response.json();
+                renderCards(currentData);
+            } catch (error) { console.error(error); }
+        }
 
-<div id="detail-page" class="detail-page">
-    <div class="detail-container">
-        <button onclick="showHome()" style="background:none; border:none; color:var(--color-accent); cursor:pointer; font-size:17px; margin-bottom:30px;">← Назад</button>
-        <div id="detail-content"></div>
-    </div>
-</div>
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(2) + 'М';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'К';
+            return num;
+        }
 
-<!-- LOGIN SCRIPT -->
-<script>
-const PASSWORD = "shop2026";   // Змінюємо тут
-const ACCESS_VERSION = "v1";   // змінити на v2, щоб вигнати всіх
+        function renderCards(data) {
+            const container = document.getElementById('sales-cards');
+            container.innerHTML = '';
 
-function checkPassword() {
-    const input = document.getElementById("passwordInput").value;
-    if (input === PASSWORD) {
-        localStorage.setItem("access", ACCESS_VERSION);
-        document.getElementById("loginOverlay").style.display = "none";
-        loadData();
-        showHome();
-    } else {
-        document.getElementById("errorText").style.display = "block";
-    }
-}
+            // 1. ЩОДЕННІ ПРОДАЖІ
+            const dailyCard = document.createElement('a');
+            dailyCard.className = 'card special-card';
+            dailyCard.href = 'daily.html';
+            dailyCard.innerHTML = `
+                <div class="card-header">
+                    <div class="avatar" style="background: var(--color-accent)">📊</div>
+                    <div class="card-title"><h2>Щоденні продажі</h2><p>Аналітика по днях</p></div>
+                </div>
+                <div class="main-metric"><div class="main-metric-value" style="font-size:22px">Переглянути звіти</div></div>
+            `;
+            container.appendChild(dailyCard);
 
-function logout() {
-    localStorage.removeItem("access");
-    location.reload();
-}
+            // 2. ГРАФІК
+            const chartCard = document.createElement('a');
+            chartCard.className = 'card chart-card';
+            chartCard.href = 'https://docs.google.com/spreadsheets/d/1-sUZg6C6w3-lImTpIv2ezkW-mKtK8zXZ_zf4bCK83R8/edit#gid=973370496';
+            chartCard.target = '_blank';
+            chartCard.innerHTML = `
+                <div class="card-header">
+                    <div class="avatar" style="background: #ff9500">📅</div>
+                    <div class="card-title"><h2>Графік виходу</h2><p>Google Sheets</p></div>
+                </div>
+                <div class="main-metric"><div class="main-metric-value" style="font-size:22px">Зміни та розклад</div></div>
+            `;
+            container.appendChild(chartCard);
 
-document.getElementById("passwordInput").addEventListener("keydown", e => {
-    if (e.key === "Enter") checkPassword();
-});
+            // 3. ПРОДАЖІ ПЛАН ФАКТ
+            const planFactCard = document.createElement('a');
+            planFactCard.className = 'card plan-fact-card';
+            planFactCard.href = 'plan-fact.html';
+            planFactCard.innerHTML = `
+                <div class="card-header">
+                    <div class="avatar" style="background: #34c759">📈</div>
+                    <div class="card-title"><h2>Продажі План Факт</h2><p>Аналітика виконання плану</p></div>
+                </div>
+                <div class="main-metric"><div class="main-metric-value" style="font-size:22px">Переглянути звіти</div></div>
+            `;
+            container.appendChild(planFactCard);
 
-// Авто-логін якщо вже є доступ
-window.onload = () => {
-    if (localStorage.getItem("access") === ACCESS_VERSION) {
-        document.getElementById("loginOverlay").style.display = "none";
-        loadData();
-    }
-};
-</script>
+            // 4. ПРОДАВЦІ
+            data.forEach(person => {
+                const to = person.metrics['ТО'] || {value: 0, unit: 'грн'};
+                const acc = person.metrics['% Доля ACC'] || {value: 0, unit: '%'};
+                const services = person.metrics['Доля Послуг'] || {value: 0, unit: '%'};
 
-<!-- EXISTING SCRIPT -->
-<script>
-let currentData = [];
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => showDetail(person.id);
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="avatar" style="background: ${person.gradient}">${person.initials}</div>
+                        <div class="card-title"><h2>${person.name}</h2><p>${person.position}</p></div>
+                    </div>
+                    <div class="main-metric">
+                        <div class="main-metric-label">Товарообіг</div>
+                        <div class="main-metric-value">${formatNumber(to.value)} <span style="font-size:14px">${to.unit}</span></div>
+                    </div>
+                    <div class="secondary-metrics">
+                        <div><div class="metric-mini-label">Доля ACC</div><div class="metric-mini-value">${acc.value}%</div></div>
+                        <div><div class="metric-mini-label">Послуги</div><div class="metric-mini-value">${services.value}%</div></div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
 
-async function loadData() {
-    try {
-        const response = await fetch('sales-data.json?t=' + Date.now());
-        currentData = await response.json();
-        renderCards(currentData);
-    } catch (error) { console.error(error); }
-}
+        function showDetail(id) {
+            const person = currentData.find(p => p.id === id);
+            if (!person) return;
 
-function formatNumber(num) {
-    if (num >= 1000000) return (num / 1000000).toFixed(2) + 'М';
-    if (num >= 1000) return (num / 1000).toFixed(1) + 'К';
-    return num;
-}
+            const m = person.metrics;
+            const detailContent = document.getElementById('detail-content');
 
-// --- твій існуючий renderCards, showDetail, showHome ---
-// ... залишено без змін, просто додаємо новий код для авторизації
-</script>
+            const block = (key) => {
+                const item = m[key] || {value: 0, unit: '-'};
+                return `
+                    <div class="detail-metric-card">
+                        <div style="font-size:11px; color:var(--color-text-secondary); text-transform:uppercase">${key}</div>
+                        <div style="font-size:22px; font-weight:600">
+                            ${item.value.toLocaleString('uk-UA')} <span style="font-size:14px; font-weight:400">${item.unit}</span>
+                        </div>
+                    </div>
+                `;
+            };
 
+            detailContent.innerHTML = `
+                <div style="display:flex; align-items:center; margin-bottom:40px;">
+                    <div class="avatar" style="width:80px; height:80px; font-size:28px; background:${person.gradient}">${person.initials}</div>
+                    <div><h1 style="font-size:32px">${person.name}</h1><p style="color:var(--color-text-secondary)">${person.position}</p></div>
+                </div>
+
+                <div class="group-title">💰 Продажі та Обіг</div>
+                <div class="metric-group group-sales">
+                    ${block('ТО')} ${block('ASP')} ${block('Ср. Чек')}
+                </div>
+
+                <div class="group-title">⚡ Ефективність</div>
+                <div class="metric-group group-eff">
+                    ${block('Шт.')} ${block('Чеки')} ${block('ПЧ')} ${block('КПЧ')} ${block('Конверсія ПК')}
+                </div>
+
+                <div class="group-title">🎧 Аксесуари (ACC)</div>
+                <div class="metric-group group-acc">
+                    ${block('ACC')} ${block('% Доля ACC')}
+                </div>
+
+                <div class="group-title">🛠 Послуги та УДС</div>
+                <div class="metric-group group-services">
+                    ${block('Послуги грн')} ${block('Доля Послуг')} ${block('УДС')} ${block('Доля УДС')}
+                </div>
+            `;
+
+            document.getElementById('detail-page').classList.add('active');
+            document.getElementById('home-page').style.display = 'none';
+            window.scrollTo(0, 0);
+        }
+
+        function showHome() {
+            document.getElementById('detail-page').classList.remove('active');
+            document.getElementById('home-page').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        window.onload = loadData;
+
+        // СВАЙП-НАВІГАЦІЯ
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+        let isSwiping = false;
+        
+        function handleSwipe() {
+            const swipeThreshold = 120; // Збільшено поріг
+            const swipeDistanceX = touchEndX - touchStartX;
+            const swipeDistanceY = Math.abs(touchEndY - touchStartY);
+            
+            // Свайп тільки якщо чіткий горизонтальний рух
+            if (isSwiping && Math.abs(swipeDistanceX) > swipeThreshold && swipeDistanceX > 0 && swipeDistanceY < 50) {
+                // Свайп вправо - назад з деталей
+                if (document.getElementById('detail-page').classList.contains('active')) {
+                    showHome();
+                }
+            }
+        }
+        
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+            isSwiping = true;
+        }, { passive: true });
+        
+        document.addEventListener('touchmove', e => {
+            const moveY = Math.abs(e.changedTouches[0].screenY - touchStartY);
+            const moveX = Math.abs(e.changedTouches[0].screenX - touchStartX);
+            // Якщо більше вертикальний рух - це не свайп
+            if (moveY > 20 || moveX < 30) {
+                isSwiping = false;
+            }
+        }, { passive: true });
+        
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+            isSwiping = false;
+        }, { passive: true });
+    </script>
 </body>
 </html>
