@@ -322,46 +322,31 @@
 
         window.onload = loadData;
 
-      // СВАЙП-НАВІГАЦІЯ
+        // СВАЙП-НАВІГАЦІЯ
         let touchStartX = 0;
+        let touchEndX = 0;
         
-        document.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-        
-        document.addEventListener('touchend', e => {
-            const touchEndX = e.changedTouches[0].screenX;
+        function handleSwipe() {
+            const swipeThreshold = 50;
             const swipeDistance = touchEndX - touchStartX;
             
-            // Якщо свайп вправо > 100px ТА відкрита сторінка деталей
-            if (swipeDistance > 100) {
-                const detailPage = document.getElementById('detail-page');
-                if (detailPage.classList.contains('active')) {
-                    showHome();
+            if (Math.abs(swipeDistance) > swipeThreshold) {
+                if (swipeDistance > 0) {
+                    // Свайп вправо - назад
+                    if (document.getElementById('detail-page').classList.contains('active')) {
+                        showHome();
+                    }
                 }
             }
-        }, { passive: true });
+        }
         
         document.addEventListener('touchstart', e => {
             touchStartX = e.changedTouches[0].screenX;
-            touchStartY = e.changedTouches[0].screenY;
-            isSwiping = true;
-        }, { passive: true });
-        
-        document.addEventListener('touchmove', e => {
-            const moveY = Math.abs(e.changedTouches[0].screenY - touchStartY);
-            const moveX = Math.abs(e.changedTouches[0].screenX - touchStartX);
-            // Якщо більше вертикальний рух - це не свайп
-            if (moveY > 20 || moveX < 30) {
-                isSwiping = false;
-            }
         }, { passive: true });
         
         document.addEventListener('touchend', e => {
             touchEndX = e.changedTouches[0].screenX;
-            touchEndY = e.changedTouches[0].screenY;
             handleSwipe();
-            isSwiping = false;
         }, { passive: true });
     </script>
 </body>
