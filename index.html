@@ -207,6 +207,24 @@
                 <div class="main-metric"><div class="main-metric-value" style="font-size:22px">Переглянути звіти</div></div>
             `;
             container.appendChild(dailyCard);
+            
+            // 1.5. ПРОДАЖІ ПЛАН / ФАКТ
+            const planFactCard = document.createElement('a');
+            planFactCard.className = 'card special-card';
+            planFactCard.href = 'plan-fact.html'; // або інше посилання
+            planFactCard.innerHTML = `
+                <div class="card-header">
+                    <div class="avatar" style="background: #34c759">📈</div>
+                    <div class="card-title">
+                    <h2>Продажі План/Факт</h2>
+                    <p>Порівняння показників</p>
+                </div>
+            </div>
+            <div class="main-metric">
+            <div class="main-metric-value" style="font-size:22px">Переглянути звіт</div>
+            </div>
+            `;
+            container.appendChild(planFactCard);
 
             // 2. ГРАФІК
             const chartCard = document.createElement('a');
