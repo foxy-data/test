@@ -143,10 +143,62 @@ header p { color: var(--color-text-secondary); font-size: 21px; }
 .group-acc .detail-metric-card { border-left-color: var(--group-acc); }
 .group-services .detail-metric-card { border-left-color: var(--group-services); }
 
-@media (max-width: 600px) {
-    header h1 { font-size: 32px; }
-    .avatar { width: 50px; height: 50px; font-size: 18px; }
-    table td { font-size: 12px; padding: 4px; }
+/* ===== Plan / Fact table (ізольовано) ===== */
+.planfact-wrapper {
+    overflow: auto;
+}
+
+.planfact-table {
+    border-collapse: collapse;
+    width: max-content;
+    min-width: 100%;
+}
+
+.planfact-table td,
+.planfact-table th {
+    border: 1px solid #d2d2d7;
+    padding: 6px 8px;
+    font-size: 13px;
+    white-space: nowrap;
+    background: #fff;
+}
+
+.planfact-table th {
+    background: #f5f5f7;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #6e6e73;
+}
+
+.planfact-table .sticky-col {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: #fff;
+    min-width: 120px;
+    max-width: 120px;
+}
+
+.planfact-table th.sticky-col {
+    z-index: 3;
+    background: #f5f5f7;
+}
+
+.planfact-table .col-to { color:#0071e3; font-weight:600; }
+.planfact-table .col-poslugi { color:#af52de; font-weight:600; }
+.planfact-table .col-acc { color:#ff9500; font-weight:600; }
+.planfact-table .col-cheky { color:#34c759; font-weight:600; }
+
+@media (max-width:600px){
+    .planfact-table td,
+    .planfact-table th {
+        font-size: 11px;
+        padding: 4px 6px;
+    }
+    .planfact-table .sticky-col {
+        min-width: 90px;
+        max-width: 90px;
+    }
 }
 </style>
 </head>
@@ -195,7 +247,6 @@ function renderCards(data) {
     const container = document.getElementById('sales-cards');
     container.innerHTML = '';
 
-    // Щоденні продажі
     const dailyCard = document.createElement('a');
     dailyCard.className = 'card special-card';
     dailyCard.href = 'daily.html';
@@ -208,7 +259,6 @@ function renderCards(data) {
     `;
     container.appendChild(dailyCard);
 
-    // Продажі План/Факт
     const planFactCard = document.createElement('div');
     planFactCard.className = 'card special-card';
     planFactCard.innerHTML = `
@@ -227,29 +277,46 @@ function renderCards(data) {
         try {
             const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vTOUXHhUpCkh6tgvNpJzY-w5tVrhPkvEeC0W0ZWuy2YxPayuO3pvahfeKYmMZ1DwHnILTpsJFNtXLsH/pub?output=csv');
             const csvText = await response.text();
-            const rows = csvText.split('\n').map(r => r.split(','));
+            const rows = csvText.trim().split('\n').map(r => r.split(','));
+            const headers = rows.shift();
 
-            let table = '<div style="overflow:auto;"><table style="border-collapse:collapse; width:100%">';
-            rows.forEach((row,i)=>{
-                table+='<tr>';
-                row.forEach((cell,j)=>{
-                    const sticky = j===0 ? 'position:sticky; left:0; background:#fff; z-index:2; padding-right:5px;' : '';
-                    const fontSize = window.innerWidth<600 ? 'font-size:12px;' : 'font-size:14px;';
-                    table+=`<td style="border:1px solid #ccc; padding:5px; ${sticky} ${fontSize}">${cell}</td>`;
-                });
-                table+='</tr>';
+            let table = '<div class="planfact-wrapper"><table class="planfact-table"><thead><tr>';
+
+            headers.forEach((h, i) => {
+                const sticky = i === 0 ? 'sticky-col' : '';
+                table += `<th class="${sticky}">${h}</th>`;
             });
-            table+='</table></div>';
+
+            table += '</tr></thead><tbody>';
+
+            rows.forEach(row => {
+                table += '<tr>';
+                row.forEach((cell, j) => {
+                    let cls = '';
+                    if (j === 0) cls = 'sticky-col';
+
+                    const header = headers[j]?.toUpperCase() || '';
+                    if (header.includes('ТО')) cls += ' col-to';
+                    if (header.includes('ПОСЛУГ')) cls += ' col-poslugi';
+                    if (header.includes('ACC')) cls += ' col-acc';
+                    if (header.includes('ЧЕК')) cls += ' col-cheky';
+
+                    table += `<td class="${cls}">${cell}</td>`;
+                });
+                table += '</tr>';
+            });
+
+            table += '</tbody></table></div>';
             detailContent.innerHTML = table;
             window.scrollTo(0,0);
+
         } catch(e){
-            detailContent.innerHTML='<p>Помилка завантаження таблиці</p>';
+            detailContent.innerHTML = '<p>Помилка завантаження таблиці</p>';
             console.error(e);
         }
     };
     container.appendChild(planFactCard);
 
-    // Графік
     const chartCard = document.createElement('a');
     chartCard.className = 'card chart-card';
     chartCard.href = 'https://docs.google.com/spreadsheets/d/1-sUZg6C6w3-lImTpIv2ezkW-mKtK8zXZ_zf4bCK83R8/edit#gid=973370496';
@@ -263,7 +330,6 @@ function renderCards(data) {
     `;
     container.appendChild(chartCard);
 
-    // Продавці
     data.forEach(person => {
         const to = person.metrics['ТО'] || {value:0, unit:'грн'};
         const acc = person.metrics['% Доля ACC'] || {value:0, unit:'%'};
