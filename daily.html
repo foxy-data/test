@@ -134,15 +134,15 @@
         let touchStartY = 0;
         let touchEndX = 0;
         let touchEndY = 0;
-        let isScrolling = false;
+        let isSwiping = false;
         
         function handleSwipe() {
-            const swipeThreshold = 80;
+            const swipeThreshold = 120; // Збільшено поріг
             const swipeDistanceX = touchEndX - touchStartX;
             const swipeDistanceY = Math.abs(touchEndY - touchStartY);
             
-            // Свайп тільки якщо горизонтальний рух більший за вертикальний
-            if (!isScrolling && Math.abs(swipeDistanceX) > swipeThreshold && swipeDistanceX > 0 && swipeDistanceY < 30) {
+            // Свайп тільки якщо чіткий горизонтальний рух
+            if (isSwiping && Math.abs(swipeDistanceX) > swipeThreshold && swipeDistanceX > 0 && swipeDistanceY < 50) {
                 // Свайп вправо - повернутися на головну
                 window.location.href = 'index.html';
             }
@@ -151,14 +151,15 @@
         document.addEventListener('touchstart', e => {
             touchStartX = e.changedTouches[0].screenX;
             touchStartY = e.changedTouches[0].screenY;
-            isScrolling = false;
+            isSwiping = true;
         }, { passive: true });
         
         document.addEventListener('touchmove', e => {
             const moveY = Math.abs(e.changedTouches[0].screenY - touchStartY);
             const moveX = Math.abs(e.changedTouches[0].screenX - touchStartX);
-            if (moveY > moveX) {
-                isScrolling = true;
+            // Якщо більше вертикальний рух - це не свайп
+            if (moveY > 20 || moveX < 30) {
+                isSwiping = false;
             }
         }, { passive: true });
         
@@ -166,6 +167,7 @@
             touchEndX = e.changedTouches[0].screenX;
             touchEndY = e.changedTouches[0].screenY;
             handleSwipe();
+            isSwiping = false;
         }, { passive: true });
     </script>
 </body>
