@@ -139,13 +139,18 @@
 
         // СВАЙП-НАВІГАЦІЯ
         let touchStartX = 0;
+        let touchStartY = 0;
         let touchEndX = 0;
+        let touchEndY = 0;
+        let isSwiping = false;
         
         function handleSwipe() {
-            const swipeThreshold = 70;
-            const swipeDistance = touchEndX - touchStartX;
+            const swipeThreshold = 120; // Збільшено поріг
+            const swipeDistanceX = touchEndX - touchStartX;
+            const swipeDistanceY = Math.abs(touchEndY - touchStartY);
             
-            if (Math.abs(swipeDistance) > swipeThreshold && swipeDistance > 0) {
+            // Свайп тільки якщо чіткий горизонтальний рух
+            if (isSwiping && Math.abs(swipeDistanceX) > swipeThreshold && swipeDistanceX > 0 && swipeDistanceY < 50) {
                 // Свайп вправо - повернутися на головну
                 window.location.href = 'index.html';
             }
@@ -153,11 +158,24 @@
         
         document.addEventListener('touchstart', e => {
             touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+            isSwiping = true;
+        }, { passive: true });
+        
+        document.addEventListener('touchmove', e => {
+            const moveY = Math.abs(e.changedTouches[0].screenY - touchStartY);
+            const moveX = Math.abs(e.changedTouches[0].screenX - touchStartX);
+            // Якщо більше вертикальний рух - це не свайп
+            if (moveY > 20 || moveX < 30) {
+                isSwiping = false;
+            }
         }, { passive: true });
         
         document.addEventListener('touchend', e => {
             touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
             handleSwipe();
+            isSwiping = false;
         }, { passive: true });
     </script>
 </body>
