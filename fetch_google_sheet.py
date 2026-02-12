@@ -88,25 +88,52 @@ def process_data():
             })
 
         # Розрахунок загальних показників (МАГ)
+      # --- ВИПРАВЛЕНИЙ БЛОК ПІДСУМКІВ ---
         store_totals = {
-            'id': 0, 'name': 'Показники магазину', 'position': 'Всі продавці',
-            'initials': 'ALL', 'gradient': 'linear-gradient(135deg, #434343 0%, #000000 100%)',
+            'id': 0,
+            'name': 'Показники магазину',
+            'position': 'Всі продавці',
+            'initials': 'ALL', 
+            'gradient': 'linear-gradient(135deg, #434343 0%, #000000 100%)',
             'metrics': {}
         }
 
+        # Спочатку рахуємо суми для всіх базових показників (грн, шт)
         for col in cols[2:]:
             vals = [p['metrics'][col]['value'] for p in sales_data]
             unit = '%' if col in PERCENT_COLUMNS else 'грн'
             if col in ['Шт.', 'Чеки', 'ПЧ']: unit = 'шт'
-
-            if col in PERCENT_COLUMNS:
-                # Середнє для відсотків
-                res = round(sum(vals)/len(vals), 2) if vals else 0
-            else:
-                # Сума для грошей та штук
-                res = round(sum(vals), 2)
             
-            store_totals['metrics'][col] = {'value': res, 'label': col, 'unit': unit}
+            # Для звичайних значень (не відсотків) просто сумуємо
+            if col not in PERCENT_COLUMNS:
+                res = round(sum(vals), 2)
+                store_totals['metrics'][col] = {'value': res, 'label': col, 'unit': unit}
+
+        # Тепер окремо розраховуємо частки (відсотки) для всього магазину
+        # Формула: (Сума категорії / Сума ТО) * 100
+        
+        total_to = store_totals['metrics'].get('ТО', {}).get('value', 0)
+
+        for col in PERCENT_COLUMNS:
+            res = 0
+            if total_to > 0:
+                if col == 'Доля Послуг':
+                    # Шукаємо фактичне значення послуг (може називатися 'Послуги грн' або 'Послуги')
+                    val_cat = store_totals['metrics'].get('Послуги грн', {}).get('value', 0) or \
+                              store_totals['metrics'].get('Послуги', {}).get('value', 0)
+                    res = round((val_cat / total_to) * 100, 2)
+                
+                elif col == '% Доля ACC':
+                    val_cat = store_totals['metrics'].get('ACC', {}).get('value', 0)
+                    res = round((val_cat / total_to) * 100, 2)
+                
+                else:
+                    # Для інших відсотків (наприклад, Конверсія) залишаємо середнє арифметичне
+                    vals = [p['metrics'][col]['value'] for p in sales_data]
+                    res = round(sum(vals)/len(vals), 2) if vals else 0
+            
+            store_totals['metrics'][col] = {'value': res, 'label': col, 'unit': '%'}
+        # --- КІНЕЦЬ ВИПРАВЛЕНОГО БЛОКУ ---
 
         # Збереження
         final_json = [store_totals] + sales_data
