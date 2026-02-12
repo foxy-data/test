@@ -86,6 +86,7 @@
         
         .special-card { border: 1.5px solid var(--color-accent); background: #f0f7ff; }
         .chart-card { border: 1.5px solid #ff9500; background: #fffcf5; }
+        .plan-fact-card { border: 1.5px solid #34c759; background: #f0fff4; }
 
         .card-header { display: flex; align-items: center; margin-bottom: 20px; }
         
@@ -222,7 +223,20 @@
             `;
             container.appendChild(chartCard);
 
-            // 3. ПРОДАВЦІ
+            // 3. ПРОДАЖІ ПЛАН ФАКТ
+            const planFactCard = document.createElement('a');
+            planFactCard.className = 'card plan-fact-card';
+            planFactCard.href = 'plan-fact.html';
+            planFactCard.innerHTML = `
+                <div class="card-header">
+                    <div class="avatar" style="background: #34c759">📈</div>
+                    <div class="card-title"><h2>Продажі План Факт</h2><p>Аналітика виконання плану</p></div>
+                </div>
+                <div class="main-metric"><div class="main-metric-value" style="font-size:22px">Переглянути звіти</div></div>
+            `;
+            container.appendChild(planFactCard);
+
+            // 4. ПРОДАВЦІ
             data.forEach(person => {
                 const to = person.metrics['ТО'] || {value: 0, unit: 'грн'};
                 const acc = person.metrics['% Доля ACC'] || {value: 0, unit: '%'};
@@ -307,6 +321,33 @@
         }
 
         window.onload = loadData;
+
+        // СВАЙП-НАВІГАЦІЯ
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const swipeDistance = touchEndX - touchStartX;
+            
+            if (Math.abs(swipeDistance) > swipeThreshold) {
+                if (swipeDistance > 0) {
+                    // Свайп вправо - назад
+                    if (document.getElementById('detail-page').classList.contains('active')) {
+                        showHome();
+                    }
+                }
+            }
+        }
+        
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, { passive: true });
     </script>
 </body>
 </html>
