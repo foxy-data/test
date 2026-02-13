@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>План-Факт 2 — Детальна Аналітика</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <style>
+        :root { --bg: #f5f5f7; --text: #1d1d1f; --accent: #0071e3; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; }
+        .container { max-width: 100%; margin: 10px auto; }
+        .back-link { color: var(--accent); text-decoration: none; font-weight: 500; display: inline-block; margin-bottom: 15px; font-size: 14px; }
+        
+        .table-card { 
+            background: white; 
+            border-radius: 18px; 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.04); 
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table { width: 100%; border-collapse: collapse; table-layout: auto; }
+        
+        /* Кольорові групи */
+        .group-to { background: rgba(0, 113, 227, 0.05); }      /* Синій - ТО */
+        .group-serv { background: rgba(52, 199, 89, 0.05); }    /* Зелений - Послуги */
+        .group-acc { background: rgba(255, 149, 0, 0.05); }     /* Помаранчевий - АСС */
+        .group-checks { background: rgba(175, 82, 222, 0.05); } /* Фіолетовий - Чеки */
+
+        .group-header {
+            text-align: center;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 10px;
+            color: #1d1d1f;
+            border-bottom: 1px solid #d2d2d7;
+        }
+
+        th { 
+            text-align: center; 
+            padding: 10px; 
+            color: #86868b; 
+            font-size: 10px; 
+            font-weight: 600; 
+            border-bottom: 1px solid #d2d2d7; 
+            background: white;
+        }
+        
+        td { 
+            padding: 12px 10px; 
+            border-bottom: 1px solid #f5f5f7; 
+            font-size: 13px; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis;
+        }
+        
+        /* Зменшена ширина першого стовбця */
+        .name-cell, th:first-child { 
+            position: sticky; 
+            left: 0; 
+            background: white; 
+            z-index: 10; 
+            width: 110px;
+            min-width: 110px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+            font-weight: 600;
+            font-size: 12px;
+            white-space: normal;
+            line-height: 1.2;
+            text-align: left;
+        }
+        th:first-child { 
+            z-index: 11;
+        }
+
+        /* РІЗНІ КОЛЬОРИ ДЛЯ ПЛАН, ФАКТ, % */
+        .val-plan { 
+            color: #86868b; 
+            font-size: 11px;
+            background: rgba(134, 134, 139, 0.05);
+        }
+        .val-fact { 
+            font-weight: 600;
+            background: rgba(0, 113, 227, 0.08);
+            color: #0071e3;
+        }
+        .val-pct { 
+            font-weight: 700; 
+            text-align: right;
+            background: rgba(52, 199, 89, 0.1);
+            color: #34c759;
+        }
+        
+        /* Умовне форматування для останнього % стовпця */
+        .val-pct-success {
+            font-weight: 700;
+            text-align: right;
+            background: rgba(52, 199, 89, 0.15);
+            color: #34c759;
+        }
+        
+        .val-pct-danger {
+            font-weight: 700;
+            text-align: right;
+            background: rgba(255, 59, 48, 0.1);
+            color: #ff3b30;
+        }
+        
+        /* Для рядка "Разом" перевизначаємо кольори */
+        .total-row { background: #1d1d1f !important; }
+        .total-row td { color: white !important; font-weight: 700; }
+        .total-row .name-cell { background: #1d1d1f !important; color: white; }
+        .total-row .val-plan { color: #a1a1a6; background: rgba(255,255,255,0.05); }
+        .total-row .val-fact { color: white; background: rgba(255,255,255,0.1); }
+        .total-row .val-pct { color: #34c759; background: rgba(52, 199, 89, 0.2); }
+        .total-row .val-pct-success { color: #34c759 !important; background: rgba(52, 199, 89, 0.2); }
+        .total-row .val-pct-danger { color: #ff3b30 !important; background: rgba(255, 59, 48, 0.2); }
+
+        .loading { padding: 40px; text-align: center; color: #86868b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← На головну</a>
+        <div class="table-card">
+            <div id="loader" class="loading">Завантаження даних...</div>
+            <table id="dataTable" style="display: none;">
+                <thead></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function parseCSV(text) {
+            const rows = []; let row = []; let col = ""; let inQuotes = false;
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                if (char === '"' && text[i+1] === '"') { col += '"'; i++; }
+                else if (char === '"') { inQuotes = !inQuotes; }
+                else if (char === ',' && !inQuotes) { row.push(col); col = ""; }
+                else if (char === '\n' && !inQuotes) { row.push(col); rows.push(row); row = []; col = ""; }
+                else { col += char; }
+            }
+            if (col || row.length) { row.push(col); rows.push(row); }
+            return rows;
+        }
+
+        function cleanVal(val) {
+            if (!val) return 0;
+            let s = val.toString().replace('%', '').replace(/\s/g, '').replace(',', '.');
+            return parseFloat(s) || 0;
+        }
+
+        // Форматування: зберігаємо сотих якщо вони є в оригіналі
+        function formatDisplay(val, isPct = false) {
+            if (!val && val !== 0) return '0';
+            
+            let originalStr = val.toString().trim();
+            
+            // Перевіряємо чи є символ % в оригіналі
+            let isPercentInOriginal = originalStr.includes('%');
+            
+            let num = cleanVal(val);
+            
+            // Якщо isPct=true або є % в оригіналі - форматуємо як відсоток
+            if (isPct || isPercentInOriginal) {
+                let displayPct = num < 2 ? num * 100 : num; 
+                return displayPct.toFixed(2) + '%';
+            }
+            
+            // Перевіряємо чи є десяткова частина в оригіналі
+            let hasDecimals = originalStr.includes('.') || originalStr.includes(',');
+            
+            if (hasDecimals) {
+                // Якщо є - показуємо 2 знаки після коми
+                return num.toLocaleString('uk-UA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            } else {
+                // Якщо немає - показуємо як ціле число
+                return Math.round(num).toLocaleString('uk-UA');
+            }
+        }
+
+        // Визначаємо кольорову групу за назвою колонки
+        function getGroupClass(colName) {
+            const name = colName.toLowerCase();
+            if (name.includes('то') || name.includes('товарообіг')) return 'group-to';
+            if (name.includes('послуг') || name.includes('сервіс')) return 'group-serv';
+            if (name.includes('acc') || name.includes('акс')) return 'group-acc';
+            if (name.includes('чек')) return 'group-checks';
+            return '';
+        }
+
+        async function loadTable() {
+            const URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQOIhykbS0HNX-ODto87MxEF8gEbXroIyDF-G4vL2YzwXCvSioCuFw4ZOp00mfYkZNeM6zi3qge8VuN/pub?output=csv";
+            try {
+                const res = await fetch(URL + '&t=' + Date.now());
+                const text = await res.text();
+                const rows = parseCSV(text);
+                
+                if (rows.length < 2) {
+                    document.getElementById('loader').textContent = "Немає даних";
+                    return;
+                }
+
+                const headers = rows[0]; // Перший рядок - заголовки
+                const dataRows = rows.slice(1);
+
+                // Динамічно будуємо заголовки таблиці
+                const thead = document.querySelector('thead');
+                thead.innerHTML = '';
+                
+                // Перший рядок - групові заголовки
+                const headerRow1 = document.createElement('tr');
+                const th1 = document.createElement('th');
+                th1.rowSpan = 2;
+                th1.textContent = headers[0]; // Перша колонка (Продавець)
+                headerRow1.appendChild(th1);
+
+                // Групуємо колонки по 3 (План, Факт, %)
+                const numGroups = Math.floor((headers.length - 1) / 3);
+                const groupHeaders = [];
+                
+                for (let i = 0; i < numGroups; i++) {
+                    const startIdx = 1 + i * 3;
+                    const groupName = headers[startIdx].replace(/план/i, '').replace(/факт/i, '').replace(/%/g, '').trim();
+                    groupHeaders.push(groupName);
+                    
+                    const groupTh = document.createElement('th');
+                    groupTh.colSpan = 3;
+                    groupTh.className = 'group-header ' + getGroupClass(groupName);
+                    groupTh.textContent = groupName;
+                    headerRow1.appendChild(groupTh);
+                }
+
+                // Другий рядок - План, Факт, %
+                const headerRow2 = document.createElement('tr');
+                for (let i = 0; i < numGroups; i++) {
+                    const groupClass = getGroupClass(groupHeaders[i]);
+                    
+                    ['План', 'Факт', '%'].forEach(label => {
+                        const th = document.createElement('th');
+                        th.className = groupClass;
+                        th.textContent = label;
+                        headerRow2.appendChild(th);
+                    });
+                }
+
+                thead.appendChild(headerRow1);
+                thead.appendChild(headerRow2);
+
+                // Заповнюємо дані
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('dataTable').style.display = 'table';
+                const tbody = document.getElementById('tableBody');
+                tbody.innerHTML = '';
+
+                dataRows.forEach(row => {
+                    if (!row[0] || !row[0].trim()) return;
+
+                    const tr = document.createElement('tr');
+                    const isTotal = row[0].toLowerCase().includes('разом') || 
+                                   row[0].toLowerCase().includes('сума') ||
+                                   row[0].toLowerCase().includes('всього');
+                    if (isTotal) tr.className = 'total-row';
+
+                    // Перша колонка - ім'я
+                    const nameCell = document.createElement('td');
+                    nameCell.className = 'name-cell';
+                    nameCell.textContent = row[0];
+                    tr.appendChild(nameCell);
+
+                    // Решта колонок
+                    for (let i = 0; i < numGroups; i++) {
+                        const startIdx = 1 + i * 3;
+                        const groupClass = getGroupClass(groupHeaders[i]);
+                        const isLastGroup = (i === numGroups - 1);
+                        
+                        // План
+                        const planCell = document.createElement('td');
+                        planCell.className = 'val-plan ' + groupClass;
+                        planCell.textContent = formatDisplay(row[startIdx] || 0);
+                        tr.appendChild(planCell);
+                        
+                        // Факт
+                        const factCell = document.createElement('td');
+                        factCell.className = 'val-fact ' + groupClass;
+                        factCell.textContent = formatDisplay(row[startIdx + 1] || 0);
+                        tr.appendChild(factCell);
+                        
+                        // %
+                        const pctCell = document.createElement('td');
+                        const pctValue = cleanVal(row[startIdx + 2] || 0);
+                        
+                        // Для останньої групи застосовуємо умовне форматування
+                        if (isLastGroup) {
+                            if (pctValue >= 100) {
+                                pctCell.className = 'val-pct-success ' + groupClass;
+                            } else {
+                                pctCell.className = 'val-pct-danger ' + groupClass;
+                            }
+                        } else {
+                            pctCell.className = 'val-pct ' + groupClass;
+                        }
+                        
+                        pctCell.textContent = formatDisplay(row[startIdx + 2] || 0, true);
+                        tr.appendChild(pctCell);
+                    }
+
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loader').textContent = "Помилка завантаження: " + e.message;
+            }
+        }
+        loadTable();
+    </script>
+</body>
+</html>

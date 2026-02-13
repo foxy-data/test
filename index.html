@@ -116,6 +116,7 @@
         .special-card { border: 1.5px solid var(--color-accent); background: #f0f7ff; }
         .chart-card { border: 1.5px solid #ff9500; background: #fffcf5; }
         .plan-fact-card { border: 1.5px solid #34c759; background: #f0fff4; }
+        .plan-fact-2-card { border: 1.5px solid #af52de; background: #f9f0ff; }
 
         .card-header { display: flex; align-items: center; margin-bottom: 20px; }
         
@@ -306,6 +307,7 @@
             container.appendChild(createSpecialCard('Щоденні продажі', 'Аналітика по днях', {bg:'var(--color-accent)', img:'📊'}, 'special-card', 'daily.html'));
             container.appendChild(createSpecialCard('Графік виходу', 'Google Sheets', {bg:'#ff9500', img:'📅'}, 'chart-card', 'https://docs.google.com/spreadsheets/d/1-sUZg6C6w3-lImTpIv2ezkW-mKtK8zXZ_zf4bCK83R8/edit#gid=973370496', true));
             container.appendChild(createSpecialCard('Продажі План Факт', 'Аналітика виконання', {bg:'#34c759', img:'📈'}, 'plan-fact-card', 'plan-fact.html'));
+            container.appendChild(createSpecialCard('Вечірній звіт', 'Розширена аналітика', {bg:'#af52de', img:'📊'}, 'plan-fact-2-card', 'plan-fact-2.html'));
 
             // Продавці
             data.forEach(person => {
