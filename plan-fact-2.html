@@ -240,8 +240,8 @@
             
             // Якщо isPct=true або є % в оригіналі - форматуємо як відсоток
             if (isPct || isPercentInOriginal) {
-                let displayPct = num < 2 ? num * 100 : num; 
-                return displayPct.toFixed(2) + '%';
+                // Просто додаємо % без конвертації
+                return num.toFixed(2) + '%';
             }
             
             // Перевіряємо чи є десяткова частина в оригіналі
