@@ -30,12 +30,19 @@
 
         table { width: 100%; border-collapse: collapse; table-layout: auto; }
         
-        /* Кольорові групи */
-        .group-to { background: rgba(52, 199, 89, 0.08); }       /* Зелений - ТО */
-        .group-serv { background: rgba(175, 82, 222, 0.08); }    /* Фіолетовий - Послуги */
-        .group-acc { background: rgba(255, 149, 0, 0.08); }      /* Помаранчевий - АСС */
-        .group-traffic { background: rgba(0, 113, 227, 0.08); }  /* Синій - Трафік/Чеки блок */
-        .group-other { background: rgba(142, 142, 147, 0.05); }  /* Сірий - Інше */
+        /* Кольорові групи для РЯДКІВ */
+        tr.group-to { background: rgba(52, 199, 89, 0.08); }       /* Зелений - ТО */
+        tr.group-serv { background: rgba(175, 82, 222, 0.08); }    /* Фіолетовий - Послуги */
+        tr.group-acc { background: rgba(255, 149, 0, 0.08); }      /* Помаранчевий - АСС */
+        tr.group-traffic { background: rgba(0, 113, 227, 0.08); }  /* Синій - Трафік/Чеки блок */
+        tr.group-other { background: rgba(142, 142, 147, 0.05); }  /* Сірий - Інше */
+        
+        /* Лівий бордер для кращої візуалізації */
+        tr.group-to td:first-child { border-left: 4px solid #34c759; }
+        tr.group-serv td:first-child { border-left: 4px solid #af52de; }
+        tr.group-acc td:first-child { border-left: 4px solid #ff9500; }
+        tr.group-traffic td:first-child { border-left: 4px solid #0071e3; }
+        tr.group-other td:first-child { border-left: 4px solid #8e8e93; }
 
         .group-header {
             text-align: center;
@@ -48,13 +55,6 @@
             border-bottom: 1px solid #d2d2d7;
             position: relative;
         }
-        
-        /* Додаємо більш виразні межі між блоками */
-        .group-to { border-left: 3px solid #34c759; }
-        .group-serv { border-left: 3px solid #af52de; }
-        .group-acc { border-left: 3px solid #ff9500; }
-        .group-traffic { border-left: 3px solid #0071e3; }
-        .group-other { border-left: 3px solid #8e8e93; }
 
         th { 
             text-align: center; 
@@ -256,7 +256,7 @@
             }
         }
 
-        // Визначаємо кольорову групу за назвою колонки
+        // Визначаємо кольорову групу за назвою колонки (для заголовків)
         function getGroupClass(colName) {
             const name = colName.toLowerCase().trim();
             
@@ -286,6 +286,36 @@
             }
             
             // Все інше (logitech, tefal/philips та інші)
+            return 'group-other';
+        }
+
+        // Визначаємо кольорову групу для РЯДКА за назвою метрики
+        function getRowGroupClass(rowName) {
+            const name = rowName.toLowerCase().trim();
+            
+            // Блок ТО
+            if (name.includes('то ₴')) {
+                return 'group-to';
+            }
+            
+            // Блок Послуги
+            if (name.includes('послуг')) {
+                return 'group-serv';
+            }
+            
+            // Блок АСС
+            if (name.includes('асс')) {
+                return 'group-acc';
+            }
+            
+            // Блок Трафік/Чеки
+            if (name === 'трафік' || name === 'чеки' || name === 'ктч' || 
+                name === 'срч' || name.includes('конверс') || name === 'pick-up' ||
+                name === 'кредит') {
+                return 'group-traffic';
+            }
+            
+            // Все інше
             return 'group-other';
         }
 
@@ -360,7 +390,15 @@
                     const isTotal = row[0].toLowerCase().includes('разом') || 
                                    row[0].toLowerCase().includes('сума') ||
                                    row[0].toLowerCase().includes('всього');
-                    if (isTotal) tr.className = 'total-row';
+                    
+                    // Визначаємо групу рядка за назвою метрики
+                    const rowGroupClass = getRowGroupClass(row[0]);
+                    
+                    if (isTotal) {
+                        tr.className = 'total-row';
+                    } else {
+                        tr.className = rowGroupClass;
+                    }
 
                     // Перша колонка - ім'я
                     const nameCell = document.createElement('td');
