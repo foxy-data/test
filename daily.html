@@ -218,13 +218,21 @@
                             
                             // Застосовуємо кольори в залежності від назви колонки
                             const hName = headers[i].toUpperCase();
-                            if (hName === 'ТО') {
+                            
+                            // Група ТО (зелений)
+                            if (hName.includes('ПЛАН ТО') || hName.includes('ФАКТ ТО') || hName.includes('% ТО')) {
                                 td.classList.add('col-to');
-                            } else if (hName.includes('ПОСЛУГИ') || hName.includes('ПОСЛУГ')) {
+                            } 
+                            // Група Послуги (фіолетовий)
+                            else if (hName.includes('ПЛАН ПОСЛУГИ') || hName.includes('ФАКТ ПОСЛУГИ') || hName.includes('ДОЛЯ ПОСЛУГ')) {
                                 td.classList.add('col-poslugi');
-                            } else if (hName === 'АСС' || hName.includes('АКСЕС')) {
+                            } 
+                            // Група АСС (помаранчевий)
+                            else if (hName.includes('ПЛАН АСС') || hName.includes('ФАКТ АСС') || hName.includes('ДОЛЯ АСС')) {
                                 td.classList.add('col-acc');
-                            } else if (hName === 'ЧЕКИ' || hName.includes('ЧЕК')) {
+                            } 
+                            // Чеки (синій)
+                            else if (hName === 'ЧЕКИ' || hName.includes('ЧЕК')) {
                                 td.classList.add('col-cheky');
                             }
                         }
