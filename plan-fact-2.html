@@ -31,10 +31,11 @@
         table { width: 100%; border-collapse: collapse; table-layout: auto; }
         
         /* Кольорові групи */
-        .group-to { background: rgba(0, 113, 227, 0.05); }      /* Синій - ТО */
-        .group-serv { background: rgba(52, 199, 89, 0.05); }    /* Зелений - Послуги */
-        .group-acc { background: rgba(255, 149, 0, 0.05); }     /* Помаранчевий - АСС */
-        .group-checks { background: rgba(175, 82, 222, 0.05); } /* Фіолетовий - Чеки */
+        .group-to { background: rgba(52, 199, 89, 0.08); }       /* Зелений - ТО */
+        .group-serv { background: rgba(175, 82, 222, 0.08); }    /* Фіолетовий - Послуги */
+        .group-acc { background: rgba(255, 149, 0, 0.08); }      /* Помаранчевий - АСС */
+        .group-traffic { background: rgba(0, 113, 227, 0.08); }  /* Синій - Трафік/Чеки блок */
+        .group-other { background: rgba(142, 142, 147, 0.05); }  /* Сірий - Інше */
 
         .group-header {
             text-align: center;
@@ -45,7 +46,15 @@
             padding: 10px;
             color: #1d1d1f;
             border-bottom: 1px solid #d2d2d7;
+            position: relative;
         }
+        
+        /* Додаємо більш виразні межі між блоками */
+        .group-to { border-left: 3px solid #34c759; }
+        .group-serv { border-left: 3px solid #af52de; }
+        .group-acc { border-left: 3px solid #ff9500; }
+        .group-traffic { border-left: 3px solid #0071e3; }
+        .group-other { border-left: 3px solid #8e8e93; }
 
         th { 
             text-align: center; 
@@ -250,11 +259,30 @@
         // Визначаємо кольорову групу за назвою колонки
         function getGroupClass(colName) {
             const name = colName.toLowerCase();
-            if (name.includes('то') || name.includes('товарообіг')) return 'group-to';
-            if (name.includes('послуг') || name.includes('сервіс')) return 'group-serv';
-            if (name.includes('acc') || name.includes('акс')) return 'group-acc';
-            if (name.includes('чек')) return 'group-checks';
-            return '';
+            
+            // Блок ТО
+            if (name.includes('то') || name.includes('товарообіг')) {
+                return 'group-to';
+            }
+            
+            // Блок Послуги
+            if (name.includes('послуг') || name.includes('сервіс')) {
+                return 'group-serv';
+            }
+            
+            // Блок АСС
+            if (name.includes('acc') || name.includes('акс') || name.includes('асс')) {
+                return 'group-acc';
+            }
+            
+            // Блок Трафік/Чеки (трафік, чеки, ктч, срч, конверсія, кредит)
+            if (name.includes('трафік') || name.includes('чек') || name.includes('ктч') || 
+                name.includes('срч') || name.includes('конверс') || name.includes('кредит')) {
+                return 'group-traffic';
+            }
+            
+            // Все інше
+            return 'group-other';
         }
 
         async function loadTable() {
