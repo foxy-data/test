@@ -80,6 +80,46 @@
             min-width: 95px;
         }
         
+        /* Мобільна версія - зменшуємо ширину колонок */
+        @media (max-width: 767px) {
+            .val-plan { 
+                width: 60px;
+                min-width: 60px;
+                padding: 8px 5px;
+            }
+            .val-fact { 
+                width: 70px;
+                min-width: 70px;
+                padding: 8px 5px;
+            }
+            .val-pct, .val-pct-success, .val-pct-danger { 
+                width: 65px;
+                min-width: 65px;
+                padding: 8px 5px;
+            }
+            
+            .name-cell, th:first-child { 
+                width: 90px;
+                min-width: 90px;
+                font-size: 11px;
+                padding: 8px 5px;
+            }
+            
+            td {
+                font-size: 11px;
+            }
+            
+            th {
+                font-size: 9px;
+                padding: 8px 5px;
+            }
+            
+            .group-header {
+                font-size: 9px;
+                padding: 8px 5px;
+            }
+        }
+        
         /* Зменшена ширина першого стовбця */
         .name-cell, th:first-child { 
             position: sticky; 
