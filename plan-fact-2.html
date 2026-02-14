@@ -258,30 +258,32 @@
 
         // Визначаємо кольорову групу за назвою колонки
         function getGroupClass(colName) {
-            const name = colName.toLowerCase();
+            const name = colName.toLowerCase().trim();
             
-            // Блок ТО
-            if (name.includes('то') || name.includes('товарообіг')) {
+            // Блок ТО (будь-яка колонка з "то" окрім logitech)
+            if ((name.includes('то ') || name.includes(' то') || name === 'то' || 
+                 name.includes('то₴') || name.includes('то%')) && !name.includes('logitech')) {
                 return 'group-to';
             }
             
             // Блок Послуги
-            if (name.includes('послуг') || name.includes('сервіс')) {
+            if (name.includes('послуг')) {
                 return 'group-serv';
             }
             
             // Блок АСС
-            if (name.includes('acc') || name.includes('акс') || name.includes('асс')) {
+            if (name.includes('асс') || name.includes('acc')) {
                 return 'group-acc';
             }
             
-            // Блок Трафік/Чеки (трафік, чеки, ктч, срч, конверсія, кредит)
+            // Блок Трафік/Чеки (трафік, чеки, ктч, срч, конверсія, pick-up, кредит)
             if (name.includes('трафік') || name.includes('чек') || name.includes('ктч') || 
-                name.includes('срч') || name.includes('конверс') || name.includes('кредит')) {
+                name.includes('срч') || name.includes('конверс') || name.includes('pick-up') ||
+                name.includes('кредит')) {
                 return 'group-traffic';
             }
             
-            // Все інше
+            // Все інше (logitech, tefal/philips та інші)
             return 'group-other';
         }
 
