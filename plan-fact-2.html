@@ -260,26 +260,28 @@
         function getGroupClass(colName) {
             const name = colName.toLowerCase().trim();
             
-            // Блок ТО (будь-яка колонка з "то" окрім logitech)
-            if ((name.includes('то ') || name.includes(' то') || name === 'то' || 
-                 name.includes('то₴') || name.includes('то%')) && !name.includes('logitech')) {
+            // Видаляємо зайві символи для аналізу
+            const cleanName = name.replace(/₴/g, '').replace(/%/g, '').trim();
+            
+            // Блок ТО 
+            if (cleanName === 'то' || cleanName.startsWith('то ') || cleanName.endsWith(' то')) {
                 return 'group-to';
             }
             
             // Блок Послуги
-            if (name.includes('послуг')) {
+            if (cleanName.includes('послуг')) {
                 return 'group-serv';
             }
             
             // Блок АСС
-            if (name.includes('асс') || name.includes('acc')) {
+            if (cleanName === 'асс' || cleanName === 'acc' || cleanName.includes('асс ') || cleanName.includes('acc ')) {
                 return 'group-acc';
             }
             
             // Блок Трафік/Чеки (трафік, чеки, ктч, срч, конверсія, pick-up, кредит)
-            if (name.includes('трафік') || name.includes('чек') || name.includes('ктч') || 
-                name.includes('срч') || name.includes('конверс') || name.includes('pick-up') ||
-                name.includes('кредит')) {
+            if (cleanName === 'трафік' || cleanName === 'чеки' || cleanName === 'ктч' || 
+                cleanName === 'срч' || cleanName.includes('конверс') || cleanName.includes('pick-up') ||
+                cleanName === 'кредит') {
                 return 'group-traffic';
             }
             
