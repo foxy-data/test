@@ -125,14 +125,16 @@
 
         @media (min-width: 1200px) {
             .carousel-wrapper {
-                flex-wrap: wrap;
-                justify-content: flex-start;
+                flex-wrap: nowrap;
+                justify-content: space-between;
                 overflow-x: visible;
+                gap: 12px;
             }
             
             .banner-card {
-                flex: 0 0 calc(25% - 12px);
-                max-width: 300px;
+                flex: 1 1 0;
+                min-width: 0;
+                max-width: none;
             }
         }
 
@@ -169,6 +171,13 @@
             scroll-snap-align: start;
             position: relative;
             overflow: hidden;
+        }
+        
+        @media (min-width: 1200px) {
+            .banner-card {
+                padding: 24px;
+                height: 360px;
+            }
         }
 
         .banner-card::before {
