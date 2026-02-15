@@ -128,20 +128,33 @@
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
             padding: 10px 0;
+            scroll-padding: 0 calc(50% - 140px);
+        }
+        
+        /* Центрування карток на мобільних */
+        @media (max-width: 900px) {
+            .carousel-wrapper {
+                padding: 10px calc(50% - 140px);
+                scroll-padding: 0 calc(50% - 140px);
+            }
+            
+            .banner-card {
+                scroll-snap-align: center;
+            }
         }
 
         @media (min-width: 1200px) {
             .carousel-wrapper {
-                flex-wrap: nowrap;
-                justify-content: space-between;
+                flex-wrap: wrap;
+                justify-content: flex-start;
                 overflow-x: visible;
                 gap: 15px;
             }
             
             .banner-card {
-                flex: 1 1 calc(25% - 12px);
-                min-width: 0;
-                max-width: none;
+                flex: 1 1 calc(20% - 12px);
+                min-width: 220px;
+                max-width: 280px;
             }
         }
 
@@ -159,7 +172,28 @@
         }
 
         .carousel-wrapper::-webkit-scrollbar {
-            display: none;
+            height: 8px;
+        }
+        
+        .carousel-wrapper::-webkit-scrollbar-track {
+            background: #f5f5f7;
+            border-radius: 10px;
+            margin: 0 20px;
+        }
+        
+        .carousel-wrapper::-webkit-scrollbar-thumb {
+            background: #d2d2d7;
+            border-radius: 10px;
+        }
+        
+        .carousel-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a6;
+        }
+        
+        @media (max-width: 900px) {
+            .carousel-wrapper::-webkit-scrollbar {
+                display: none;
+            }
         }
 
         .banner-card {
@@ -176,6 +210,7 @@
             text-decoration: none;
             color: inherit;
             scroll-snap-align: start;
+            scroll-snap-stop: always;
             position: relative;
             overflow: hidden;
         }
@@ -226,6 +261,11 @@
         .banner-plan-fact-2 { 
             border-color: #af52de; 
             background: linear-gradient(135deg, #f9f0ff 0%, #f3e6ff 100%);
+        }
+        
+        .banner-documents { 
+            border-color: #007aff; 
+            background: linear-gradient(135deg, #e6f2ff 0%, #d9ebff 100%);
         }
 
         .banner-icon {
@@ -526,6 +566,7 @@
             carouselWrapper.appendChild(createBanner('Графік виходу', 'Google Sheets', {bg:'#ff9500', img:'📅'}, 'chart', 'https://docs.google.com/spreadsheets/d/1-sUZg6C6w3-lImTpIv2ezkW-mKtK8zXZ_zf4bCK83R8/edit#gid=973370496', true));
             carouselWrapper.appendChild(createBanner('МІСЯЦЬ план/факт', 'Аналітика виконання', {bg:'#34c759', img:'📈'}, 'plan-fact', 'plan-fact.html'));
             carouselWrapper.appendChild(createBanner('Вечірній звіт', 'Розширена аналітика', {bg:'#af52de', img:'📊'}, 'plan-fact-2', 'plan-fact-2.html'));
+            carouselWrapper.appendChild(createBanner('АБ', 'Алгоритм Безпеки', {bg:'#007aff', img:'📄'}, 'documents', 'document-viewer.html'));
 
             carouselContainer.appendChild(carouselWrapper);
             container.appendChild(carouselContainer);
@@ -623,6 +664,23 @@
             }
             isSwiping = false;
         }, { passive: true });
+        
+        // Центрування карток на мобільних
+        if (window.innerWidth <= 900) {
+            const carouselWrapper = document.querySelector('.carousel-wrapper');
+            if (carouselWrapper) {
+                // Центруємо першу картку при завантаженні
+                setTimeout(() => {
+                    const firstCard = carouselWrapper.querySelector('.banner-card');
+                    if (firstCard) {
+                        const cardWidth = firstCard.offsetWidth;
+                        const wrapperWidth = carouselWrapper.offsetWidth;
+                        const scrollPosition = -(wrapperWidth / 2 - cardWidth / 2);
+                        carouselWrapper.scrollLeft = Math.max(0, scrollPosition);
+                    }
+                }, 100);
+            }
+        }
     </script>
 </body>
 </html>

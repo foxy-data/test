@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>АБ — Алгоритм Безпеки</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <style>
+        :root { 
+            --bg: #f5f5f7; 
+            --text: #1d1d1f; 
+            --accent: #0071e3;
+            --card-bg: #ffffff;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Inter', -apple-system, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .container { 
+            max-width: 750px; 
+            margin: 0 auto; 
+            padding: 40px 20px; 
+        }
+        
+        .back-link { 
+            color: var(--accent); 
+            text-decoration: none; 
+            font-weight: 500; 
+            display: inline-block; 
+            margin-bottom: 20px; 
+            font-size: 16px;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Кнопки швидкої навігації */
+        .nav-buttons {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+            transition: all 0.3s;
+            display: none;
+        }
+        
+        .nav-btn.visible {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .nav-btn:hover {
+            background: #0077ED;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 113, 227, 0.4);
+        }
+        
+        .nav-btn:active {
+            transform: translateY(0);
+        }
+        
+        @media (max-width: 768px) {
+            .nav-buttons {
+                right: 15px;
+                bottom: 15px;
+            }
+            
+            .nav-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+        }
+        
+        .header {
+            margin-bottom: 30px;
+        }
+        
+        .header h1 { 
+            font-size: 40px; 
+            font-weight: 600; 
+            letter-spacing: -0.5px; 
+            margin-bottom: 10px;
+        }
+        
+        .header p { 
+            color: #86868b; 
+            font-size: 18px; 
+        }
+        
+        /* Картки вибору розділу */
+        .section-choice {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .choice-card {
+            background: var(--card-bg);
+            border-radius: 22px;
+            padding: 40px 30px;
+            border: 2px solid #d2d2d7;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .choice-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+            border-color: var(--accent);
+        }
+        
+        .choice-icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+        
+        .choice-card h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .choice-card p {
+            color: #86868b;
+            font-size: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .section-choice {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .choice-card {
+                padding: 30px 20px;
+            }
+            
+            .choice-icon {
+                font-size: 40px;
+            }
+            
+            .choice-card h2 {
+                font-size: 18px;
+            }
+        }
+        
+        .upload-card {
+            background: var(--card-bg);
+            border-radius: 22px;
+            padding: 40px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+            text-align: center;
+            margin-bottom: 30px;
+            border: 2px dashed #d2d2d7;
+            transition: all 0.3s;
+        }
+        
+        .upload-card:hover {
+            border-color: var(--accent);
+        }
+        
+        .upload-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        
+        .upload-button {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        
+        .upload-button:hover {
+            background: #0077ED;
+            transform: translateY(-2px);
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .document-card {
+            background: var(--card-bg);
+            border-radius: 22px;
+            padding: 40px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+            display: none;
+        }
+        
+        .document-card.active {
+            display: block;
+        }
+        
+        #documentContent {
+            font-size: 16px;
+            line-height: 1.8;
+        }
+        
+        #documentContent h1 {
+            font-size: 32px;
+            font-weight: 600;
+            margin: 30px 0 20px 0;
+            color: var(--text);
+        }
+        
+        #documentContent h2 {
+            font-size: 26px;
+            font-weight: 600;
+            margin: 25px 0 15px 0;
+            color: var(--text);
+        }
+        
+        #documentContent h3 {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 20px 0 12px 0;
+            color: var(--text);
+        }
+        
+        #documentContent p {
+            margin: 15px 0;
+            color: var(--text);
+        }
+        
+        #documentContent ul, 
+        #documentContent ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        #documentContent li {
+            margin: 8px 0;
+        }
+        
+        #documentContent table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        #documentContent th,
+        #documentContent td {
+            border: 1px solid #d2d2d7;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        #documentContent th {
+            background: #f5f5f7;
+            font-weight: 600;
+        }
+        
+        #documentContent strong,
+        #documentContent b {
+            font-weight: 600;
+        }
+        
+        #documentContent em,
+        #documentContent i {
+            font-style: italic;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #86868b;
+            display: none;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .error {
+            background: #fff5f5;
+            color: #ff3b30;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .error.active {
+            display: block;
+        }
+        
+        .download-button {
+            display: inline-block;
+            background: #f5f5f7;
+            color: var(--text);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            margin-top: 20px;
+            transition: all 0.2s;
+        }
+        
+        .download-button:hover {
+            background: #e8e8ed;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 10px;
+                max-width: 100%;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .header p {
+                font-size: 15px;
+            }
+            
+            .upload-card {
+                padding: 25px 15px;
+            }
+            
+            .document-card {
+                padding: 20px 12px;
+                border-radius: 18px;
+            }
+            
+            #documentContent {
+                font-size: 13px;
+                line-height: 1.6;
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+                word-break: break-word;
+                max-width: 100%;
+            }
+            
+            #documentContent * {
+                max-width: 100%;
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+            }
+            
+            #documentContent h1 {
+                font-size: 20px;
+                margin: 18px 0 12px 0;
+                line-height: 1.3;
+            }
+            
+            #documentContent h2 {
+                font-size: 18px;
+                margin: 16px 0 10px 0;
+                line-height: 1.3;
+            }
+            
+            #documentContent h3 {
+                font-size: 16px;
+                margin: 14px 0 8px 0;
+                line-height: 1.3;
+            }
+            
+            #documentContent p {
+                margin: 10px 0;
+                text-align: justify;
+            }
+            
+            #documentContent ul,
+            #documentContent ol {
+                padding-left: 20px;
+                margin: 10px 0;
+            }
+            
+            #documentContent li {
+                margin: 6px 0;
+            }
+            
+            #documentContent table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                font-size: 11px;
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            #documentContent th,
+            #documentContent td {
+                padding: 6px 4px;
+                min-width: 80px;
+                font-size: 11px;
+            }
+            
+            #documentContent img {
+                max-width: 100% !important;
+                height: auto !important;
+                display: block;
+                margin: 10px auto;
+            }
+            
+            /* Переносимо довгі слова та URL */
+            #documentContent a {
+                word-break: break-all;
+            }
+            
+            .download-button {
+                font-size: 13px;
+                padding: 8px 16px;
+            }
+            
+            #uploadOptions {
+                padding: 15px;
+            }
+            
+            #uploadOptions h3 {
+                font-size: 14px;
+            }
+            
+            #uploadOptions input,
+            #uploadOptions button {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Назад</a>
+        
+        <div class="header">
+            <h1>АБ</h1>
+            <p>Оберіть розділ для перегляду</p>
+        </div>
+        
+        <!-- Вибір розділу -->
+        <div class="section-choice" id="sectionChoice">
+            <div class="choice-card" onclick="loadSection('ab')">
+                <div class="choice-icon">📋</div>
+                <h2>АБ</h2>
+                <p>Основний документ</p>
+            </div>
+            
+            <div class="choice-card" onclick="loadSection('ab-actions')">
+                <div class="choice-icon">🎯</div>
+                <h2>АБ постійні акції</h2>
+                <p>Постійні акції та пропозиції</p>
+            </div>
+        </div>
+        
+        <div class="upload-card" id="uploadCard" style="display: none;">
+            <div class="upload-icon">📄</div>
+            <h2 style="margin-bottom: 10px;">Файл не знайдено</h2>
+            <p style="color: #86868b; margin-bottom: 20px;">Не вдалося завантажити документ з Google Drive</p>
+        </div>
+        
+        <div class="loading" id="loading">
+            <p>Завантаження документа...</p>
+        </div>
+        
+        <div class="error" id="error">
+            <strong>Помилка завантаження</strong>
+            <p id="errorMessage"></p>
+        </div>
+        
+        <div class="document-card" id="documentCard">
+            <div id="documentContent"></div>
+            
+            <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid #d2d2d7; text-align: center;">
+                <button class="download-button" onclick="backToSections()">
+                    ← Назад до розділів
+                </button>
+            </div>
+        </div>
+        
+        <!-- Кнопки швидкої навігації -->
+        <div class="nav-buttons">
+            <button id="scrollTopBtn" class="nav-btn" onclick="scrollToTop()" title="На початок">
+                ↑
+            </button>
+            <button id="scrollBottomBtn" class="nav-btn" onclick="scrollToBottom()" title="В кінець">
+                ↓
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // URL файлів на Google Drive/Docs
+        const DOCUMENT_URLS = {
+            'ab': 'https://docs.google.com/document/d/1vOPXtlNiIwnobEEe0UeiBvSyl0D6kHWQ/edit?usp=drivesdk&ouid=113524751602305051183&rtpof=true&sd=true',
+            'ab-actions': 'https://docs.google.com/document/d/1OoZzMqErnHQc2XBiFWDAd3Yan0y1YJwm/edit?usp=drivesdk&ouid=113524751602305051183&rtpof=true&sd=true'
+        };
+        
+        // Автоматичне завантаження файлу при завантаженні сторінки
+        window.onload = function() {
+            // Перевіряємо чи є параметр section в адресі
+            const urlParams = new URLSearchParams(window.location.search);
+            const section = urlParams.get('section');
+            
+            if (section && DOCUMENT_URLS[section]) {
+                loadSection(section);
+            }
+            // Якщо немає параметра, показуємо вибір розділу
+        };
+        
+        function loadSection(sectionId) {
+            const fileUrl = DOCUMENT_URLS[sectionId];
+            
+            if (!fileUrl) {
+                showError('Документ для цього розділу ще не налаштовано');
+                return;
+            }
+            
+            // Приховуємо вибір розділу
+            document.getElementById('sectionChoice').style.display = 'none';
+            
+            // Завантажуємо документ
+            loadFromDrive(fileUrl);
+        }
+        
+        function backToSections() {
+            document.getElementById('documentCard').classList.remove('active');
+            document.getElementById('sectionChoice').style.display = 'grid';
+            document.getElementById('documentContent').innerHTML = '';
+            window.scrollTo(0, 0);
+        }
+        
+        async function loadFromDrive(urlInput) {
+            if (!urlInput) {
+                showError('Посилання на документ не вказано');
+                return;
+            }
+            
+            let downloadUrl = '';
+            
+            // Перевіряємо тип посилання
+            if (urlInput.includes('docs.google.com/document')) {
+                // Google Docs - отримуємо ID та експортуємо як .docx
+                let docId = '';
+                
+                if (urlInput.includes('/document/d/')) {
+                    docId = urlInput.split('/document/d/')[1].split('/')[0];
+                } else if (urlInput.includes('id=')) {
+                    docId = urlInput.split('id=')[1].split('&')[0];
+                }
+                
+                if (!docId) {
+                    showError('Не вдалося визначити ID документа');
+                    return;
+                }
+                
+                downloadUrl = `https://docs.google.com/document/d/${docId}/export?format=docx`;
+                
+            } else if (urlInput.includes('drive.google.com')) {
+                // Звичайний Drive файл
+                let fileId = '';
+                
+                if (urlInput.includes('/file/d/')) {
+                    fileId = urlInput.split('/file/d/')[1].split('/')[0];
+                } else if (urlInput.includes('id=')) {
+                    fileId = urlInput.split('id=')[1].split('&')[0];
+                }
+                
+                if (!fileId) {
+                    showError('Не вдалося визначити ID файлу');
+                    return;
+                }
+                
+                downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+            } else {
+                showError('Невірний формат посилання. Використайте посилання з Google Drive або Google Docs.');
+                return;
+            }
+            
+            // Показуємо індикатор завантаження
+            document.getElementById('uploadCard').style.display = 'none';
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('error').classList.remove('active');
+            
+            try {
+                const response = await fetch(downloadUrl);
+                
+                if (!response.ok) {
+                    throw new Error('Не вдалося завантажити файл з Google Drive.');
+                }
+                
+                const blob = await response.blob();
+                const arrayBuffer = await blob.arrayBuffer();
+                
+                // Конвертуємо .docx в HTML
+                const result = await mammoth.convertToHtml(
+                    { arrayBuffer: arrayBuffer },
+                    {
+                        styleMap: [
+                            "p[style-name='Heading 1'] => h1:fresh",
+                            "p[style-name='Heading 2'] => h2:fresh",
+                            "p[style-name='Heading 3'] => h3:fresh",
+                            "p[style-name='Title'] => h1:fresh",
+                        ]
+                    }
+                );
+                
+                // Виводимо контент
+                document.getElementById('documentContent').innerHTML = result.value;
+                
+                // Показуємо документ
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('documentCard').classList.add('active');
+                
+            } catch (error) {
+                console.error('Помилка:', error);
+                showError('Не вдалося завантажити файл. Переконайтесь, що файл має відкритий доступ для перегляду (Налаштування доступу → Усі, хто має посилання, можуть переглядати)');
+            }
+        }
+        
+        function showError(message) {
+            document.getElementById('loading').classList.remove('active');
+            document.getElementById('sectionChoice').style.display = 'grid';
+            document.getElementById('error').classList.add('active');
+            document.getElementById('errorMessage').textContent = message;
+        }
+        
+        function resetViewer() {
+            window.location.reload();
+        }
+        
+        // Функції швидкої навігації
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+        
+        function scrollToBottom() {
+            window.scrollTo({
+                top: document.documentElement.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+        
+        // Показуємо/приховуємо кнопки в залежності від позиції прокрутки
+        window.addEventListener('scroll', function() {
+            const scrollTopBtn = document.getElementById('scrollTopBtn');
+            const scrollBottomBtn = document.getElementById('scrollBottomBtn');
+            const documentCard = document.getElementById('documentCard');
+            
+            // Показуємо кнопки тільки якщо документ завантажено
+            if (!documentCard.classList.contains('active')) {
+                return;
+            }
+            
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight;
+            const clientHeight = document.documentElement.clientHeight;
+            
+            // Показуємо кнопку "вгору" якщо прокрутили вниз більше ніж на 300px
+            if (scrollTop > 300) {
+                scrollTopBtn.classList.add('visible');
+            } else {
+                scrollTopBtn.classList.remove('visible');
+            }
+            
+            // Показуємо кнопку "вниз" якщо не в кінці сторінки
+            if (scrollTop + clientHeight < scrollHeight - 100) {
+                scrollBottomBtn.classList.add('visible');
+            } else {
+                scrollBottomBtn.classList.remove('visible');
+            }
+        });
+    </script>
+</body>
+</html>
