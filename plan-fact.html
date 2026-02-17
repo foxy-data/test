@@ -152,26 +152,24 @@
             return Math.round(num).toLocaleString('uk-UA');
         }
 
-        // Функція для визначення кольору заливки залежно від % виконання
-        function getPctBackground(val) {
+        // Функція для визначення кольору залежно від % виконання
+        function getPctStyle(val) {
             const num = cleanVal(val);
             const pct = num < 2 ? num * 100 : num;
             
-            if (pct <= 0) return 'rgba(255, 59, 48, 0.15)';
-            
-            // Від 0% до 100% - червоний → жовтий → зелений
-            if (pct < 50)  return `rgba(255, 59, 48, ${0.05 + (0.15 * (1 - pct / 50))})`;   // червоний
-            if (pct < 80)  return `rgba(255, 149, 0, ${0.08 + (0.1 * ((pct - 50) / 30))})`;  // помаранчевий
-            if (pct < 100) return `rgba(255, 204, 0, ${0.08 + (0.1 * ((pct - 80) / 20))})`;  // жовтий
-            if (pct < 120) return `rgba(52, 199, 89, ${0.08 + (0.1 * ((pct - 100) / 20))})`;  // зелений
-            return 'rgba(52, 199, 89, 0.20)'; // яскраво зелений (>120%)
+            if (pct <= 0)  return { bg: 'rgba(255, 59, 48, 0.15)',  color: '#cc2200' };
+            if (pct < 50)  return { bg: `rgba(255, 59, 48, ${0.05 + (0.15 * (1 - pct / 50))})`,  color: '#d63b2a' };
+            if (pct < 80)  return { bg: `rgba(255, 149, 0, ${0.08 + (0.1 * ((pct - 50) / 30))})`, color: '#c97000' };
+            if (pct < 100) return { bg: `rgba(255, 204, 0, ${0.08 + (0.1 * ((pct - 80) / 20))})`, color: '#a07800' };
+            if (pct < 120) return { bg: `rgba(52, 199, 89, ${0.08 + (0.1 * ((pct - 100) / 20))})`, color: '#248a3d' };
+            return { bg: 'rgba(52, 199, 89, 0.20)', color: '#1a6e30' };
         }
 
-        // Функція для генерації % комірки з заливкою
+        // Функція для генерації % комірки з заливкою і кольором тексту
         function pctCell(val, groupClass, isGroupStart = false) {
-            const bg = getPctBackground(val);
+            const { bg, color } = getPctStyle(val);
             const startClass = isGroupStart ? ' group-start' : '';
-            return `<td class="val-pct ${groupClass}${startClass}" style="background: ${bg} !important">${formatDisplay(val, true)}</td>`;
+            return `<td class="val-pct ${groupClass}${startClass}" style="background: ${bg} !important; color: ${color} !important">${formatDisplay(val, true)}</td>`;
         }
 
         async function loadTable() {
