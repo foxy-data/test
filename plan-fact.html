@@ -173,6 +173,8 @@
             const startClass = isGroupStart ? ' group-start' : '';
             return `<td class="val-pct ${groupClass}${startClass}" style="background: ${bg} !important">${formatDisplay(val, true)}</td>`;
         }
+
+        async function loadTable() {
             const URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTOUXHhUpCkh6tgvNpJzY-w5tVrhPkvEeC0W0ZWuy2YxPayuO3pvahfeKYmMZ1DwHnILTpsJFNtXLsH/pub?output=csv";
             try {
                 const res = await fetch(URL + '&t=' + Date.now());
