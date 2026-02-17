@@ -21,50 +21,52 @@
 
         table { width: 100%; border-collapse: collapse; min-width: 1200px; table-layout: fixed; }
         
-        /* Кольорові групи */
-        .group-to { background: rgba(0, 113, 227, 0.05); }      /* Синій - ТО */
-        .group-serv { background: rgba(52, 199, 89, 0.05); }    /* Зелений - Послуги */
-        .group-acc { background: rgba(255, 149, 0, 0.05); }     /* Помаранчевий - АСС */
-        .group-checks { background: rgba(175, 82, 222, 0.05); } /* Фіолетовий - Чеки */
+        /* Кольорові шрифти груп - БЕЗ заливки */
+        .group-to {}
+        .group-serv {}
+        .group-acc {}
+        .group-checks {}
 
-        .group-header {
-            text-align: center;
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 10px;
-            color: #1d1d1f;
-            border-bottom: 1px solid #d2d2d7;
-        }
+        /* Кольорові заголовки груп */
+        .group-header { text-align: center; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px; color: #1d1d1f; border-bottom: 1px solid #d2d2d7; }
+        .group-header.group-to { color: #0071e3; }
+        .group-header.group-serv { color: #34c759; }
+        .group-header.group-acc { color: #ff9500; }
+        .group-header.group-checks { color: #af52de; }
 
         th { text-align: left; padding: 10px; color: #86868b; font-size: 10px; font-weight: 600; border-bottom: 1px solid #d2d2d7; background: white; }
         td { padding: 12px 10px; border-bottom: 1px solid #f5f5f7; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
         /* Зменшена ширина першого стовбця */
         .name-cell, th:first-child { 
-            position: sticky; 
-            left: 0; 
-            background: white; 
-            z-index: 10; 
-            width: 110px; /* Суттєво зменшено */
-            min-width: 110px;
+            position: sticky; left: 0; background: white; z-index: 10; 
+            width: 110px; min-width: 110px;
             box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-            font-weight: 600;
-            font-size: 12px;
-            white-space: normal; /* Дозволяємо перенос прізвища */
-            line-height: 1.2;
+            font-weight: 600; font-size: 12px;
+            white-space: normal; line-height: 1.2;
         }
         th:first-child { z-index: 11; }
 
+        /* Загальні стилі значень */
         .val-plan { color: #86868b; font-size: 11px; }
-        .val-fact { font-weight: 600; }
-        .val-pct { font-weight: 700; color: #1d1d1f; text-align: right; }
+        .val-fact { font-weight: 600; color: #1d1d1f; }
+        .val-pct { font-weight: 700; text-align: right; }
+
+        /* Кольорові шрифти для груп */
+        .val-fact.group-to, .val-pct.group-to { color: #0071e3; }
+        .val-fact.group-serv, .val-pct.group-serv { color: #34c759; }
+        .val-fact.group-acc, .val-pct.group-acc { color: #ff9500; }
+        .val-fact.group-checks, .val-pct.group-checks { color: #af52de; }
         
-        .total-row { background: #1d1d1f !important; }
-        .total-row td { color: white !important; font-weight: 700; }
-        .total-row .name-cell { background: #1d1d1f !important; color: white; }
-        .total-row .val-plan { color: #a1a1a6; }
+        /* TOTAL рядок - окрема заливка */
+        .total-row { background: #f0f7ff !important; border-top: 2px solid #0071e3; }
+        .total-row td { font-weight: 700; color: #1d1d1f !important; }
+        .total-row .name-cell { background: #f0f7ff !important; color: #0071e3 !important; font-size: 13px; }
+        .total-row .val-plan { color: #86868b !important; }
+        .total-row .val-fact.group-to, .total-row .val-pct.group-to { color: #0071e3 !important; }
+        .total-row .val-fact.group-serv, .total-row .val-pct.group-serv { color: #34c759 !important; }
+        .total-row .val-fact.group-acc, .total-row .val-pct.group-acc { color: #ff9500 !important; }
+        .total-row .val-fact.group-checks, .total-row .val-pct.group-checks { color: #af52de !important; }
 
         .loading { padding: 40px; text-align: center; color: #86868b; }
     </style>
