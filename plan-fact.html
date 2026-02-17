@@ -68,21 +68,26 @@
         
         /* TOTAL рядок */
         .total-row { 
-            background: #1d1d1f !important; 
-            border-top: 3px solid #0071e3;
+            background: #1d1d1f !important;
+            border-top: 3px solid #0071e3 !important;
         }
-        .total-row td { font-weight: 700; }
+        .total-row td { 
+            font-weight: 700 !important;
+            background: #1d1d1f !important;
+        }
         .total-row .name-cell { 
             background: #1d1d1f !important; 
             color: white !important;
-            font-size: 13px; 
-            letter-spacing: 0.5px;
+            font-size: 13px !important;
+            letter-spacing: 0.5px !important;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.3) !important;
         }
         .total-row .val-plan { color: #6e6e73 !important; }
         .total-row .val-fact.group-to, .total-row .val-pct.group-to { color: #5ac8fa !important; }
         .total-row .val-fact.group-serv, .total-row .val-pct.group-serv { color: #30d158 !important; }
         .total-row .val-fact.group-acc, .total-row .val-pct.group-acc { color: #ffd60a !important; }
         .total-row .val-fact.group-checks, .total-row .val-pct.group-checks { color: #da8fff !important; }
+        .total-row .group-start { border-left-color: #3a3a3c !important; }
 
         .loading { padding: 40px; text-align: center; color: #86868b; }
     </style>
@@ -162,8 +167,17 @@
                     if (row.length < 10 || !row[0].trim()) return;
 
                     const tr = document.createElement('tr');
-                    const isTotal = row[0].toLowerCase().includes('разом') || row[0].toLowerCase().includes('сума');
-                    if (isTotal) tr.className = 'total-row';
+                    const nameLC = row[0].toLowerCase().trim();
+                    const isTotal = nameLC.includes('разом') || 
+                                   nameLC.includes('сума') || 
+                                   nameLC.includes('total') || 
+                                   nameLC.includes('підсумок') || 
+                                   nameLC.includes('всього') ||
+                                   nameLC.includes('итого');
+                    if (isTotal) {
+                        tr.className = 'total-row';
+                        console.log('✅ Знайдено Total рядок:', row[0]);
+                    }
 
                     tr.innerHTML = `
                         <td class="name-cell">${row[0]}</td>
