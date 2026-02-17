@@ -29,14 +29,22 @@
 
         /* Кольорові заголовки груп */
         .group-header { text-align: center; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px; color: #1d1d1f; border-bottom: 1px solid #d2d2d7; }
-        .group-header.group-to { color: #0071e3; }
-        .group-header.group-serv { color: #34c759; }
-        .group-header.group-acc { color: #ff9500; }
-        .group-header.group-checks { color: #af52de; }
 
         th { text-align: left; padding: 10px; color: #86868b; font-size: 10px; font-weight: 600; border-bottom: 1px solid #d2d2d7; background: white; }
         td { padding: 12px 10px; border-bottom: 1px solid #f5f5f7; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
+        /* Роздільники між групами */
+        .group-start { border-left: 2px solid #d2d2d7 !important; }
+        
+        /* Підкреслення заголовків груп кольором */
+        .group-header.group-to { color: #0071e3; border-bottom: 3px solid #0071e3; }
+        .group-header.group-serv { color: #34c759; border-bottom: 3px solid #34c759; border-left: 2px solid #d2d2d7; }
+        .group-header.group-acc { color: #ff9500; border-bottom: 3px solid #ff9500; border-left: 2px solid #d2d2d7; }
+        .group-header.group-checks { color: #af52de; border-bottom: 3px solid #af52de; border-left: 2px solid #d2d2d7; }
+        
+        /* Роздільники в рядку заголовків другого рівня */
+        th.group-serv:first-of-type, th.group-acc:first-of-type, th.group-checks:first-of-type { border-left: 2px solid #d2d2d7; }
+
         /* Зменшена ширина першого стовбця */
         .name-cell, th:first-child { 
             position: sticky; left: 0; background: white; z-index: 10; 
@@ -58,15 +66,23 @@
         .val-fact.group-acc, .val-pct.group-acc { color: #ff9500; }
         .val-fact.group-checks, .val-pct.group-checks { color: #af52de; }
         
-        /* TOTAL рядок - окрема заливка */
-        .total-row { background: #f0f7ff !important; border-top: 2px solid #0071e3; }
-        .total-row td { font-weight: 700; color: #1d1d1f !important; }
-        .total-row .name-cell { background: #f0f7ff !important; color: #0071e3 !important; font-size: 13px; }
-        .total-row .val-plan { color: #86868b !important; }
-        .total-row .val-fact.group-to, .total-row .val-pct.group-to { color: #0071e3 !important; }
-        .total-row .val-fact.group-serv, .total-row .val-pct.group-serv { color: #34c759 !important; }
-        .total-row .val-fact.group-acc, .total-row .val-pct.group-acc { color: #ff9500 !important; }
-        .total-row .val-fact.group-checks, .total-row .val-pct.group-checks { color: #af52de !important; }
+        /* TOTAL рядок */
+        .total-row { 
+            background: #1d1d1f !important; 
+            border-top: 3px solid #0071e3;
+        }
+        .total-row td { font-weight: 700; }
+        .total-row .name-cell { 
+            background: #1d1d1f !important; 
+            color: white !important;
+            font-size: 13px; 
+            letter-spacing: 0.5px;
+        }
+        .total-row .val-plan { color: #6e6e73 !important; }
+        .total-row .val-fact.group-to, .total-row .val-pct.group-to { color: #5ac8fa !important; }
+        .total-row .val-fact.group-serv, .total-row .val-pct.group-serv { color: #30d158 !important; }
+        .total-row .val-fact.group-acc, .total-row .val-pct.group-acc { color: #ffd60a !important; }
+        .total-row .val-fact.group-checks, .total-row .val-pct.group-checks { color: #da8fff !important; }
 
         .loading { padding: 40px; text-align: center; color: #86868b; }
     </style>
@@ -155,15 +171,15 @@
                         <td class="val-fact group-to">${formatDisplay(row[2])}</td>
                         <td class="val-pct group-to">${formatDisplay(row[3], true)}</td>
                         
-                        <td class="val-plan group-serv">${formatDisplay(row[4])}</td>
+                        <td class="val-plan group-serv group-start">${formatDisplay(row[4])}</td>
                         <td class="val-fact group-serv">${formatDisplay(row[5])}</td>
                         <td class="val-pct group-serv">${formatDisplay(row[6], true)}</td>
                         
-                        <td class="val-plan group-acc">${formatDisplay(row[7])}</td>
+                        <td class="val-plan group-acc group-start">${formatDisplay(row[7])}</td>
                         <td class="val-fact group-acc">${formatDisplay(row[8])}</td>
                         <td class="val-pct group-acc">${formatDisplay(row[9], true)}</td>
                         
-                        <td class="val-plan group-checks">${formatDisplay(row[10])}</td>
+                        <td class="val-plan group-checks group-start">${formatDisplay(row[10])}</td>
                         <td class="val-fact group-checks">${formatDisplay(row[11])}</td>
                         <td class="val-pct group-checks">${formatDisplay(row[12], true)}</td>
                     `;
