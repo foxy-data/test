@@ -152,7 +152,27 @@
             return Math.round(num).toLocaleString('uk-UA');
         }
 
-        async function loadTable() {
+        // Функція для визначення кольору заливки залежно від % виконання
+        function getPctBackground(val) {
+            const num = cleanVal(val);
+            const pct = num < 2 ? num * 100 : num;
+            
+            if (pct <= 0) return 'rgba(255, 59, 48, 0.15)';
+            
+            // Від 0% до 100% - червоний → жовтий → зелений
+            if (pct < 50)  return `rgba(255, 59, 48, ${0.05 + (0.15 * (1 - pct / 50))})`;   // червоний
+            if (pct < 80)  return `rgba(255, 149, 0, ${0.08 + (0.1 * ((pct - 50) / 30))})`;  // помаранчевий
+            if (pct < 100) return `rgba(255, 204, 0, ${0.08 + (0.1 * ((pct - 80) / 20))})`;  // жовтий
+            if (pct < 120) return `rgba(52, 199, 89, ${0.08 + (0.1 * ((pct - 100) / 20))})`;  // зелений
+            return 'rgba(52, 199, 89, 0.20)'; // яскраво зелений (>120%)
+        }
+
+        // Функція для генерації % комірки з заливкою
+        function pctCell(val, groupClass, isGroupStart = false) {
+            const bg = getPctBackground(val);
+            const startClass = isGroupStart ? ' group-start' : '';
+            return `<td class="val-pct ${groupClass}${startClass}" style="background: ${bg} !important">${formatDisplay(val, true)}</td>`;
+        }
             const URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTOUXHhUpCkh6tgvNpJzY-w5tVrhPkvEeC0W0ZWuy2YxPayuO3pvahfeKYmMZ1DwHnILTpsJFNtXLsH/pub?output=csv";
             try {
                 const res = await fetch(URL + '&t=' + Date.now());
@@ -185,19 +205,19 @@
                         <td class="name-cell">${row[0]}</td>
                         <td class="val-plan group-to">${formatDisplay(row[1])}</td>
                         <td class="val-fact group-to">${formatDisplay(row[2])}</td>
-                        <td class="val-pct group-to">${formatDisplay(row[3], true)}</td>
+                        ${pctCell(row[3], 'group-to')}
                         
                         <td class="val-plan group-serv group-start">${formatDisplay(row[4])}</td>
                         <td class="val-fact group-serv">${formatDisplay(row[5])}</td>
-                        <td class="val-pct group-serv">${formatDisplay(row[6], true)}</td>
+                        ${pctCell(row[6], 'group-serv')}
                         
                         <td class="val-plan group-acc group-start">${formatDisplay(row[7])}</td>
                         <td class="val-fact group-acc">${formatDisplay(row[8])}</td>
-                        <td class="val-pct group-acc">${formatDisplay(row[9], true)}</td>
+                        ${pctCell(row[9], 'group-acc')}
                         
                         <td class="val-plan group-checks group-start">${formatDisplay(row[10])}</td>
                         <td class="val-fact group-checks">${formatDisplay(row[11])}</td>
-                        <td class="val-pct group-checks">${formatDisplay(row[12], true)}</td>
+                        ${pctCell(row[12], 'group-checks')}
                     `;
                     tbody.appendChild(tr);
                 });
