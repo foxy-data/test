@@ -84,10 +84,10 @@
             box-shadow: 2px 0 5px rgba(0,0,0,0.08) !important;
         }
         .total-row .val-plan { color: #86868b !important; }
-        .total-row .val-fact.group-to, .total-row .val-pct.group-to { color: #0071e3 !important; }
-        .total-row .val-fact.group-serv, .total-row .val-pct.group-serv { color: #34c759 !important; }
-        .total-row .val-fact.group-acc, .total-row .val-pct.group-acc { color: #ff9500 !important; }
-        .total-row .val-fact.group-checks, .total-row .val-pct.group-checks { color: #af52de !important; }
+        .total-row .val-fact.group-to, .total-row .val-pct.group-to { color: #1d1d1f !important; }
+        .total-row .val-fact.group-serv, .total-row .val-pct.group-serv { color: #1d1d1f !important; }
+        .total-row .val-fact.group-acc, .total-row .val-pct.group-acc { color: #1d1d1f !important; }
+        .total-row .val-fact.group-checks, .total-row .val-pct.group-checks { color: #1d1d1f !important; }
         .total-row .group-start { border-left-color: #a8c4f0 !important; }
 
         .loading { padding: 40px; text-align: center; color: #86868b; }
@@ -166,10 +166,13 @@
         }
 
         // Функція для генерації % комірки з заливкою і кольором тексту
-        function pctCell(val, groupClass, isGroupStart = false) {
+        function pctCell(val, groupClass, isGroupStart = false, isTotal = false) {
             const { bg, color } = getPctStyle(val);
             const startClass = isGroupStart ? ' group-start' : '';
-            return `<td class="val-pct ${groupClass}${startClass}" style="background: ${bg} !important; color: ${color} !important">${formatDisplay(val, true)}</td>`;
+            const style = isTotal 
+                ? `background: ${bg} !important; color: #1d1d1f !important; font-weight: 700 !important`
+                : `background: ${bg} !important; color: ${color} !important`;
+            return `<td class="val-pct ${groupClass}${startClass}" style="${style}">${formatDisplay(val, true)}</td>`;
         }
 
         async function loadTable() {
@@ -201,23 +204,25 @@
                         console.log('✅ Знайдено Total рядок:', row[0]);
                     }
 
+                    const factStyle = isTotal ? ' style="color: #1d1d1f !important"' : '';
+                    
                     tr.innerHTML = `
                         <td class="name-cell">${row[0]}</td>
                         <td class="val-plan group-to">${formatDisplay(row[1])}</td>
-                        <td class="val-fact group-to">${formatDisplay(row[2])}</td>
-                        ${pctCell(row[3], 'group-to')}
+                        <td class="val-fact group-to"${factStyle}>${formatDisplay(row[2])}</td>
+                        ${pctCell(row[3], 'group-to', false, isTotal)}
                         
                         <td class="val-plan group-serv group-start">${formatDisplay(row[4])}</td>
-                        <td class="val-fact group-serv">${formatDisplay(row[5])}</td>
-                        ${pctCell(row[6], 'group-serv')}
+                        <td class="val-fact group-serv"${factStyle}>${formatDisplay(row[5])}</td>
+                        ${pctCell(row[6], 'group-serv', false, isTotal)}
                         
                         <td class="val-plan group-acc group-start">${formatDisplay(row[7])}</td>
-                        <td class="val-fact group-acc">${formatDisplay(row[8])}</td>
-                        ${pctCell(row[9], 'group-acc')}
+                        <td class="val-fact group-acc"${factStyle}>${formatDisplay(row[8])}</td>
+                        ${pctCell(row[9], 'group-acc', false, isTotal)}
                         
                         <td class="val-plan group-checks group-start">${formatDisplay(row[10])}</td>
-                        <td class="val-fact group-checks">${formatDisplay(row[11])}</td>
-                        ${pctCell(row[12], 'group-checks')}
+                        <td class="val-fact group-checks"${factStyle}>${formatDisplay(row[11])}</td>
+                        ${pctCell(row[12], 'group-checks', false, isTotal)}
                     `;
                     tbody.appendChild(tr);
                 });
