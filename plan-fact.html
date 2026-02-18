@@ -59,8 +59,8 @@
         /* Мобільна версія - snap scroll по групах */
         @media (max-width: 900px) {
             .table-card {
-                scroll-snap-type: x proximity;
-                scroll-padding-left: 80px;
+                scroll-snap-type: x mandatory;
+                scroll-padding-left: 75px;
             }
             
             table {
@@ -76,33 +76,30 @@
             }
             
             th, td {
-                font-size: 11px;
-                padding: 8px 5px;
+                font-size: 10px;
+                padding: 6px 4px;
+                white-space: nowrap;
             }
             
-            /* Snap на Факт кожної групи (щоб Plan був видимий) */
-            /* ТО Факт - 3-тя колонка */
-            th:nth-child(3), tr td:nth-child(3) {
+            /* Snap на початку кожної ГРУПИ */
+            /* ТО План - показує ПК + ТО План/Факт/% (3 колонки) */
+            th:nth-child(2), tr td:nth-child(2) {
                 scroll-snap-align: start;
-                scroll-margin-left: 80px;
             }
             
-            /* Послуги Факт - після group-start (Plan) */
-            th.group-serv:nth-of-type(2), td.group-serv:nth-of-type(2) {
+            /* Послуги План - показує ПК + Послуги всі 4 колонки */
+            th.group-serv.group-start, td.group-serv.group-start {
                 scroll-snap-align: start;
-                scroll-margin-left: 80px;
             }
             
-            /* АСС Факт */
-            th.group-acc:nth-of-type(2), td.group-acc:nth-of-type(2) {
+            /* АСС План - показує ПК + АСС всі 4 колонки */
+            th.group-acc.group-start, td.group-acc.group-start {
                 scroll-snap-align: start;
-                scroll-margin-left: 80px;
             }
             
-            /* Чеки Факт */
-            th.group-checks:nth-of-type(2), td.group-checks:nth-of-type(2) {
+            /* Чеки План - показує ПК + Чеки всі 3 колонки */
+            th.group-checks.group-start, td.group-checks.group-start {
                 scroll-snap-align: start;
-                scroll-margin-left: 80px;
             }
         }
 
