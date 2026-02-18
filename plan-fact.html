@@ -162,6 +162,12 @@
             }
             return Math.round(num).toLocaleString('uk-UA');
         }
+        
+        // Форматування для Доля - зберігаємо сотих
+        function formatShare(val) {
+            let num = cleanVal(val);
+            return num.toFixed(2);
+        }
 
         // Функція для визначення кольору залежно від % виконання
         function getPctStyle(val) {
@@ -268,12 +274,12 @@
                             
                             <td class="val-plan group-serv group-start">${formatDisplay(row[4])}</td>
                             <td class="val-fact group-serv"${factStyle}>${formatDisplay(row[5])}</td>
-                            <td class="val-fact group-serv"${factStyle}>${formatDisplay(row[6])}</td>
+                            <td class="val-fact group-serv"${factStyle}>${formatShare(row[6])}</td>
                             ${pctCell(row[7], 'group-serv', false, isTotal)}
                             
                             <td class="val-plan group-acc group-start">${formatDisplay(row[8])}</td>
                             <td class="val-fact group-acc"${factStyle}>${formatDisplay(row[9])}</td>
-                            <td class="val-fact group-acc"${factStyle}>${formatDisplay(row[10])}</td>
+                            <td class="val-fact group-acc"${factStyle}>${formatShare(row[10])}</td>
                             ${pctCell(row[11], 'group-acc', false, isTotal)}
                             
                             <td class="val-plan group-checks group-start">${formatDisplay(row[12])}</td>
