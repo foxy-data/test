@@ -89,6 +89,17 @@
         .total-row .val-fact.group-acc, .total-row .val-pct.group-acc { color: #1d1d1f !important; }
         .total-row .val-fact.group-checks, .total-row .val-pct.group-checks { color: #1d1d1f !important; }
         .total-row .group-start { border-left-color: #a8c4f0 !important; }
+        
+        /* ВІДСТАВАННЯ рядок */
+        .deviation-row td {
+            font-style: italic !important;
+            color: #86868b !important;
+            font-size: 12px !important;
+        }
+        .deviation-row .name-cell {
+            font-style: italic !important;
+            color: #86868b !important;
+        }
 
         .loading { padding: 40px; text-align: center; color: #86868b; }
     </style>
@@ -199,31 +210,59 @@
                                    nameLC.includes('підсумок') || 
                                    nameLC.includes('всього') ||
                                    nameLC.includes('итого');
+                    const isDeviation = nameLC.includes('відставання') || nameLC.includes('відхилення');
+                    
                     if (isTotal) {
                         tr.className = 'total-row';
                         console.log('✅ Знайдено Total рядок:', row[0]);
                     }
+                    if (isDeviation) {
+                        tr.className = 'deviation-row';
+                        console.log('📊 Знайдено рядок відставання:', row[0]);
+                    }
 
                     const factStyle = isTotal ? ' style="color: #1d1d1f !important"' : '';
                     
-                    tr.innerHTML = `
-                        <td class="name-cell">${row[0]}</td>
-                        <td class="val-plan group-to">${formatDisplay(row[1])}</td>
-                        <td class="val-fact group-to"${factStyle}>${formatDisplay(row[2])}</td>
-                        ${pctCell(row[3], 'group-to', false, isTotal)}
-                        
-                        <td class="val-plan group-serv group-start">${formatDisplay(row[4])}</td>
-                        <td class="val-fact group-serv"${factStyle}>${formatDisplay(row[5])}</td>
-                        ${pctCell(row[6], 'group-serv', false, isTotal)}
-                        
-                        <td class="val-plan group-acc group-start">${formatDisplay(row[7])}</td>
-                        <td class="val-fact group-acc"${factStyle}>${formatDisplay(row[8])}</td>
-                        ${pctCell(row[9], 'group-acc', false, isTotal)}
-                        
-                        <td class="val-plan group-checks group-start">${formatDisplay(row[10])}</td>
-                        <td class="val-fact group-checks"${factStyle}>${formatDisplay(row[11])}</td>
-                        ${pctCell(row[12], 'group-checks', false, isTotal)}
-                    `;
+                    // Для рядка відставання - показуємо як є без форматування
+                    if (isDeviation) {
+                        tr.innerHTML = `
+                            <td class="name-cell">${row[0]}</td>
+                            <td class="val-plan group-to">${row[1] || ''}</td>
+                            <td class="val-fact group-to">${row[2] || ''}</td>
+                            <td class="val-pct group-to">${row[3] || ''}</td>
+                            
+                            <td class="val-plan group-serv group-start">${row[4] || ''}</td>
+                            <td class="val-fact group-serv">${row[5] || ''}</td>
+                            <td class="val-pct group-serv">${row[6] || ''}</td>
+                            
+                            <td class="val-plan group-acc group-start">${row[7] || ''}</td>
+                            <td class="val-fact group-acc">${row[8] || ''}</td>
+                            <td class="val-pct group-acc">${row[9] || ''}</td>
+                            
+                            <td class="val-plan group-checks group-start">${row[10] || ''}</td>
+                            <td class="val-fact group-checks">${row[11] || ''}</td>
+                            <td class="val-pct group-checks">${row[12] || ''}</td>
+                        `;
+                    } else {
+                        tr.innerHTML = `
+                            <td class="name-cell">${row[0]}</td>
+                            <td class="val-plan group-to">${formatDisplay(row[1])}</td>
+                            <td class="val-fact group-to"${factStyle}>${formatDisplay(row[2])}</td>
+                            ${pctCell(row[3], 'group-to', false, isTotal)}
+                            
+                            <td class="val-plan group-serv group-start">${formatDisplay(row[4])}</td>
+                            <td class="val-fact group-serv"${factStyle}>${formatDisplay(row[5])}</td>
+                            ${pctCell(row[6], 'group-serv', false, isTotal)}
+                            
+                            <td class="val-plan group-acc group-start">${formatDisplay(row[7])}</td>
+                            <td class="val-fact group-acc"${factStyle}>${formatDisplay(row[8])}</td>
+                            ${pctCell(row[9], 'group-acc', false, isTotal)}
+                            
+                            <td class="val-plan group-checks group-start">${formatDisplay(row[10])}</td>
+                            <td class="val-fact group-checks"${factStyle}>${formatDisplay(row[11])}</td>
+                            ${pctCell(row[12], 'group-checks', false, isTotal)}
+                        `;
+                    }
                     tbody.appendChild(tr);
                 });
             } catch (e) {
