@@ -48,12 +48,33 @@
         /* Зменшена ширина першого стовбця */
         .name-cell, th:first-child { 
             position: sticky; left: 0; background: white; z-index: 10; 
-            width: 110px; min-width: 110px;
+            width: 90px; min-width: 90px;
             box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-            font-weight: 600; font-size: 12px;
+            font-weight: 600; font-size: 11px;
             white-space: normal; line-height: 1.2;
+            padding: 8px 5px;
         }
         th:first-child { z-index: 11; }
+        
+        /* Мобільна версія - snap scroll по групах */
+        @media (max-width: 900px) {
+            .table-card {
+                scroll-snap-type: x mandatory;
+            }
+            
+            .name-cell, th:first-child {
+                width: 75px;
+                min-width: 75px;
+                font-size: 9px;
+                padding: 6px 3px;
+            }
+            
+            /* Групи snap-points */
+            th.group-to:nth-child(2), td.group-to:nth-child(2) { scroll-snap-align: start; }
+            th.group-serv.group-start, td.group-serv.group-start { scroll-snap-align: start; }
+            th.group-acc.group-start, td.group-acc.group-start { scroll-snap-align: start; }
+            th.group-checks.group-start, td.group-checks.group-start { scroll-snap-align: start; }
+        }
 
         /* Загальні стилі значень */
         .val-plan { color: #86868b; font-size: 11px; }
