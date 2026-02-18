@@ -59,7 +59,12 @@
         /* Мобільна версія - snap scroll по групах */
         @media (max-width: 900px) {
             .table-card {
-                scroll-snap-type: x mandatory;
+                scroll-snap-type: x proximity;
+                scroll-padding-left: 75px;
+            }
+            
+            table {
+                min-width: 1200px;
             }
             
             .name-cell, th:first-child {
@@ -67,13 +72,38 @@
                 min-width: 75px;
                 font-size: 9px;
                 padding: 6px 3px;
+                box-shadow: 4px 0 8px rgba(0,0,0,0.15);
             }
             
-            /* Групи snap-points */
-            th.group-to:nth-child(2), td.group-to:nth-child(2) { scroll-snap-align: start; }
-            th.group-serv.group-start, td.group-serv.group-start { scroll-snap-align: start; }
-            th.group-acc.group-start, td.group-acc.group-start { scroll-snap-align: start; }
-            th.group-checks.group-start, td.group-checks.group-start { scroll-snap-align: start; }
+            th, td {
+                font-size: 11px;
+                padding: 8px 5px;
+            }
+            
+            /* Snap-points на початку кожної групи */
+            /* ТО - друга колонка (після ПК) */
+            th:nth-child(2), tr td:nth-child(2) {
+                scroll-snap-align: start;
+                scroll-margin-left: 75px;
+            }
+            
+            /* Послуги - колонка з group-start */
+            th.group-serv:first-of-type, td.group-serv.group-start {
+                scroll-snap-align: start;
+                scroll-margin-left: 75px;
+            }
+            
+            /* АСС */
+            th.group-acc:first-of-type, td.group-acc.group-start {
+                scroll-snap-align: start;
+                scroll-margin-left: 75px;
+            }
+            
+            /* Чеки */
+            th.group-checks:first-of-type, td.group-checks.group-start {
+                scroll-snap-align: start;
+                scroll-margin-left: 75px;
+            }
         }
 
         /* Загальні стилі значень */
