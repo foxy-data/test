@@ -60,7 +60,7 @@
         @media (max-width: 900px) {
             .table-card {
                 scroll-snap-type: x proximity;
-                scroll-padding-left: 90px;
+                scroll-padding-left: 80px;
             }
             
             table {
@@ -80,29 +80,29 @@
                 padding: 8px 5px;
             }
             
-            /* Snap-points на початку кожної групи з відступом */
-            /* ТО Plan - друга колонка (перед нею буде видно ПК) */
-            th:nth-child(2), tr td:nth-child(2) {
+            /* Snap на Факт кожної групи (щоб Plan був видимий) */
+            /* ТО Факт - 3-тя колонка */
+            th:nth-child(3), tr td:nth-child(3) {
                 scroll-snap-align: start;
-                scroll-margin-left: 90px;
+                scroll-margin-left: 80px;
             }
             
-            /* Послуги Plan */
-            th.group-serv:first-of-type, td.group-serv.group-start {
+            /* Послуги Факт - після group-start (Plan) */
+            th.group-serv:nth-of-type(2), td.group-serv:nth-of-type(2) {
                 scroll-snap-align: start;
-                scroll-margin-left: 90px;
+                scroll-margin-left: 80px;
             }
             
-            /* АСС Plan */
-            th.group-acc:first-of-type, td.group-acc.group-start {
+            /* АСС Факт */
+            th.group-acc:nth-of-type(2), td.group-acc:nth-of-type(2) {
                 scroll-snap-align: start;
-                scroll-margin-left: 90px;
+                scroll-margin-left: 80px;
             }
             
-            /* Чеки Plan */
-            th.group-checks:first-of-type, td.group-checks.group-start {
+            /* Чеки Факт */
+            th.group-checks:nth-of-type(2), td.group-checks:nth-of-type(2) {
                 scroll-snap-align: start;
-                scroll-margin-left: 90px;
+                scroll-margin-left: 80px;
             }
         }
 
