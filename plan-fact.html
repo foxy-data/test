@@ -19,7 +19,7 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        table { width: 100%; border-collapse: collapse; min-width: 1200px; table-layout: fixed; }
+        table { width: 100%; border-collapse: collapse; min-width: 1400px; table-layout: fixed; }
         
         /* Кольорові шрифти груп - БЕЗ заливки */
         .group-to {}
@@ -113,15 +113,16 @@
                 <thead>
                     <tr>
                         <th rowspan="2">Продавець</th>
+                        <th rowspan="2" class="group-to">ПК</th>
                         <th colspan="3" class="group-header group-to">Товарообіг</th>
-                        <th colspan="3" class="group-header group-serv">Послуги</th>
-                        <th colspan="3" class="group-header group-acc">Аксесуари</th>
+                        <th colspan="4" class="group-header group-serv">Послуги</th>
+                        <th colspan="4" class="group-header group-acc">Аксесуари</th>
                         <th colspan="3" class="group-header group-checks">Чеки</th>
                     </tr>
                     <tr>
                         <th class="group-to">План</th><th class="group-to">Факт</th><th class="group-to">%</th>
-                        <th class="group-serv">План</th><th class="group-serv">Факт</th><th class="group-serv">%</th>
-                        <th class="group-acc">План</th><th class="group-acc">Факт</th><th class="group-acc">%</th>
+                        <th class="group-serv">План</th><th class="group-serv">Факт</th><th class="group-serv">Доля</th><th class="group-serv">%</th>
+                        <th class="group-acc">План</th><th class="group-acc">Факт</th><th class="group-acc">Доля</th><th class="group-acc">%</th>
                         <th class="group-checks">План</th><th class="group-checks">Факт</th><th class="group-checks">%</th>
                     </tr>
                 </thead>
@@ -193,13 +194,20 @@
                 const text = await res.text();
                 const rows = parseCSV(text);
                 const dataRows = rows.slice(1);
+                
+                console.log('📊 Всього рядків:', dataRows.length);
+                console.log('📊 Перший рядок (кількість колонок):', dataRows[0] ? dataRows[0].length : 0);
+                console.log('📊 Перший рядок даних:', dataRows[0]);
 
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('dataTable').style.display = 'table';
                 const tbody = document.getElementById('tableBody');
 
-                dataRows.forEach(row => {
-                    if (row.length < 10 || !row[0].trim()) return;
+                dataRows.forEach((row, idx) => {
+                    if (row.length < 15 || !row[0].trim()) {
+                        console.log(`⚠️ Пропущено рядок ${idx + 2}: довжина ${row.length}, назва: "${row[0]}"`);
+                        return;
+                    }
 
                     const tr = document.createElement('tr');
                     const nameLC = row[0].toLowerCase().trim();
@@ -227,43 +235,53 @@
                     if (isDeviation) {
                         tr.innerHTML = `
                             <td class="name-cell">${row[0]}</td>
-                            <td class="val-plan group-to">${row[1] || ''}</td>
-                            <td class="val-fact group-to">${row[2] || ''}</td>
-                            <td class="val-pct group-to">${row[3] || ''}</td>
+                            <td class="val-fact group-to">${row[1] || ''}</td>
+                            <td class="val-plan group-to">${row[2] || ''}</td>
+                            <td class="val-fact group-to">${row[3] || ''}</td>
+                            <td class="val-pct group-to">${row[4] || ''}</td>
                             
-                            <td class="val-plan group-serv group-start">${row[4] || ''}</td>
-                            <td class="val-fact group-serv">${row[5] || ''}</td>
-                            <td class="val-pct group-serv">${row[6] || ''}</td>
+                            <td class="val-plan group-serv group-start">${row[5] || ''}</td>
+                            <td class="val-fact group-serv">${row[6] || ''}</td>
+                            <td class="val-fact group-serv">${row[7] || ''}</td>
+                            <td class="val-pct group-serv">${row[8] || ''}</td>
                             
-                            <td class="val-plan group-acc group-start">${row[7] || ''}</td>
-                            <td class="val-fact group-acc">${row[8] || ''}</td>
-                            <td class="val-pct group-acc">${row[9] || ''}</td>
+                            <td class="val-plan group-acc group-start">${row[9] || ''}</td>
+                            <td class="val-fact group-acc">${row[10] || ''}</td>
+                            <td class="val-fact group-acc">${row[11] || ''}</td>
+                            <td class="val-pct group-acc">${row[12] || ''}</td>
                             
-                            <td class="val-plan group-checks group-start">${row[10] || ''}</td>
-                            <td class="val-fact group-checks">${row[11] || ''}</td>
-                            <td class="val-pct group-checks">${row[12] || ''}</td>
+                            <td class="val-plan group-checks group-start">${row[13] || ''}</td>
+                            <td class="val-fact group-checks">${row[14] || ''}</td>
+                            <td class="val-pct group-checks">${row[15] || ''}</td>
                         `;
                     } else {
                         tr.innerHTML = `
                             <td class="name-cell">${row[0]}</td>
-                            <td class="val-plan group-to">${formatDisplay(row[1])}</td>
-                            <td class="val-fact group-to"${factStyle}>${formatDisplay(row[2])}</td>
-                            ${pctCell(row[3], 'group-to', false, isTotal)}
+                            <td class="val-fact group-to"${factStyle}>${formatDisplay(row[1])}</td>
+                            <td class="val-plan group-to">${formatDisplay(row[2])}</td>
+                            <td class="val-fact group-to"${factStyle}>${formatDisplay(row[3])}</td>
+                            ${pctCell(row[4], 'group-to', false, isTotal)}
                             
-                            <td class="val-plan group-serv group-start">${formatDisplay(row[4])}</td>
-                            <td class="val-fact group-serv"${factStyle}>${formatDisplay(row[5])}</td>
-                            ${pctCell(row[6], 'group-serv', false, isTotal)}
+                            <td class="val-plan group-serv group-start">${formatDisplay(row[5])}</td>
+                            <td class="val-fact group-serv"${factStyle}>${formatDisplay(row[6])}</td>
+                            <td class="val-fact group-serv"${factStyle}>${formatDisplay(row[7])}</td>
+                            ${pctCell(row[8], 'group-serv', false, isTotal)}
                             
-                            <td class="val-plan group-acc group-start">${formatDisplay(row[7])}</td>
-                            <td class="val-fact group-acc"${factStyle}>${formatDisplay(row[8])}</td>
-                            ${pctCell(row[9], 'group-acc', false, isTotal)}
+                            <td class="val-plan group-acc group-start">${formatDisplay(row[9])}</td>
+                            <td class="val-fact group-acc"${factStyle}>${formatDisplay(row[10])}</td>
+                            <td class="val-fact group-acc"${factStyle}>${formatDisplay(row[11])}</td>
+                            ${pctCell(row[12], 'group-acc', false, isTotal)}
                             
-                            <td class="val-plan group-checks group-start">${formatDisplay(row[10])}</td>
-                            <td class="val-fact group-checks"${factStyle}>${formatDisplay(row[11])}</td>
-                            ${pctCell(row[12], 'group-checks', false, isTotal)}
+                            <td class="val-plan group-checks group-start">${formatDisplay(row[13])}</td>
+                            <td class="val-fact group-checks"${factStyle}>${formatDisplay(row[14])}</td>
+                            ${pctCell(row[15], 'group-checks', false, isTotal)}
                         `;
                     }
                     tbody.appendChild(tr);
+                    
+                    if (idx < 3) {
+                        console.log(`🔍 Рядок ${idx + 2} "${row[0]}": колонок = ${row.length}`);
+                    }
                 });
             } catch (e) {
                 document.getElementById('loader').textContent = "Помилка завантаження";
