@@ -19,7 +19,7 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        table { width: 100%; border-collapse: collapse; min-width: 1400px; table-layout: fixed; }
+        table { width: 100%; border-collapse: collapse; min-width: 1200px; table-layout: fixed; }
         
         /* Кольорові шрифти груп - БЕЗ заливки */
         .group-to {}
@@ -194,25 +194,13 @@
                 const text = await res.text();
                 const rows = parseCSV(text);
                 const dataRows = rows.slice(1);
-                
-                console.log('📊 Всього рядків:', dataRows.length);
-                console.log('📊 Перший рядок (кількість колонок):', dataRows[0] ? dataRows[0].length : 0);
-                console.log('📊 Перший рядок даних:');
-                if (dataRows[0]) {
-                    dataRows[0].forEach((val, i) => {
-                        console.log(`  Колонка ${i}: "${val}"`);
-                    });
-                }
 
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('dataTable').style.display = 'table';
                 const tbody = document.getElementById('tableBody');
 
-                dataRows.forEach((row, idx) => {
-                    if (row.length < 16 || !row[0].trim()) {
-                        console.log(`⚠️ Пропущено рядок ${idx + 2}: довжина ${row.length}, назва: "${row[0]}"`);
-                        return;
-                    }
+                dataRows.forEach(row => {
+                    if (row.length < 15 || !row[0].trim()) return;
 
                     const tr = document.createElement('tr');
                     const nameLC = row[0].toLowerCase().trim();
@@ -283,10 +271,6 @@
                         `;
                     }
                     tbody.appendChild(tr);
-                    
-                    if (idx < 3) {
-                        console.log(`🔍 Рядок ${idx + 2} "${row[0]}": колонок = ${row.length}`);
-                    }
                 });
             } catch (e) {
                 document.getElementById('loader').textContent = "Помилка завантаження";
