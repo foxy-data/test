@@ -197,14 +197,19 @@
                 
                 console.log('📊 Всього рядків:', dataRows.length);
                 console.log('📊 Перший рядок (кількість колонок):', dataRows[0] ? dataRows[0].length : 0);
-                console.log('📊 Перший рядок даних:', dataRows[0]);
+                console.log('📊 Перший рядок даних:');
+                if (dataRows[0]) {
+                    dataRows[0].forEach((val, i) => {
+                        console.log(`  Колонка ${i}: "${val}"`);
+                    });
+                }
 
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('dataTable').style.display = 'table';
                 const tbody = document.getElementById('tableBody');
 
                 dataRows.forEach((row, idx) => {
-                    if (row.length < 15 || !row[0].trim()) {
+                    if (row.length < 16 || !row[0].trim()) {
                         console.log(`⚠️ Пропущено рядок ${idx + 2}: довжина ${row.length}, назва: "${row[0]}"`);
                         return;
                     }
