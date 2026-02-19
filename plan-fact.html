@@ -87,29 +87,29 @@
                 min-width: 65px;
             }
             
-            /* Snap на ФАКТ колонці - щоб План був видимий після sticky */
-            /* ТО Факт (3-тя) = показує ПК(sticky) + План + Факт + % */
-            th:nth-child(3), tr td:nth-child(3) {
+            /* Snap на колонці ПЛАН кожної групи */
+            /* ТО План (2-га колонка) */
+            th:nth-child(2), tr td:nth-child(2) {
                 scroll-snap-align: start;
-                scroll-margin-left: 145px; /* 75px(ПК) + 70px(План) */
+                scroll-margin-left: 75px;
             }
             
-            /* Послуги Факт (6-та) = показує ПК + План + Факт + Доля + % */
-            th:nth-child(6), tr td:nth-child(6) {
+            /* Послуги План (5-та колонка) */
+            th:nth-child(5), tr td:nth-child(5) {
                 scroll-snap-align: start;
-                scroll-margin-left: 145px;
+                scroll-margin-left: 75px;
             }
             
-            /* АСС Факт (10-та) = показує ПК + План + Факт + Доля + % */
-            th:nth-child(10), tr td:nth-child(10) {
+            /* АСС План (9-та колонка) */
+            th:nth-child(9), tr td:nth-child(9) {
                 scroll-snap-align: start;
-                scroll-margin-left: 145px;
+                scroll-margin-left: 75px;
             }
             
-            /* Чеки Факт (14-та) = показує ПК + План + Факт + % */
-            th:nth-child(14), tr td:nth-child(14) {
+            /* Чеки План (13-та колонка) */
+            th:nth-child(13), tr td:nth-child(13) {
                 scroll-snap-align: start;
-                scroll-margin-left: 145px;
+                scroll-margin-left: 75px;
             }
         }
 
