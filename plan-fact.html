@@ -59,12 +59,12 @@
         /* Мобільна версія - snap scroll по групах */
         @media (max-width: 900px) {
             .table-card {
-                scroll-snap-type: x proximity;
-                scroll-padding-left: 75px;
+                scroll-snap-type: x mandatory;
+                scroll-padding-inline: 75px 0;
             }
             
             table {
-                min-width: 1200px;
+                min-width: 1400px;
             }
             
             .name-cell, th:first-child {
@@ -73,37 +73,40 @@
                 font-size: 9px;
                 padding: 6px 3px;
                 box-shadow: 4px 0 8px rgba(0,0,0,0.15);
+                background: white !important;
             }
             
             th, td {
                 font-size: 10px;
-                padding: 6px 4px;
+                padding: 6px 5px;
                 white-space: nowrap;
+                min-width: 70px;
             }
             
-            /* Snap на початку кожної ГРУПИ з відступом від sticky */
-            /* ТО План - показує ПК + ТО План/Факт/% (3 колонки) */
-            th:nth-child(2), tr td:nth-child(2) {
-                scroll-snap-align: start;
-                scroll-margin-left: 75px;
+            /* Збільшуємо ширину % колонок */
+            .val-pct {
+                min-width: 65px;
             }
             
-            /* Послуги План - показує ПК + Послуги всі 4 колонки */
-            th.group-serv.group-start, td.group-serv.group-start {
-                scroll-snap-align: start;
-                scroll-margin-left: 75px;
+            /* Snap на ФАКТ колонці кожної групи щоб група була по центру */
+            /* ТО Факт (3-тя колонка) - покаже План, Факт, % */
+            th:nth-child(3), tr td:nth-child(3) {
+                scroll-snap-align: center;
             }
             
-            /* АСС План - показує ПК + АСС всі 4 колонки */
-            th.group-acc.group-start, td.group-acc.group-start {
-                scroll-snap-align: start;
-                scroll-margin-left: 75px;
+            /* Послуги Доля (7-ма колонка) - покаже всі 4 колонки Послуг */
+            th:nth-child(7), tr td:nth-child(7) {
+                scroll-snap-align: center;
             }
             
-            /* Чеки План - показує ПК + Чеки всі 3 колонки */
-            th.group-checks.group-start, td.group-checks.group-start {
-                scroll-snap-align: start;
-                scroll-margin-left: 75px;
+            /* АСС Доля (11-та колонка) - покаже всі 4 колонки АСС */
+            th:nth-child(11), tr td:nth-child(11) {
+                scroll-snap-align: center;
+            }
+            
+            /* Чеки Факт (14-та колонка) - покаже всі 3 колонки Чеків */
+            th:nth-child(14), tr td:nth-child(14) {
+                scroll-snap-align: center;
             }
         }
 
