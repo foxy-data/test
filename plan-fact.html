@@ -60,7 +60,6 @@
         @media (max-width: 900px) {
             .table-card {
                 scroll-snap-type: x mandatory;
-                scroll-padding-inline: 75px 0;
             }
             
             table {
@@ -88,25 +87,29 @@
                 min-width: 65px;
             }
             
-            /* Snap на ФАКТ колонці кожної групи щоб група була по центру */
-            /* ТО Факт (3-тя колонка) - покаже План, Факт, % */
+            /* Snap на ФАКТ колонці - щоб План був видимий після sticky */
+            /* ТО Факт (3-тя) = показує ПК(sticky) + План + Факт + % */
             th:nth-child(3), tr td:nth-child(3) {
-                scroll-snap-align: center;
+                scroll-snap-align: start;
+                scroll-margin-left: 145px; /* 75px(ПК) + 70px(План) */
             }
             
-            /* Послуги Доля (7-ма колонка) - покаже всі 4 колонки Послуг */
-            th:nth-child(7), tr td:nth-child(7) {
-                scroll-snap-align: center;
+            /* Послуги Факт (6-та) = показує ПК + План + Факт + Доля + % */
+            th:nth-child(6), tr td:nth-child(6) {
+                scroll-snap-align: start;
+                scroll-margin-left: 145px;
             }
             
-            /* АСС Доля (11-та колонка) - покаже всі 4 колонки АСС */
-            th:nth-child(11), tr td:nth-child(11) {
-                scroll-snap-align: center;
+            /* АСС Факт (10-та) = показує ПК + План + Факт + Доля + % */
+            th:nth-child(10), tr td:nth-child(10) {
+                scroll-snap-align: start;
+                scroll-margin-left: 145px;
             }
             
-            /* Чеки Факт (14-та колонка) - покаже всі 3 колонки Чеків */
+            /* Чеки Факт (14-та) = показує ПК + План + Факт + % */
             th:nth-child(14), tr td:nth-child(14) {
-                scroll-snap-align: center;
+                scroll-snap-align: start;
+                scroll-margin-left: 145px;
             }
         }
 
