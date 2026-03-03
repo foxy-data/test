@@ -83,7 +83,7 @@
         .nav-logo { font-weight: 600; font-size: 17px; cursor: pointer; }
         .logout-btn { font-size: 12px; color: var(--color-text-secondary); cursor: pointer; border: none; background: none; }
 
-        .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px 16px; }
         
         @media (min-width: 1200px) {
             .container {
@@ -91,9 +91,9 @@
                 padding: 40px 30px;
             }
         }
-        header { margin-bottom: 40px; }
-        header h1 { font-size: 40px; font-weight: 600; letter-spacing: -0.02em; }
-        header p { color: var(--color-text-secondary); font-size: 21px; }
+        header { margin-bottom: 16px; }
+        header h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
+        header p { color: var(--color-text-secondary); font-size: 15px; }
 
         .cards-grid {
             display: grid;
@@ -450,6 +450,147 @@
             header h1 { font-size: 32px; }
             .avatar { width: 50px; height: 50px; font-size: 18px; }
         }
+
+        /* --- КОМПАКТНА ТАБЛИЦЯ З GOOGLE SHEETS --- */
+        .gsheet-block {
+            background: #fff;
+            border-radius: 18px;
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-md);
+            margin-bottom: 24px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        /* Згорнутий стан */
+        .gsheet-block.collapsed .gsheet-body {
+            display: none;
+        }
+        .gsheet-body {
+            /* 48px nav + ~50px page header + 44px gsheet header + 24px margin */
+            max-height: calc(100dvh - 48px - 50px - 44px - 24px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .gsheet-body::-webkit-scrollbar { width: 3px; }
+        .gsheet-body::-webkit-scrollbar-thumb { background: #d2d2d7; border-radius: 10px; }
+        .gsheet-block.collapsed {
+            border-radius: 18px;
+        }
+        .gsheet-expand-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--color-accent);
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-family: inherit;
+            transition: opacity 0.2s;
+        }
+        .gsheet-expand-btn:hover { opacity: 0.7; }
+        .gsheet-expand-arrow {
+            display: inline-block;
+            transition: transform 0.25s ease;
+            font-style: normal;
+        }
+        .gsheet-block:not(.collapsed) .gsheet-expand-arrow {
+            transform: rotate(180deg);
+        }
+        .gsheet-block-header {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 14px;
+            border-bottom: 1px solid var(--color-border);
+            background: #f5f5f7;
+            border-radius: 18px 18px 0 0;
+        }
+        .gsheet-block-title {
+            display: flex; align-items: center; gap: 7px;
+            font-size: 13px; font-weight: 600; color: var(--color-text);
+        }
+        .gsheet-refresh-btn {
+            background: none; border: 1px solid var(--color-border);
+            border-radius: 8px; padding: 4px 9px; font-size: 11px;
+            font-weight: 500; color: var(--color-text-secondary);
+            cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; gap: 4px; font-family: inherit;
+        }
+        .gsheet-refresh-btn:hover { color: var(--color-accent); border-color: var(--color-accent); }
+        .gsheet-table-wrapper {
+            overflow-x: hidden;
+        }
+        .gsheet-table-wrapper::-webkit-scrollbar { height: 4px; width: 4px; }
+        .gsheet-table-wrapper::-webkit-scrollbar-thumb { background: #d2d2d7; border-radius: 10px; }
+        .gsheet-table {
+            width: 100%; border-collapse: collapse; table-layout: fixed;
+        }
+        .gsheet-table thead th {
+            background: #f5f5f7; padding: 5px 6px; text-align: left;
+            font-size: 9px; font-weight: 700; text-transform: uppercase;
+            color: var(--color-text-secondary); letter-spacing: 0.03em;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            position: sticky; top: 0; z-index: 1;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .gsheet-table tbody tr { border-bottom: 1px solid rgba(0,0,0,0.04); }
+        .gsheet-table tbody tr:last-child { border-bottom: none; }
+        .gsheet-table tbody td {
+            padding: 4px 5px; white-space: normal; word-break: break-word;
+            vertical-align: top; font-size: 10px; line-height: 1.25; color: var(--color-text);
+        }
+        .gsheet-table tbody td:first-child {
+            font-weight: 600; border-left: 3px solid transparent; padding-left: 6px;
+            width: 55px; min-width: 55px; max-width: 55px;
+            white-space: normal; word-break: break-word;
+        }
+        .gsheet-row-acc { background: #fff7ed; }
+        .gsheet-row-acc td:first-child { color: #c05800; border-left-color: #f97316; }
+        .gsheet-row-acc:hover { background: #ffedd5; }
+        .gsheet-row-av { background: #eff6ff; }
+        .gsheet-row-av td:first-child { color: #1d4ed8; border-left-color: #3b82f6; }
+        .gsheet-row-av:hover { background: #dbeafe; }
+        .gsheet-row-dig { background: #fefce8; }
+        .gsheet-row-dig td:first-child { color: #854d0e; border-left-color: #eab308; }
+        .gsheet-row-dig:hover { background: #fef9c3; }
+        .gsheet-row-it { background: #f0fdf4; }
+        .gsheet-row-it td:first-child { color: #166534; border-left-color: #22c55e; }
+        .gsheet-row-it:hover { background: #dcfce7; }
+        .gsheet-row-kbt { background: #fdf4ff; }
+        .gsheet-row-kbt td:first-child { color: #7c3aed; border-left-color: #a855f7; }
+        .gsheet-row-kbt:hover { background: #f3e8ff; }
+        .gsheet-row-mbt { background: #f0fdfa; }
+        .gsheet-row-mbt td:first-child { color: #0f766e; border-left-color: #14b8a6; }
+        .gsheet-row-mbt:hover { background: #ccfbf1; }
+        .gsheet-row-credit { background: #fff1f2; }
+        .gsheet-row-credit td:first-child { color: #be123c; border-left-color: #f43f5e; }
+        .gsheet-row-credit:hover { background: #ffe4e6; }
+        .gsheet-row-discount { background: #fdf2f8; }
+        .gsheet-row-discount td:first-child { color: #9d174d; border-left-color: #ec4899; }
+        .gsheet-row-discount:hover { background: #fce7f3; }
+        .gsheet-row-limit { background: #f8fafc; }
+        .gsheet-row-limit td:first-child { color: #475569; border-left-color: #94a3b8; }
+        .gsheet-row-limit:hover { background: #f1f5f9; }
+        .gsheet-row-other { background: #fff; }
+        .gsheet-row-other td:first-child { border-left-color: #d2d2d7; }
+        .gsheet-row-other:hover { background: #f9f9fb; }
+        .gsheet-loading {
+            padding: 20px; text-align: center; color: var(--color-text-secondary);
+            font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .gsheet-loading-spinner {
+            width: 16px; height: 16px; border: 2px solid #d2d2d7;
+            border-top-color: var(--color-accent); border-radius: 50%;
+            animation: gsheet-spin 0.7s linear infinite;
+        }
+        @keyframes gsheet-spin { to { transform: rotate(360deg); } }
+        .gsheet-error { padding: 16px; text-align: center; color: #ff3b30; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -477,6 +618,31 @@
                 <h1>Команда</h1>
                 <p>Статистика та графіки департаменту</p>
             </header>
+            <!-- ТАБЛИЦЯ З GOOGLE SHEETS -->
+            <div class="gsheet-block collapsed" id="gsheet-block">
+                <div class="gsheet-block-header">
+                    <div class="gsheet-block-title">
+                        <span>📋</span>
+                        <span id="gsheet-title">ПОСИЛЕННЯ</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <button class="gsheet-refresh-btn" onclick="loadGSheet()">↻ Оновити</button>
+                        <button class="gsheet-expand-btn" onclick="toggleGSheet()">
+                            <span id="gsheet-expand-label">Розгорнути</span>
+                            <i class="gsheet-expand-arrow">▼</i>
+                        </button>
+                    </div>
+                </div>
+                <div class="gsheet-body">
+                    <div id="gsheet-content">
+                        <div class="gsheet-loading">
+                            <div class="gsheet-loading-spinner"></div>
+                            Завантаження...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="sales-cards"></div>
         </div>
 
@@ -511,6 +677,7 @@
         function unlockSite() {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
+            loadGSheet();
             loadData();
         }
 
@@ -535,6 +702,113 @@
                 }
             }
         };
+
+
+        // --- GOOGLE SHEETS ТАБЛИЦЯ ---
+        const GSHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTd9BXXff9qHAx0Hp0MEgb-rzsHOgsnBUoqus8vf5zSCzmDfNbe0Js9pcY_2YMkZT6lLZp7vmTEbwM6/pub?output=csv';
+
+        function toggleGSheet() {
+            const block = document.getElementById('gsheet-block');
+            const label = document.getElementById('gsheet-expand-label');
+            const isCollapsed = block.classList.contains('collapsed');
+            if (isCollapsed) {
+                block.classList.remove('collapsed');
+                label.textContent = 'Згорнути';
+            } else {
+                block.classList.add('collapsed');
+                label.textContent = 'Розгорнути';
+            }
+        }
+
+        async function loadGSheet() {
+            const content = document.getElementById('gsheet-content');
+            content.innerHTML = `<div class="gsheet-loading"><div class="gsheet-loading-spinner"></div>Завантаження...</div>`;
+            try {
+                const res = await fetch(GSHEET_CSV_URL + '&t=' + Date.now());
+                if (!res.ok) throw new Error('fail');
+                renderGSheetTable(await res.text());
+            } catch(e) {
+                content.innerHTML = `<div class="gsheet-error">⚠️ Помилка завантаження</div>`;
+            }
+        }
+
+        function parseCSV(text) {
+            const rows = []; let cells = [], cur = '', inQ = false;
+            for (let i = 0; i < text.length; i++) {
+                const ch = text[i];
+                if (ch === '"') { if (inQ && text[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ; }
+                else if (ch === ',' && !inQ) { cells.push(cur); cur = ''; }
+                else if ((ch === '\n' || ch === '\r') && !inQ) {
+                    if (ch === '\r' && text[i+1] === '\n') i++;
+                    cells.push(cur); cur = ''; rows.push(cells); cells = [];
+                } else cur += ch;
+            }
+            if (cur || cells.length) { cells.push(cur); rows.push(cells); }
+            return rows.filter(r => r.some(c => c.trim()));
+        }
+
+        function rowClass(val) {
+            const v = (val || '').trim().toLowerCase();
+            if (v.startsWith('асс') || v === 'acc') return 'gsheet-row-acc';
+            if (v.startsWith('ав') || v === 'av') return 'gsheet-row-av';
+            if (v.startsWith('діг') || v.startsWith('dig')) return 'gsheet-row-dig';
+            if (v.startsWith('іт') || v === 'it') return 'gsheet-row-it';
+            if (v.startsWith('кбт') || v === 'kbt') return 'gsheet-row-kbt';
+            if (v.startsWith('мбт') || v === 'mbt') return 'gsheet-row-mbt';
+            if (v.includes('кредит')) return 'gsheet-row-credit';
+            if (v.includes('знижк') || v.includes('інет')) return 'gsheet-row-discount';
+            if (v.includes('обмеж')) return 'gsheet-row-limit';
+            return 'gsheet-row-other';
+        }
+
+        function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+        function renderGSheetTable(csv) {
+            const el = document.getElementById('gsheet-content');
+            const rows = parseCSV(csv);
+            if (!rows.length) { el.innerHTML = `<div class="gsheet-error">Порожня таблиця</div>`; return; }
+            const headers = rows[0];
+
+            // Визначаємо індекс колонки "Продавець" та колонки-групи
+            const sellerIdx = headers.findIndex(h => /продав|seller|прод\./i.test(h));
+
+            // Генеруємо colgroup — фіксовані пропорції під мобільний
+            // Колонки: [Група, Продавець, Ліміт у мене, На одиничні позиції, На одиничні товари, Від чек]
+            // Ширини в %: 8, 18, 22, 22, 16, 14
+            const colWidths = [8, 24, 18, 18, 18, 14];
+            const total = headers.length;
+            let colgroup = '<colgroup>';
+            headers.forEach((h, i) => {
+                const w = colWidths[i] !== undefined ? colWidths[i] : Math.floor(60 / Math.max(total - 2, 1));
+                colgroup += `<col style="width:${w}%">`;
+            });
+            colgroup += '</colgroup>';
+
+            let html = `<div class="gsheet-table-wrapper"><table class="gsheet-table">${colgroup}<thead><tr>`;
+            headers.forEach((h, i) => {
+                const wrap = (i === 0 || i === sellerIdx) ? ' style="white-space:normal"' : '';
+                html += `<th${wrap}>${esc(h)}</th>`;
+            });
+            html += `</tr></thead><tbody>`;
+            rows.slice(1).forEach(row => {
+                const cls = rowClass(row[0]);
+                // Перевіряємо чи є дані після 2-ї колонки
+                const hasExtraCols = row.slice(2).some(c => (c || '').trim() !== '');
+                html += `<tr class="${cls}">`;
+                if (!hasExtraCols && headers.length > 2) {
+                    // Перша колонка — назва групи, решта — colspan
+                    html += `<td>${esc(row[0])}</td>`;
+                    html += `<td colspan="${headers.length - 1}" style="white-space:normal;word-break:break-word">${esc(row[1] || '')}</td>`;
+                } else {
+                    headers.forEach((_, i) => {
+                        html += `<td>${esc(row[i])}</td>`;
+                    });
+                }
+                html += `</tr>`;
+            });
+            html += `</tbody></table></div>`;
+            el.innerHTML = html;
+        }
 
         // --- ЛОГІКА ДАНИХ ТА ВІДОБРАЖЕННЯ ---
         let currentData = [];
