@@ -27,7 +27,6 @@
         }
         h1 { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
 
-        /* === ОДНА ТАБЛИЦЯ, overflow-x на table-card — як в plan-fact === */
         .table-card {
             background: white;
             border-radius: 16px;
@@ -40,18 +39,16 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1200px;
             table-layout: fixed;
         }
 
-        /* === ГРУПОВІ ЗАГОЛОВКИ === */
         th.group-header {
             text-align: center;
             font-size: 10px;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            padding: 7px 6px;
+            padding: 7px 4px;
             color: #1d1d1f;
             border-bottom: 1px solid #d2d2d7;
             background: white;
@@ -64,9 +61,9 @@
 
         th {
             text-align: left;
-            padding: 5px 6px;
+            padding: 5px 4px;
             color: #86868b;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 600;
             text-transform: uppercase;
             border-bottom: 1px solid #d2d2d7;
@@ -81,46 +78,48 @@
         th.g-checks { color: #af52de; }
 
         td {
-            padding: 5px 6px;
+            padding: 4px 3px;
             border-bottom: 1px solid #f2f2f4;
-            font-size: 12px;
+            font-size: 11px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        /* Роздільник між групами */
         .grp-start { border-left: 2px solid #d2d2d7 !important; }
 
-        /* === STICKY ПЕРША КОЛОНКА — точно як plan-fact === */
+        /* STICKY ім'я */
         .name-cell, th:first-child {
             position: sticky;
             left: 0;
             background: white;
-            z-index: 10;
-            width: 90px;
-            min-width: 90px;
-            max-width: 90px;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+            z-index: 100;
+            box-shadow: 4px 0 8px -2px rgba(0,0,0,0.12);
             font-weight: 600;
-            font-size: 11px;
             white-space: normal;
             line-height: 1.2;
-            padding: 5px 5px;
+            word-break: break-word;
         }
-        th:first-child { z-index: 11; }
+        th:first-child { z-index: 101; }
 
-        /* === ЗНАЧЕННЯ === */
-        .val-plan   { color: #aaa; font-size: 10px; }
-        .val-fact   { font-weight: 600; }
-        .val-pct    { font-weight: 700; }
+        .cell-badge {
+            display: block;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            text-align: center;
+            padding: 2px 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .badge-plan        { background: rgba(134,134,139,0.10); color: #6e6e73; font-weight: 500; font-size: 9px; }
+        .badge-fact-to     { background: rgba(0,113,227,0.12);   color: #1a50b8; }
+        .badge-fact-serv   { background: rgba(52,199,89,0.12);   color: #1a7f37; }
+        .badge-fact-acc    { background: rgba(255,149,0,0.12);   color: #b85000; }
+        .badge-fact-checks { background: rgba(175,82,222,0.12);  color: #6d28d9; }
+        .badge-fact-none   { background: rgba(134,134,139,0.08); color: #3d3d3f; }
 
-        .val-fact.g-to,     .val-pct.g-to     { color: #0071e3; }
-        .val-fact.g-serv,   .val-pct.g-serv   { color: #34c759; }
-        .val-fact.g-acc,    .val-pct.g-acc    { color: #ff9500; }
-        .val-fact.g-checks, .val-pct.g-checks { color: #af52de; }
-
-        /* === СПЕЦІАЛЬНІ РЯДКИ === */
         .time-row td           { background: #f5f5f7 !important; font-weight: 700; color: #333; }
         .time-row td.name-cell { background: #f5f5f7 !important; }
         .summary-row td           { background: #eaf1fe !important; font-weight: 700; color: #1d1d1f !important; }
@@ -129,53 +128,73 @@
         .loading { padding: 40px; text-align: center; color: #86868b; }
         .error   { padding: 40px; text-align: center; color: #ff3b30; }
 
-        /* === МОБІЛЬНА — точно як plan-fact === */
-        @media (max-width: 767px) {
-            .table-card {
-                scroll-snap-type: x proximity;
-                scroll-behavior: smooth;
-                scroll-padding-left: 100px;
-                -webkit-overflow-scrolling: touch;
-                overscroll-behavior-x: contain;
-            }
-
-            table { min-width: 900px; }
+        /* ===================== ДЕСКТОП ===================== */
+        @media (min-width: 768px) {
+            table { min-width: 1100px; }
 
             .name-cell, th:first-child {
-                width: 100px;
-                min-width: 100px;
-                max-width: 100px;
-                font-size: 9.5px;
-                padding: 5px 4px;
-                z-index: 20 !important;
+                width: 110px; min-width: 110px; max-width: 110px;
+                font-size: 11px;
+                padding: 5px 6px;
+            }
+
+            /* план */
+            .col-plan  { width: 72px; }
+            /* факт */
+            .col-fact  { width: 90px; }
+            /* % або доля */
+            .col-pct   { width: 70px; }
+            /* share (Доля послуг / Доля ACC) */
+            .col-share { width: 70px; }
+
+            td { font-size: 12px; padding: 5px 5px; }
+            th { font-size: 10px; padding: 5px 5px; }
+            .cell-badge { font-size: 11px; padding: 2px 5px; }
+        }
+
+        /* ===================== МОБІЛЬНИЙ =====================
+           Мета: sticky ПК (85px) + рівно 3 колонки групи на екрані (~305px залишок на 390px екрані)
+           Кожна колонка = ~101px → 3 × 101 = 303px ✓
+        */
+        @media (max-width: 767px) {
+            /* Ширина 1 колонки = (100vw - 85px) / 3 */
+            :root { --mob-name: 85px; --mob-col: calc((100vw - 85px) / 3); }
+
+            table { min-width: calc(85px + var(--mob-col) * 12); } /* запас на всі колонки */
+
+            .name-cell, th:first-child {
+                width: var(--mob-name); min-width: var(--mob-name); max-width: var(--mob-name);
+                font-size: 9px;
+                padding: 4px 4px;
+                z-index: 200 !important;
                 background: white;
                 background-clip: padding-box;
-                box-shadow: 4px 0 10px -2px rgba(0,0,0,0.14);
+                box-shadow: 4px 0 10px -2px rgba(0,0,0,0.18);
                 border-right: 1px solid #e0e0e5;
             }
-            th:first-child { z-index: 21 !important; }
+            th:first-child { z-index: 201 !important; }
 
-            td:not(.name-cell), th:not(:first-child) {
-                position: relative;
-                z-index: 1;
+            /* Усі колонки даних — рівно 1/3 вільного простору */
+            .col-plan, .col-fact, .col-pct, .col-share {
+                width: var(--mob-col);
+                min-width: var(--mob-col);
+                max-width: var(--mob-col);
             }
 
-            th, td {
-                min-width: calc((100vw - 100px) / 2.7);
-                max-width: calc((100vw - 100px) / 2.7);
-                font-size: 10.5px;
-                padding: 5px 4px;
+            td { font-size: 10.5px; padding: 4px 3px; }
+            th { font-size: 8.5px;  padding: 4px 3px; }
+            th.group-header { font-size: 9px; padding: 5px 3px; }
+
+            .cell-badge {
+                font-size: 10px;
+                padding: 2px 3px;
+                border-radius: 5px;
             }
 
-            /* Snap точки — nth-child відповідає першій колонці кожної групи */
-            /* scroll-padding-left на контейнері враховує sticky name-cell */
-            th:nth-child(2), td:nth-child(2) { scroll-snap-align: start; }
-            th:nth-child(5), td:nth-child(5) { scroll-snap-align: start; }
-            th:nth-child(8), td:nth-child(8) { scroll-snap-align: start; }
-            th:nth-child(11), td:nth-child(11) { scroll-snap-align: start; }
-            th:nth-child(12), td:nth-child(12) { scroll-snap-align: start; }
-
-            td, th { scroll-snap-stop: normal; }
+            .table-card {
+                scroll-snap-type: x mandatory;
+                scroll-padding-left: var(--mob-name);
+            }
         }
     </style>
 </head>
@@ -186,6 +205,7 @@
     <div class="table-card">
         <div id="loader" class="loading">Завантаження...</div>
         <table id="tbl" style="display:none">
+            <colgroup id="cg"></colgroup>
             <thead id="thead"></thead>
             <tbody id="tbody"></tbody>
         </table>
@@ -219,9 +239,9 @@ function colInfo(h) {
     else if (u === 'ЧЕКИ' || u === 'ЧЕК' || u.startsWith('ПЛАН ЧЕК') || u.startsWith('ФАКТ ЧЕК') || u.startsWith('% ЧЕК')) g = 'checks';
     else if (u.includes(' ТО') || u.startsWith('ТО') || u.endsWith('ТО')) g = 'to';
 
-    if      (u.includes('ПЛАН'))                             t = 'plan';
-    else if (u.includes('%') || u.includes('ВИКО'))          t = 'pct';
-    else if (u.includes('ДОЛЯ') || u.includes('SHARE'))      t = 'share';
+    if      (u.includes('ПЛАН'))                         t = 'plan';
+    else if (u.includes('%') || u.includes('ВИКО'))      t = 'pct';
+    else if (u.includes('ДОЛЯ') || u.includes('SHARE'))  t = 'share';
     return { g, t };
 }
 
@@ -240,7 +260,7 @@ function fmtPct(v) {
     let n = toNum(v);
     const s = v ? v.toString() : '';
     if (!s.includes('%') && n > 0 && n < 2) n *= 100;
-    return n.toFixed(2) + '%';
+    return n.toFixed(1) + '%';
 }
 function pctBg(v) {
     let n = toNum(v);
@@ -257,8 +277,6 @@ function pctBg(v) {
 // ===== THEAD =====
 function buildThead(headers) {
     const thead = document.getElementById('thead');
-
-    // Збираємо групи
     const groups = [];
     let cur = null;
     for (let i = 1; i < headers.length; i++) {
@@ -267,7 +285,6 @@ function buildThead(headers) {
         else cur.count++;
     }
 
-    // Рядок 1: групові заголовки
     const tr1 = document.createElement('tr');
     const corner = document.createElement('th');
     corner.rowSpan = 2;
@@ -282,13 +299,18 @@ function buildThead(headers) {
     }
     thead.appendChild(tr1);
 
-    // Рядок 2: підзаголовки
     const tr2 = document.createElement('tr');
     let prevG = '';
     for (let i = 1; i < headers.length; i++) {
-        const { g } = colInfo(headers[i]);
+        const { g, t } = colInfo(headers[i]);
         const th = document.createElement('th');
         th.className = (g ? 'g-'+g : '');
+        // клас ширини
+        if (t === 'plan')  th.classList.add('col-plan');
+        else if (t === 'pct')   th.classList.add('col-pct');
+        else if (t === 'share') th.classList.add('col-share');
+        else                    th.classList.add('col-fact');
+
         if (g !== prevG) th.classList.add('grp-start');
         prevG = g;
         const lbl = headers[i].trim().toUpperCase();
@@ -297,6 +319,68 @@ function buildThead(headers) {
         tr2.appendChild(th);
     }
     thead.appendChild(tr2);
+}
+
+// ===== ДИНАМІЧНА ЗАЛИВКА "ДОЛЯ" КОЛОНОК =====
+function colorizeShareCols(headers) {
+    const tbody = document.getElementById('tbody');
+    if (!tbody) return;
+
+    const shareColIndexes = [];
+    for (let i = 1; i < headers.length; i++) {
+        if (colInfo(headers[i]).t === 'share') shareColIndexes.push(i);
+    }
+    if (!shareColIndexes.length) return;
+
+    shareColIndexes.forEach(colIdx => {
+        const cells = [];
+        tbody.querySelectorAll('tr:not(.time-row):not(.summary-row)').forEach(tr => {
+            const td = tr.querySelectorAll('td')[colIdx];
+            if (!td) return;
+            const badge = td.querySelector('.cell-badge');
+            const raw = badge ? badge.textContent.trim() : td.textContent.trim();
+            const num = parseFloat(raw.replace('%','').replace(/\s/g,'').replace(',','.')) || 0;
+            cells.push({ badge, num });
+        });
+
+        if (!cells.length) return;
+        const vals = cells.map(c => c.num);
+        const min = Math.min(...vals), max = Math.max(...vals);
+        const range = max - min || 1;
+
+        cells.forEach(({ badge, num }) => {
+            if (!badge) return;
+            const ratio = (num - min) / range;
+            const hue  = Math.round(ratio * 120);
+            const lBg  = Math.round(88 - ratio * 10);
+            const lFg  = Math.round(28 + ratio * 10);
+            badge.style.background = `hsl(${hue},70%,${lBg}%)`;
+            badge.style.color      = `hsl(${hue},60%,${lFg}%)`;
+        });
+    });
+}
+
+// ===== SNAP по grp-start колонках =====
+function applySnapToGroupStarts() {
+    if (window.innerWidth >= 768) return;
+    // Знаходимо індекси td де є grp-start і виставляємо scroll-snap-align
+    const rows = document.querySelectorAll('#tbody tr');
+    if (!rows.length) return;
+    const firstRow = rows[0];
+    firstRow.querySelectorAll('td').forEach((td, i) => {
+        if (i === 0) return;
+        if (td.classList.contains('grp-start')) {
+            // виставляємо snap через stylesheet
+            td.style.scrollSnapAlign = 'start';
+        }
+    });
+    // те саме для thead
+    document.querySelectorAll('#thead tr:last-child th').forEach((th, i) => {
+        if (i === 0) return;
+        if (th.classList.contains('grp-start')) {
+            th.style.scrollSnapAlign = 'start';
+        }
+    });
 }
 
 // ===== ЗАВАНТАЖЕННЯ =====
@@ -336,34 +420,41 @@ async function load() {
             let prevG = '';
             for (let i = 1; i < headers.length; i++) {
                 const { g, t } = colInfo(headers[i]);
-                const val      = (row[i] || '').trim();
-                const isStart  = g !== prevG;
+                const val = (row[i] || '').trim();
+                const isStart = g !== prevG;
                 prevG = g;
 
                 const td = document.createElement('td');
                 if (isStart && g) td.classList.add('grp-start');
 
+                // клас ширини для td
+                if (t === 'plan')       td.classList.add('col-plan');
+                else if (t === 'pct')   td.classList.add('col-pct');
+                else if (t === 'share') td.classList.add('col-share');
+                else                    td.classList.add('col-fact');
+
                 if (t === 'pct' && !isTime) {
                     const { bg, fg } = pctBg(val);
-                    td.className = 'val-pct' + (g ? ' g-'+g : '');
+                    td.className += ' val-pct' + (g ? ' g-'+g : '');
                     if (isStart && g) td.classList.add('grp-start');
-                    td.style.background = bg;
-                    td.style.color = isSummary ? '#1d1d1f' : fg;
-                    td.textContent = val ? fmtPct(val) : '';
+                    td.innerHTML = '<span class="cell-badge" style="background:'+bg+';color:'+(isSummary?'#1d1d1f':fg)+'">'+( val ? fmtPct(val) : '')+'</span>';
                 } else if (t === 'share') {
-                    td.className = 'val-fact' + (g ? ' g-'+g : '');
-                    td.textContent = val;
+                    td.innerHTML = '<span class="cell-badge badge-fact-'+(g||'none')+'">'+val+'</span>';
                 } else if (t === 'plan') {
-                    td.className = 'val-plan' + (g ? ' g-'+g : '');
-                    td.textContent = isTime ? val : fmtInt(val);
+                    const planTxt = isTime ? val : fmtInt(val);
+                    td.innerHTML = isTime ? planTxt : '<span class="cell-badge badge-plan">'+planTxt+'</span>';
                 } else {
-                    td.className = 'val-fact' + (g ? ' g-'+g : '');
-                    td.textContent = (!isTime && val && !val.includes('%')) ? fmtInt(val) : val;
+                    const factTxt = (!isTime && val && !val.includes('%')) ? fmtInt(val) : val;
+                    td.innerHTML = isTime ? factTxt : '<span class="cell-badge badge-fact-'+(g||'none')+'">'+factTxt+'</span>';
                 }
                 tr.appendChild(td);
             }
             tbody.appendChild(tr);
         }
+
+        colorizeShareCols(headers);
+        applySnapToGroupStarts();
+
     } catch(e) {
         const el = document.getElementById('loader');
         el.className = 'error';
