@@ -679,10 +679,10 @@ function renderChart() {
                 }
 
                 group.forEach(p => {
-                    const bx = p.x - p.tw / 2 - PAD_X;
-                    const by = p.labelY - FONT_SIZE - PAD_Y;
                     const bw = p.tw + PAD_X * 2;
                     const bh = FONT_SIZE + PAD_Y * 2;
+                    const bx = p.x - bw / 2;
+                    const by = p.labelY - bh / 2;
 
                     // Тінь
                     ctx.shadowColor = 'rgba(0,0,0,0.18)';
@@ -703,10 +703,14 @@ function renderChart() {
                     ctx.roundRect(bx, by, bw, bh, 4);
                     ctx.stroke();
 
-                    // Текст
+                    // Текст — точно по центру рамки
                     ctx.fillStyle = p.color;
                     ctx.font = `700 ${FONT_SIZE}px Inter, sans-serif`;
-                    ctx.fillText(p.text, p.x - p.tw / 2, p.labelY);
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(p.text, p.x, by + bh / 2);
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'alphabetic';
 
                     // Пунктирна лінія від підпису до точки
                     const lineStartY = by + bh;
