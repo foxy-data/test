@@ -190,6 +190,8 @@ function colInfo(h) {
     else if (u.includes('АСС') || u.includes('ACC') || u.includes('АКСЕС')) g = 'acc';
     else if (u === 'ЧЕКИ' || u === 'ЧЕК' || u.startsWith('ПЛАН ЧЕК') || u.startsWith('ФАКТ ЧЕК') || u.startsWith('% ЧЕК')) g = 'checks';
     else if (u.includes(' ТО') || u.startsWith('ТО') || u.endsWith('ТО')) g = 'to';
+    else if (u.includes('ДОХІД') || u.includes('ДОХОД') || u.includes('INCOME') || u.includes('MARGIN') || u.includes('МАРЖА')) g = 'income';
+    else if ((u.includes('СР') && (u.includes('ЧЕК') || u.includes('CHECK'))) || u === 'ASP' || u.includes('AVG CHECK')) g = 'avgcheck';
     if      (u.includes('ПЛАН'))                         t = 'plan';
     else if (u.includes('%') || u.includes('ВИКО'))      t = 'pct';
     else if (u.includes('ДОЛЯ') || u.includes('SHARE'))  t = 'share';
@@ -491,10 +493,14 @@ function toggleCompact() {
 
 // ===== RATING =====
 const RATING_DEFS = [
-    { key:'to',     label:'ТО',       color:'#0071e3' },
-    { key:'serv',   label:'Послуги',  color:'#34c759' },
-    { key:'acc',    label:'ACC',      color:'#ff9500' },
-    { key:'checks', label:'Чеки',     color:'#af52de' },
+    { key:'to',        label:'ТО',          color:'#0071e3', gFilter:'to',       tFilter:'fact'  },
+    { key:'serv',      label:'Послуги',      color:'#34c759', gFilter:'serv',     tFilter:'fact'  },
+    { key:'serv_shr',  label:'Доля посл.',   color:'#34c759', gFilter:'serv',     tFilter:'share' },
+    { key:'acc',       label:'ACC',          color:'#ff9500', gFilter:'acc',      tFilter:'fact'  },
+    { key:'acc_shr',   label:'Доля ACC',     color:'#ff9500', gFilter:'acc',      tFilter:'share' },
+    { key:'checks',    label:'Чеки',         color:'#af52de', gFilter:'checks',   tFilter:'fact'  },
+    { key:'income',    label:'Дохід',        color:'#00b388', gFilter:'income',   tFilter:'fact'  },
+    { key:'avgcheck',  label:'Серед. чек',   color:'#5856d6', gFilter:'avgcheck', tFilter:'fact'  },
 ];
 let activeRatingKey = 'to';
 
@@ -521,9 +527,14 @@ function setView(mode) {
 function buildRatingMetricPills() {
     const c = document.getElementById('metricPills');
     c.innerHTML = '';
-    // показуємо тільки групи що є в заголовках
-    const available = new Set(savedHeaders.map(h => colInfo(h).g).filter(g => g));
-    RATING_DEFS.filter(d => available.has(d.key)).forEach(d => {
+    // показуємо тільки метрики для яких є відповідна колонка в заголовках
+    const available = RATING_DEFS.filter(d => {
+        return savedHeaders.some(h => {
+            const { g, t } = colInfo(h);
+            return g === d.gFilter && t === d.tFilter;
+        });
+    });
+    available.forEach(d => {
         const btn = document.createElement('button');
         btn.className = 'mpill' + (d.key === activeRatingKey ? ' active' : '');
         btn.textContent = d.label;
@@ -531,6 +542,10 @@ function buildRatingMetricPills() {
         btn.onclick = () => { activeRatingKey = d.key; buildRatingMetricPills(); renderRankingCards(); };
         c.appendChild(btn);
     });
+    // якщо поточна метрика недоступна — переключаємо на першу
+    if (available.length && !available.find(d => d.key === activeRatingKey)) {
+        activeRatingKey = available[0].key;
+    }
 }
 
 function renderRankingCards() {
@@ -538,14 +553,17 @@ function renderRankingCards() {
     grid.innerHTML = '';
     const def = RATING_DEFS.find(d => d.key === activeRatingKey) || RATING_DEFS[0];
 
-    // Знаходимо індекс колонки Факт для обраної групи
+    // Знаходимо індекс колонки за gFilter + tFilter
     let factIdx = -1, planIdx = -1, pctIdx = -1;
     for (let i = 1; i < savedHeaders.length; i++) {
         const { g, t } = colInfo(savedHeaders[i]);
-        if (g !== def.key) continue;
-        if (t === 'fact' && factIdx < 0) factIdx = i;
-        if (t === 'plan' && planIdx < 0) planIdx = i;
-        if (t === 'pct'  && pctIdx  < 0) pctIdx  = i;
+        if (g !== def.gFilter) continue;
+        if (t === def.tFilter && factIdx < 0) factIdx = i;
+        // план і % шукаємо тільки для fact-метрик (не для share)
+        if (def.tFilter === 'fact') {
+            if (t === 'plan' && planIdx < 0) planIdx = i;
+            if (t === 'pct'  && pctIdx  < 0) pctIdx  = i;
+        }
     }
     if (factIdx < 0) {
         grid.innerHTML = '<div style="padding:40px;text-align:center;color:#86868b">Немає даних для цієї метрики</div>';
