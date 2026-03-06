@@ -606,9 +606,8 @@ function renderRankingCards() {
         const valFmt = v => {
             if (!v) return '—';
             const n = Number(v);
-            if (n >= 1000000) return (n/1000000).toFixed(2)+'М';
-            if (n >= 1000)    return (n/1000).toFixed(0)+'К';
-            return Math.round(n).toLocaleString('uk-UA');
+            if (isNaN(n)) return String(v);
+            return Number.isInteger(n) ? n.toLocaleString('uk-UA') : n.toLocaleString('uk-UA', {minimumFractionDigits:2, maximumFractionDigits:2});
         };
 
         const card = document.createElement('div');
