@@ -89,19 +89,21 @@
     .mpill{border:1.5px solid #d2d2d7;background:white;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;color:#6e6e73;transition:all .15s;white-space:nowrap}
     .mpill.active{color:white;border-color:transparent}
     .ranking-grid{display:flex;flex-direction:column;gap:7px}
-    .rank-card{background:white;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.06);padding:11px 14px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden;transition:transform .15s}
+    .rank-card{background:white;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.06);padding:10px 14px;display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden;transition:transform .15s}
     .rank-card:hover{transform:translateY(-1px)}
     .rank-bg{position:absolute;left:0;top:0;height:100%;opacity:.07;border-radius:14px;pointer-events:none;transition:width .5s ease}
-    .rank-pos{font-size:18px;font-weight:800;min-width:26px;text-align:center;line-height:1}
-    .rank-pos.gold{color:#f5a623}.rank-pos.silver{color:#9b9b9b}.rank-pos.bronze{color:#c47a3a}.rank-pos.rest{color:#ccc;font-size:14px}
+    .rank-top{display:flex;align-items:center;gap:10px}
+    .rank-pos{font-size:17px;font-weight:800;min-width:24px;text-align:center;line-height:1;flex-shrink:0}
+    .rank-pos.gold{color:#f5a623}.rank-pos.silver{color:#9b9b9b}.rank-pos.bronze{color:#c47a3a}.rank-pos.rest{color:#ccc;font-size:13px}
     .rank-name{flex:1;min-width:0}
-    .rank-name-text{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .rank-sub{font-size:10px;color:#6e6e73;margin-top:1px}
-    .rank-bar-wrap{flex:2;min-width:50px;max-width:140px}
-    .rank-bar-bg{height:6px;background:#ebebef;border-radius:3px;overflow:hidden}
+    .rank-name-text{font-size:12px;font-weight:700;white-space:normal;word-break:break-word;line-height:1.3}
+    .rank-sub{font-size:10px;color:#6e6e73;margin-top:2px}
+    .rank-bottom{display:flex;align-items:center;gap:8px;padding-left:34px}
+    .rank-bar-wrap{flex:1;min-width:0}
+    .rank-bar-bg{height:5px;background:#ebebef;border-radius:3px;overflow:hidden}
     .rank-bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
-    .rank-val{text-align:right;min-width:58px}
-    .rank-val-main{font-size:14px;font-weight:800;line-height:1.2}
+    .rank-val{text-align:right;flex-shrink:0}
+    .rank-val-main{font-size:13px;font-weight:800;line-height:1.2}
     .rank-val-sub{font-size:10px;color:#6e6e73}
 </style>
 ```
@@ -456,19 +458,23 @@ function renderRankingCards() {
         card.className = 'rank-card';
         card.innerHTML = `
             <div class="rank-bg" style="background:${m.color};width:${barPct}%"></div>
-            <div class="rank-pos ${posClass}">${pos<=3?['🥇','🥈','🥉'][pos-1]:pos}</div>
-            <div class="rank-name">
-                <div class="rank-name-text">${item.name}</div>
-                ${pctStr?`<div class="rank-sub">Виконання: ${pctStr}</div>`:''}
-            </div>
-            <div class="rank-bar-wrap">
-                <div class="rank-bar-bg">
-                    <div class="rank-bar-fill" style="width:${barPct}%;background:${m.color}"></div>
+            <div class="rank-top">
+                <div class="rank-pos ${posClass}">${pos<=3?['🥇','🥈','🥉'][pos-1]:pos}</div>
+                <div class="rank-name">
+                    <div class="rank-name-text">${item.name}</div>
+                    ${pctStr?`<div class="rank-sub">Виконання: ${pctStr}</div>`:''}
+                </div>
+                <div class="rank-val">
+                    <div class="rank-val-main" style="color:${m.color}">${fmtRatingVal(item.val, m.fmt)}</div>
+                    ${item.plan?`<div class="rank-val-sub">план: ${fmtRatingVal(item.plan, m.fmt)}</div>`:''}
                 </div>
             </div>
-            <div class="rank-val">
-                <div class="rank-val-main" style="color:${m.color}">${fmtRatingVal(item.val, m.fmt)}</div>
-                ${item.plan?`<div class="rank-val-sub">план: ${fmtRatingVal(item.plan, m.fmt)}</div>`:''}
+            <div class="rank-bottom">
+                <div class="rank-bar-wrap">
+                    <div class="rank-bar-bg">
+                        <div class="rank-bar-fill" style="width:${barPct}%;background:${m.color}"></div>
+                    </div>
+                </div>
             </div>`;
         grid.appendChild(card);
     });
