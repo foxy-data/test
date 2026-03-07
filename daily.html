@@ -545,17 +545,20 @@ function setView(mode) {
     if (mode === 'rating') {
         tableCard.style.display = 'none';
         toggleBtn.style.display = 'none';
+        ratingBtn.textContent = '← Таблиця';
         ratingBtn.style.background = '#3634a3';
+        ratingBtn.onclick = () => setView('table');
         ratingPanel.classList.add('visible');
         buildRatingMetricPills();
-        // Show skeleton briefly
         const grid = document.getElementById('rankingGrid');
         showRatingSkeleton(grid, 7);
         setTimeout(()=>{ grid.innerHTML=''; renderRankingCards(); }, 180);
     } else {
         tableCard.style.display = '';
         toggleBtn.style.display = '';
+        ratingBtn.textContent = '🏆 Рейтинг';
         ratingBtn.style.background = '#5856d6';
+        ratingBtn.onclick = () => setView('rating');
         ratingPanel.classList.remove('visible');
     }
 }
