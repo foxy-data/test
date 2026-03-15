@@ -552,6 +552,16 @@
         </div>
     </div>
 
+    <div class="container">
+        <div id="catChartWrap" style="display:none;margin-top:18px;background:white;border-radius:18px;box-shadow:0 2px 12px rgba(0,0,0,.06);padding:16px;">
+            <div style="font-size:18px;font-weight:700;color:#1d1d1f;margin-bottom:14px">Структура продажів</div>
+            <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center">
+                <canvas id="catPieCanvas"></canvas>
+                <div id="catLegend" style="flex:1;min-width:140px;display:flex;flex-direction:column"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const IPHONE_SVG = `<svg viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="14" y="4" width="26" height="46" rx="5" fill="currentColor"/>
@@ -757,15 +767,5 @@
 
         loadCategories();
     </script>
-
-    <div class="container">
-        <div id="catChartWrap" style="display:none;margin-top:18px;background:white;border-radius:18px;box-shadow:0 2px 12px rgba(0,0,0,.06);padding:16px;">
-            <div style="font-size:18px;font-weight:700;color:#1d1d1f;margin-bottom:14px">Структура продажів</div>
-            <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center">
-                <canvas id="catPieCanvas"></canvas>
-                <div id="catLegend" style="flex:1;min-width:140px;display:flex;flex-direction:column"></div>
-            </div>
-        </div>
-    </div>
 </body>
 </html>
