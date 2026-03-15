@@ -644,14 +644,17 @@
             try {
                 const res = await fetch(CAT_URL + '&t=' + Date.now());
                 if (!res.ok) throw new Error('HTTP ' + res.status);
-                const rows = parseCatCSV(await res.text());
-                if (rows.length < 2) throw new Error('Немає даних');
+                const text = await res.text();
+                const rows = parseCatCSV(text);
+                if (rows.length < 2) throw new Error('Немає даних, рядків: ' + rows.length);
 
-                // Визначаємо індекси колонок по заголовку
                 const headers = rows[0].map(h => h.trim().toLowerCase());
                 const idxCat = headers.findIndex(h => h.includes('катег'));
                 const idxSum = headers.findIndex(h => h.includes('сум') || h.includes('sum'));
                 const idxQty = headers.findIndex(h => h.includes('шт') || h.includes('qty') || h.includes('кіл'));
+
+                if (idxCat < 0) throw new Error('Не знайдено колонку Категорія. Заголовки: ' + headers.join(', '));
+                if (idxSum < 0) throw new Error('Не знайдено колонку Сума. Заголовки: ' + headers.join(', '));
 
                 const dataRows = rows.slice(1).filter(r => r[idxCat] && r[idxCat].trim());
 
@@ -761,7 +764,7 @@
                     });
                 }
             } catch(e) {
-                grid.innerHTML = `<div style="grid-column:1/-1;padding:30px;text-align:center;color:#ff3b30">❌ ${e.message}</div>`;
+                grid.innerHTML = `<div style="grid-column:1/-1;padding:20px;text-align:center;color:#ff3b30;font-size:13px;font-weight:600">❌ ${e.message}</div>`;
             }
         }
 
