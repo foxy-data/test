@@ -512,9 +512,12 @@
             position: relative; overflow: hidden;
         }
         .cat-icon-bg {
-            position: absolute; right: -6px; bottom: -6px;
+            position: absolute; right: -4px; bottom: -4px;
             font-size: 42px; opacity: .13; line-height: 1;
             pointer-events: none; user-select: none;
+        }
+        .cat-icon-bg svg {
+            width: 54px; height: 54px; opacity: 1;
         }
         .cat-name {
             font-size: 13px; font-weight: 700; text-transform: uppercase;
@@ -550,7 +553,30 @@
     </div>
 
     <script>
-        const CAT_PALETTES = [
+        const IPHONE_SVG = `<svg viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="4" width="26" height="46" rx="5" fill="currentColor"/>
+            <rect x="16" y="8" width="22" height="34" rx="2" fill="white" opacity=".35"/>
+            <rect x="22" y="6" width="10" height="2" rx="1" fill="white" opacity=".5"/>
+            <circle cx="27" cy="46" r="2" fill="white" opacity=".5"/>
+        </svg>`;
+
+        const MACBOOK_SVG = `<svg viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="8" y="12" width="38" height="24" rx="3" fill="currentColor"/>
+            <rect x="11" y="15" width="32" height="18" rx="1.5" fill="white" opacity=".35"/>
+            <rect x="4" y="36" width="46" height="4" rx="2" fill="currentColor" opacity=".8"/>
+            <rect x="20" y="36" width="14" height="2" rx="1" fill="white" opacity=".4"/>
+        </svg>`;
+
+        function getIconHtml(name, fallbackEmoji, color) {
+            const nl = name.toLowerCase();
+            if (nl.includes('iphone')) {
+                return `<span style="color:${color}">${IPHONE_SVG}</span>`;
+            }
+            if (nl.includes('macbook') || nl.includes('mac book')) {
+                return `<span style="color:${color}">${MACBOOK_SVG}</span>`;
+            }
+            return fallbackEmoji;
+        }
             { bg:'#e8f1fd', text:'#1a50b8', icon:'📱' },
             { bg:'#e3f8ec', text:'#1a7f37', icon:'💻' },
             { bg:'#fff3e0', text:'#b85000', icon:'🎧' },
@@ -619,6 +645,7 @@
 
                 const dataRows = rows.slice(1).filter(r => r[idxCat] && r[idxCat].trim());
 
+                // ── картки категорій ──
                 grid.innerHTML = '';
                 dataRows.forEach((row, i) => {
                     const name = row[idxCat] ? row[idxCat].trim() : '—';
@@ -630,12 +657,99 @@
                     card.className = 'cat-card';
                     card.style.cssText = `background:${pal.bg};animation-delay:${i*0.05}s`;
                     card.innerHTML = `
-                        <div class="cat-icon-bg">${pal.icon}</div>
+                        <div class="cat-icon-bg">${getIconHtml(name, pal.icon, pal.text)}</div>
                         <div class="cat-name">${name}</div>
                         <div class="cat-sum" style="color:${pal.text}">${fmtSum(sum)}</div>
                         ${qty ? `<div class="cat-qty" style="color:${pal.text}">${parseInt(qty) || qty} шт</div>` : ''}`;
                     grid.appendChild(card);
                 });
+
+                // ── кругова діаграма ──
+                const PIE_KEYS   = ['av','it','dig','sda','mda','acc','nip'];
+                const PIE_COLORS = ['#0071e3','#34c759','#af52de','#ff9500','#ff3b30','#5856d6','#00b388'];
+                const PIE_LABELS = { av:'AV', it:'IT', dig:'DIG', sda:'SDA', mda:'MDA', acc:'ACC', nip:'NIP' };
+
+                const pieData = {};
+                dataRows.forEach(r => {
+                    const n = (r[idxCat]||'').trim().toLowerCase();
+                    const v = parseFloat((r[idxSum]||'').toString().replace(/\s/g,'').replace(',','.')) || 0;
+                    PIE_KEYS.forEach(k => { if (n === k) pieData[k] = v; });
+                });
+
+                const pieTotal = PIE_KEYS.reduce((s,k) => s + (pieData[k]||0), 0);
+                if (pieTotal > 0) {
+                    document.getElementById('catChartWrap').style.display = 'block';
+                    const canvas = document.getElementById('catPieCanvas');
+                    const dpr = window.devicePixelRatio || 1;
+                    const SIZE = Math.min(document.getElementById('catChartWrap').offsetWidth || 300, 300);
+                    canvas.width  = SIZE * dpr;
+                    canvas.height = SIZE * dpr;
+                    canvas.style.width  = SIZE + 'px';
+                    canvas.style.height = SIZE + 'px';
+                    const ctx = canvas.getContext('2d');
+                    ctx.scale(dpr, dpr);
+                    const cx = SIZE/2, cy = SIZE/2;
+                    const R = SIZE*0.40, ri = SIZE*0.23;
+                    let angle = -Math.PI/2;
+
+                    const slices = PIE_KEYS
+                        .filter(k => (pieData[k]||0) > 0)
+                        .map(k => ({ key:k, val:pieData[k], pct:pieData[k]/pieTotal, color:PIE_COLORS[PIE_KEYS.indexOf(k)] }));
+
+                    slices.forEach(s => {
+                        const sweep = s.pct * 2 * Math.PI;
+                        ctx.beginPath();
+                        ctx.moveTo(cx, cy);
+                        ctx.arc(cx, cy, R, angle, angle+sweep);
+                        ctx.closePath();
+                        ctx.fillStyle = s.color;
+                        ctx.fill();
+                        ctx.strokeStyle = '#f5f5f7';
+                        ctx.lineWidth = 2.5;
+                        ctx.stroke();
+
+                        if (s.pct > 0.04) {
+                            const mid = angle + sweep/2;
+                            const lx = cx + R*0.67*Math.cos(mid);
+                            const ly = cy + R*0.67*Math.sin(mid);
+                            ctx.fillStyle = '#fff';
+                            ctx.font = `700 ${Math.round(SIZE*0.038)}px Inter,sans-serif`;
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText((s.pct*100).toFixed(1)+'%', lx, ly);
+                        }
+                        angle += sweep;
+                    });
+
+                    // дірка
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, ri, 0, 2*Math.PI);
+                    ctx.fillStyle = '#f5f5f7';
+                    ctx.fill();
+
+                    // центр текст
+                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#1d1d1f';
+                    ctx.font = `700 ${Math.round(SIZE*0.052)}px Inter,sans-serif`;
+                    ctx.fillText('Структура', cx, cy - SIZE*0.038);
+                    ctx.fillStyle = '#86868b';
+                    ctx.font = `500 ${Math.round(SIZE*0.036)}px Inter,sans-serif`;
+                    ctx.fillText('продажів', cx, cy + SIZE*0.04);
+
+                    // легенда
+                    const legend = document.getElementById('catLegend');
+                    legend.innerHTML = '';
+                    slices.forEach(s => {
+                        const item = document.createElement('div');
+                        item.style.cssText = 'display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid #f2f2f4;';
+                        item.innerHTML = `
+                            <span style="width:11px;height:11px;border-radius:3px;background:${s.color};flex-shrink:0;display:inline-block"></span>
+                            <span style="font-size:13px;font-weight:700;color:#1d1d1f">${PIE_LABELS[s.key]}</span>
+                            <span style="font-size:11px;color:#86868b;flex:1">${Math.round(s.val).toLocaleString('uk-UA')} ₴</span>
+                            <span style="font-size:13px;font-weight:700;color:${s.color}">${(s.pct*100).toFixed(1)}%</span>`;
+                        legend.appendChild(item);
+                    });
+                }
             } catch(e) {
                 grid.innerHTML = `<div style="grid-column:1/-1;padding:30px;text-align:center;color:#ff3b30">❌ ${e.message}</div>`;
             }
@@ -643,5 +757,15 @@
 
         loadCategories();
     </script>
+
+    <div class="container">
+        <div id="catChartWrap" style="display:none;margin-top:18px;background:white;border-radius:18px;box-shadow:0 2px 12px rgba(0,0,0,.06);padding:16px;">
+            <div style="font-size:18px;font-weight:700;color:#1d1d1f;margin-bottom:14px">Структура продажів</div>
+            <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center">
+                <canvas id="catPieCanvas"></canvas>
+                <div id="catLegend" style="flex:1;min-width:140px;display:flex;flex-direction:column"></div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
