@@ -696,21 +696,26 @@
                     document.getElementById('catChartWrap').style.display = 'block';
                     const canvas = document.getElementById('catPieCanvas');
                     const dpr = window.devicePixelRatio || 1;
-                    const SIZE = Math.min(document.getElementById('catChartWrap').offsetWidth || 300, 300);
-                    canvas.width  = SIZE * dpr;
-                    canvas.height = SIZE * dpr;
-                    canvas.style.width  = SIZE + 'px';
-                    canvas.style.height = SIZE + 'px';
+                    const wrap = document.getElementById('catChartWrap');
+                    const SIZE = Math.min(wrap.offsetWidth - 32 || 280, 280);
+                    const FULL = Math.round(SIZE * 1.35); // більше місця для зовнішніх підписів
+                    canvas.width  = FULL * dpr;
+                    canvas.height = FULL * dpr;
+                    canvas.style.width  = FULL + 'px';
+                    canvas.style.height = FULL + 'px';
                     const ctx = canvas.getContext('2d');
                     ctx.scale(dpr, dpr);
-                    const cx = SIZE/2, cy = SIZE/2;
-                    const R = SIZE*0.40, ri = SIZE*0.23;
+                    const cx = FULL/2, cy = FULL/2;
+                    const R = SIZE*0.36, ri = SIZE*0.21;
+                    const ROUT = SIZE*0.44;
+                    const RTXT = SIZE*0.52;
                     let angle = -Math.PI/2;
 
                     const slices = PIE_KEYS
                         .filter(k => (pieData[k]||0) > 0)
                         .map(k => ({ key:k, val:pieData[k], pct:pieData[k]/pieTotal, color:PIE_COLORS[PIE_KEYS.indexOf(k)] }));
 
+                    // 1. малюємо сектори
                     slices.forEach(s => {
                         const sweep = s.pct * 2 * Math.PI;
                         ctx.beginPath();
@@ -720,29 +725,18 @@
                         ctx.fillStyle = s.color;
                         ctx.fill();
                         ctx.strokeStyle = '#f5f5f7';
-                        ctx.lineWidth = 2.5;
+                        ctx.lineWidth = 2;
                         ctx.stroke();
-
-                        if (s.pct > 0.04) {
-                            const mid = angle + sweep/2;
-                            const lx = cx + R*0.67*Math.cos(mid);
-                            const ly = cy + R*0.67*Math.sin(mid);
-                            ctx.fillStyle = '#fff';
-                            ctx.font = `700 ${Math.round(SIZE*0.038)}px Inter,sans-serif`;
-                            ctx.textAlign = 'center';
-                            ctx.textBaseline = 'middle';
-                            ctx.fillText((s.pct*100).toFixed(1)+'%', lx, ly);
-                        }
                         angle += sweep;
                     });
 
-                    // дірка
+                    // 2. дірка
                     ctx.beginPath();
                     ctx.arc(cx, cy, ri, 0, 2*Math.PI);
                     ctx.fillStyle = '#f5f5f7';
                     ctx.fill();
 
-                    // центр текст
+                    // 3. центр текст
                     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                     ctx.fillStyle = '#1d1d1f';
                     ctx.font = `700 ${Math.round(SIZE*0.052)}px Inter,sans-serif`;
@@ -750,6 +744,50 @@
                     ctx.fillStyle = '#86868b';
                     ctx.font = `500 ${Math.round(SIZE*0.036)}px Inter,sans-serif`;
                     ctx.fillText('продажів', cx, cy + SIZE*0.04);
+
+                    // 4. підписи зовні з лінією
+                    angle = -Math.PI/2;
+                    const fontSize = Math.round(SIZE*0.036);
+                    slices.forEach(s => {
+                        const sweep = s.pct * 2 * Math.PI;
+                        const mid = angle + sweep/2;
+
+                        // точка на краю сектора
+                        const x1 = cx + R*0.92*Math.cos(mid);
+                        const y1 = cy + R*0.92*Math.sin(mid);
+                        // точка зовні кола
+                        const x2 = cx + ROUT*Math.cos(mid);
+                        const y2 = cy + ROUT*Math.sin(mid);
+                        // точка тексту
+                        const tx = cx + RTXT*Math.cos(mid);
+                        const ty = cy + RTXT*Math.sin(mid);
+
+                        // лінія
+                        ctx.beginPath();
+                        ctx.moveTo(x1, y1);
+                        ctx.lineTo(x2, y2);
+                        ctx.strokeStyle = s.color;
+                        ctx.lineWidth = 1.2;
+                        ctx.stroke();
+
+                        // текст: назва + %
+                        const label = PIE_LABELS[s.key];
+                        const pctStr = (s.pct*100).toFixed(1)+'%';
+                        ctx.textAlign = tx > cx ? 'left' : 'right';
+                        ctx.textBaseline = 'middle';
+
+                        // назва категорії
+                        ctx.fillStyle = '#1d1d1f';
+                        ctx.font = `700 ${fontSize}px Inter,sans-serif`;
+                        ctx.fillText(label, tx, ty - fontSize*0.6);
+
+                        // %
+                        ctx.fillStyle = s.color;
+                        ctx.font = `600 ${fontSize}px Inter,sans-serif`;
+                        ctx.fillText(pctStr, tx, ty + fontSize*0.6);
+
+                        angle += sweep;
+                    });
 
                     // легенда
                     const legend = document.getElementById('catLegend');
