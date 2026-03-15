@@ -486,5 +486,162 @@
         }
         loadTable();
     </script>
+
+    <!-- ═══════════════ КАТЕГОРІЇ ТОВАРУ ═══════════════ -->
+    <style>
+        .cat-section { margin-top: 18px; }
+        .cat-section-title {
+            font-size: 18px; font-weight: 700; color: #1d1d1f;
+            margin-bottom: 10px; padding-left: 2px;
+        }
+        .cat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        @media(min-width: 600px) { .cat-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media(min-width: 900px) { .cat-grid { grid-template-columns: repeat(4, 1fr); } }
+
+        @keyframes catFadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+        .cat-card {
+            border-radius: 14px;
+            padding: 11px 13px;
+            display: flex; flex-direction: column; gap: 3px;
+            animation: catFadeIn .3s ease both;
+            position: relative; overflow: hidden;
+        }
+        .cat-icon-bg {
+            position: absolute; right: -6px; bottom: -6px;
+            font-size: 42px; opacity: .13; line-height: 1;
+            pointer-events: none; user-select: none;
+        }
+        .cat-name {
+            font-size: 11px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: .05em; opacity: .75;
+        }
+        .cat-sum {
+            font-size: 17px; font-weight: 800; line-height: 1.2;
+        }
+        .cat-qty {
+            font-size: 11px; font-weight: 600; opacity: .65;
+        }
+        /* скелетон */
+        @keyframes shimmerCat{0%{background-position:-400px 0}100%{background-position:400px 0}}
+        .cat-skel {
+            background: linear-gradient(90deg,#eaeaed 25%,#f5f5f7 50%,#eaeaed 75%);
+            background-size: 400px 100%;
+            animation: shimmerCat 1.4s ease-in-out infinite;
+            border-radius: 6px;
+        }
+        .cat-card-skel {
+            background: white; border-radius: 14px;
+            border: 1px solid rgba(0,0,0,.05);
+            padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;
+            min-height: 72px;
+        }
+    </style>
+
+    <div class="container">
+        <div class="cat-section">
+            <div class="cat-section-title">Категорії товару</div>
+            <div class="cat-grid" id="catGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        const CAT_PALETTES = [
+            { bg:'#e8f1fd', text:'#1a50b8', icon:'📱' },
+            { bg:'#e3f8ec', text:'#1a7f37', icon:'💻' },
+            { bg:'#fff3e0', text:'#b85000', icon:'🎧' },
+            { bg:'#f3eefe', text:'#6d28d9', icon:'🖥️' },
+            { bg:'#fde8e8', text:'#c0392b', icon:'📷' },
+            { bg:'#e8f8f5', text:'#0f6e56', icon:'⌚' },
+            { bg:'#fef9e0', text:'#8a6800', icon:'🎮' },
+            { bg:'#fde8f5', text:'#8b2258', icon:'📟' },
+            { bg:'#e8f4fd', text:'#1a6bc4', icon:'🔌' },
+            { bg:'#e9fde8', text:'#2e7d32', icon:'🖨️' },
+            { bg:'#fdf0e8', text:'#c05800', icon:'📡' },
+            { bg:'#f0e8fd', text:'#5e35b1', icon:'💾' },
+        ];
+        const CAT_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSHr5D0io8bTywVzOwBLMzTkEWRZdA2uWixvn8Jm8ZI9NC9KMSp0ewzs0cJLv8gy_MvJbq_EqCzoPCh/pub?output=csv';
+
+        function parseCatCSV(text) {
+            const rows = [];
+            for (const line of text.split(/\r?\n/)) {
+                if (!line.trim()) continue;
+                const row = []; let cell = '', q = false;
+                for (let i = 0; i < line.length; i++) {
+                    const c = line[i];
+                    if (c === '"') { if (q && line[i+1]==='"') { cell+='"'; i++; } else q=!q; }
+                    else if (c === ',' && !q) { row.push(cell.trim()); cell = ''; }
+                    else cell += c;
+                }
+                row.push(cell.trim());
+                if (row.some(x => x !== '')) rows.push(row);
+            }
+            return rows;
+        }
+
+        function fmtSum(v) {
+            const n = parseFloat(v.toString().replace(/\s/g,'').replace(',','.')) || 0;
+            return n ? Math.round(n).toLocaleString('uk-UA') + ' ₴' : '—';
+        }
+
+        function showCatSkeleton(grid, count) {
+            grid.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const c = document.createElement('div');
+                c.className = 'cat-card-skel';
+                const d = (i * 0.05) + 's';
+                c.innerHTML = `
+                    <div class="cat-skel" style="width:50%;height:9px;animation-delay:${d}"></div>
+                    <div class="cat-skel" style="width:75%;height:16px;animation-delay:${d}"></div>
+                    <div class="cat-skel" style="width:35%;height:9px;animation-delay:${d}"></div>`;
+                grid.appendChild(c);
+            }
+        }
+
+        async function loadCategories() {
+            const grid = document.getElementById('catGrid');
+            showCatSkeleton(grid, 8);
+            try {
+                const res = await fetch(CAT_URL + '&t=' + Date.now());
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const rows = parseCatCSV(await res.text());
+                if (rows.length < 2) throw new Error('Немає даних');
+
+                // Визначаємо індекси колонок по заголовку
+                const headers = rows[0].map(h => h.trim().toLowerCase());
+                const idxCat = headers.findIndex(h => h.includes('катег'));
+                const idxSum = headers.findIndex(h => h.includes('сум') || h.includes('sum'));
+                const idxQty = headers.findIndex(h => h.includes('шт') || h.includes('qty') || h.includes('кіл'));
+
+                const dataRows = rows.slice(1).filter(r => r[idxCat] && r[idxCat].trim());
+
+                grid.innerHTML = '';
+                dataRows.forEach((row, i) => {
+                    const name = row[idxCat] ? row[idxCat].trim() : '—';
+                    const sum  = idxSum >= 0 ? row[idxSum] : '';
+                    const qty  = idxQty >= 0 ? row[idxQty] : '';
+                    const pal  = CAT_PALETTES[i % CAT_PALETTES.length];
+
+                    const card = document.createElement('div');
+                    card.className = 'cat-card';
+                    card.style.cssText = `background:${pal.bg};animation-delay:${i*0.05}s`;
+                    card.innerHTML = `
+                        <div class="cat-icon-bg">${pal.icon}</div>
+                        <div class="cat-name" style="color:${pal.text}">${name}</div>
+                        <div class="cat-sum" style="color:${pal.text}">${fmtSum(sum)}</div>
+                        ${qty ? `<div class="cat-qty" style="color:${pal.text}">${parseInt(qty) || qty} шт</div>` : ''}`;
+                    grid.appendChild(card);
+                });
+            } catch(e) {
+                grid.innerHTML = `<div style="grid-column:1/-1;padding:30px;text-align:center;color:#ff3b30">❌ ${e.message}</div>`;
+            }
+        }
+
+        loadCategories();
+    </script>
 </body>
 </html>
