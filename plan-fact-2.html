@@ -517,8 +517,8 @@
             pointer-events: none; user-select: none;
         }
         .cat-name {
-            font-size: 11px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: .05em; opacity: .75;
+            font-size: 13px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: .03em; color: #1d1d1f;
         }
         .cat-sum {
             font-size: 17px; font-weight: 800; line-height: 1.2;
@@ -631,7 +631,7 @@
                     card.style.cssText = `background:${pal.bg};animation-delay:${i*0.05}s`;
                     card.innerHTML = `
                         <div class="cat-icon-bg">${pal.icon}</div>
-                        <div class="cat-name" style="color:${pal.text}">${name}</div>
+                        <div class="cat-name">${name}</div>
                         <div class="cat-sum" style="color:${pal.text}">${fmtSum(sum)}</div>
                         ${qty ? `<div class="cat-qty" style="color:${pal.text}">${parseInt(qty) || qty} шт</div>` : ''}`;
                     grid.appendChild(card);
