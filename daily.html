@@ -765,6 +765,51 @@ function renderRankingCards() {
         return;
     }
 
+    // ── ПЛАШКА МАГАЗИНУ ──
+    const sumKeywords = ['разом','сума','total','тотал','підсумок','всього','итого'];
+    const storeRow = savedRows.find(r => {
+        const nl = (r[0]||'').trim().toLowerCase();
+        return sumKeywords.some(k => nl.includes(k));
+    });
+    if (storeRow) {
+        const sFact = toNum(storeRow[factIdx]);
+        const sPlan = planIdx >= 0 ? toNum(storeRow[planIdx]) : null;
+        const sPct  = pctIdx  >= 0 ? storeRow[pctIdx] : null;
+        let sPctNum = null;
+        if (sPct != null) {
+            sPctNum = toNum(sPct);
+            if (!String(sPct).includes('%') && sPctNum > 0 && sPctNum < 2) sPctNum *= 100;
+        }
+        const pctColor = !sPctNum ? '#86868b' : sPctNum < 80 ? '#ff3b30' : sPctNum < 100 ? '#ff9500' : '#34c759';
+        const valFmtS = v => v ? Math.round(v).toLocaleString('uk-UA') : '—';
+
+        const banner = document.createElement('div');
+        banner.style.cssText = `
+            background:white;border-radius:14px;
+            box-shadow:0 2px 12px rgba(0,0,0,.06);
+            border:1.5px solid ${def.color}33;
+            padding:10px 14px;margin-bottom:4px;
+            display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+        `;
+        banner.innerHTML = `
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#a0a0ab;flex:0 0 auto">🏪 Магазин</div>
+            <div style="display:flex;gap:12px;flex:1;flex-wrap:wrap;align-items:center">
+                ${sPlan ? `<div style="display:flex;flex-direction:column;align-items:center">
+                    <span style="font-size:9px;color:#a0a0ab;font-weight:600;text-transform:uppercase">План</span>
+                    <span style="font-size:13px;font-weight:700;color:#1d1d1f">${valFmtS(sPlan)}</span>
+                </div>` : ''}
+                <div style="display:flex;flex-direction:column;align-items:center">
+                    <span style="font-size:9px;color:#a0a0ab;font-weight:600;text-transform:uppercase">Факт</span>
+                    <span style="font-size:13px;font-weight:700;color:${def.color}">${valFmtS(sFact)}</span>
+                </div>
+                ${sPctNum != null ? `<div style="display:flex;flex-direction:column;align-items:center">
+                    <span style="font-size:9px;color:#a0a0ab;font-weight:600;text-transform:uppercase">Виконання</span>
+                    <span style="font-size:15px;font-weight:800;color:${pctColor}">${sPctNum.toFixed(1)}%</span>
+                </div>` : ''}
+            </div>`;
+        grid.appendChild(banner);
+    }
+
     const excluded = ['разом','сума','total','тотал','підсумок','всього','итого','відставання','відхилення','виконання','залишок'];
 
     const items = savedRows
