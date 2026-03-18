@@ -289,7 +289,14 @@
 
 <div class="rating-panel" id="ratingPanel">
     <div class="metric-bar">
-        <span class="metric-bar-title">Метрика</span>
+        <div style="display:flex;align-items:center;padding:6px 10px;border-bottom:1px solid #f0f0f2;gap:8px;flex-wrap:wrap">
+            <span style="font-size:10px;font-weight:700;color:#a0a0ab;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">Режим</span>
+            <div style="display:flex;gap:3px;background:#f0f0f5;border-radius:9px;padding:3px" id="modeToggle">
+                <button id="modeBtnTotal" onclick="setAvgMode(false)" style="border:none;padding:4px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:white;color:#1d1d1f;box-shadow:0 1px 4px rgba(0,0,0,.12)">Загальне</button>
+                <button id="modeBtnAvg"   onclick="setAvgMode(true)"  style="border:none;padding:4px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:#6e6e73">⌀ Середнє/міс</button>
+            </div>
+            <span id="modeDesc" style="font-size:10px;color:#a0a0ab;flex:1">Загальна сума за обраний період</span>
+        </div>
         <div class="metric-pills" id="metricPills"></div>
     </div>
     <div class="ranking-grid" id="rankingGrid"></div>
@@ -331,6 +338,10 @@ const COL_GROUPS = [
         { key:'NIP', label:'NIP', badge:'b-cat', fmt:'money' },
         { key:'SDA', label:'SDA', badge:'b-cat', fmt:'money' },
     ]},
+    { name:'Середнє/міс', cls:'gh-other', cols:[
+        { key:'__months__',  label:'Міс.', badge:'b-plain', fmt:'int',   special:'months' },
+        { key:'__avg_to__',  label:'Сер.ТО', badge:'b-to',   fmt:'money', special:'avg_to' },
+    ]},
 ];
 
 // Метрики для рейтингу
@@ -344,6 +355,7 @@ const RATING_METRICS = [
     { key:'Ср. Чек',      label:'Ср.Чек',     color:'#5856d6', fmt:'money', higher:true, group:'main' },
     { key:'КПЧ',          label:'КПЧ',        color:'#00b388', fmt:'dec2',  higher:true, group:'main' },
     // Категорії
+    { key:'__all_cat__', label:'Всі кат.', color:'#5856d6', fmt:'money', higher:true, group:'cat', allCat:true },
     { key:'AV',  label:'AV',  color:'#c8392b', fmt:'money', higher:true, group:'cat' },
     { key:'DIG', label:'DIG', color:'#e67e22', fmt:'money', higher:true, group:'cat' },
     { key:'IT',  label:'IT',  color:'#8e44ad', fmt:'money', higher:true, group:'cat' },
@@ -366,6 +378,7 @@ let allYears = [], allMonths = [], allSellers = [];
 let selYears = new Set(), selMonths = new Set(), selSellers = new Set();
 let viewMode = 'table';
 let activeMetricKey = 'ТО';
+let avgMode = false;
 let dynMetricKey = 'ТО';
 let dynSellerSet = new Set(); // продавці обрані на графік динаміки
 let dynChartInstance = null;
@@ -679,6 +692,9 @@ function renderTable(){
     sellers.forEach(seller=>{
         const agg=aggregate(byS[seller]);
         if(!agg)return;
+        // рахуємо унікальні місяці продавця у відфільтрованих даних
+        const uniqueMonths=new Set(byS[seller].map(r=>r.рік+'-'+r.місяць)).size;
+        const avgTO=agg['ТО']!=null&&uniqueMonths>0?agg['ТО']/uniqueMonths:null;
         allRows.push({seller,agg});
         const tr=document.createElement('tr');
         const tdN=document.createElement('td');tdN.className='col-fix';tdN.textContent=seller;tr.appendChild(tdN);
@@ -686,7 +702,10 @@ function renderTable(){
             g.cols.forEach((col,ci)=>{
                 const td=document.createElement('td');
                 if(ci===0&&gi>0)td.classList.add('grp-start');
-                const v=agg[col.key];
+                let v;
+                if(col.special==='months')      v=uniqueMonths;
+                else if(col.special==='avg_to') v=avgTO;
+                else                            v=agg[col.key];
                 if(v!==undefined&&v!==null){
                     const sp=document.createElement('span');sp.className='badge '+col.badge;
                     sp.textContent=fmtV(v,col.fmt);td.appendChild(sp);
@@ -707,6 +726,8 @@ function renderTable(){
                 g.cols.forEach((col,ci)=>{
                     const td=document.createElement('td');
                     if(ci===0&&gi>0)td.classList.add('grp-start');
+                    // special колонки в підсумку — прочерк
+                    if(col.special){td.textContent='—';td.style.color='#ccc';tr.appendChild(td);return;}
                     const v=allAgg[col.key];
                     if(v!==undefined&&v!==null){
                         const sp=document.createElement('span');sp.className='badge '+col.badge;
@@ -723,21 +744,44 @@ function renderTable(){
 }
 
 // ── RATING ──
+function setAvgMode(on){
+    avgMode=on;
+    const btnTotal=document.getElementById('modeBtnTotal');
+    const btnAvg=document.getElementById('modeBtnAvg');
+    const desc=document.getElementById('modeDesc');
+    if(on){
+        btnAvg.style.background='white';btnAvg.style.color='#1d1d1f';btnAvg.style.boxShadow='0 1px 4px rgba(0,0,0,.12)';
+        btnTotal.style.background='transparent';btnTotal.style.color='#6e6e73';btnTotal.style.boxShadow='none';
+        desc.textContent='Сума ÷ кількість місяців з продажами';
+    } else {
+        btnTotal.style.background='white';btnTotal.style.color='#1d1d1f';btnTotal.style.boxShadow='0 1px 4px rgba(0,0,0,.12)';
+        btnAvg.style.background='transparent';btnAvg.style.color='#6e6e73';btnAvg.style.boxShadow='none';
+        desc.textContent='Загальна сума за обраний період';
+    }
+    renderRating();
+}
+
 function renderMetricPills(){
     const cont=document.getElementById('metricPills');cont.innerHTML='';
-    // Група "Основні"
-    const g1=document.createElement('div');g1.style.cssText='display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px';
-    const g2=document.createElement('div');g2.style.cssText='display:flex;flex-wrap:wrap;gap:5px;padding-top:6px;border-top:1px solid #f2f2f4';
-    const g2lbl=document.createElement('div');g2lbl.style.cssText='width:100%;font-size:9px;font-weight:700;color:#86868b;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px';g2lbl.textContent='Категорії';g2.appendChild(g2lbl);
-    RATING_METRICS.forEach(m=>{
+    const wrap=document.createElement('div');
+    wrap.style.cssText='display:flex;flex-wrap:wrap;gap:4px;padding:7px 10px;align-items:center';
+
+    RATING_METRICS.forEach((m,idx)=>{
+        // роздільник перед першою категорійною метрикою
+        if(m.group==='cat' && (idx===0||RATING_METRICS[idx-1].group!=='cat')){
+            const sep=document.createElement('div');
+            sep.style.cssText='width:100%;display:flex;align-items:center;gap:6px;margin:3px 0 2px';
+            sep.innerHTML='<span style="font-size:9px;font-weight:700;color:#a0a0ab;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Категорії</span><div style="flex:1;height:1px;background:#f0f0f2"></div>';
+            wrap.appendChild(sep);
+        }
         const b=document.createElement('button');
         b.className='mpill'+(m.key===activeMetricKey?' active':'');
         b.textContent=m.label;
         if(m.key===activeMetricKey){b.style.background=m.color;b.style.borderColor=m.color;}
         b.onclick=()=>{activeMetricKey=m.key;renderMetricPills();renderRating();};
-        (m.group==='cat'?g2:g1).appendChild(b);
+        wrap.appendChild(b);
     });
-    cont.appendChild(g1);cont.appendChild(g2);
+    cont.appendChild(wrap);
 }
 
 // ── DYNAMICS ──
@@ -877,13 +921,11 @@ function renderRating(){
     renderMetricPills();
     const data=filteredData();
     const grid=document.getElementById('rankingGrid');
-    // Show skeleton briefly if grid is empty/stale
     showRatingSkeleton(grid, 7);
     if(!data.length){
         setTimeout(()=>{grid.innerHTML='<div class="status-box">Немає даних</div>';},150);
         return;
     }
-    // Small delay so skeleton flashes once, then real cards appear
     setTimeout(()=>{
         grid.innerHTML='';
         const m=RATING_METRICS.find(x=>x.key===activeMetricKey)||RATING_METRICS[0];
@@ -892,15 +934,97 @@ function renderRating(){
 
         const scored=Object.entries(byS).map(([seller,rows])=>{
             const agg=aggregate(rows);
-            const val=agg?agg[m.key]:null;
-            return{seller,val};
+            const uniqueMonths=new Set(rows.map(r=>r.рік+'-'+r.місяць)).size;
+            const CAT_KEYS=['AV','IT','DIG','SDA','MDA','NIP'];
+            const isAvgByNature = PCT_KEYS.has(m.key);
+
+            // rawTotal — завжди загальна сума (незалежно від режиму)
+            const rawTotal = m.allCat
+                ? CAT_KEYS.reduce((s,k)=>s+(agg&&agg[k]!=null?agg[k]:0),0)||null
+                : agg?agg[m.key]:null;
+
+            // monthlyVal — показник за місяць
+            const monthlyVal = rawTotal!=null && uniqueMonths>0 && !isAvgByNature
+                ? rawTotal / uniqueMonths
+                : rawTotal;
+
+            // val для сортування і відображення
+            const val = avgMode && !isAvgByNature ? monthlyVal : rawTotal;
+
+            return {seller, val, rawTotal, monthlyVal, uniqueMonths, agg, isAvgByNature};
         }).filter(x=>x.val!==null);
 
         scored.sort((a,b)=>m.higher?b.val-a.val:a.val-b.val);
         const maxVal=scored[0]?.val||1;
 
+        // ── СЕРЕДНЄ ──
+        // Зважене середнє місячного показника: Σ(місячний × місяці) / Σ(місяці)
+        // = Σ(rawTotal) / Σ(місяці) — те саме але через rawTotal
+        // Для % і avg-by-nature — просте арифметичне
+        const isAvgByNatureGlobal = PCT_KEYS.has(m.key);
+        const totalMonths = scored.reduce((s,x)=>s+x.uniqueMonths, 0);
+        const totalRaw    = scored.reduce((s,x)=>s+(x.rawTotal||0), 0);
+
+        // зважене середнє місячного: Σ(rawTotal) / Σ(місяці)
+        const weightedMonthlyAvg = !isAvgByNatureGlobal && totalMonths>0
+            ? totalRaw / totalMonths
+            : scored.reduce((s,x)=>s+x.val,0) / scored.length;
+
+        // те що показуємо в шапці і порівнюємо — завжди місячне зважене
+        const displayAvg = weightedMonthlyAvg;
+
+        // totalSum для шапки — залежить від режиму
+        const totalSum = scored.reduce((s,x)=>s+x.val, 0);
+
+        // потенціал: хто має місячний показник нижче середнього
+        // потенціал = (середнє - місячний) × місяці = скільки недобрав за свій період
+        const totalPotential = (m.fmt==='money'||m.fmt==='int')
+            ? scored.filter(x => x.monthlyVal < displayAvg)
+                    .reduce((s,x) => s + (displayAvg - x.monthlyVal) * x.uniqueMonths, 0)
+            : 0;
+
+        const banner = document.createElement('div');
+        banner.style.cssText=`background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.06);border:1.5px solid ${m.color}33;padding:10px 14px;margin-bottom:4px;display:flex;gap:0;`;
+        const mkStat=(label,valStr,color)=>`
+            <div style="flex:1;text-align:center;padding:0 8px">
+                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#a0a0ab;margin-bottom:3px">${label}</div>
+                <div style="font-size:15px;font-weight:800;color:${color}">${valStr}</div>
+            </div>`;
+        const div=(color='#f0f0f2')=>`<div style="width:1px;background:${color};flex-shrink:0"></div>`;
+        banner.innerHTML =
+            mkStat('Продавців', scored.length, '#1d1d1f') +
+            div() +
+            mkStat(avgMode?'Сума/міс':'Загалом', fmtV(totalSum, m.fmt), m.color) +
+            div() +
+            mkStat('Сер.зважене/міс', fmtV(displayAvg, m.fmt), '#5856d6') +
+            (totalPotential>0 ? div()+ mkStat('🎯 Потенціал', fmtV(totalPotential, m.fmt), '#c0392b') : '');
+        grid.appendChild(banner);
+
         scored.forEach((item,i)=>{
             const barPct=(item.val/maxVal*100).toFixed(1);
+            const isAvgByNature=item.isAvgByNature;
+            const subLine = avgMode && item.rawTotal!=null && !isAvgByNature
+                ? `Загалом: ${fmtV(item.rawTotal, m.fmt)}`
+                : (!avgMode && m.fmt==='money' && item.uniqueMonths>1 && !isAvgByNature
+                    ? `Сер./міс: ${fmtV(item.monthlyVal, m.fmt)}`
+                    : '');
+
+            // відхилення: завжди порівнюємо місячний показник із зваженим середнім місячним
+            const sellerMonthly = item.isAvgByNature ? item.val : item.monthlyVal;
+            const diff    = sellerMonthly - displayAvg;
+            const diffPct = displayAvg ? (diff/displayAvg*100) : 0;
+            const diffColor = diff>=0 ? '#1a7f37' : '#c0392b';
+            const diffBg    = diff>=0 ? 'rgba(52,199,89,0.10)' : 'rgba(255,59,48,0.10)';
+            const diffSign  = diff>=0 ? '+' : '';
+            const diffStr   = m.fmt==='money'||m.fmt==='int'
+                ? `${diffSign}${fmtV(Math.abs(diff),m.fmt)}/міс (${diffSign}${diffPct.toFixed(1)}%)`
+                : `${diffSign}${diffPct.toFixed(1)}%`;
+
+            // потенціал = (середнє - місячний) × місяці — скільки недобрав за свій період
+            const potential = diff < 0 && (m.fmt==='money'||m.fmt==='int')
+                ? Math.abs(diff) * item.uniqueMonths
+                : null;
+
             const card=document.createElement('div');card.className='rank-card';
             card.innerHTML=`
                 <div class="rank-bg" style="background:${m.color};width:${barPct}%"></div>
@@ -908,10 +1032,19 @@ function renderRating(){
                     <div class="rank-pos ${i===0?'gold':i===1?'silver':i===2?'bronze':'rest'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
                     <div class="rank-name">
                         <div class="rank-name-text">${item.seller}</div>
-                        ${i>0?`<div class="rank-sub">${(item.val/scored[0].val*100).toFixed(1)}% від лідера</div>`:''}
+                        <div class="rank-sub" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:3px;align-items:center">
+                            ${i>0?`<span>${(item.val/scored[0].val*100).toFixed(1)}% від лідера</span>`:''}
+                            <span style="background:rgba(0,0,0,.06);border-radius:5px;padding:1px 6px;font-size:9px;font-weight:700;color:#6e6e73">📅 ${item.uniqueMonths} міс.</span>
+                            <span style="background:${diffBg};border-radius:5px;padding:1px 7px;font-size:9px;font-weight:700;color:${diffColor}">${diff>=0?'▲':'▼'} ${diffStr}</span>
+                        </div>
+                        ${potential?`<div style="display:flex;align-items:center;gap:5px;margin-top:5px;padding:4px 8px;background:rgba(255,59,48,0.07);border-radius:7px;border-left:3px solid #ff3b30">
+                            <span style="font-size:9px;font-weight:700;color:#c0392b;text-transform:uppercase;letter-spacing:.04em">🎯 Потенціал</span>
+                            <span style="font-size:12px;font-weight:800;color:#c0392b;margin-left:auto">${fmtV(potential,m.fmt)}</span>
+                        </div>`:''}
                     </div>
                     <div class="rank-val">
                         <div class="rank-val-main" style="color:${m.color}">${fmtV(item.val,m.fmt)}</div>
+                        ${subLine?`<div class="rank-val-sub" style="font-size:9.5px;margin-top:2px;color:#86868b">${subLine}</div>`:''}
                     </div>
                 </div>
                 <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${barPct}%;background:${m.color}"></div></div>`;
