@@ -118,7 +118,7 @@
         .summary-row-val{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap}
         .summary-row-val.pct{color:#1a50b8}
         .summary-divider{border:none;border-top:1px solid #ebebef;margin:3px 0}
-        .delta-row{display:flex;align-items:center;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1px dashed #e0e0e5}
+        .delta-row{display:flex;flex-direction:column;align-items:flex-start;gap:3px;margin-top:6px;padding-top:6px;border-top:1px dashed #e0e0e5}
         .delta-label{font-size:10px;color:var(--text-sec);font-weight:500}
         .delta-badge{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
         .delta-up  {background:rgba(52,199,89,.15);color:#1a7f37}
@@ -128,6 +128,28 @@
 
         .status-box{padding:40px;text-align:center;color:var(--text-sec);font-size:14px}
         .status-box.error{color:#ff3b30}
+
+        /* COMPARE MODE */
+        .compare-btn{border:none;background:#f0f0f5;border-radius:9px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;color:#6e6e73;transition:all .2s}
+        .compare-btn.on{background:#5856d6;color:#fff}
+        .period-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0}
+        .period-label.p1{background:#e8f1fd;color:#1a50b8}
+        .period-label.p2{background:#e3f8ec;color:#1a7f37}
+        .pill.p1-active{color:#fff}
+        .pill.p2-active{color:#fff}
+        .compare-summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:10px}
+        .cmp-card{background:#f9f9fb;border-radius:12px;padding:10px 12px;border:1px solid var(--border)}
+        .cmp-card-label{font-size:10px;color:var(--text-sec);font-weight:600;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .cmp-row{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:3px}
+        .cmp-row-lbl{font-size:10px;color:var(--text-sec);white-space:nowrap;display:flex;align-items:center;gap:4px}
+        .cmp-row-val{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap}
+        .cmp-divider{border:none;border-top:1px dashed #e0e0e5;margin:5px 0}
+        .cmp-delta{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px}
+        .cmp-delta.up  {background:rgba(52,199,89,.15);color:#1a7f37}
+        .cmp-delta.down{background:rgba(255,59,48,.12);color:#c0392b}
+        .cmp-delta.flat{background:rgba(134,134,139,.10);color:#6e6e73}
+        .p1-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#0071e3;flex-shrink:0}
+        .p2-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#34c759;flex-shrink:0}
     </style>
 </head>
 <body>
@@ -143,14 +165,18 @@
     </div>
 </div>
 
-<div class="filters-wrap">
-    <div class="filter-group">
-        <span class="filter-label">📅 Рік</span>
-        <div class="pills" id="yearPills"></div>
+<div class="filters-wrap" style="flex-direction:column;align-items:stretch">
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid #f0f0f2;flex-wrap:wrap">
+        <span style="font-size:10px;font-weight:700;color:#a0a0ab;text-transform:uppercase;letter-spacing:.06em">Режим</span>
+        <button class="compare-btn" id="compareModeBtn" onclick="toggleCompareMode()">⚖️ Порівняння</button>
     </div>
-    <div class="filter-group filter-months">
-        <span class="filter-label">📆 Місяці</span>
-        <div class="pills" id="monthPills"></div>
+    <div id="filterRow1" style="display:flex;align-items:flex-start;padding:7px 10px;flex-wrap:wrap;gap:4px">
+        <span class="period-label p1" id="periodLabel1" style="display:none;margin-top:2px">Період 1</span>
+        <div class="pills" id="yearPills" style="flex-wrap:wrap"></div>
+    </div>
+    <div id="filterRow2" style="display:none;border-top:1px solid #f0f0f2;padding:7px 10px;flex-wrap:wrap;gap:4px;align-items:flex-start">
+        <span class="period-label p2" style="margin-top:2px">Період 2</span>
+        <div class="pills" id="yearPills2" style="flex-wrap:wrap"></div>
     </div>
 </div>
 
@@ -177,6 +203,10 @@
     <div class="summary-panel" id="summaryPanel" style="display:none">
         <div class="summary-title">Підсумки за обраний період</div>
         <div class="summary-grid" id="summaryGrid"></div>
+    </div>
+    <div class="summary-panel" id="compareSummaryPanel" style="display:none">
+        <div class="summary-title">Порівняння періодів</div>
+        <div class="compare-summary-grid" id="compareSummaryGrid"></div>
     </div>
 </div>
 
@@ -212,9 +242,14 @@ function summaryRule(name) {
 
 // STATE
 let allYears=[],allMetrics=[],allMonths=[];
-let selectedYears=new Set(),selectedMetrics=new Set(),selectedMonths=new Set();
+let selectedPeriods=new Set(); // "рік_місяць"
+let selectedMetrics=new Set();
+const yearColorMap={};
 let viewMode='table',chartInstance=null;
-let parsedByYear={},yearColorMap={};
+let parsedByYear={};
+let compareMode=false;
+let periods1=new Set(); // Період 1
+let periods2=new Set(); // Період 2
 
 // CSV
 function parseCSV(text){
@@ -259,105 +294,280 @@ function detectAndParse(rows){
     allMonths=[...ms].sort((a,b)=>a-b);
     const step=Math.floor(CHART_COLORS.length/Math.max(allYears.length,1));
     allYears.forEach((y,i)=>{yearColorMap[y]=CHART_COLORS[(i*step)%CHART_COLORS.length];});
-    if(allYears.length)selectedYears.add(allYears[0]);
+    // За замовчуванням — всі місяці всіх років
+    allYears.forEach(y=>allMonths.forEach(m=>selectedPeriods.add(y+'_'+m)));
 }
 
-function activeMonths(){return selectedMonths.size===0?allMonths:[...selectedMonths].sort((a,b)=>a-b);}
+function activeMonths(y){ return allMonths.filter(m=>selectedPeriods.has(y+'_'+m)); }
+function getAllPairs(){
+    return allYears.flatMap(y=>
+        allMonths.filter(m=>allMetrics.some(met=>parsedByYear[y]?.[met]?.[m]!=null))
+                 .map(m=>({y,m,key:y+'_'+m}))
+    );
+}
+function activePeriods(){ return allYears.flatMap(y=>allMonths.filter(m=>selectedPeriods.has(y+'_'+m)).map(m=>({y,m}))); }
 function yColor(y){return yearColorMap[y]||'#86868b';}
 function dsColor(y,mi){const bi=CHART_COLORS.indexOf(yearColorMap[y]);return CHART_COLORS[(bi+mi*2)%CHART_COLORS.length];}
 function badgeCls(name){const lo=name.toLowerCase();for(const g of GROUP_HINTS)if(g.kw.some(k=>lo.includes(k)))return g.cls;if(lo.includes('%')||lo.includes('доля')||lo.includes('конвер'))return'badge-pct';return'badge-other';}
 
 // FILTERS
 function renderFilters(){
+    if(compareMode){
+        renderPillsFor('yearPills',  periods1, ()=>'#0071e3');
+        renderPillsFor('yearPills2', periods2, ()=>'#34c759');
+        return;
+    }
     const yp=document.getElementById('yearPills');yp.innerHTML='';
-    // Кнопка "Всі роки"
-    const ba=mkPill('Всі',selectedYears.size===allYears.length,()=>{allYears.forEach(y=>selectedYears.add(y));refreshAll();});
+    const allPairs=getAllPairs();
+    if(!allPairs.length)return;
+    if(selectedPeriods.size===0)allPairs.forEach(p=>selectedPeriods.add(p.key));
+    const allActive=allPairs.every(p=>selectedPeriods.has(p.key));
+    const ba=mkPill('Всі',allActive,()=>{allPairs.forEach(p=>selectedPeriods.add(p.key));renderFilters();refreshAll();});
     yp.appendChild(ba);
-    allYears.forEach(y=>{
-        const active=selectedYears.has(y);
-        const btn=mkPill(y,active,()=>{
-            if(selectedYears.has(y)){if(selectedYears.size>1)selectedYears.delete(y);}else selectedYears.add(y);
-            refreshAll();
+    const divider=()=>{const s=document.createElement('span');s.style.cssText='color:#d2d2d7;align-self:center;padding:0 3px;font-size:11px';s.textContent='|';return s;};
+    yp.appendChild(divider());
+    allYears.slice().sort((a,b)=>a-b).forEach(y=>{
+        const yc=yColor(y);
+        const availM=allMonths.filter(m=>allMetrics.some(met=>parsedByYear[y]?.[met]?.[m]!=null));
+        if(!availM.length)return;
+        const allYActive=availM.every(m=>selectedPeriods.has(y+'_'+m));
+        const yBtn=document.createElement('button');
+        yBtn.className='pill'+(allYActive?' active':'');
+        yBtn.textContent=y;yBtn.style.fontWeight='800';
+        if(allYActive){yBtn.style.background=yc;yBtn.style.borderColor=yc;yBtn.style.color='#fff';}
+        yBtn.onclick=()=>{
+            if(allYActive){availM.forEach(m=>{if(selectedPeriods.size>1)selectedPeriods.delete(y+'_'+m);});}
+            else{availM.forEach(m=>selectedPeriods.add(y+'_'+m));}
+            renderFilters();refreshAll();
+        };
+        yp.appendChild(yBtn);
+        availM.forEach(m=>{
+            const key=y+'_'+m;
+            const btn=mkPill(MONTHS_UK[m-1].slice(0,3),selectedPeriods.has(key),()=>{
+                if(selectedPeriods.has(key)){if(selectedPeriods.size>1)selectedPeriods.delete(key);}
+                else selectedPeriods.add(key);
+                renderFilters();refreshAll();
+            });
+            btn.dataset.period=key;
+            if(selectedPeriods.has(key)){btn.style.background=yc;btn.style.borderColor=yc;btn.style.color='#fff';}
+            yp.appendChild(btn);
         });
-        btn.dataset.year=y;
-        if(active){btn.style.background=yColor(y);btn.style.borderColor=yColor(y);btn.classList.add('year-active');}
-        yp.appendChild(btn);
+        yp.appendChild(divider());
     });
-
-    const mp=document.getElementById('monthPills');mp.innerHTML='';
-    mp.appendChild(mkPill('Всі',selectedMonths.size===0,()=>{selectedMonths.clear();refreshAll();}));
-    allMonths.forEach(m=>{
-        const btn=mkPill(MONTHS_UK[m-1].slice(0,3),selectedMonths.size===0||selectedMonths.has(m),()=>{
-            if(selectedMonths.size===0){
-                // перший клік — вибираємо лише цей місяць
-                selectedMonths.add(m);
-            } else if(selectedMonths.has(m)){
-                selectedMonths.delete(m);
-                // якщо всі знято — скидаємо до "всі"
-            } else {
-                selectedMonths.add(m);
-            }
-            refreshAll();
-        });
-        btn.dataset.month=m;
-        mp.appendChild(btn);
-    });
+    const mp=document.getElementById('monthPills');if(mp)mp.innerHTML='';
 }
+
+
 function mkPill(text,active,onclick){
     const b=document.createElement('button');b.className='pill'+(active?' active':'');b.textContent=text;b.onclick=onclick;return b;
 }
 function updFilters(){
-    document.querySelectorAll('#yearPills .pill[data-year]').forEach(b=>{
-        const y=+b.dataset.year,a=selectedYears.has(y);
-        b.className='pill'+(a?' active year-active':'');b.style.background=a?yColor(y):'';b.style.borderColor=a?yColor(y):'';
+    // В режимі порівняння пілюлі повністю перемальовуються через renderFilters — тут нічого не робимо
+    if(compareMode) return;
+    document.querySelectorAll('#yearPills .pill[data-period]').forEach(b=>{
+        const key=b.dataset.period;
+        const y=+key.split('_')[0];
+        const a=selectedPeriods.has(key);
+        b.className='pill'+(a?' active':'');
+        b.style.background=a?yColor(y):'';
+        b.style.borderColor=a?yColor(y):'';
     });
-    const bay=document.querySelector('#yearPills .pill:not([data-year])');
-    if(bay)bay.className='pill'+(selectedYears.size===allYears.length?' active':'');
-    document.querySelectorAll('#monthPills .pill[data-month]').forEach(b=>{
-        b.className='pill'+((selectedMonths.size===0||selectedMonths.has(+b.dataset.month))?' active':'');
-    });
-    const bam=document.querySelector('#monthPills .pill:not([data-month])');
-    if(bam)bam.className='pill'+(selectedMonths.size===0?' active':'');
+    const ba=document.querySelector('#yearPills .pill:not([data-period])');
+    if(ba)ba.className='pill'+(allYears.flatMap(y=>allMonths.map(m=>y+'_'+m)).every(k=>selectedPeriods.has(k))?' active':'');
 }
-function refreshAll(){updFilters();renderTable();renderChips();if(viewMode==='chart'){renderChart();}else{renderSummary();}}
+function toggleCompareMode(){
+    compareMode=!compareMode;
+    const btn=document.getElementById('compareModeBtn');
+    btn.classList.toggle('on',compareMode);
+    document.getElementById('filterRow2').style.display=compareMode?'flex':'none';
+    document.getElementById('periodLabel1').style.display=compareMode?'':'none';
+    if(compareMode){
+        // При кожному вмиканні — скидаємо набори, юзер вибирає з нуля
+        periods1.clear();
+        periods2.clear();
+    }
+    renderFilters();refreshAll();
+}
+
+function renderPillsFor(containerId, periodsSet, colorFn, activeClass){
+    const yp=document.getElementById(containerId);
+    yp.innerHTML='';
+    const allPairs=getAllPairs();
+
+    const divider=()=>{const s=document.createElement('span');s.style.cssText='color:#d2d2d7;align-self:center;padding:0 3px;font-size:11px';s.textContent='|';return s;};
+
+    allYears.slice().sort((a,b)=>a-b).forEach(y=>{
+        const yc=colorFn(y);
+        const availM=allMonths.filter(m=>allMetrics.some(met=>parsedByYear[y]?.[met]?.[m]!=null));
+        if(!availM.length)return;
+
+        const allYActive=availM.every(m=>periodsSet.has(y+'_'+m));
+        const yBtn=document.createElement('button');
+        yBtn.className='pill'+(allYActive?' active':'');
+        yBtn.textContent=y;
+        yBtn.style.fontWeight='800';
+        if(allYActive){yBtn.style.background=yc;yBtn.style.borderColor=yc;yBtn.style.color='#fff';}
+        yBtn.onclick=()=>{
+            if(allYActive){availM.forEach(m=>periodsSet.delete(y+'_'+m));}
+            else{availM.forEach(m=>periodsSet.add(y+'_'+m));}
+            renderFilters();refreshAll();
+        };
+        yp.appendChild(yBtn);
+
+        availM.forEach(m=>{
+            const key=y+'_'+m;
+            const active=periodsSet.has(key);
+            const btn=mkPill(MONTHS_UK[m-1].slice(0,3), active, ()=>{
+                if(periodsSet.has(key)) periodsSet.delete(key);
+                else periodsSet.add(key);
+                renderFilters();refreshAll();
+            });
+            btn.dataset.period=key;
+            if(active){btn.style.background=yc;btn.style.borderColor=yc;btn.style.color='#fff';}
+            yp.appendChild(btn);
+        });
+        yp.appendChild(divider());
+    });
+}
+
+function calcPeriodVal(metric, periodsSet){
+    const rule=summaryRule(metric);
+    if(rule.type==='none')return null;
+    const pairs=[...periodsSet].map(k=>{const[y,m]=k.split('_');return{y:+y,m:+m};});
+    if(!pairs.length)return null;
+
+    if(rule.type==='sum'){
+        return pairs.reduce((s,p)=>{
+            const v=parsedByYear[p.y]?.[metric]?.[p.m];
+            return s+(v!=null?v:0);
+        },0);
+    }
+    if(rule.type==='avg'){
+        const vals=pairs.map(p=>parsedByYear[p.y]?.[metric]?.[p.m]).filter(v=>v!=null);
+        return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;
+    }
+    if(rule.type==='ratio'){
+        const numKey=rule.num,fbKey=rule.fallback;
+        let numSum=0,toSum=0;
+        pairs.forEach(p=>{
+            const numMv=parsedByYear[p.y]?.[numKey]||parsedByYear[p.y]?.[fbKey]||{};
+            const toMv=parsedByYear[p.y]?.['ТО']||{};
+            const nv=numMv[p.m];const tv=toMv[p.m];
+            if(nv!=null)numSum+=nv;if(tv!=null)toSum+=tv;
+        });
+        return toSum>0?(numSum/toSum*100):null;
+    }
+    return null;
+}
+
+function renderCompareSummary(){
+    const panel=document.getElementById('compareSummaryPanel');
+    const grid=document.getElementById('compareSummaryGrid');
+    grid.innerHTML='';
+    if(!selectedMetrics.size){panel.style.display='none';return;}
+
+    const metrics=[...selectedMetrics];
+    const p1label=[...periods1].sort().map(k=>{const[y,m]=k.split('_');return MONTHS_UK[+m-1].slice(0,3)+' '+String(y).slice(2);}).join(', ');
+    const p2label=[...periods2].sort().map(k=>{const[y,m]=k.split('_');return MONTHS_UK[+m-1].slice(0,3)+' '+String(y).slice(2);}).join(', ');
+
+    metrics.forEach(metric=>{
+        const rule=summaryRule(metric);
+        if(rule.type==='none')return;
+
+        const v1=calcPeriodVal(metric,periods1);
+        const v2=calcPeriodVal(metric,periods2);
+        if(v1===null&&v2===null)return;
+
+        const isRatio=rule.type==='ratio'||rule.type==='avg';
+        const n1=periods1.size,n2=periods2.size;
+
+        const fmtVal=v=>v!=null?(isRatio?v.toFixed(2)+'%':fmt(v)):'—';
+        const fmtAvg=v=>v!=null?(isRatio?v.toFixed(2)+'%':fmt(v)):'—';
+
+        let diff=null,diffPct=null;
+        if(v1!=null&&v2!=null){diff=v2-v1;diffPct=v1!==0?(diff/Math.abs(v1)*100):null;}
+        const cls=diff==null?'flat':Math.abs(diff)<0.001?'flat':diff>0?'up':'down';
+        const arrow=cls==='up'?'▲':cls==='down'?'▼':'→';
+        const diffStr=diff==null?'н/д':(isRatio?(diff>0?'+':'')+diff.toFixed(2)+'%':(diff>0?'+':'')+fmt(Math.abs(diff)))+(diffPct!=null?' ('+diffPct.toFixed(1)+'%)':'');
+
+        const card=document.createElement('div');card.className='cmp-card';
+        card.innerHTML=`
+            <div class="cmp-card-label">${metric}</div>
+            <div class="cmp-row">
+                <div class="cmp-row-lbl"><span class="p1-dot"></span> П1</div>
+                <div class="cmp-row-val">${fmtVal(v1)}</div>
+            </div>
+            ${!isRatio&&n1>1?`<div class="cmp-row"><div class="cmp-row-lbl" style="padding-left:11px">Сер./міс</div><div class="cmp-row-val" style="color:#86868b;font-size:11px">${v1!=null?fmt(v1/n1):'—'}</div></div>`:''}
+            <div class="cmp-row">
+                <div class="cmp-row-lbl"><span class="p2-dot"></span> П2</div>
+                <div class="cmp-row-val">${fmtVal(v2)}</div>
+            </div>
+            ${!isRatio&&n2>1?`<div class="cmp-row"><div class="cmp-row-lbl" style="padding-left:11px">Сер./міс</div><div class="cmp-row-val" style="color:#86868b;font-size:11px">${v2!=null?fmt(v2/n2):'—'}</div></div>`:''}
+            <hr class="cmp-divider">
+            <div class="cmp-row">
+                <div class="cmp-row-lbl">Відхилення</div>
+                <span class="cmp-delta ${cls}">${arrow} ${diffStr}</span>
+            </div>`;
+        grid.appendChild(card);
+    });
+    panel.style.display=grid.children.length?'block':'none';
+}
+
+function refreshAll(){
+    updFilters();
+    renderTable();
+    renderChips();
+    if(viewMode==='chart') renderChart();
+    else renderSummary();
+    // compareSummaryPanel більше не використовується — вся логіка в renderSummary
+    document.getElementById('compareSummaryPanel').style.display='none';
+}
 
 // TABLE
 function renderTable(){
     const card=document.getElementById('tableCard');card.innerHTML='';
-    const years=[...selectedYears].sort((a,b)=>a-b),months=activeMonths();
-    if(!months.length||!years.length){card.innerHTML='<div class="status-box">Немає даних</div>';return;}
+    // В режимі порівняння показуємо union periods1 + periods2
+    let periods;
+    if(compareMode){
+        const combined=new Set([...periods1,...periods2]);
+        periods=[...combined].map(k=>{const[y,m]=k.split('_');return{y:+y,m:+m};}).sort((a,b)=>a.y-b.y||a.m-b.m);
+        if(!periods.length){card.innerHTML='<div class="status-box">👆 Оберіть місяці у Періоді 1 та Періоді 2</div>';return;}
+    } else {
+        periods=activePeriods();
+        if(!periods.length){card.innerHTML='<div class="status-box">Немає даних</div>';return;}
+    }
+    const years=[...new Set(periods.map(p=>p.y))].sort((a,b)=>a-b);
+    const months=[...new Set(periods.map(p=>p.m))].sort((a,b)=>a-b);
     const hint=document.createElement('div');hint.className='table-hint';
     hint.innerHTML=`<span>💡</span> Натисніть на рядок щоб додати показник на <span>графік</span>`;
     card.appendChild(hint);
     const wrap=document.createElement('div');wrap.style.cssText='overflow-x:auto;-webkit-overflow-scrolling:touch;';card.appendChild(wrap);
-    const colW=Math.max(44,Math.floor((window.innerWidth-115)/(months.length*years.length)));
-    const tbl=document.createElement('table');tbl.style.width=(115+colW*months.length*years.length)+'px';
+    const colW=Math.max(44,Math.floor((window.innerWidth-115)/periods.length));
+    const tbl=document.createElement('table');tbl.style.width=(115+colW*periods.length)+'px';
     const cg=document.createElement('colgroup');
     const c0=document.createElement('col');c0.style.width='115px';cg.appendChild(c0);
-    years.forEach(()=>months.forEach(()=>{const c=document.createElement('col');c.style.width=colW+'px';cg.appendChild(c);}));
+    periods.forEach(()=>{const c=document.createElement('col');c.style.width=colW+'px';cg.appendChild(c);});
     tbl.appendChild(cg);
     const thead=document.createElement('thead');
-    if(years.length>1){
-        const trY=document.createElement('tr');
-        const thC=document.createElement('th');thC.className='col-metric';thC.rowSpan=2;thC.textContent='Показник';trY.appendChild(thC);
-        years.forEach((y,yi)=>{
-            const th=document.createElement('th');th.colSpan=months.length;th.textContent=y;
-            const yc=yColor(y);th.style.cssText=`font-weight:800;font-size:11px;border-bottom:2px solid ${yc};color:${yc};`;
-            if(yi>0)th.classList.add('grp-start');trY.appendChild(th);
-        });
-        thead.appendChild(trY);
-        const trM=document.createElement('tr');
-        years.forEach((y,yi)=>months.forEach((m,mi)=>{
-            const th=document.createElement('th');th.textContent=MONTHS_UK[m-1].slice(0,3);
-            if(mi===0&&yi>0)th.classList.add('grp-start');trM.appendChild(th);
-        }));
-        thead.appendChild(trM);
-    } else {
-        const trH=document.createElement('tr');
-        const thN=document.createElement('th');thN.className='col-metric';thN.textContent='Показник';trH.appendChild(thN);
-        months.forEach(m=>{const th=document.createElement('th');th.textContent=MONTHS_UK[m-1];trH.appendChild(th);});
-        thead.appendChild(trH);
-    }
+    // Один рядок заголовків "Міс РР"
+    const trH=document.createElement('tr');
+    const thN=document.createElement('th');thN.className='col-metric';thN.textContent='Показник';trH.appendChild(thN);
+    periods.forEach((p,pi)=>{
+        const th=document.createElement('th');
+        th.textContent=MONTHS_UK[p.m-1].slice(0,3)+' '+String(p.y).slice(2);
+        let thColor;
+        if(compareMode){
+            const key=p.y+'_'+p.m;
+            const inP1=periods1.has(key), inP2=periods2.has(key);
+            thColor=inP2&&!inP1?'#34c759':inP1?'#0071e3':'#86868b';
+        } else {
+            thColor=yColor(p.y);
+        }
+        th.style.cssText=`color:${thColor};font-weight:700;`;
+        if(pi>0&&(periods[pi-1].y!==p.y||compareMode&&(periods1.has(p.y+'_'+p.m)!==periods1.has(periods[pi-1].y+'_'+periods[pi-1].m))))th.classList.add('grp-start');
+        trH.appendChild(th);
+    });
+    thead.appendChild(trH);
     tbl.appendChild(thead);
     const tbody=document.createElement('tbody');
     let rowIdx=0;
@@ -369,18 +579,16 @@ function renderTable(){
         if(selectedMetrics.has(metric))tr.classList.add('selected');
         const tdN=document.createElement('td');tdN.className='col-metric';tdN.textContent=metric;tr.appendChild(tdN);
         const bc=badgeCls(metric);
-        years.forEach((y,yi)=>{
-            const mv=parsedByYear[y]?.[metric]||{};
-            months.forEach((m,mi)=>{
-                const val=mv[m],td=document.createElement('td');
-                if(mi===0&&yi>0)td.classList.add('grp-start');
-                if(val!==undefined&&val!==null){
-                    const sp=document.createElement('span');
-                    sp.className='badge '+(selectedMetrics.has(metric)?bc:'badge-other');
-                    sp.textContent=fmt(val);td.appendChild(sp);
-                } else{td.textContent='—';td.style.color='#ccc';}
-                tr.appendChild(td);
-            });
+        periods.forEach((p,pi)=>{
+            const val=parsedByYear[p.y]?.[metric]?.[p.m];
+            const td=document.createElement('td');
+            if(pi>0&&periods[pi-1].y!==p.y)td.classList.add('grp-start');
+            if(val!==undefined&&val!==null){
+                const sp=document.createElement('span');
+                sp.className='badge '+(selectedMetrics.has(metric)?bc:'badge-other');
+                sp.textContent=fmt(val);td.appendChild(sp);
+            } else{td.textContent='—';td.style.color='#ccc';}
+            tr.appendChild(td);
         });
         tr.addEventListener('click',()=>toggleMetric(metric));
         tbody.appendChild(tr);
@@ -406,22 +614,37 @@ function toggleMetric(metric){
 // CHIPS
 function renderChips(){
     const cont=document.getElementById('selectedChips');cont.innerHTML='';
-    const years=[...selectedYears].sort((a,b)=>a-b),metrics=[...selectedMetrics];
-    years.forEach((y)=>{
-        metrics.forEach((metric,mi)=>{
-            const color=dsColor(y,mi);
-            const chip=document.createElement('div');chip.className='chip';
-            chip.style.cssText=`background:${color}22;color:${color};border:1.5px solid ${color}55;`;
-            const label=years.length>1?`${metric} (${y})`:metric;
-            chip.innerHTML=`<span>${label}</span><span class="chip-x">✕</span>`;
-            chip.addEventListener('click',()=>toggleMetric(metric));
-            cont.appendChild(chip);
+    const metrics=[...selectedMetrics];
+    if(compareMode){
+        const p1color='#0071e3', p2color='#34c759';
+        metrics.forEach(metric=>{
+            [[p1color,'П1'],[p2color,'П2']].forEach(([color,plabel])=>{
+                const chip=document.createElement('div');chip.className='chip';
+                chip.style.cssText=`background:${color}22;color:${color};border:1.5px solid ${color}55;`;
+                chip.innerHTML=`<span>${metric} (${plabel})</span><span class="chip-x">✕</span>`;
+                chip.addEventListener('click',()=>toggleMetric(metric));
+                cont.appendChild(chip);
+            });
         });
-    });
-    const months=activeMonths();
-    const yrs=[...selectedYears].sort((a,b)=>a-b).join(', ');
-    const monStr=selectedMonths.size===0?'всі місяці':months.map(m=>MONTHS_UK[m-1].slice(0,3)).join(', ');
-    document.getElementById('chartSubtitle').textContent=selectedMetrics.size?`${yrs} · ${monStr}`:'Оберіть показники у таблиці';
+        const fmtP=set=>[...set].sort().map(k=>{const[y,m]=k.split('_');return MONTHS_UK[+m-1].slice(0,3)+' '+String(y).slice(2);}).join(', ');
+        document.getElementById('chartSubtitle').textContent=selectedMetrics.size?`П1: ${fmtP(periods1)} | П2: ${fmtP(periods2)}`:'Оберіть показники у таблиці';
+    } else {
+        const periods=activePeriods();
+        const years=[...new Set(periods.map(p=>p.y))].sort((a,b)=>a-b);
+        years.forEach((y)=>{
+            metrics.forEach((metric,mi)=>{
+                const color=dsColor(y,mi);
+                const chip=document.createElement('div');chip.className='chip';
+                chip.style.cssText=`background:${color}22;color:${color};border:1.5px solid ${color}55;`;
+                const label=years.length>1?`${metric} (${y})`:metric;
+                chip.innerHTML=`<span>${label}</span><span class="chip-x">✕</span>`;
+                chip.addEventListener('click',()=>toggleMetric(metric));
+                cont.appendChild(chip);
+            });
+        });
+        const periodStr=[...selectedPeriods].sort().map(k=>{const[y,m]=k.split('_');return MONTHS_UK[+m-1].slice(0,3)+' '+String(y).slice(2);}).join(', ');
+        document.getElementById('chartSubtitle').textContent=selectedMetrics.size?periodStr:'Оберіть показники у таблиці';
+    }
 }
 
 // CHART
@@ -432,17 +655,53 @@ function renderChart(){
         body.innerHTML=`<div class="empty-chart"><div class="empty-chart-icon">📊</div><div class="empty-chart-text">Натисніть на рядок у таблиці, щоб додати показник</div></div>`;
         renderSummary();return;
     }
-    const years=[...selectedYears].sort((a,b)=>a-b),metrics=[...selectedMetrics],months=activeMonths();
-    const labels=months.map(m=>MONTHS_UK[m-1].slice(0,3));
+    const metrics=[...selectedMetrics];
     const datasets=[];
-    years.forEach(y=>{
-        metrics.forEach((metric,mi)=>{
-            const mv=parsedByYear[y]?.[metric]||{};
-            const color=dsColor(y,mi);
-            const label=years.length>1?`${metric} (${y})`:metric;
-            datasets.push({label,data:months.map(m=>mv[m]??null),borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true});
+    let labels=[];
+
+    if(compareMode){
+        // Сортуємо хронологічно всередині кожного набору
+        const p1pairs=[...periods1].map(k=>{const[y,m]=k.split('_');return{y:+y,m:+m};}).sort((a,b)=>a.y-b.y||a.m-b.m);
+        const p2pairs=[...periods2].map(k=>{const[y,m]=k.split('_');return{y:+y,m:+m};}).sort((a,b)=>a.y-b.y||a.m-b.m);
+        const maxLen=Math.max(p1pairs.length,p2pairs.length);
+        // Вісь X = ТІЛЬКИ назви місяців з П1 (порядок кроків, без року)
+        // Обидва датасети мають однакову кількість точок — i-та точка П2 накладається на i-ту точку П1
+        labels=Array.from({length:maxLen},(_,i)=>{
+            const p=p1pairs[i]||p2pairs[i];
+            return MONTHS_UK[p.m-1].slice(0,3);
         });
-    });
+        const P1_SHADES=['#0071e3','#5856d6','#af52de','#ff3b30','#ff9500','#00b388','#5ac8fa','#007aff'];
+        const P2_SHADES=['#34c759','#30d158','#32ade6','#ffd60a','#ff6b35','#64d2ff','#a8e063','#b5e48c'];
+        metrics.forEach((metric,mi)=>{
+            const c1=P1_SHADES[mi%P1_SHADES.length];
+            const c2=P2_SHADES[mi%P2_SHADES.length];
+            // i-та точка = i-й місяць у хронологічному порядку всередині набору
+            const data1=Array.from({length:maxLen},(_,i)=>{const p=p1pairs[i];return p!=null?(parsedByYear[p.y]?.[metric]?.[p.m]??null):null;});
+            const data2=Array.from({length:maxLen},(_,i)=>{const p=p2pairs[i];return p!=null?(parsedByYear[p.y]?.[metric]?.[p.m]??null):null;});
+            // tooltip: реальна дата кожної точки
+            const tt1=p1pairs.map(p=>MONTHS_UK[p.m-1].slice(0,3)+' '+p.y);
+            const tt2=p2pairs.map(p=>MONTHS_UK[p.m-1].slice(0,3)+' '+p.y);
+            while(tt1.length<maxLen) tt1.push('');
+            while(tt2.length<maxLen) tt2.push('');
+            datasets.push({label:`${metric} (П1)`,data:data1,borderColor:c1,backgroundColor:c1+'18',pointBackgroundColor:c1,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:false,borderDash:[],_tt:tt1});
+            datasets.push({label:`${metric} (П2)`,data:data2,borderColor:c2,backgroundColor:c2+'18',pointBackgroundColor:c2,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:false,borderDash:[5,3],_tt:tt2});
+        });
+    } else {
+        const periods=activePeriods();const years=[...new Set(periods.map(p=>p.y))].sort((a,b)=>a-b);
+        // Вісь X — унікальні місяці з вибраних periods, відсортовані
+        const xMonths=[...new Set(periods.map(p=>p.m))].sort((a,b)=>a-b);
+        labels=xMonths.map(m=>MONTHS_UK[m-1].slice(0,3));
+        metrics.forEach((metric,mi)=>{
+            years.forEach(y=>{
+                const mv=parsedByYear[y]?.[metric]||{};
+                const color=dsColor(y,mi);
+                const label=years.length>1?`${metric} (${y})`:metric;
+                // дані тільки для місяців що вибрані для цього року
+                const data=xMonths.map(m=>selectedPeriods.has(y+'_'+m)?(mv[m]??null):null);
+                datasets.push({label,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true});
+            });
+        });
+    }
     if(chartInstance){chartInstance.destroy();chartInstance=null;}
     body.innerHTML='<div class="chart-wrap"><canvas id="dynChart"></canvas></div>';
 
@@ -502,10 +761,10 @@ function renderChart(){
                 legend:{display:datasets.length>1,position:'top',labels:{font:{family:'Inter',size:10},boxWidth:20,padding:10,
                     generateLabels(c){return c.data.datasets.map((ds,i)=>({text:ds.label,fillStyle:ds.borderColor,strokeStyle:ds.borderColor,lineWidth:2,hidden:c.getDatasetMeta(i).hidden,datasetIndex:i}));}}},
                 tooltip:{backgroundColor:'#1d1d1f',titleFont:{family:'Inter',size:12},bodyFont:{family:'Inter',size:11},padding:10,
-                    callbacks:{label:c=>` ${c.dataset.label}: ${fmt(c.raw)}`}}
+                    callbacks:{label:c=>{const d=c.dataset._tt?.[c.dataIndex];return` ${c.dataset.label}${d?' ['+d+']':''}: ${fmt(c.raw)}`;}}}
             },
             scales:{
-                x:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Inter',size:10},color:'#86868b'}},
+                x:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Inter',size:compareMode?8:10},color:'#86868b',maxRotation:compareMode?45:0,minRotation:0}},
                 y:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Inter',size:10},color:'#86868b',callback:v=>fmt(v)}}
             }
         }
@@ -557,8 +816,82 @@ function mkDeltaRow(prevYear, currYear, prevVal, currVal){
 function renderSummary(){
     const panel=document.getElementById('summaryPanel');
     const grid=document.getElementById('summaryGrid');grid.innerHTML='';
-    const years=[...selectedYears].sort((a,b)=>a-b),metrics=[...selectedMetrics],months=activeMonths();
+    const metrics=[...selectedMetrics];
     if(!metrics.length){panel.style.display='none';return;}
+
+    if(compareMode){
+        // В режимі порівняння — показуємо суму/середнє/відхилення саме за periods1 і periods2
+        metrics.forEach(metric=>{
+            const rule=summaryRule(metric);
+            if(rule.type==='none')return;
+            const v1=calcPeriodVal(metric,periods1);
+            const v2=calcPeriodVal(metric,periods2);
+            if(v1===null&&v2===null)return;
+
+            const isRatio=rule.type==='ratio';
+            const isAvg=rule.type==='avg';
+            const n1=periods1.size,n2=periods2.size;
+            const fmtV=v=>v!=null?(isRatio||isAvg?v.toFixed(2)+'%':fmt(v)):'—';
+
+            const card=document.createElement('div');card.className='summary-card';
+            const lbl=document.createElement('div');lbl.className='summary-card-label';lbl.title=metric;lbl.textContent=metric;card.appendChild(lbl);
+            const rowsEl=document.createElement('div');rowsEl.className='summary-rows';card.appendChild(rowsEl);
+
+            // П1
+            const yl1=document.createElement('div');
+            yl1.style.cssText='font-size:10px;font-weight:700;color:#0071e3;margin-bottom:2px;display:flex;align-items:center;gap:4px';
+            yl1.innerHTML='<span class="p1-dot"></span>Період 1';
+            rowsEl.appendChild(yl1);
+            if(isAvg){
+                rowsEl.appendChild(mkSRow('Середнє',fmtV(v1),isRatio||isAvg));
+            } else if(isRatio){
+                rowsEl.appendChild(mkSRow('Частка від ТО',fmtV(v1),true));
+            } else {
+                rowsEl.appendChild(mkSRow('Сума',fmtV(v1)));
+                if(n1>1) rowsEl.appendChild(mkSRow('Середнє',v1!=null?fmt(v1/n1):'—'));
+            }
+
+            const hr=document.createElement('hr');hr.className='summary-divider';rowsEl.appendChild(hr);
+
+            // П2
+            const yl2=document.createElement('div');
+            yl2.style.cssText='font-size:10px;font-weight:700;color:#34c759;margin-bottom:2px;display:flex;align-items:center;gap:4px';
+            yl2.innerHTML='<span class="p2-dot"></span>Період 2';
+            rowsEl.appendChild(yl2);
+            if(isAvg){
+                rowsEl.appendChild(mkSRow('Середнє',fmtV(v2),isRatio||isAvg));
+            } else if(isRatio){
+                rowsEl.appendChild(mkSRow('Частка від ТО',fmtV(v2),true));
+            } else {
+                rowsEl.appendChild(mkSRow('Сума',fmtV(v2)));
+                if(n2>1) rowsEl.appendChild(mkSRow('Середнє',v2!=null?fmt(v2/n2):'—'));
+            }
+
+            // Delta
+            if(v1!=null&&v2!=null){
+                const diff=v2-v1;
+                const diffPct=v1!==0?(diff/Math.abs(v1)*100):null;
+                const cls=Math.abs(diff)<0.001?'flat':diff>0?'up':'down';
+                const arrow=cls==='up'?'▲':cls==='down'?'▼':'→';
+                let diffStr=(isRatio||isAvg)?((diff>0?'+':'')+diff.toFixed(2)+'%'):((diff>0?'+':'')+fmt(Math.abs(diff)));
+                if(diffPct!=null&&!isRatio&&!isAvg) diffStr+=' ('+diffPct.toFixed(1)+'%)';
+                const dRow=document.createElement('div');dRow.className='delta-row';
+                const dLbl=document.createElement('div');dLbl.className='delta-label';dLbl.textContent='Відхилення П2 vs П1';
+                const badge=document.createElement('div');badge.className='delta-badge '+cls;
+                badge.innerHTML=`<span class="delta-arrow">${arrow}</span>${diffStr}`;
+                dRow.appendChild(dLbl);dRow.appendChild(badge);
+                rowsEl.appendChild(dRow);
+            }
+
+            if(rowsEl.children.length)grid.appendChild(card);
+        });
+        panel.style.display=grid.children.length?'block':'none';
+        return;
+    }
+
+    // Звичайний режим (без порівняння)
+    const periods=activePeriods();const years=[...new Set(periods.map(p=>p.y))].sort((a,b)=>a-b);const months=[...new Set(periods.map(p=>p.m))].sort((a,b)=>a-b);
+    if(!periods.length){panel.style.display='none';return;}
 
     metrics.forEach(metric=>{
         const rule=summaryRule(metric);
@@ -572,11 +905,11 @@ function renderSummary(){
         const baseVals={};
 
         years.forEach((y,yi)=>{
+            const yMonths=allMonths.filter(m=>selectedPeriods.has(y+'_'+m));
             const mv=parsedByYear[y]?.[metric]||{};
-            const vals=months.map(m=>mv[m]).filter(v=>v!==undefined&&v!==null);
+            const vals=yMonths.map(m=>mv[m]).filter(v=>v!==undefined&&v!==null);
             if(!vals.length)return;
             const yc=yColor(y);
-
             if(yi>0){const hr=document.createElement('hr');hr.className='summary-divider';rowsEl.appendChild(hr);}
             if(years.length>1){
                 const yl=document.createElement('div');
@@ -584,7 +917,6 @@ function renderSummary(){
                 yl.innerHTML=`<span class="year-dot" style="background:${yc}"></span>${y}`;
                 rowsEl.appendChild(yl);
             }
-
             if(rule.type==='sum'){
                 const sum=vals.reduce((a,b)=>a+b,0);
                 const avg=sum/vals.length;
@@ -599,8 +931,8 @@ function renderSummary(){
                 const numKey=rule.num,fbKey=rule.fallback;
                 const numMv=parsedByYear[y]?.[numKey]||parsedByYear[y]?.[fbKey]||{};
                 const toMv=parsedByYear[y]?.['ТО']||{};
-                const numSum=months.map(m=>numMv[m]).filter(v=>v!=null).reduce((a,b)=>a+b,0);
-                const toSum=months.map(m=>toMv[m]).filter(v=>v!=null).reduce((a,b)=>a+b,0);
+                const numSum=yMonths.map(m=>numMv[m]).filter(v=>v!=null).reduce((a,b)=>a+b,0);
+                const toSum=yMonths.map(m=>toMv[m]).filter(v=>v!=null).reduce((a,b)=>a+b,0);
                 const pct=toSum>0?(numSum/toSum*100):null;
                 if(pct===null)return;
                 baseVals[y]=pct;
@@ -620,7 +952,7 @@ function renderSummary(){
 
         if(rowsEl.children.length)grid.appendChild(card);
     });
-    panel.style.display=grid.children.length?'':'none';
+    panel.style.display=grid.children.length?'block':'none';
 }
 
 function mkSRow(label,val,isPct=false){

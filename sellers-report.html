@@ -248,16 +248,12 @@
     </div>
 </div>
 
-<div class="filters-wrap">
-    <div class="filter-group">
-        <span class="filter-label">📅 Рік</span>
-        <div class="pills" id="yearPills"></div>
+<div class="filters-wrap" style="flex-direction:column;align-items:stretch">
+    <div class="filter-group" style="border-right:none;border-bottom:1px solid #f0f0f2;flex-wrap:wrap">
+        <span class="filter-label" style="padding-top:8px">📅 Період</span>
+        <div class="pills" id="periodPills" style="flex-wrap:wrap;padding:6px 0"></div>
     </div>
-    <div class="filter-group">
-        <span class="filter-label">📆 Місяць</span>
-        <div class="pills" id="monthPills"></div>
-    </div>
-    <div class="filter-group filter-flex">
+    <div class="filter-group" style="border-right:none">
         <span class="filter-label">👤 Продавець</span>
         <div class="pills" id="sellerPills"></div>
     </div>
@@ -329,6 +325,7 @@ const COL_GROUPS = [
         { key:'Конверсія ПК', label:'Конв.', badge:'b-eff', fmt:'pct' },
         { key:'Конверсія ПК Offline', label:'Оф.Конв', badge:'b-eff', fmt:'pct' },
         { key:'% УДС', label:'УДС', badge:'b-plain', fmt:'money' },
+        { key:'CSI', label:'CSI', badge:'b-eff', fmt:'dec2' },
     ]},
     { name:'Категорії', cls:'gh-cat', cols:[
         { key:'AV', label:'AV', badge:'b-cat', fmt:'money' },
@@ -354,6 +351,7 @@ const RATING_METRICS = [
     { key:'Конверсія ПК', label:'Конверсія',  color:'#af52de', fmt:'pct',   higher:true, group:'main' },
     { key:'Ср. Чек',      label:'Ср.Чек',     color:'#5856d6', fmt:'money', higher:true, group:'main' },
     { key:'КПЧ',          label:'КПЧ',        color:'#00b388', fmt:'dec2',  higher:true, group:'main' },
+    { key:'CSI',          label:'CSI',        color:'#ff6b35', fmt:'dec2',  higher:true, group:'main' },
     // Категорії
     { key:'__all_cat__', label:'Всі кат.', color:'#5856d6', fmt:'money', higher:true, group:'cat', allCat:true },
     { key:'AV',  label:'AV',  color:'#c8392b', fmt:'money', higher:true, group:'cat' },
@@ -375,7 +373,8 @@ const DYN_METRICS = [
 // STATE
 let allData = [];        // [{рік,місяць,продавець, ...поля}]
 let allYears = [], allMonths = [], allSellers = [];
-let selYears = new Set(), selMonths = new Set(), selSellers = new Set();
+let selSellers = new Set();
+let selPeriods = new Set();
 let viewMode = 'table';
 let activeMetricKey = 'ТО';
 let avgMode = false;
@@ -457,6 +456,8 @@ const COL_NAME_MAP = {
     '% удс':                  '% УДС',
     'удс':                    '% УДС',
     'уds':                    '% УДС',
+    // CSI
+    'csi':                    'CSI',
     // Категорії
     'av':                     'AV',
     'dig':                    'DIG',
@@ -521,9 +522,7 @@ function parseFull(rows){
     allYears=[...ySet].sort((a,b)=>b-a);
     allMonths=[...mSet].sort((a,b)=>a-b);
     allSellers=[...sSet].sort();
-
-    selYears.add(allYears[0]);
-    // всі місяці і продавці за замовчуванням
+    // dateFrom/dateTo встановлюються в renderFilters
 }
 
 function findIdx(header,keys){
@@ -551,11 +550,13 @@ function fmtV(v,type){
 }
 
 // FILTER
+function ym(y,m){return y*100+m;}
+function ymKey(y,m){return y+'_'+m;}
+
 function filteredData(){
     return allData.filter(r=>{
-        if(selYears.size&&!selYears.has(r.рік))return false;
-        if(selMonths.size&&!selMonths.has(r.місяць))return false;
-        if(selSellers.size&&!selSellers.has(r.продавець))return false;
+        if(selPeriods.size && !selPeriods.has(ymKey(r.рік,r.місяць))) return false;
+        if(selSellers.size && !selSellers.has(r.продавець)) return false;
         return true;
     });
 }
@@ -579,26 +580,42 @@ function aggregate(rows){
 }
 
 // ── FILTERS RENDER ──
+function getAllPairs(){
+    return [...new Set(allData.map(r=>ym(r.рік,r.місяць)))].sort((a,b)=>a-b)
+        .map(v=>({y:Math.floor(v/100), m:v%100, key:ymKey(Math.floor(v/100),v%100)}));
+}
+
 function renderFilters(){
-    // Роки
-    const yp=document.getElementById('yearPills');yp.innerHTML='';
-    mkPillAll(yp,'Всі',selYears.size===allYears.length,()=>{allYears.forEach(y=>selYears.add(y));refresh();});
-    allYears.forEach(y=>{
-        mkPill(yp,y,selYears.has(y),()=>{
-            selYears.has(y)?(selYears.size>1&&selYears.delete(y)):selYears.add(y);refresh();
-        },'data-year',y);
+    const pairs=getAllPairs();
+    if(!pairs.length) return;
+
+    // За замовчуванням — всі вибрані
+    if(selPeriods.size===0) pairs.forEach(p=>selPeriods.add(p.key));
+
+    const pp=document.getElementById('periodPills');
+    pp.innerHTML='';
+
+    // "Всі"
+    const allActive=selPeriods.size===pairs.length;
+    const ab=document.createElement('button');
+    ab.className='pill'+(allActive?' active':'');
+    ab.textContent='Всі';
+    ab.onclick=()=>{pairs.forEach(p=>selPeriods.add(p.key));renderFilters();refresh();};
+    pp.appendChild(ab);
+
+    // Пілюля на кожен місяць-рік: "Січ 24"
+    pairs.forEach(p=>{
+        const b=document.createElement('button');
+        b.className='pill'+(selPeriods.has(p.key)?' active':'');
+        b.textContent=MONTHS_UK[p.m-1].slice(0,3)+' '+String(p.y).slice(2);
+        b.onclick=()=>{
+            if(selPeriods.has(p.key)){if(selPeriods.size>1)selPeriods.delete(p.key);}
+            else selPeriods.add(p.key);
+            renderFilters();refresh();
+        };
+        pp.appendChild(b);
     });
-    // Місяці
-    const mp=document.getElementById('monthPills');mp.innerHTML='';
-    mkPillAll(mp,'Всі',selMonths.size===0,()=>{selMonths.clear();refresh();});
-    allMonths.forEach(m=>{
-        mkPill(mp,MONTHS_UK[m-1].slice(0,3),selMonths.size===0||selMonths.has(m),()=>{
-            if(selMonths.size===0){selMonths.add(m);}
-            else if(selMonths.has(m)){selMonths.delete(m);}
-            else{selMonths.add(m);}
-            refresh();
-        },'data-month',m);
-    });
+
     // Продавці
     const sp=document.getElementById('sellerPills');sp.innerHTML='';
     mkPillAll(sp,'Всі',selSellers.size===0,()=>{selSellers.clear();refresh();});
@@ -611,6 +628,11 @@ function renderFilters(){
         },'data-seller',s);
     });
 }
+
+function onYearMonthChange(){}
+function onPeriodChange(){}
+function onDateRangeChange(){}
+
 function mkPillAll(container,text,active,onclick){
     const b=document.createElement('button');b.className='pill'+(active?' active':'');b.textContent=text;b.onclick=onclick;container.appendChild(b);
 }
@@ -618,14 +640,10 @@ function mkPill(container,text,active,onclick,attr,val){
     const b=document.createElement('button');b.className='pill'+(active?' active':'');b.textContent=text;if(attr)b.setAttribute(attr,val);b.onclick=onclick;container.appendChild(b);
 }
 function updFilters(){
-    document.querySelectorAll('#yearPills .pill[data-year]').forEach(b=>{b.className='pill'+(selYears.has(+b.dataset.year)?' active':'');});
-    document.querySelector('#yearPills .pill:not([data-year])')?.classList.toggle('active',selYears.size===allYears.length);
-    document.querySelectorAll('#monthPills .pill[data-month]').forEach(b=>{b.className='pill'+((selMonths.size===0||selMonths.has(+b.dataset.month))?' active':'');});
-    document.querySelector('#monthPills .pill:not([data-month])')?.classList.toggle('active',selMonths.size===0);
     document.querySelectorAll('#sellerPills .pill[data-seller]').forEach(b=>{b.className='pill'+((selSellers.size===0||selSellers.has(b.dataset.seller))?' active':'');});
     document.querySelector('#sellerPills .pill:not([data-seller])')?.classList.toggle('active',selSellers.size===0);
 }
-function refresh(){updFilters();if(viewMode==='table')renderTable();else renderRating();}
+function refresh(){updFilters();if(viewMode==='table')renderTable();else if(viewMode==='rating')renderRating();else{renderDynControls();renderDynChart();}}
 
 // ── TABLE ──
 function renderTable(){
@@ -644,10 +662,10 @@ function renderTable(){
     if(!sellers.length){card.innerHTML='<div class="status-box">Немає даних за обраний фільтр</div>';return;}
 
     const hint=document.createElement('div');hint.className='table-hint';
-    const months=selMonths.size===0?allMonths:[...selMonths].sort((a,b)=>a-b);
-    const yrs=[...selYears].sort((a,b)=>a-b).join(', ');
-    const monStr=selMonths.size===0?'всі місяці':months.map(m=>MONTHS_UK[m-1].slice(0,3)).join(', ');
-    hint.innerHTML=`📊 <b style="color:var(--accent)">${sellers.length} продавців</b> · ${yrs} · ${monStr}`;
+    const pairs=getAllPairs();
+    const allSelected=selPeriods.size===pairs.length;
+    const periodStr=allSelected?'весь період':[...selPeriods].sort().map(k=>{const[y,m]=k.split('_');return MONTHS_UK[+m-1].slice(0,3)+' '+String(y).slice(2);}).join(', ');
+    hint.innerHTML=`📊 <b style="color:var(--accent)">${sellers.length} продавців</b> · ${periodStr}`;
     card.appendChild(hint);
 
     const wrap=document.createElement('div');wrap.style.cssText='overflow-x:auto;-webkit-overflow-scrolling:touch;';card.appendChild(wrap);
@@ -828,33 +846,40 @@ function renderDynChart(){
         if(dynChartInstance){dynChartInstance.destroy();dynChartInstance=null;}
         body.innerHTML='<div class="dyn-empty">📊 Оберіть продавця</div>';return;
     }
-    // Збираємо місяці і роки з фільтрів
-    const years=[...selYears].sort((a,b)=>a-b);
-    const allM=[...new Set(filteredData().map(r=>r.місяць))].sort((a,b)=>a-b);
-    if(!allM.length){body.innerHTML='<div class="dyn-empty">Немає даних</div>';return;}
+    const fd=filteredData();
+    if(!fd.length){body.innerHTML='<div class="dyn-empty">Немає даних</div>';return;}
 
-    // Labels: якщо кілька років — "Міс РРРР", якщо один — "Міс"
-    const timePoints=[];
-    years.forEach(y=>{allM.forEach(m=>{
-        const exists=allData.some(r=>r.рік===y&&r.місяць===m&&(selMonths.size===0||selMonths.has(m)));
-        if(exists)timePoints.push({y,m,label:years.length>1?MONTHS_UK[m-1].slice(0,3)+' '+y:MONTHS_UK[m-1].slice(0,3)});
-    });});
-    if(!timePoints.length){body.innerHTML='<div class="dyn-empty">Немає даних</div>';return;}
+    // Вісь X — унікальні місяці відсортовані
+    const xMonths=[...new Set(fd.map(r=>r.місяць))].sort((a,b)=>a-b);
+    // Роки з вибраних periods
+    const xYears=[...new Set(fd.map(r=>r.рік))].sort((a,b)=>a-b);
+    const labels=xMonths.map(m=>MONTHS_UK[m-1].slice(0,3));
 
     const metricMeta=DYN_METRICS.find(x=>x.key===dynMetricKey)||{key:dynMetricKey,label:dynMetricKey,color:'#0071e3',fmt:'money'};
     const isPct=PCT_KEYS.has(dynMetricKey);
 
     const sellers=[...dynSellerSet];
-    const datasets=sellers.map((seller,si)=>{
-        const color=DYN_COLORS[si%DYN_COLORS.length];
-        const data=timePoints.map(tp=>{
-            const rows=allData.filter(r=>r.рік===tp.y&&r.місяць===tp.m&&r.продавець===seller&&(selMonths.size===0||selMonths.has(r.місяць)));
-            if(!rows.length)return null;
-            const vals=rows.map(r=>r[dynMetricKey]).filter(v=>v!=null);
-            if(!vals.length)return null;
-            return isPct?vals.reduce((a,b)=>a+b,0)/vals.length:vals.reduce((a,b)=>a+b,0);
+    const datasets=[];
+    const YEAR_ALPHA=['','aa','bb','cc']; // для варіації кольору по роках
+    sellers.forEach((seller,si)=>{
+        const baseColor=DYN_COLORS[si%DYN_COLORS.length];
+        xYears.forEach((y,yi)=>{
+            // Трохи змінюємо яскравість для різних років одного продавця
+            const opacity=yi===0?'ff':yi===1?'cc':'99';
+            const color=baseColor;
+            const dash=yi===0?[]:yi===1?[6,3]:[2,3];
+            const label=xYears.length>1?`${seller.split(' ').slice(0,2).join(' ')} (${y})`:seller.split(' ').slice(0,2).join(' ');
+            const data=xMonths.map(m=>{
+                if(!selPeriods.has(ymKey(y,m)))return null;
+                const rows=allData.filter(r=>r.рік===y&&r.місяць===m&&r.продавець===seller);
+                if(!rows.length)return null;
+                const vals=rows.map(r=>r[dynMetricKey]).filter(v=>v!=null);
+                if(!vals.length)return null;
+                return isPct?vals.reduce((a,b)=>a+b,0)/vals.length:vals.reduce((a,b)=>a+b,0);
+            });
+            if(data.every(v=>v===null))return;
+            datasets.push({label,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,borderDash:dash});
         });
-        return{label:seller,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true};
     });
 
     if(dynChartInstance){dynChartInstance.destroy();dynChartInstance=null;}
@@ -899,7 +924,7 @@ function renderDynChart(){
 
     const ctx2=document.getElementById('dynCanvas').getContext('2d');
     dynChartInstance=new Chart(ctx2,{
-        type:'line',data:{labels:timePoints.map(tp=>tp.label),datasets},plugins:[smartLabels],
+        type:'line',data:{labels,datasets},plugins:[smartLabels],
         options:{
             responsive:true,maintainAspectRatio:false,
             interaction:{mode:'index',intersect:false},
