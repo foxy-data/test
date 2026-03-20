@@ -820,19 +820,28 @@ card.appendChild(wrap);cont.innerHTML=’’;cont.appendChild(card);
 
 // ── INIT ──
 async function init(){
-showSkel();
+const cont=document.getElementById(‘tabContent’);
+cont.innerHTML=’<div class="table-card"><div class="status-box">⏳ Завантаження даних…</div></div>’;
 try{
-const res=await fetch(CSV_URL+’&t=’+Date.now());
+const controller=new AbortController();
+const timer=setTimeout(()=>controller.abort(),20000);
+const res=await fetch(CSV_URL+’&t=’+Date.now(),{signal:controller.signal});
+clearTimeout(timer);
 if(!res.ok)throw new Error(‘HTTP ‘+res.status);
 const text=await res.text();
+if(!text||text.length<10)throw new Error(‘Порожній файл’);
 const rows=parseCSV(text);
-if(!rows.length)throw new Error(‘Порожній файл’);
+if(!rows.length)throw new Error(‘CSV порожній’);
 detect(rows);
-if(!stores.length)throw new Error(‘Не знайдено магазини у файлі’);
+if(!stores.length){
+cont.innerHTML=’<div class="table-card"><div class="status-box error">❌ Магазини не знайдено. Перші рядки CSV: ‘+rows.slice(0,3).map(r=>r.slice(0,5).join(’|’)).join(’ / ‘)+’</div></div>’;
+return;
+}
 renderFilters();
 render();
 }catch(e){
-document.getElementById(‘tabContent’).innerHTML=’<div class="table-card"><div class="status-box error">❌ ‘+e.message+’</div></div>’;
+const msg=e.name===‘AbortError’?‘Таймаут завантаження (20с)’:e.message;
+cont.innerHTML=’<div class="table-card"><div class="status-box error">❌ ‘+msg+’<br><small>URL: ‘+CSV_URL.slice(0,60)+’…</small><br><button onclick="init()" style="margin-top:10px;padding:6px 14px;background:#0071e3;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">🔄 Спробувати знову</button></div></div>’;
 console.error(e);
 }
 }
