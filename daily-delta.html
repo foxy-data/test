@@ -355,20 +355,6 @@ document.getElementById(‘filtersWrap’).style.display=’’;
 }
 
 // ── HELPERS ──
-function fmt(v){
-if(v===null||v===undefined)return’—’;
-const n=Number(v);if(isNaN(n))return’—’;
-if(Math.abs(n)>=1000000)return(n/1000000).toFixed(2)+‘М’;
-if(Math.abs(n)>=1000)return(n/1000).toFixed(1)+‘К’;
-if(n%1!==0)return n.toFixed(1);
-return n.toLocaleString(‘uk-UA’);
-}
-function fmtDate(d){
-if(!d)return’’;
-const p=d.replace(///g,’.’).split(’.’);
-if(p.length===3){return p[0].length===4?p[2]+’.’+p[1]:p[0]+’.’+p[1];}
-return d;
-}
 function deltaClass(d){
 if(d===null||d===undefined)return’’;
 if(d<0.8)return’d5’;if(d<0.95)return’d4’;if(d<=1.05)return’d3’;if(d<=1.25)return’d2’;return’d1’;
@@ -382,42 +368,7 @@ const t=document.createElement(‘td’);
 t.textContent=(text===null||text===undefined)?’—’:text;
 if(cls)t.className=cls;if(sty)Object.assign(t.style,sty);return t;
 }
-function storeHead(tbl_thead, sts, leftColCount){
-// Row1: store names
-const trG=document.createElement(‘tr’);
-for(let i=0;i<leftColCount;i++){
-const th=mkTh(i===0?’’:’’,’’,{background:’#374151’,color:’#fff’});
-th.rowSpan=2;
-if(i===0){th.className=‘c-l1’;th.textContent=‘Рік’;}
-else{th.className=‘c-l2’;th.textContent=‘Тиждень’;}
-if(i===leftColCount-1){th.style.boxShadow=‘3px 0 5px -2px rgba(0,0,0,.07)’;th.style.borderRight=‘2px solid rgba(0,0,0,0.1)’;}
-trG.appendChild(th);
-}
-sts.forEach((st,i)=>{
-const c=STORE_HDR[i%STORE_HDR.length];
-const th=mkTh(st.name,‘grp’,{background:c,borderLeft:i>0?‘2px solid rgba(255,255,255,0.2)’:’’});
-th.colSpan=3;th.title=st.name;trG.appendChild(th);
-});
-tbl_thead.appendChild(trG);
-// Row2: Фокс Комфі Δ
-const trH=document.createElement(‘tr’);
-sts.forEach((st,i)=>{
-const c=STORE_HDR[i%STORE_HDR.length];
-[‘Фокс’,‘Комфі’,‘Δ’].forEach((l,j)=>{
-trH.appendChild(mkTh(l,‘sub’,{background:c,borderLeft:j===0&&i>0?‘2px solid rgba(255,255,255,0.2)’:’’}));
-});
-});
-tbl_thead.appendChild(trH);
-}
-function addStoreData(tr, sts, calcFn){
-sts.forEach((st,i)=>{
-const bg=STORE_BG[i%STORE_BG.length];
-const{f,k,d}=calcFn(st);
-tr.appendChild(mkTd(fmt(f),’’,{background:bg,borderLeft:i>0?‘2px solid #d0d0da’:’’}));
-tr.appendChild(mkTd(fmt(k),’’,{background:bg}));
-tr.appendChild(mkTd(d!=null?d.toFixed(2):null,deltaClass(d),{background:bg}));
-});
-}
+
 function addDiffRow(tbody,prevMap,curMap,sts,labelText){
 const tr=document.createElement(‘tr’);tr.className=‘diff-row’;
 tr.appendChild(mkTd(labelText,’’,{textAlign:‘left’,paddingLeft:‘4px’,color:’#92400e’,fontWeight:‘600’}));
