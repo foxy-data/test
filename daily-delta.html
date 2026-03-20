@@ -779,9 +779,7 @@ chartInstance=new Chart(ctx,{
         },
         scales:{
             x:{grid:{color:'#f0f0f0'},ticks:{font:{size:9},color:'#86868b',maxTicksLimit:24,maxRotation:45}},
-            y:{grid:{color:'#f0f0f0'},ticks:{font:{size:10},color:'#86868b',
-                callback:v=>selChartMetric==='delta'?v.toFixed(2):fmt(v)},
-                ...(selChartMetric==='delta'?{min:0.5}:{})}
+            y:(function(){const yOpts={grid:{color:'#f0f0f0'},ticks:{font:{size:10},color:'#86868b',callback:function(v){return selChartMetric==='delta'?v.toFixed(2):fmt(v);}}};if(selChartMetric==='delta')yOpts.min=0.5;return yOpts;})()
         }
     }
 });
@@ -823,10 +821,7 @@ async function init(){
 const cont=document.getElementById(‘tabContent’);
 cont.innerHTML=’<div class="table-card"><div class="status-box">⏳ Завантаження даних…</div></div>’;
 try{
-const controller=new AbortController();
-const timer=setTimeout(()=>controller.abort(),20000);
-const res=await fetch(CSV_URL+’&t=’+Date.now(),{signal:controller.signal});
-clearTimeout(timer);
+const res=await fetch(CSV_URL+’&t=’+Date.now());
 if(!res.ok)throw new Error(‘HTTP ‘+res.status);
 const text=await res.text();
 if(!text||text.length<10)throw new Error(‘Порожній файл’);
