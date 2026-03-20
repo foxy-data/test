@@ -141,8 +141,8 @@ if([’#div/0!’,’#value!’,’#n/a’,’#ref!’].includes(s.toLowerCase()
 const n=parseFloat(s);return isNaN(n)?null:n;
 }
 function fmt(v){
-if(v===null||v===undefined)return’—’;
-const n=Number(v);if(isNaN(n))return’—’;
+if(v===null||v===undefined)return’\u2014’;
+const n=Number(v);if(isNaN(n))return’\u2014’;
 if(Math.abs(n)>=1000000)return(n/1000000).toFixed(2)+‘М’;
 if(Math.abs(n)>=1000)return(n/1000).toFixed(1)+‘К’;
 if(n%1!==0)return n.toFixed(2);
@@ -154,8 +154,8 @@ if(!d)return’’;
 const parts=d.replace(///g,’.’).split(’.’);
 if(parts.length===3){
 const [a,b,c]=parts;
-if(a.length===4)return`${c}.${b}`;// YYYY.MM.DD → DD.MM
-return`${a}.${b}`;// DD.MM.YYYY → DD.MM
+if(a.length===4)return`${c}.${b}`;// YYYY.MM.DD \u2192 DD.MM
+return`${a}.${b}`;// DD.MM.YYYY \u2192 DD.MM
 }
 return d;
 }
@@ -168,8 +168,8 @@ function detect(rows){
 // Row 0 (idx 0): порожні A-F, потім загальні суми (TOTAL рядок 1)
 // Row 1 (idx 1): TOTAL, YEAR, PERIOD у перших колонках + числа сум
 // Row 2 (idx 2): назви магазинів (починаючи з col 7/H), з пробілами між магазинами
-// Row 3 (idx 3): підколонки — Фокстрот, Комфі, Дельта день (повторюється)
-// Row 4+ : дані — рік(0), тиждень(1), №місяця(2), місяць(3), деньЦифра(4), деньНазва(5), дата(6)
+// Row 3 (idx 3): підколонки \u2014 Фокстрот, Комфі, Дельта день (повторюється)
+// Row 4+ : дані \u2014 рік(0), тиждень(1), \u2116місяця(2), місяць(3), деньЦифра(4), деньНазва(5), дата(6)
 
 ```
 // Знаходимо рядок з підколонками (містить 'фокстрот' і 'комфі' як окремі значення)
@@ -221,7 +221,7 @@ for(let ri=dataStart;ri<rows.length;ri++){
     const row=rows[ri];
     if(!row.some(c=>c)) continue;
 
-    // Визначаємо поля дати: рік(0),тиждень(1),№міс(2),місяць(3),деньЦифра(4),деньНазва(5),дата(6)
+    // Визначаємо поля дати: рік(0),тиждень(1),\u2116міс(2),місяць(3),деньЦифра(4),деньНазва(5),дата(6)
     const year=toN(row[0]);
     const week=toN(row[1]);
     const monthNum=toN(row[2]);
@@ -283,7 +283,7 @@ return sts.some(st=>{const v=r.storeVals[st.name]||{};return v.foks!=null||v.kom
 }
 function activeStores(){return stores.filter(s=>selStores.has(s.name));}
 
-// ── FILTERS ──
+// – FILTERS –
 function mkPill(text,active,cls,onclick){
 const b=document.createElement(‘button’);
 b.className=‘pill’+(active?’ active’:’’)+(cls?’ ‘+cls:’’);
@@ -313,7 +313,7 @@ renderFilters();render();
 if(a){b.style.background=’#1d1d1f’;b.style.color=’#fff’;b.style.fontWeight=‘800’;}
 yp.appendChild(b);
 });
-// Month — only months with data
+// Month \u2014 only months with data
 const mp=document.getElementById(‘monthPills’);mp.innerHTML=’’;
 const availM=allMonths.filter(m=>dataRows.some(r=>selYears.has(r.year)&&r.month===m));
 const allMA=availM.every(m=>selMonths.has(m));
@@ -354,7 +354,7 @@ sp.appendChild(b);
 document.getElementById(‘filtersWrap’).style.display=’’;
 }
 
-// ── HELPERS ──
+// – HELPERS –
 function deltaClass(d){
 if(d===null||d===undefined)return’’;
 if(d<0.8)return’d5’;if(d<0.95)return’d4’;if(d<=1.05)return’d3’;if(d<=1.25)return’d2’;return’d1’;
@@ -365,7 +365,7 @@ if(cls)t.className=cls;if(sty)Object.assign(t.style,sty);return t;
 }
 function mkTd(text,cls,sty){
 const t=document.createElement(‘td’);
-t.textContent=(text===null||text===undefined)?’—’:text;
+t.textContent=(text===null||text===undefined)?’\u2014’:text;
 if(cls)t.className=cls;if(sty)Object.assign(t.style,sty);return t;
 }
 
@@ -375,25 +375,25 @@ tr.appendChild(mkTd(labelText,’’,{textAlign:‘left’,paddingLeft:‘4px’
 tr.appendChild(mkTd(’’,’’));
 sts.forEach((st,i)=>{
 const bg=STORE_BG[i%STORE_BG.length];
-const pf=prevMap[st.name]?.f||0,pk=prevMap[st.name]?.k||0;
-const cf=curMap[st.name]?.f||0,ck=curMap[st.name]?.k||0;
+const pf=(prevMap[st.name]&&prevMap[st.name].f)||0,pk=(prevMap[st.name]&&prevMap[st.name].k)||0;
+const cf=(curMap[st.name]&&curMap[st.name].f)||0,ck=(curMap[st.name]&&curMap[st.name].k)||0;
 const df=cf-pf,dk=ck-pk;
 const pd=pk>0?pk/pf:null,cd=ck>0?ck/ck:null;
-const fmtDiff=(v)=>(v>0?’+’:’’)+fmt(Math.abs(v))+(v>=0?’ ↑’:’ ↓’);
-const fmtPct=(v,base)=>base>0?((v/base*100).toFixed(1)+’%’):’—’;
+const fmtDiff=(v)=>(v>0?’+’:’’)+fmt(Math.abs(v))+(v>=0?’ \u2191’:’ \u2193’);
+const fmtPct=(v,base)=>base>0?((v/base*100).toFixed(1)+’%’):’\u2014’;
 const clsF=df>=0?‘diff-pos’:‘diff-neg’;
 const clsK=dk>=0?‘diff-pos’:‘diff-neg’;
 const fBL=i>0?‘2px solid #d0d0da’:’’;
-tr.appendChild(mkTd((df>=0?’+’:’’)+fmt(Math.abs(df))+(df>=0?’ ↑’:’ ↓’),clsF,{background:bg,borderLeft:fBL,fontSize:‘10px’}));
-tr.appendChild(mkTd((dk>=0?’+’:’’)+fmt(Math.abs(dk))+(dk>=0?’ ↑’:’ ↓’),clsK,{background:bg,fontSize:‘10px’}));
-const pd2=prevMap[st.name]?.d,cd2=curMap[st.name]?.d;
+tr.appendChild(mkTd((df>=0?’+’:’’)+fmt(Math.abs(df))+(df>=0?’ \u2191’:’ \u2193’),clsF,{background:bg,borderLeft:fBL,fontSize:‘10px’}));
+tr.appendChild(mkTd((dk>=0?’+’:’’)+fmt(Math.abs(dk))+(dk>=0?’ \u2191’:’ \u2193’),clsK,{background:bg,fontSize:‘10px’}));
+const pd2=(prevMap[st.name]&&prevMap[st.name].d),cd2=(curMap[st.name]&&curMap[st.name].d);
 const dd=pd2!=null&&cd2!=null?cd2-pd2:null;
 tr.appendChild(mkTd(dd!=null?(dd>=0?’+’:’’)+dd.toFixed(2):null,dd==null?’’:(dd<=0?‘diff-pos’:‘diff-neg’),{background:bg,fontSize:‘10px’}));
 });
 tbody.appendChild(tr);
 }
 
-// ── TABLE TAB ──
+// – TABLE TAB –
 function renderTable(){
 const cont=document.getElementById(‘tabContent’);
 const data=activeData();
@@ -403,7 +403,7 @@ if(!data.length){cont.innerHTML=’<div class="table-card"><div class="status-bo
 ```
 const card=document.createElement('div');card.className='table-card';
 const hint=document.createElement('div');hint.className='table-hint';
-hint.innerHTML='Пн–Чт — будні | Пт–Нд — <b style="color:#b45309">вихідні</b> | Δ: <span class="d5">&#60;0.8</span> <span class="d4">0.8–0.95</span> <span class="d3">~1</span> <span class="d2">1.05–1.25</span> <span class="d1">&#62;1.25</span>';
+hint.innerHTML='Пн\u2013Чт \u2014 будні | Пт\u2013Нд \u2014 <b style="color:#b45309">вихідні</b> | \u0394: <span class="d5">&#60;0.8</span> <span class="d4">0.8\u20130.95</span> <span class="d3">~1</span> <span class="d2">1.05\u20131.25</span> <span class="d1">&#62;1.25</span>';
 card.appendChild(hint);
 const wrap=document.createElement('div');wrap.className='table-wrap';
 
@@ -423,7 +423,7 @@ thead.appendChild(trG);
 const trH=document.createElement('tr');
 sts.forEach((st,i)=>{
     const c=STORE_HDR[i%STORE_HDR.length];
-    ['Фокс','Комфі','Δ'].forEach((l,j)=>{
+    ['Фокс','Комфі','\u0394'].forEach((l,j)=>{
         trH.appendChild(mkTh(l,'sub',{background:c,borderLeft:j===0&&i>0?'2px solid rgba(255,255,255,0.2)':''}));
     });
 });
@@ -440,8 +440,8 @@ data.forEach(r=>{
     sts.forEach((st,i)=>{
         const bg=STORE_BG[i%STORE_BG.length];
         const v=r.storeVals[st.name]||{};
-        const f=v.foks??null,k=v.komf??null;
-        const d=v.delta??((f!=null&&k!=null&&f!==0)?k/f:null);
+        const f=(v.foks!==undefined&&v.foks!==null?v.foks:null),k=(v.komf!==undefined&&v.komf!==null?v.komf:null);
+        const d=(v.delta!==undefined&&v.delta!==null?v.delta:((f!=null&&k!=null&&f!==0)?k/f:null));
         tr.appendChild(mkTd(fmt(f),'',{background:bg,borderLeft:i>0?'2px solid #d0d0da':''}));
         tr.appendChild(mkTd(fmt(k),'',{background:bg}));
         tr.appendChild(mkTd(d!=null?d.toFixed(2):null,deltaClass(d),{background:bg}));
@@ -467,7 +467,7 @@ cont.innerHTML='';cont.appendChild(card);
 
 }
 
-// ── AGGREGATE HELPER ──
+// – AGGREGATE HELPER –
 function aggRows(rows,sts){
 const r={};
 sts.forEach(st=>{
@@ -494,7 +494,7 @@ thead.appendChild(trG);
 const trH=document.createElement(‘tr’);
 sts.forEach((st,i)=>{
 const c=STORE_HDR[i%STORE_HDR.length];
-[‘Фокс’,‘Комфі’,‘Δ’].forEach((l,j)=>{
+[‘Фокс’,‘Комфі’,’\u0394’].forEach((l,j)=>{
 trH.appendChild(mkTh(l,‘sub’,{background:c,borderLeft:j===0&&i>0?‘2px solid rgba(255,255,255,0.2)’:’’}));
 });
 });
@@ -518,14 +518,14 @@ tbody.appendChild(tr);
 // Diff row vs previous
 if(prevKey&&groupMap.has(prevKey)){
 const prevAgg=aggRows(groupMap.get(prevKey).rows,sts);
-addDiffRow(tbody,prevAgg,agg,sts,‘↔ vs попер.’);
+addDiffRow(tbody,prevAgg,agg,sts,’\u2194 vs попер.’);
 }
 });
 tbl.appendChild(tbody);wrap.appendChild(tbl);card.appendChild(wrap);
 cont.innerHTML=’’;cont.appendChild(card);
 }
 
-// ── WEEKDAY TAB ──
+// – WEEKDAY TAB –
 function renderWeekday(){
 const cont=document.getElementById(‘tabContent’);
 const data=activeData();
@@ -543,7 +543,7 @@ if(r.isWE)w.we.push(r);else w.wd.push(r);
 });
 const card=document.createElement(‘div’);card.className=‘table-card’;
 const hint=document.createElement(‘div’);hint.className=‘table-hint’;
-hint.innerHTML=’<b>Пн–Чт</b> та <b>Пт–Нд</b> за кожен тиждень | ↔ — відхилення від попереднього тижня’;
+hint.innerHTML=’<b>Пн\u2013Чт</b> та <b>Пт\u2013Нд</b> за кожен тиждень | \u2194 \u2014 відхилення від попереднього тижня’;
 card.appendChild(hint);
 const wrap=document.createElement(‘div’);wrap.className=‘table-wrap’;
 const tbl=document.createElement(‘table’);
@@ -551,12 +551,12 @@ const thead=document.createElement(‘thead’);
 const trG=document.createElement(‘tr’);
 trG.appendChild(mkTh(‘Рік’,‘c-l1’,{background:’#374151’,color:’#fff’,rowSpan:2}));
 trG.appendChild(mkTh(‘Тиж’,‘c-l2’,{background:’#374151’,color:’#fff’,rowSpan:2}));
-const segs=[‘Пн–Чт’,‘Пт–Нд’];
+const segs=[‘Пн\u2013Чт’,‘Пт\u2013Нд’];
 sts.forEach((st,i)=>{
 segs.forEach((seg,j)=>{
 const c=STORE_HDR[i%STORE_HDR.length];
 const darker=c+‘dd’;
-const th=mkTh(seg===‘Пн–Чт’?st.name+’ (буд)’:st.name+’ (вих)’,‘grp’,{
+const th=mkTh(seg===‘Пн\u2013Чт’?st.name+’ (буд)’:st.name+’ (вих)’,‘grp’,{
 background:j===0?c:c+‘99’,
 borderLeft:(i>0&&j===0)?‘2px solid rgba(255,255,255,0.2)’:j===1?‘1px solid rgba(255,255,255,0.15)’:’’
 });
@@ -568,7 +568,7 @@ const trH=document.createElement(‘tr’);
 sts.forEach((st,i)=>{
 segs.forEach((seg,j)=>{
 const c=STORE_HDR[i%STORE_HDR.length];
-[‘Фокс’,‘Комфі’,‘Δ’].forEach((l,k2)=>{
+[‘Фокс’,‘Комфі’,’\u0394’].forEach((l,k2)=>{
 const bl=(k2===0&&i>0&&j===0)?‘2px solid rgba(255,255,255,0.2)’:k2===0&&j===1?‘1px solid rgba(255,255,255,0.15)’:’’;
 trH.appendChild(mkTh(l,‘sub’,{background:j===0?c:c+‘99’,borderLeft:bl}));
 });
@@ -601,7 +601,7 @@ if(idx>0){
 const prevK=keys[idx-1];
 const prev=wMap.get(prevK);
 const diffTr=document.createElement(‘tr’);diffTr.className=‘diff-row’;
-diffTr.appendChild(mkTd(‘↔ vs T’+prev.week,’’,{textAlign:‘left’,paddingLeft:‘6px’,color:’#92400e’,fontWeight:‘600’,fontSize:‘10px’}));
+diffTr.appendChild(mkTd(’\u2194 vs T’+prev.week,’’,{textAlign:‘left’,paddingLeft:‘6px’,color:’#92400e’,fontWeight:‘600’,fontSize:‘10px’}));
 diffTr.appendChild(mkTd(’’,’’));
 sts.forEach((st,i)=>{
 const bg=STORE_BG[i%STORE_BG.length];
@@ -614,8 +614,8 @@ const df=cf-pf,dk=ck-pk;
 const pd=pf>0?pk/pf:null,cd=cf>0?ck/cf:null;
 const dd=pd!=null&&cd!=null?cd-pd:null;
 const bl=(j===0&&i>0)?‘2px solid #d0d0da’:j===1?‘1px solid #e8e8ec’:’’;
-diffTr.appendChild(mkTd((df>=0?’+’:’’)+fmt(Math.abs(df))+(df>=0?’ ↑’:’ ↓’),df>=0?‘diff-pos’:‘diff-neg’,{background:bg,borderLeft:bl,fontSize:‘10px’}));
-diffTr.appendChild(mkTd((dk>=0?’+’:’’)+fmt(Math.abs(dk))+(dk>=0?’ ↑’:’ ↓’),dk>=0?‘diff-pos’:‘diff-neg’,{background:bg,fontSize:‘10px’}));
+diffTr.appendChild(mkTd((df>=0?’+’:’’)+fmt(Math.abs(df))+(df>=0?’ \u2191’:’ \u2193’),df>=0?‘diff-pos’:‘diff-neg’,{background:bg,borderLeft:bl,fontSize:‘10px’}));
+diffTr.appendChild(mkTd((dk>=0?’+’:’’)+fmt(Math.abs(dk))+(dk>=0?’ \u2191’:’ \u2193’),dk>=0?‘diff-pos’:‘diff-neg’,{background:bg,fontSize:‘10px’}));
 diffTr.appendChild(mkTd(dd!=null?(dd>=0?’+’:’’)+dd.toFixed(2):null,dd==null?’’:(dd<=0?‘diff-pos’:‘diff-neg’),{background:bg,fontSize:‘10px’}));
 });
 });
@@ -626,7 +626,7 @@ tbl.appendChild(tbody);wrap.appendChild(tbl);card.appendChild(wrap);
 cont.innerHTML=’’;cont.appendChild(card);
 }
 
-// ── WEEKLY TAB ──
+// – WEEKLY TAB –
 function renderWeekly(){
 const cont=document.getElementById(‘tabContent’);
 const data=activeData();const sts=activeStores();
@@ -644,7 +644,7 @@ keys.sort().forEach((k,i)=>{gMap.get(k).prevKey=i>0?keys[i-1]:null;});
 buildAggTable(cont,gMap,sts,‘Рік’,‘Тиждень’,l=>‘T’+(l.split(’_W’)[1]||’’));
 }
 
-// ── MONTHLY TAB ──
+// – MONTHLY TAB –
 function renderMonthly(){
 const cont=document.getElementById(‘tabContent’);
 const data=activeData();const sts=activeStores();
@@ -656,23 +656,23 @@ if(!gMap.has(k)){gMap.set(k,{label:k,rows:[]});keys.push(k);}
 gMap.get(k).rows.push(r);
 });
 keys.sort().forEach((k,i)=>{gMap.get(k).prevKey=i>0?keys[i-1]:null;});
-buildAggTable(cont,gMap,sts,‘Рік’,‘Місяць’,l=>{const m=parseInt(l.split(’*’)[1]);return MONTHS_UK[m-1]?.slice(0,3)||l;});
+buildAggTable(cont,gMap,sts,‘Рік’,‘Місяць’,l=>{const m=parseInt(l.split(’*’)[1]);return (MONTHS_UK[m-1]?MONTHS_UK[m-1].slice(0,3):l);});
 }
 
-// ── CHART TAB ──
+// – CHART TAB –
 function renderChart(){
 const cont=document.getElementById(‘tabContent’);
 const data=activeData();
 if(!data.length){cont.innerHTML=’<div class="chart-card"><div class="status-box">Немає даних</div></div>’;return;}
 const sts=activeStores();
-if(!selChartStore||!sts.find(s=>s.name===selChartStore))selChartStore=sts[0]?.name||’’;
+if(!selChartStore||!sts.find(s=>s.name===selChartStore))selChartStore=(sts[0]?sts[0].name:’’);
 
 ```
 const card=document.createElement('div');card.className='chart-card';
 
 // Controls row 1: mode
 const c0=document.createElement('div');c0.className='ctrl-row';
-c0.appendChild(Object.assign(document.createElement('span'),{className:'ctrl-lbl',textContent:'Режим:'}));
+c0.appendChild((function(){const _el=document.createElement('span');_el.className='ctrl-lbl';_el.textContent='Режим:';return _el;})());
 [{v:'store',l:'Один магазин, всі дні'},{v:'allstores',l:'Всі магазини, один період'}].forEach(m=>{
     const b=document.createElement('button');b.className='pill'+(selChartMode===m.v?' active':'');
     b.textContent=m.l;if(selChartMode===m.v){b.style.background='#374151';b.style.color='#fff';}
@@ -682,7 +682,7 @@ card.appendChild(c0);
 
 // Controls row 2: period grouping
 const c1=document.createElement('div');c1.className='ctrl-row';
-c1.appendChild(Object.assign(document.createElement('span'),{className:'ctrl-lbl',textContent:'Групування:'}));
+c1.appendChild((function(){const _el=document.createElement('span');_el.className='ctrl-lbl';_el.textContent='Групування:';return _el;})());
 [{v:'day',l:'День'},{v:'week',l:'Тиждень'},{v:'month',l:'Місяць'}].forEach(p=>{
     const b=document.createElement('button');b.className='pill'+(selChartPeriod===p.v?' active':'');
     b.textContent=p.l;if(selChartPeriod===p.v){b.style.background='#0071e3';b.style.color='#fff';}
@@ -692,15 +692,15 @@ card.appendChild(c1);
 
 // Controls row 3: metric
 const c2=document.createElement('div');c2.className='ctrl-row';
-c2.appendChild(Object.assign(document.createElement('span'),{className:'ctrl-lbl',textContent:'Показник:'}));
-[{v:'delta',l:'Δ Дельта'},{v:'foks',l:'Фокстрот'},{v:'komf',l:'Комфі'}].forEach(m=>{
+c2.appendChild((function(){const _el=document.createElement('span');_el.className='ctrl-lbl';_el.textContent='Показник:';return _el;})());
+[{v:'delta',l:'\u0394 Дельта'},{v:'foks',l:'Фокстрот'},{v:'komf',l:'Комфі'}].forEach(m=>{
     const b=document.createElement('button');b.className='pill'+(selChartMetric===m.v?' active':'');
     b.textContent=m.l;if(selChartMetric===m.v){b.style.background='#6b21a8';b.style.color='#fff';}
     b.onclick=()=>{selChartMetric=m.v;renderChart();};c2.appendChild(b);
 });
 // If mode=store, show store selector
 if(selChartMode==='store'){
-    c2.appendChild(Object.assign(document.createElement('span'),{className:'ctrl-lbl',textContent:'  Магазин:',style:'margin-left:8px'}));
+    (function(){const _s=document.createElement('span');_s.className='ctrl-lbl';_s.textContent='  Магазин:';_s.style.marginLeft='8px';c2.appendChild(_s);})();
     sts.forEach(st=>{
         const b=document.createElement('button');b.className='pill'+(st.name===selChartStore?' active':'');
         b.textContent=st.name.split(' ').slice(1,4).join(' ');b.title=st.name;
@@ -711,13 +711,13 @@ if(selChartMode==='store'){
 card.appendChild(c2);
 
 // Build aggregated data
-function getVal(rows,stName){
+const getVal=function(rows,stName){
     let f=0,k=0;
     rows.forEach(r=>{const v=r.storeVals[stName]||{};if(v.foks!=null)f+=v.foks;if(v.komf!=null)k+=v.komf;});
     if(selChartMetric==='delta')return f>0?k/f:null;
     if(selChartMetric==='foks')return f||null;
     return k||null;
-}
+};
 // Group data by period
 const gMap=new Map();
 data.forEach(r=>{
@@ -731,7 +731,7 @@ const sortedKeys=[...gMap.keys()].sort();
 const labels=sortedKeys.map(k=>{
     if(selChartPeriod==='day')return fmtDate(k);
     if(selChartPeriod==='week'){const p=k.split('_W');return'T'+p[1]+(p[0]?' '+String(p[0]).slice(2):'');}
-    const p=k.split('_');const m=parseInt(p[1]);return MONTHS_UK[m-1]?.slice(0,3)+(p[0]?' '+String(p[0]).slice(2):'');
+    const p=k.split('_');const m=parseInt(p[1]);return (MONTHS_UK[m-1]?MONTHS_UK[m-1].slice(0,3):'')+(p[0]?' '+String(p[0]).slice(2):'');
 });
 
 const datasets=[];
@@ -766,28 +766,28 @@ cont.innerHTML='';cont.appendChild(card);
 
 if(chartInstance){chartInstance.destroy();chartInstance=null;}
 const ctx=canvas.getContext('2d');
+var yAxis={grid:{color:'#f0f0f0'},ticks:{font:{size:10},color:'#86868b',callback:function(v){return selChartMetric==='delta'?v.toFixed(2):fmt(v);}}};
+if(selChartMetric==='delta')yAxis.min=0.5;
+var chartScales={x:{grid:{color:'#f0f0f0'},ticks:{font:{size:9},color:'#86868b',maxTicksLimit:24,maxRotation:45}},y:yAxis};
+var tooltipLabel=function(c){return ' '+c.dataset.label+': '+(c.raw!=null?(selChartMetric==='delta'?c.raw.toFixed(2):fmt(c.raw)):'\u2014');};
 chartInstance=new Chart(ctx,{
-    data:{labels,datasets},
+    data:{labels:labels,datasets:datasets},
     options:{
-        responsive:true,maintainAspectRatio:false,
+        responsive:true,
+        maintainAspectRatio:false,
         interaction:{mode:'index',intersect:false},
         plugins:{
             legend:{display:datasets.length>1,position:'top',labels:{font:{size:10},boxWidth:16,padding:8}},
-            tooltip:{backgroundColor:'#1d1d1f',titleFont:{size:11},bodyFont:{size:11},padding:10,
-                callbacks:{label:c=>' '+c.dataset.label+': '+(c.raw!=null?
-                    (selChartMetric==='delta'?c.raw.toFixed(2):fmt(c.raw)):'—')}}
+            tooltip:{backgroundColor:'#1d1d1f',titleFont:{size:11},bodyFont:{size:11},padding:10,callbacks:{label:tooltipLabel}}
         },
-        scales:{
-            x:{grid:{color:'#f0f0f0'},ticks:{font:{size:9},color:'#86868b',maxTicksLimit:24,maxRotation:45}},
-            y:(function(){const yOpts={grid:{color:'#f0f0f0'},ticks:{font:{size:10},color:'#86868b',callback:function(v){return selChartMetric==='delta'?v.toFixed(2):fmt(v);}}};if(selChartMetric==='delta')yOpts.min=0.5;return yOpts;})()
-        }
+        scales:chartScales
     }
 });
 ```
 
 }
 
-// ── SWITCH ──
+// – SWITCH –
 function switchTab(tab){
 activeTab=tab;
 document.querySelectorAll(’.tab’).forEach((b,i)=>{
@@ -803,7 +803,7 @@ else if(activeTab===‘monthly’)renderMonthly();
 else renderChart();
 }
 
-// ── SKELETON ──
+// – SKELETON –
 function showSkel(){
 const cont=document.getElementById(‘tabContent’);
 const card=document.createElement(‘div’);card.className=‘table-card’;
@@ -816,10 +816,10 @@ wrap.appendChild(row);
 card.appendChild(wrap);cont.innerHTML=’’;cont.appendChild(card);
 }
 
-// ── INIT ──
+// – INIT –
 async function init(){
 const cont=document.getElementById(‘tabContent’);
-cont.innerHTML=’<div class="table-card"><div class="status-box">⏳ Завантаження даних…</div></div>’;
+cont.innerHTML=’<div class="table-card"><div class="status-box">\u23f3 Завантаження даних…</div></div>’;
 try{
 const res=await fetch(CSV_URL+’&t=’+Date.now());
 if(!res.ok)throw new Error(‘HTTP ‘+res.status);
@@ -829,14 +829,14 @@ const rows=parseCSV(text);
 if(!rows.length)throw new Error(‘CSV порожній’);
 detect(rows);
 if(!stores.length){
-cont.innerHTML=’<div class="table-card"><div class="status-box error">❌ Магазини не знайдено. Перші рядки CSV: ‘+rows.slice(0,3).map(r=>r.slice(0,5).join(’|’)).join(’ / ‘)+’</div></div>’;
+cont.innerHTML=’<div class="table-card"><div class="status-box error">\u274c Магазини не знайдено. Перші рядки CSV: ‘+rows.slice(0,3).map(r=>r.slice(0,5).join(’|’)).join(’ / ‘)+’</div></div>’;
 return;
 }
 renderFilters();
 render();
 }catch(e){
 const msg=e.name===‘AbortError’?‘Таймаут завантаження (20с)’:e.message;
-cont.innerHTML=’<div class="table-card"><div class="status-box error">❌ ‘+msg+’<br><small>URL: ‘+CSV_URL.slice(0,60)+’…</small><br><button onclick="init()" style="margin-top:10px;padding:6px 14px;background:#0071e3;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">🔄 Спробувати знову</button></div></div>’;
+cont.innerHTML=’<div class="table-card"><div class="status-box error">\u274c ‘+msg+’<br><small>URL: ‘+CSV_URL.slice(0,60)+’…</small><br><button onclick="init()" style="margin-top:10px;padding:6px 14px;background:#0071e3;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">🔄 Спробувати знову</button></div></div>’;
 console.error(e);
 }
 }
