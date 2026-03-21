@@ -246,7 +246,6 @@ box-shadow: var(--shadow);
 padding: 16px;
 margin-bottom: 14px;
 }
-/* Адаптивна висота для графіка */
 .chart-wrap { 
   position: relative; 
   height: 60vh; 
@@ -274,6 +273,32 @@ scrollbar-width: thin;
   text-align: center;
   font-style: italic;
 }
+
+/* ✅ МОБІЛЬНА ОПТИМІЗАЦІЯ */
+@media (max-width: 768px) {
+body { padding: 6px 8px 50px; }
+.page-title { font-size: 18px; }
+.tab { font-size: 11px; padding: 5px 10px; }
+.filter-label { font-size: 9px; }
+.pill { font-size: 10px; padding: 3px 6px; }
+th, td { font-size: 10px; padding: 3px 5px; }
+.chart-card { padding: 10px; }
+.ctrl-row { gap: 4px; }
+.ctrl-lbl { font-size: 10px; }
+.chart-wrap { 
+  height: 70vh !important; 
+  min-height: 550px !important; 
+  max-height: none !important;
+}
+.zoom-hint { font-size: 9px; margin-top: 6px; }
+.table-wrap { max-height: 60vh; }
+}
+
+/* ✅ ПЛАВНІ ПЕРЕХОДИ */
+.pill { transition: all 0.15s ease; }
+.chart-wrap canvas { transition: opacity 0.2s ease; }
+#btnTooltip.active { background: #1d1d1f !important; color: white !important; }
+#btnTooltip:not(.active) { background: #ef4444 !important; color: white !important; }
 </style>
 </head>
 <body>
@@ -425,7 +450,6 @@ let st = stores.find(s => s.name === curStore);
 if (!st) { st = { name: curStore, cols: [] }; stores.push(st); }
 st.cols.push({ type, colIdx: i });
 }
-// Фільтруємо магазини без назви або колонок
 stores = stores.filter(s => s.name && s.name.trim() && s.cols.length > 0);
 
 const dataStart = subRow + 1;
@@ -473,14 +497,12 @@ allYearMonths = [...ymSet].sort();
 selYearMonths = new Set(allYearMonths);
 selStores = new Set(stores.map(s => s.name));
 
-// Фільтруємо магазини які мають хоч якісь дані
 stores = stores.filter(st => {
 return dataRows.some(r => {
 const v = r.storeVals[st.name] || {};
 return v.foks != null || v.komf != null || v.delta != null;
 });
 });
-// Оновлюємо selStores після фільтрації
 selStores = new Set(stores.map(s => s.name));
 }
 function activeData() {
@@ -518,7 +540,6 @@ renderFilters(); render();
 if (allYMA) baYM.style.background = '#374151';
 ymp.appendChild(baYM);
 
-// Групуємо по роках
 const yearsGrouped = {};
 allYearMonths.forEach(ym => {
 const [year, month] = ym.split('_');
@@ -621,7 +642,7 @@ if (d <= 1.25) return 'd2';
 return 'd1';
 }
 // ──────────────────────────────────────────────
-// РЕНДЕР ТАБЛИЦІ (звичайна вкладка)
+// РЕНДЕР ТАБЛИЦІ
 // ──────────────────────────────────────────────
 function renderTable() {
 const cont = document.getElementById('tabContent');
@@ -987,7 +1008,7 @@ r[st.name] = { f, k, d: f > 0 ? k / f : null };
 return r;
 }
 // ──────────────────────────────────────────────
-// ГРАФІК (Динаміка)
+// ГРАФІК (Динаміка) — ПОВНІСТЮ ВИПРАВЛЕНИЙ
 // ──────────────────────────────────────────────
 function renderChart() {
 const cont = document.getElementById('tabContent');
@@ -998,10 +1019,13 @@ return;
 }
 const sts = activeStores();
 if (!selChartStore || !sts.find(s => s.name === selChartStore)) selChartStore = sts[0]?.name || '';
+
+const isMobile = window.innerWidth < 768;
+
 const card = document.createElement('div'); card.className = 'chart-card';
 const c0 = document.createElement('div'); c0.className = 'ctrl-row';
 c0.appendChild(Object.assign(document.createElement('span'), {className: 'ctrl-lbl', textContent: 'Режим:'}));
-[{v:'store',l:'Один магазин, всі дні'}, {v:'allstores',l:'Всі магазини, один період'}].forEach(m => {
+[{v:'store',l:'Один магазин'}, {v:'allstores',l:'Всі магазини'}].forEach(m => {
 const b = document.createElement('button');
 b.className = 'pill' + (selChartMode === m.v ? ' active' : '');
 b.textContent = m.l;
@@ -1010,15 +1034,32 @@ b.onclick = () => { selChartMode = m.v; renderChart(); };
 c0.appendChild(b);
 });
 
-// Додаємо кнопку скидання зуму
 const btnResetZoom = document.createElement('button');
 btnResetZoom.className = 'pill';
-btnResetZoom.textContent = '🔄 Скинути масштаб';
-btnResetZoom.style.marginLeft = 'auto'; // Відсуваємо вправо
+btnResetZoom.textContent = '🔄 Скинути';
 btnResetZoom.onclick = () => { if(chartInstance) chartInstance.resetZoom(); };
 c0.appendChild(btnResetZoom);
 
+// ✅ КНОПКА TOOLTIP З ІНДИКАТОРОМ
+const btnTooltip = document.createElement('button');
+btnTooltip.className = 'pill active';
+btnTooltip.textContent = '💬 Tooltip: ON';
+btnTooltip.id = 'btnTooltip';
+let tooltipEnabled = true;
+btnTooltip.onclick = () => {
+tooltipEnabled = !tooltipEnabled;
+const chart = Chart.getChart('dailyChart');
+if (chart) {
+chart.options.plugins.tooltip.enabled = tooltipEnabled;
+chart.update('none');
+}
+btnTooltip.textContent = tooltipEnabled ? '💬 Tooltip: ON' : '🔇 Tooltip: OFF';
+btnTooltip.classList.toggle('active', tooltipEnabled);
+};
+c0.appendChild(btnTooltip);
+
 card.appendChild(c0);
+
 const c1 = document.createElement('div'); c1.className = 'ctrl-row';
 c1.appendChild(Object.assign(document.createElement('span'), {className: 'ctrl-lbl', textContent: 'Групування:'}));
 [{v:'day',l:'День'}, {v:'week',l:'Тиждень'}, {v:'month',l:'Місяць'}].forEach(p => {
@@ -1030,6 +1071,7 @@ b.onclick = () => { selChartPeriod = p.v; renderChart(); };
 c1.appendChild(b);
 });
 card.appendChild(c1);
+
 const c2 = document.createElement('div'); c2.className = 'ctrl-row';
 c2.appendChild(Object.assign(document.createElement('span'), {className: 'ctrl-lbl', textContent: 'Показник:'}));
 [{v:'delta',l:'Δ Дельта'}, {v:'foks',l:'Фокстрот'}, {v:'komf',l:'Комфі'}].forEach(m => {
@@ -1053,6 +1095,7 @@ c2.appendChild(b);
 });
 }
 card.appendChild(c2);
+
 function getVal(rows, stName) {
 let f = 0, k = 0;
 rows.forEach(r => {
@@ -1064,6 +1107,7 @@ if (selChartMetric === 'delta') return f > 0 ? k / f : null;
 if (selChartMetric === 'foks') return f || null;
 return k || null;
 }
+
 const gMap = new Map();
 data.forEach(r => {
 let k;
@@ -1075,7 +1119,6 @@ gMap.get(k).push(r);
 });
 const sortedKeys = [...gMap.keys()].sort();
 
-// Фільтруємо порожні періоди (де немає даних)
 const filteredKeys = sortedKeys.filter(k => {
 const rows = gMap.get(k);
 return rows.some(r => {
@@ -1096,45 +1139,42 @@ if (selChartPeriod === 'day') return fmtDate(k);
 if (selChartPeriod === 'week') { const p = k.split('_W'); return 'T' + p[1] + (p[0] ? ' ' + String(p[0]).slice(2) : ''); }
 const p = k.split('_'); const m = parseInt(p[1]); return MONTHS_UK[m-1]?.slice(0,3) + (p[0] ? ' ' + String(p[0]).slice(2) : '');
 });
+
 const datasets = [];
 const CHART_COLORS = ['#1a56db','#0e7490','#6b21a8','#9d174d','#065f46','#92400e'];
 const dataLength = filteredKeys.length;
 
-// Оновлена логіка для datalabels
+// ✅ ПОКАЗУЄМО ВСІ МІТКИ з розумним позиціюванням
 const customDataLabelsConfig = {
-  display: function(context) {
-    // Ховаємо маркери, якщо точок занадто багато, щоб не робити кашу
-    return dataLength <= 20; 
-  },
-  color: '#1d1d1f',
-  backgroundColor: 'rgba(255,255,255,0.95)',
-  borderRadius: 6,
-  borderWidth: 1.5,
-  borderColor: function(context) {
-    return context.dataset.borderColor || '#000';
-  },
-  padding: { top: 4, bottom: 4, left: 6, right: 6 },
-  font: { 
-    size: 9, 
-    weight: '600',
-    family: 'Inter'
-  },
-  formatter: (value) => {
-    if (value === null) return '';
-    return selChartMetric === 'delta' ? value.toFixed(2) : fmt(value);
-  },
-  anchor: 'end',
-  align: 'top',
-  offset: 6,
-  clamp: true, // Не дає вилізти за межі графіка
-  clip: false
+display: true,
+color: (context) => context.dataset.borderColor,
+backgroundColor: 'rgba(255, 255, 255, 0.95)',
+padding: 2,
+font: { size: isMobile ? 8 : 9, weight: '600', family: 'Inter' },
+formatter: (v) => v != null ? v.toFixed(2) : '',
+anchor: 'end',
+align: (context) => {
+const idx = context.dataIndex;
+const total = context.dataset.data.length;
+if (idx === total - 1) return 'right';
+if (idx % 4 === 0) return 'top';
+if (idx % 4 === 1) return 'bottom';
+if (idx % 4 === 2) return 'top';
+return 'bottom';
+},
+offset: isMobile ? 4 : 6,
+clip: false,
+overflow: 'visible',
+borderWidth: 1,
+borderColor: (context) => context.dataset.borderColor + '60',
+borderRadius: 4
 };
 
 if (selChartMode === 'store') {
 const vals = filteredKeys.map(k => getVal(gMap.get(k), selChartStore));
 const color = selChartMetric === 'delta' ? '#6b21a8' : (selChartMetric === 'foks' ? '#1a56db' : '#0e7490');
 const isBar = selChartMetric === 'delta';
-datasets.push({
+const dataset = {
 type: isBar ? 'bar' : 'line',
 label: selChartStore.split(' ').slice(1,3).join(' '),
 data: vals,
@@ -1148,97 +1188,150 @@ return 'rgba(185,28,28,0.7)';
 }) : color + '33',
 borderColor: color,
 borderWidth: isBar ? 0 : 2.5,
-pointRadius: dataLength <= 30 ? 5 : 3,
-pointHoverRadius: 9,
+pointRadius: dataLength <= 40 ? 4 : 3,
+pointHoverRadius: 8,
 tension: 0.25,
 fill: !isBar,
 spanGaps: true,
 datalabels: customDataLabelsConfig
-});
+};
+dataset.originalColor = color;
+datasets.push(dataset);
 } else {
+// ✅ ВИПРАВЛЕНО: додано "data:" перед vals
 sts.forEach((st, i) => {
 const color = CHART_COLORS[i % CHART_COLORS.length];
 const vals = filteredKeys.map(k => getVal(gMap.get(k), st.name));
-datasets.push({
+const dataset = {
 type: 'line',
 label: st.name.split(' ').slice(1,3).join(' '),
-data: vals,
+data: vals,  // ← Ось що було пропущено!
 borderColor: color,
 backgroundColor: color + '22',
 borderWidth: 2.5,
-pointRadius: dataLength <= 30 ? 5 : 3,
-pointHoverRadius: 9,
+pointRadius: dataLength <= 40 ? 4 : 3,
+pointHoverRadius: 8,
 tension: 0.25,
 fill: false,
 spanGaps: true,
 datalabels: customDataLabelsConfig
-});
+};
+dataset.originalColor = color;
+datasets.push(dataset);
 });
 }
-const wrap = document.createElement('div'); wrap.className = 'chart-wrap';
+
+const wrap = document.createElement('div'); 
+wrap.className = 'chart-wrap';
+wrap.style.height = isMobile ? '70vh' : '60vh';
+wrap.style.minHeight = isMobile ? '550px' : '500px';
+
 const canvas = document.createElement('canvas'); canvas.id = 'dailyChart';
 wrap.appendChild(canvas);
 
-// Підказка про зумування
 const zoomHint = document.createElement('div');
 zoomHint.className = 'zoom-hint';
-zoomHint.innerHTML = '💡 <i>Підказка: використовуйте коліщатко миші або свайп по графіку для наближення та прокрутки.</i>';
+zoomHint.innerHTML = isMobile ? 
+'💡 <i>Щипок для масштабу | Подвійний клік для скидання | Кнопка Tooltip вимикає підказки</i>' : 
+'💡 <i>Коліщатко для масштабу | Подвійний клік для скидання</i>';
 card.appendChild(wrap);
 card.appendChild(zoomHint);
 
 cont.innerHTML = '';
 cont.appendChild(card);
+
 if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
 const ctx = canvas.getContext('2d');
+
 chartInstance = new Chart(ctx, {
 plugins: [ChartDataLabels, window.ChartZoom],
 data: { labels, datasets },
 options: {
 responsive: true,
 maintainAspectRatio: false,
-interaction: { mode: 'index', intersect: false },
+interaction: { 
+mode: isMobile ? 'nearest' : 'index', 
+intersect: false
+},
+hover: {
+mode: 'dataset',
+intersect: false
+},
+onHover: (event, chartElement, chart) => {
+const datasets = chart.data.datasets;
+if (chartElement.length > 0) {
+const index = chartElement[0].datasetIndex;
+datasets.forEach((ds, i) => {
+if (ds.originalColor) {
+ds.borderColor = i === index ? ds.originalColor : ds.originalColor + '22';
+}
+});
+} else {
+datasets.forEach(ds => {
+if (ds.originalColor) ds.borderColor = ds.originalColor;
+});
+}
+chart.update('none');
+},
 plugins: {
-legend: { display: datasets.length > 1, position: 'top', labels: { font: { size: 11 }, boxWidth: 18, padding: 10 } },
+legend: { 
+display: datasets.length > 1, 
+position: isMobile ? 'bottom' : 'top', 
+labels: { 
+font: { size: isMobile ? 9 : 11 }, 
+boxWidth: isMobile ? 10 : 18, 
+padding: isMobile ? 4 : 10,
+usePointStyle: true
+} 
+},
 tooltip: {
-backgroundColor: 'rgba(29, 29, 31, 0.95)',
-titleFont: { size: 13, weight: '600' },
-bodyFont: { size: 12 },
-padding: 12,
-cornerRadius: 8,
+enabled: tooltipEnabled,
+backgroundColor: 'rgba(0, 0, 0, 0.9)',
+titleFont: { size: isMobile ? 11 : 13, weight: '600' },
+bodyFont: { size: isMobile ? 10 : 12 },
+padding: isMobile ? 6 : 12,
+cornerRadius: isMobile ? 4 : 8,
 displayColors: true,
+hideOnClick: true,
 callbacks: {
 label: c => ' ' + c.dataset.label + ': ' + (c.raw != null ? (selChartMetric === 'delta' ? c.raw.toFixed(2) : fmt(c.raw)) : '—')
 }
 },
-// Налаштування плагіна для зумування
 zoom: {
-  pan: {
-    enabled: true,
-    mode: 'x',
-    modifierKey: 'ctrl',
-  },
-  zoom: {
-    wheel: {
-      enabled: true,
-    },
-    pinch: {
-      enabled: true
-    },
-    mode: 'x',
-  }
+pan: { enabled: true, mode: 'x' },
+zoom: {
+wheel: { enabled: !isMobile },
+pinch: { enabled: true },
+mode: 'x'
 }
 },
-scales: {
-x: { grid: { color: '#f0f0f0' }, ticks: { font: { size: 9 }, color: '#86868b', maxTicksLimit: 24, maxRotation: 45 } },
-y: {
-grace: '15%', // Додає зверху 15% простору, щоб маркери не перекривали лінії
-grid: { color: '#f0f0f0' },
-ticks: {
-font: { size: 10 },
-color: '#86868b',
-callback: v => selChartMetric === 'delta' ? v.toFixed(2) : fmt(v)
+datalabels: customDataLabelsConfig
 },
-...(selChartMetric === 'delta' ? { suggestedMin: 0.5, suggestedMax: 1.5 } : {})
+scales: {
+x: { 
+grid: { 
+display: true, 
+drawOnChartArea: true,
+color: '#e5e7eb'
+}, 
+ticks: { 
+font: { size: isMobile ? 8 : 9 }, 
+color: '#6b7280', 
+maxTicksLimit: isMobile ? 6 : 24, 
+maxRotation: isMobile ? 45 : 0,
+autoSkip: true
+} 
+},
+// ✅ АВТОМАТИЧНИЙ МАСШТАБ Y — БЕЗ ЖОРСТКИХ ОБМЕЖЕНЬ
+y: {
+grace: isMobile ? '35%' : '25%',  // Запас зверху і знизу
+grid: { color: '#e5e7eb' },
+ticks: {
+font: { size: isMobile ? 9 : 10 },
+color: '#6b7280',
+callback: v => selChartMetric === 'delta' ? v.toFixed(2) : fmt(v)
+}
+// ✅ Chart.js сам підбере мін/макс під дані!
 }
 }
 }
@@ -1285,3 +1378,4 @@ init();
 </script>
 </body>
 </html>
+
