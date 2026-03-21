@@ -457,6 +457,16 @@ ymSet.add(yearMonthKey);
 allYearMonths = [...ymSet].sort();
 selYearMonths = new Set(allYearMonths);
 selStores = new Set(stores.map(s => s.name));
+
+// Фільтруємо магазини які мають хоч якісь дані
+stores = stores.filter(st => {
+return dataRows.some(r => {
+const v = r.storeVals[st.name] || {};
+return v.foks != null || v.komf != null || v.delta != null;
+});
+});
+// Оновлюємо selStores після фільтрації
+selStores = new Set(stores.map(s => s.name));
 }
 function activeData() {
 return dataRows.filter(r => {
@@ -535,9 +545,11 @@ renderFilters(); render();
 });
 if (allSA) baS.style.background = '#374151';
 sp.appendChild(baS);
-stores.forEach(s => {
+stores.filter(s => s.name && s.name.trim()).forEach(s => {
 const a = selStores.has(s.name);
-const b = mkPill(s.name.split(' ').slice(1,4).join(' '), a, '', () => {
+const displayName = s.name.split(' ').slice(1,4).join(' ');
+if (!displayName) return;
+const b = mkPill(displayName, a, '', () => {
 if (a) { if (selStores.size > 1) selStores.delete(s.name); }
 else selStores.add(s.name);
 renderFilters(); render();
@@ -600,7 +612,7 @@ function renderTable() {
 const cont = document.getElementById('tabContent');
 const data = activeData();
 const sts = activeStores();
-if (!data.length) {
+if (!data.length || !sts.length) {
 cont.innerHTML = '<div class="table-card"><div class="status-box">Немає даних для обраного фільтру</div></div>';
 return;
 }
@@ -693,7 +705,7 @@ function renderWeekday() {
 const cont = document.getElementById('tabContent');
 const data = activeData();
 const sts = activeStores();
-if (!data.length) {
+if (!data.length || !sts.length) {
 cont.innerHTML = '<div class="table-card"><div class="status-box">Немає даних</div></div>';
 return;
 }
@@ -830,7 +842,7 @@ function renderWeekly() {
 const cont = document.getElementById('tabContent');
 const data = activeData();
 const sts = activeStores();
-if (!data.length) {
+if (!data.length || !sts.length) {
 cont.innerHTML = '<div class="table-card"><div class="status-box">Немає даних</div></div>';
 return;
 }
@@ -852,7 +864,7 @@ function renderMonthly() {
 const cont = document.getElementById('tabContent');
 const data = activeData();
 const sts = activeStores();
-if (!data.length) {
+if (!data.length || !sts.length) {
 cont.innerHTML = '<div class="table-card"><div class="status-box">Немає даних</div></div>';
 return;
 }
