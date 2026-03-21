@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <style>
 :root {
 --bg: #f5f5f7;
@@ -244,7 +246,13 @@ box-shadow: var(--shadow);
 padding: 16px;
 margin-bottom: 14px;
 }
-.chart-wrap { position: relative; height: 500px; }
+/* Адаптивна висота для графіка */
+.chart-wrap { 
+  position: relative; 
+  height: 60vh; 
+  min-height: 500px; 
+  max-height: 700px; 
+}
 .ctrl-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
 .ctrl-lbl { font-size: 11px; font-weight: 600; color: var(--text-sec); margin-right: 2px; }
 .status-box { padding: 40px; text-align: center; color: var(--text-sec); font-size: 14px; }
@@ -259,6 +267,13 @@ scrollbar-width: thin;
 }
 #yearMonthPills::-webkit-scrollbar, #storePills::-webkit-scrollbar, #segmentPills::-webkit-scrollbar { height: 6px; }
 #yearMonthPills::-webkit-scrollbar-thumb, #storePills::-webkit-scrollbar-thumb, #segmentPills::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+.zoom-hint {
+  font-size: 10px;
+  color: #86868b;
+  margin-top: 8px;
+  text-align: center;
+  font-style: italic;
+}
 </style>
 </head>
 <body>
@@ -994,6 +1009,15 @@ if (selChartMode === m.v) { b.style.background = '#374151'; b.style.color = '#ff
 b.onclick = () => { selChartMode = m.v; renderChart(); };
 c0.appendChild(b);
 });
+
+// Додаємо кнопку скидання зуму
+const btnResetZoom = document.createElement('button');
+btnResetZoom.className = 'pill';
+btnResetZoom.textContent = '🔄 Скинути масштаб';
+btnResetZoom.style.marginLeft = 'auto'; // Відсуваємо вправо
+btnResetZoom.onclick = () => { if(chartInstance) chartInstance.resetZoom(); };
+c0.appendChild(btnResetZoom);
+
 card.appendChild(c0);
 const c1 = document.createElement('div'); c1.className = 'ctrl-row';
 c1.appendChild(Object.assign(document.createElement('span'), {className: 'ctrl-lbl', textContent: 'Групування:'}));
@@ -1075,6 +1099,37 @@ const p = k.split('_'); const m = parseInt(p[1]); return MONTHS_UK[m-1]?.slice(0
 const datasets = [];
 const CHART_COLORS = ['#1a56db','#0e7490','#6b21a8','#9d174d','#065f46','#92400e'];
 const dataLength = filteredKeys.length;
+
+// Оновлена логіка для datalabels
+const customDataLabelsConfig = {
+  display: function(context) {
+    // Ховаємо маркери, якщо точок занадто багато, щоб не робити кашу
+    return dataLength <= 20; 
+  },
+  color: '#1d1d1f',
+  backgroundColor: 'rgba(255,255,255,0.95)',
+  borderRadius: 6,
+  borderWidth: 1.5,
+  borderColor: function(context) {
+    return context.dataset.borderColor || '#000';
+  },
+  padding: { top: 4, bottom: 4, left: 6, right: 6 },
+  font: { 
+    size: 9, 
+    weight: '600',
+    family: 'Inter'
+  },
+  formatter: (value) => {
+    if (value === null) return '';
+    return selChartMetric === 'delta' ? value.toFixed(2) : fmt(value);
+  },
+  anchor: 'end',
+  align: 'top',
+  offset: 6,
+  clamp: true, // Не дає вилізти за межі графіка
+  clip: false
+};
+
 if (selChartMode === 'store') {
 const vals = filteredKeys.map(k => getVal(gMap.get(k), selChartStore));
 const color = selChartMetric === 'delta' ? '#6b21a8' : (selChartMetric === 'foks' ? '#1a56db' : '#0e7490');
@@ -1098,51 +1153,7 @@ pointHoverRadius: 9,
 tension: 0.25,
 fill: !isBar,
 spanGaps: true,
-datalabels: {
-display: function(context) {
-const index = context.dataIndex;
-if (dataLength > 30) return index % 4 === 0; // Кожна 4-та
-if (dataLength > 20) return index % 3 === 0; // Кожна 3-тя
-if (dataLength > 10) return index % 2 === 0; // Кожна 2-га
-return true;
-},
-color: '#1d1d1f',
-backgroundColor: 'rgba(255,255,255,0.95)',
-borderRadius: 8,
-borderWidth: 2,
-borderColor: function(context) {
-return context.dataset.borderColor || '#000';
-},
-padding: 6,
-font: { 
-size: 8, // Зменшено з 10 до 8
-weight: '600',
-family: 'Inter'
-},
-formatter: (value, context) => {
-if (value === null) return '';
-const str = selChartMetric === 'delta' ? value.toFixed(2) : fmt(value);
-return str;
-},
-anchor: function(context) {
-return context.dataIndex % 2 === 0 ? 'end' : 'center';
-},
-align: function(context) {
-const index = context.dataIndex;
-if (index % 3 === 0) return 'top';
-if (index % 3 === 1) return 'bottom';
-return 'center';
-},
-offset: function(context) {
-const index = context.dataIndex;
-if (index % 3 === 0) return 20; // Збільшено з 15 до 20
-if (index % 3 === 1) return -20; // Збільшено з -15 до -20
-return 0;
-},
-clip: false,
-clamp: false,
-overlap: false
-}
+datalabels: customDataLabelsConfig
 });
 } else {
 sts.forEach((st, i) => {
@@ -1160,64 +1171,27 @@ pointHoverRadius: 9,
 tension: 0.25,
 fill: false,
 spanGaps: true,
-datalabels: {
-display: function(context) {
-const index = context.dataIndex;
-if (dataLength > 30) return index % 4 === 0;
-if (dataLength > 20) return index % 3 === 0;
-if (dataLength > 10) return index % 2 === 0;
-return true;
-},
-color: '#1d1d1f',
-backgroundColor: 'rgba(255,255,255,0.95)',
-borderRadius: 8,
-borderWidth: 2,
-borderColor: function(context) {
-return context.dataset.borderColor || '#000';
-},
-padding: 6,
-font: { 
-size: 8, // Зменшено з 10 до 8
-weight: '600',
-family: 'Inter'
-},
-formatter: (value, context) => {
-if (value === null) return '';
-const str = selChartMetric === 'delta' ? value.toFixed(2) : fmt(value);
-return str;
-},
-anchor: function(context) {
-return context.dataIndex % 2 === 0 ? 'end' : 'center';
-},
-align: function(context) {
-const index = context.dataIndex;
-if (index % 3 === 0) return 'top';
-if (index % 3 === 1) return 'bottom';
-return 'center';
-},
-offset: function(context) {
-const index = context.dataIndex;
-if (index % 3 === 0) return 20;
-if (index % 3 === 1) return -20;
-return 0;
-},
-clip: false,
-clamp: false,
-overlap: false
-}
+datalabels: customDataLabelsConfig
 });
 });
 }
 const wrap = document.createElement('div'); wrap.className = 'chart-wrap';
 const canvas = document.createElement('canvas'); canvas.id = 'dailyChart';
 wrap.appendChild(canvas);
+
+// Підказка про зумування
+const zoomHint = document.createElement('div');
+zoomHint.className = 'zoom-hint';
+zoomHint.innerHTML = '💡 <i>Підказка: використовуйте коліщатко миші або свайп по графіку для наближення та прокрутки.</i>';
 card.appendChild(wrap);
+card.appendChild(zoomHint);
+
 cont.innerHTML = '';
 cont.appendChild(card);
 if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
 const ctx = canvas.getContext('2d');
 chartInstance = new Chart(ctx, {
-plugins: [ChartDataLabels],
+plugins: [ChartDataLabels, window.ChartZoom],
 data: { labels, datasets },
 options: {
 responsive: true,
@@ -1235,11 +1209,29 @@ displayColors: true,
 callbacks: {
 label: c => ' ' + c.dataset.label + ': ' + (c.raw != null ? (selChartMetric === 'delta' ? c.raw.toFixed(2) : fmt(c.raw)) : '—')
 }
+},
+// Налаштування плагіна для зумування
+zoom: {
+  pan: {
+    enabled: true,
+    mode: 'x',
+    modifierKey: 'ctrl',
+  },
+  zoom: {
+    wheel: {
+      enabled: true,
+    },
+    pinch: {
+      enabled: true
+    },
+    mode: 'x',
+  }
 }
 },
 scales: {
 x: { grid: { color: '#f0f0f0' }, ticks: { font: { size: 9 }, color: '#86868b', maxTicksLimit: 24, maxRotation: 45 } },
 y: {
+grace: '15%', // Додає зверху 15% простору, щоб маркери не перекривали лінії
 grid: { color: '#f0f0f0' },
 ticks: {
 font: { size: 10 },
