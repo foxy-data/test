@@ -6,6 +6,7 @@
 <title>Дельта конкурента</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <style>
 :root{--bg:#f5f5f7;--text:#1d1d1f;--text-sec:#6e6e73;--accent:#ff3b30;--accent2:#0071e3;--border:#d2d2d7;--card:#fff;--shadow:0 4px 20px rgba(0,0,0,0.06);}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -49,25 +50,22 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);paddi
 table{border-collapse:collapse;width:100%}
 th,td{padding:4px 6px;border-bottom:1px solid #f2f2f4;font-size:11px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 /* Frozen left */
-td.col-year,td.col-month{position:sticky;background:white;z-index:5;}
+td.col-year,td.col-month{position:sticky;background:white;z-index:15;}
 td.col-year{left:0;min-width:38px;width:38px;font-size:10px;font-weight:700;color:var(--text-sec);}
 td.col-month{left:38px;min-width:54px;width:54px;font-size:11px;font-weight:600;text-align:left;box-shadow:4px 0 8px -2px rgba(0,0,0,.07);border-right:1px solid #e8e8ec;}
 /* Period color on month cell */
 td.col-month.p1c{color:#1a50b8}
 td.col-month.p2c{color:#1a7f37}
-/* Group header */
-th.grp-th{background:#f2f2f7;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#666;cursor:default;text-align:center;border-bottom:1px solid #e0e0e8;position:sticky;top:0;z-index:10;}
-th.grp-th.sticky-yz{left:0;z-index:21;}
-th.grp-th.sticky-yz2{left:38px;z-index:21;}
-/* ✅ Group background colors - SOFTER */
-th.grp-th.grp-foks{background:#e3f2fd;color:#1565c0;}
-th.grp-th.grp-komf{background:#e8f5e9;color:#2e7d32;}
-/* Sub-col header */
-th.sub-th{background:white;font-size:9px;font-weight:700;color:var(--text-sec);text-transform:uppercase;cursor:pointer;text-align:center;position:sticky;top:22px;z-index:10;border-bottom:2px solid var(--border);transition:background .15s;user-select:none;}
+/* Group header - FIXED TOP */
+th.grp-th{background:#f2f2f7;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#666;cursor:default;text-align:center;border-bottom:1px solid #e0e0e8;position:sticky;top:0;z-index:30;}
+th.grp-th.sticky-yz{left:0;z-index:41;}
+th.grp-th.sticky-yz2{left:38px;z-index:41;}
+/* Sub-col header - FIXED below group */
+th.sub-th{background:white;font-size:9px;font-weight:700;color:var(--text-sec);text-transform:uppercase;cursor:pointer;text-align:center;position:sticky;top:22px;z-index:20;border-bottom:2px solid var(--border);transition:background .15s;user-select:none;}
 th.sub-th:hover{background:#f0f4ff;color:var(--accent2);}
 th.sub-th.selected-col{background:#e8f0fe;color:var(--accent2);border-bottom-color:var(--accent2);}
-th.sub-th.sticky-left0{left:0;z-index:20;}
-th.sub-th.sticky-left1{left:38px;z-index:20;}
+th.sub-th.sticky-left0{left:0;z-index:30;}
+th.sub-th.sticky-left1{left:38px;z-index:30;}
 th.grp-sep,td.grp-sep{border-left:2px solid #d0d0da!important;}
 td.selected-col{background:#f0f5ff;}
 tr:hover td{background:#f9f9fb!important;}
@@ -76,9 +74,8 @@ tr:hover td.col-year,tr:hover td.col-month{background:#f0f0f5!important;}
 .delta-neg{color:#c0392b;font-weight:700;}
 tr.year-sep td{background:#f5f5f7;font-size:10px;font-weight:800;color:#888;padding:2px 6px;border-bottom:1px solid #e8e8ec;}
 tr.year-sep td.col-year{color:var(--text);font-size:11px;}
-/* ✅ Column striping - full height highlighting */
-col.striped-col{background:#fff9e6;}
-tr td.col-striped{background:#fff9e6;}
+/* ✅ Delta cell coloring - DARKER green/red */
+td.is-delta{font-weight:700;}
 /* CHART */
 .chart-panel{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px;display:none}
 .chart-panel.visible{display:block}
@@ -235,33 +232,25 @@ if(Math.abs(n)>=1000)return(n/1000).toFixed(1)+'К';
 if(n%1!==0)return n.toFixed(2);
 return n.toLocaleString('uk-UA');
 }
-// ✅ Delta color gradient: green (low) to red (high) - SOFTER COLORS
+// ✅ Delta color - DARKER green/red only
 function getDeltaColor(value){
 if(value===null||value===undefined) return '';
-// Normalize: assume delta around 1.0 is neutral
-// < 0.8 = very green, > 1.2 = very red
-const normalized=Math.max(-1,Math.min(2,(value-0.8)/0.4)); // -1 to 2 range
-let r,g,b;
-if(normalized<0){
-// Green to yellow (0 to 0.5)
-const t=(normalized+1)*2; // 0 to 1
-r=Math.round(100*t);
-g=180;
-b=100;
-}else if(normalized<0.5){
-// Yellow to orange (0.5 to 1.0)
-const t=normalized*2; // 1 to 2
-r=Math.round(180+75*t);
-g=Math.round(180*(1-t+1));
-b=80;
-}else{
-// Orange to red (1.0 to 2.0)
-const t=(normalized-0.5)*2; // 0 to 1
-r=220;
-g=Math.round(100*(1-t));
-b=80;
-}
+// Normalize: < 1.0 = green (good), > 1.0 = red (bad)
+if(value<1.0){
+// Green: darker shades from #166534 to #15803d
+const intensity=Math.max(0,Math.min(1,(1.0-value)/0.5)); // 0 to 1
+const r=Math.round(22+40*intensity);
+const g=Math.round(101-30*intensity);
+const b=Math.round(52-20*intensity);
 return `rgb(${r},${g},${b})`;
+}else{
+// Red: darker shades from #991b1b to #dc2626
+const intensity=Math.max(0,Math.min(1,(value-1.0)/0.5)); // 0 to 1
+const r=Math.round(153+50*intensity);
+const g=Math.round(27+20*intensity);
+const b=Math.round(27+20*intensity);
+return `rgb(${r},${g},${b})`;
+}
 }
 function detectStructure(csvRows){
 if(csvRows.length<3)return false;
@@ -453,43 +442,28 @@ hint.innerHTML='<span class="hl">💡</span> Натисніть на <span class
 card.appendChild(hint);
 const wrap=document.createElement('div');wrap.style.cssText='overflow-x:auto;-webkit-overflow-scrolling:touch;';card.appendChild(wrap);
 const tbl=document.createElement('table');
-// ✅ Add colgroup for column striping
-const colgroup=document.createElement('colgroup');
-colgroup.appendChild(document.createElement('col')); // Year
-colgroup.appendChild(document.createElement('col')); // Month
 const thead=document.createElement('thead');
+// Row 1: group headers
 const trG=document.createElement('tr');
 const thY0=document.createElement('th');thY0.className='sub-th sticky-left0';thY0.rowSpan=2;thY0.style.cursor='default';thY0.textContent='Рік';trG.appendChild(thY0);
 const thM0=document.createElement('th');thM0.className='sub-th sticky-left1 grp-sep';thM0.rowSpan=2;thM0.style.cssText='cursor:default;text-align:left;';thM0.textContent='Місяць';trG.appendChild(thM0);
 colGroups.forEach((grp,gi)=>{
-const th=document.createElement('th');
-th.className='grp-th';
-// ✅ Add group class for visual distinction
-if(/фокс/i.test(grp.name)) th.classList.add('grp-foks');
-else if(/комф|комб/i.test(grp.name)) th.classList.add('grp-komf');
-th.colSpan=grp.cols.length;th.textContent=grp.name;
+const th=document.createElement('th');th.className='grp-th';th.colSpan=grp.cols.length;th.textContent=grp.name;
 if(gi>0)th.classList.add('grp-sep');trG.appendChild(th);
-// ✅ Add striped columns
-grp.cols.forEach((col,ci)=>{
-const colEl=document.createElement('col');
-if(col.isDelta) colEl.classList.add('striped-col');
-colgroup.appendChild(colEl);
-});
 });
 thead.appendChild(trG);
-tbl.appendChild(colgroup);
+// Row 2: sub-col headers
 const trH=document.createElement('tr');
 colGroups.forEach((grp,gi)=>{
 grp.cols.forEach((col,ci)=>{
-const th=document.createElement('th');th.className='sub-th';
-if(col.isDelta) th.classList.add('is-delta');
-th.textContent=col.sub;th.dataset.key=col.key;
+const th=document.createElement('th');th.className='sub-th';th.textContent=col.sub;th.dataset.key=col.key;
 if(ci===0&&gi>0)th.classList.add('grp-sep');
 if(selectedCols.has(col.key))th.classList.add('selected-col');
 th.onclick=()=>toggleCol(col.key);trH.appendChild(th);
 });
 });
 thead.appendChild(trH);tbl.appendChild(thead);
+// Body
 const tbody=document.createElement('tbody');
 let lastY=null;
 data.forEach(r=>{
@@ -510,21 +484,18 @@ if(periods1.has(r.key)&&!periods2.has(r.key))tdM.classList.add('p1c');
 else if(periods2.has(r.key)&&!periods1.has(r.key))tdM.classList.add('p2c');
 }
 tr.appendChild(tdM);
-let colIndex=0;
 colGroups.forEach((grp,gi)=>{
 grp.cols.forEach((col,ci)=>{
 const td=document.createElement('td');
 if(ci===0&&gi>0)td.classList.add('grp-sep');
-if(col.isDelta){
-td.classList.add('is-delta','col-striped');
-}
+if(col.isDelta) td.classList.add('is-delta');
 if(selectedCols.has(col.key))td.classList.add('selected-col');
 td.dataset.key=col.key;
 const v=r.vals[col.key];
 if(v!==null&&v!==undefined){
 td.textContent=fmt(v,col.isPct);
 if(col.isDelta){
-// ✅ Apply softer gradient color based on delta value
+// ✅ Apply darker green/red color
 const color=getDeltaColor(v);
 if(color) td.style.color=color;
 if(v>0.005)td.classList.add('delta-pos');
@@ -532,7 +503,6 @@ else if(v<-0.005)td.classList.add('delta-neg');
 }
 }else{td.textContent='—';td.style.color='#ccc';}
 tr.appendChild(td);
-colIndex++;
 });
 });
 tbody.appendChild(tr);
@@ -609,7 +579,7 @@ renderSummary();return;
 const colArr=[...selectedCols];
 const datasets=[];
 let labels=[];
-// ✅ Calculate Y-axis bounds for auto-scaling
+// Calculate Y-axis bounds for auto-scaling
 let yMin=Infinity,yMax=-Infinity;
 if(compareMode){
 const p1rows=rowsForPeriods(periods1);
@@ -627,7 +597,7 @@ const col=allCols.find(c=>c.key===key);if(!col)return;
 const c1=P1_SHADES[i%P1_SHADES.length],c2=P2_SHADES[i%P2_SHADES.length];
 const d1=Array.from({length:maxLen},(_,j)=>{const r=p1rows[j];const val=r?(r.vals[key]??null):null;if(val!==null){yMin=Math.min(yMin,val);yMax=Math.max(yMax,val);}return val;});
 const d2=Array.from({length:maxLen},(_,j)=>{const r=p2rows[j];const val=r?(r.vals[key]??null):null;if(val!==null){yMin=Math.min(yMin,val);yMax=Math.max(yMax,val);}return val;});
-// ✅ More saturated colors (60 instead of 18)
+// More saturated colors (60 instead of 18)
 datasets.push({label:`${col.sub} (П1)`,data:d1,borderColor:c1,backgroundColor:c1+'60',pointBackgroundColor:c1,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:false,borderDash:[],_isPct:col.isPct});
 datasets.push({label:`${col.sub} (П2)`,data:d2,borderColor:c2,backgroundColor:c2+'60',pointBackgroundColor:c2,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:false,borderDash:[5,3],_isPct:col.isPct});
 });
@@ -638,61 +608,53 @@ colArr.forEach((key,i)=>{
 const col=allCols.find(c=>c.key===key);if(!col)return;
 const color=CHART_COLORS[i%CHART_COLORS.length];
 const values=data.map(r=>{const v=r.vals[key];if(v!==null){yMin=Math.min(yMin,v);yMax=Math.max(yMax,v);}return v;});
-// ✅ More saturated colors (60 instead of 18)
+// More saturated colors (60 instead of 18)
 datasets.push({label:col.group+': '+col.sub,data:values,borderColor:color,backgroundColor:color+'60',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,_isPct:col.isPct});
 });
 }
 if(yMin===Infinity){yMin=0;yMax=100;}
-// ✅ Add 10% padding to Y-axis
+// Add 10% padding to Y-axis
 const yRange=yMax-yMin;
 const yPadding=yRange*0.1;
 yMin=Math.max(0,yMin-yPadding);
 yMax=yMax+yPadding;
 if(chartInstance){chartInstance.destroy();chartInstance=null;}
 body.innerHTML='<div class="chart-wrap"><canvas id="cmpChart"></canvas></div>';
-const smartLabels={id:'smartLabels',afterDatasetsDraw(chart){
-if(chartType!=='line') return; // Only for line charts
-const ctx=chart.ctx;ctx.save();
-const FS=10,PX=4,PY=3,LH=FS+PY*2+2,GAP=4;
-ctx.font=`600 ${FS}px Inter,sans-serif`;
-const pts=[];
+// ✅ Data labels plugin configuration
+const datalabelsPlugin={
+id:'dataLabels',
+afterDatasetsDraw(chart){
+const ctx=chart.ctx;
+ctx.save();
+ctx.font='600 10px Inter,sans-serif';
+ctx.textAlign='center';
+ctx.textBaseline='middle';
 chart.data.datasets.forEach((ds,di)=>{
-const meta=chart.getDatasetMeta(di);if(meta.hidden)return;
+const meta=chart.getDatasetMeta(di);
+if(meta.hidden)return;
 ds.data.forEach((val,pi)=>{
 if(val===null||val===undefined)return;
-const el=meta.data[pi];if(!el)return;
+const el=meta.data[pi];
+if(!el)return;
 const text=fmt(val,ds._isPct);
-pts.push({x:el.x,y:el.y,text,color:ds.borderColor,tw:ctx.measureText(text).width});
-});
-});
-const byX={};pts.forEach(p=>{const k=Math.round(p.x);if(!byX[k])byX[k]=[];byX[k].push(p);});
-Object.values(byX).forEach(grp=>{
-grp.sort((a,b)=>a.y-b.y);grp.forEach(p=>{p.ly=p.y-LH/2-6;});
-for(let it=0;it<20;it++){let ch=false;for(let i=1;i<grp.length;i++){const pr=grp[i-1],cu=grp[i],df=(pr.ly+LH+GAP)-cu.ly;if(df>0){pr.ly-=df/2;cu.ly+=df/2;ch=true;}}if(!ch)break;}
-grp.forEach(p=>{
-const bw=p.tw+PX*2,bh=FS+PY*2,bx=p.x-bw/2,by=p.ly-bh/2;
-ctx.shadowColor='rgba(0,0,0,0.15)';ctx.shadowBlur=4;ctx.shadowOffsetY=1;
-ctx.fillStyle='#fff';ctx.beginPath();ctx.roundRect(bx,by,bw,bh,4);ctx.fill();
-ctx.shadowColor='transparent';ctx.shadowBlur=0;
-ctx.strokeStyle=p.color;ctx.lineWidth=1.2;ctx.beginPath();ctx.roundRect(bx,by,bw,bh,4);ctx.stroke();
-ctx.fillStyle=p.color;ctx.font=`700 ${FS}px Inter,sans-serif`;
-ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.text,p.x,by+bh/2);
-ctx.textAlign='left';ctx.textBaseline='alphabetic';
-const lsy=by+bh;if(p.y-lsy>6){ctx.strokeStyle=p.color+'66';ctx.lineWidth=1;ctx.setLineDash([2,2]);ctx.beginPath();ctx.moveTo(p.x,lsy);ctx.lineTo(p.x,p.y-5);ctx.stroke();ctx.setLineDash([]);}
+const pos=el.getCenterPoint();
+ctx.fillStyle=ds.borderColor||'#1d1d1f';
+ctx.fillText(text,pos.x,pos.y-12);
 });
 });
 ctx.restore();
-}};
+}
+};
 const ctx2=document.getElementById('cmpChart').getContext('2d');
 chartInstance=new Chart(ctx2,{
 type:chartType,
 data:{labels,datasets},
-plugins:chartType==='line'?[smartLabels]:[],
+plugins:chartType==='line'?[datalabelsPlugin]:[],
 options:{
 responsive:true,
 maintainAspectRatio:false,
 interaction:{mode:'index',intersect:false},
-layout:{padding:{top:chartType==='line'?30:8,left:8,right:8}},
+layout:{padding:{top:chartType==='line'?35:8,left:8,right:8}},
 plugins:{
 legend:{display:datasets.length>1,position:'top',labels:{font:{family:'Inter',size:10},boxWidth:20,padding:10}},
 tooltip:{
@@ -706,7 +668,7 @@ callbacks:{label:c=>` ${c.dataset.label}: ${fmt(c.raw,c.dataset._isPct)}`}
 },
 scales:{
 x:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Inter',size:compareMode?8:9},color:'#86868b',maxRotation:compareMode?45:30}},
-// ✅ Auto-scaled Y-axis with padding
+// Auto-scaled Y-axis with padding
 y:{
 grid:{color:'#f0f0f0'},
 ticks:{font:{family:'Inter',size:10},color:'#86868b',callback:v=>fmt(v)},
