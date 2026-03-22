@@ -799,20 +799,11 @@ function renderChart(){
                     const color=dsColor(y,mi);
                     const label=`${metric} (${y})`;
                     const data=uniqPairs.map(p=>p.y===y?(mv[p.m]??null):null);
-                    // _fulData тільки для ТО-датасету
                     const showFul=hasFul&&toName&&metric===toName;
                     const fulData=showFul?uniqPairs.map(p=>p.y===y?calcFulfillment(p.y,p.m):null):null;
                     datasets.push({label,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,_fulData:fulData});
                 });
             });
-            if(hasFul){
-                years.forEach(y=>{
-                    const color='#5856d6';
-                    const label=`% виконання (${y})`;
-                    const data=uniqPairs.map(p=>p.y===y?calcFulfillment(p.y,p.m):null);
-                    datasets.push({label,data,borderColor:color,backgroundColor:color+'40',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,borderDash:[4,3],_isPct:true,_barHidden:true});
-                });
-            }
         } else {
             const y=years[0];
             const xMonths=[...new Set(periods.map(p=>p.m))].sort((a,b)=>a-b);
@@ -823,30 +814,19 @@ function renderChart(){
                 const mv=parsedByYear[y]?.[metric]||{};
                 const color=dsColor(y,mi);
                 const data=xMonths.map(m=>mv[m]??null);
-                // _fulData тільки для ТО-датасету
                 const showFul=hasFul&&toName&&metric===toName;
                 const fulData=showFul?xMonths.map(m=>calcFulfillment(y,m)):null;
                 datasets.push({label:metric,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,_fulData:fulData});
             });
-            if(hasFul){
-                const color='#5856d6';
-                const data=xMonths.map(m=>calcFulfillment(y,m));
-                datasets.push({label:'% виконання',data,borderColor:color,backgroundColor:color+'40',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,borderDash:[4,3],_isPct:true,_barHidden:true});
-            }
         }
     }
     if(chartInstance){chartInstance.destroy();chartInstance=null;}
     body.innerHTML='<div class="chart-wrap"><canvas id="dynChart"></canvas></div>';
 
-    // В bar mode — приховуємо _barHidden датасети (% виконання як окрема лінія не потрібна)
-    if(chartType==='bar'){
-        datasets.forEach(ds=>{ if(ds._barHidden) ds.hidden=true; });
-    }
-
     // Насичені кольори заливки для стовпців
     datasets.forEach(ds=>{
         if(chartType==='bar'){
-            ds.backgroundColor=ds._isPct?(ds.borderColor+'40'):(ds.borderColor+'cc');
+            ds.backgroundColor=ds.borderColor+'cc';
         }
     });
 
@@ -854,7 +834,7 @@ function renderChart(){
     const barDataLabelsConfig={
         display:(ctx)=>{
             const ds=ctx.dataset;
-            if(ds._barHidden||ds._isPct)return false;
+            if(ds._isPct)return false;
             return ctx.chart.getDatasetMeta(ctx.datasetIndex).hidden?false:true;
         },
         color:'#1d1d1f',
@@ -917,7 +897,7 @@ function renderChart(){
             // Звичайні лейбли для не-isPct датасетів
             const pts=[];
             chart.data.datasets.forEach((ds,di)=>{
-                if(ds._isPct||ds._barHidden)return;
+                if(ds._isPct)return;
                 const meta=chart.getDatasetMeta(di);if(meta.hidden)return;
                 ds.data.forEach((val,pi)=>{
                     if(val===null||val===undefined)return;
@@ -968,7 +948,7 @@ function renderChart(){
                 legend:{display:datasets.length>1,position:'top',labels:{font:{family:'Inter',size:10},boxWidth:20,padding:10,
                     generateLabels(c){return c.data.datasets.map((ds,i)=>({text:ds.label,fillStyle:ds.borderColor,strokeStyle:ds.borderColor,lineWidth:2,hidden:c.getDatasetMeta(i).hidden,datasetIndex:i}));}}},
                 tooltip:{enabled:tooltipEnabled,backgroundColor:'#1d1d1f',titleFont:{family:'Inter',size:12},bodyFont:{family:'Inter',size:11},padding:10,
-                    callbacks:{label:c=>{const d=c.dataset._tt?.[c.dataIndex];const raw=c.raw;const val=c.dataset._isPct&&raw!=null?raw.toFixed(1)+'%':fmt(raw);return` ${c.dataset.label}${d?' ['+d+']':''}: ${val}`;}}},
+                    callbacks:{label:c=>{const d=c.dataset._tt?.[c.dataIndex];return` ${c.dataset.label}${d?' ['+d+']':''}: ${fmt(c.raw)}`;}}},
                 datalabels:chartType==='bar'?barDataLabelsConfig:false
             },
             scales:{
