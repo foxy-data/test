@@ -6,7 +6,6 @@
 <title>Дельта конкурента</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <style>
 :root{--bg:#f5f5f7;--text:#1d1d1f;--text-sec:#6e6e73;--accent:#ff3b30;--accent2:#0071e3;--border:#d2d2d7;--card:#fff;--shadow:0 4px 20px rgba(0,0,0,0.06);}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -46,24 +45,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);paddi
 .table-hint .hl{color:var(--accent2);font-weight:600}
 table{border-collapse:collapse;width:100%}
 th,td{padding:4px 6px;border-bottom:1px solid #f2f2f4;font-size:11px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-td.col-year,td.col-month{position:sticky;background:white;z-index:15;}
+td.col-year,td.col-month{position:sticky;background:white;z-index:5;}
 td.col-year{left:0;min-width:38px;width:38px;font-size:10px;font-weight:700;color:var(--text-sec);}
 td.col-month{left:38px;min-width:54px;width:54px;font-size:11px;font-weight:600;text-align:left;box-shadow:4px 0 8px -2px rgba(0,0,0,.07);border-right:1px solid #e8e8ec;}
 td.col-month.p1c{color:#1a50b8}
 td.col-month.p2c{color:#1a7f37}
-/* ✅ Group headers - FIXED TOP with colors */
-th.grp-th{background:#f2f2f7;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#666;cursor:default;text-align:center;border-bottom:1px solid #e0e0e8;position:sticky;top:0;z-index:30;}
-th.grp-th.sticky-yz{left:0;z-index:41;}
-th.grp-th.sticky-yz2{left:38px;z-index:41;}
-/* ✅ Group background colors */
-th.grp-th.grp-foks{background:#e3f2fd;color:#1565c0;}
-th.grp-th.grp-komf{background:#e8f5e9;color:#2e7d32;}
-/* Sub-col header */
-th.sub-th{background:white;font-size:9px;font-weight:700;color:var(--text-sec);text-transform:uppercase;cursor:pointer;text-align:center;position:sticky;top:22px;z-index:20;border-bottom:2px solid var(--border);transition:background .15s;user-select:none;}
+th.grp-th{background:#f2f2f7;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#666;cursor:default;text-align:center;border-bottom:1px solid #e0e0e8;position:sticky;top:0;z-index:10;}
+th.grp-th.sticky-yz{left:0;z-index:21;}
+th.grp-th.sticky-yz2{left:38px;z-index:21;}
+th.sub-th{background:white;font-size:9px;font-weight:700;color:var(--text-sec);text-transform:uppercase;cursor:pointer;text-align:center;position:sticky;top:22px;z-index:10;border-bottom:2px solid var(--border);transition:background .15s;user-select:none;}
 th.sub-th:hover{background:#f0f4ff;color:var(--accent2);}
 th.sub-th.selected-col{background:#e8f0fe;color:var(--accent2);border-bottom-color:var(--accent2);}
-th.sub-th.sticky-left0{left:0;z-index:30;}
-th.sub-th.sticky-left1{left:38px;z-index:30;}
+th.sub-th.sticky-left0{left:0;z-index:20;}
+th.sub-th.sticky-left1{left:38px;z-index:20;}
 th.grp-sep,td.grp-sep{border-left:2px solid #d0d0da!important;}
 td.selected-col{background:#f0f5ff;}
 tr:hover td{background:#f9f9fb!important;}
@@ -72,11 +66,6 @@ tr:hover td.col-year,tr:hover td.col-month{background:#f0f0f5!important;}
 .delta-neg{color:#c0392b;font-weight:700;}
 tr.year-sep td{background:#f5f5f7;font-size:10px;font-weight:800;color:#888;padding:2px 6px;border-bottom:1px solid #e8e8ec;}
 tr.year-sep td.col-year{color:var(--text);font-size:11px;}
-/* ✅ Delta cell coloring - DARKER green/red */
-td.is-delta{font-weight:700;}
-/* ✅ Column striping - full height highlighting for delta columns */
-col.delta-col{background:#fff3e0;}
-tr td.col-delta-striped{background:#fff3e0;}
 .chart-panel{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px;display:none}
 .chart-panel.visible{display:block}
 .chart-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
@@ -155,8 +144,7 @@ tr td.col-delta-striped{background:#fff3e0;}
 </div>
 <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
 <div class="chart-controls">
-<button class="chart-control-btn" id="btnToggleTooltip" onclick="toggleTooltip()">💬 Tooltip: ON</button>
-<button class="chart-control-btn" id="btnChartType" onclick="toggleChartType()">📊 Тип: Лінії</button>
+<button class="chart-control-btn" id="btnChartMode" onclick="toggleChartMode()">📊 Лише обрані</button>
 </div>
 <div class="chip-wrap" id="selectedChips"></div>
 </div>
@@ -186,8 +174,7 @@ let compareMode=false;
 let periods1=new Set(),periods2=new Set();
 let selectedCols=new Set();
 let viewMode='table',chartInstance=null;
-let tooltipEnabled=true;
-let chartType='line';
+let chartMode='selected'; // 'selected' or 'withSummary'
 
 function parseCSV(text){
 const result=[];let row=[],col='',inQ=false;
@@ -212,23 +199,6 @@ if(Math.abs(n)>=1000000)return(n/1000000).toFixed(2)+'М';
 if(Math.abs(n)>=1000)return(n/1000).toFixed(1)+'К';
 if(n%1!==0)return n.toFixed(2);
 return n.toLocaleString('uk-UA');
-}
-// ✅ Delta color - DARKER green/red only
-function getDeltaColor(value){
-if(value===null||value===undefined) return '';
-if(value<1.0){
-const intensity=Math.max(0,Math.min(1,(1.0-value)/0.5));
-const r=Math.round(22+40*intensity);
-const g=Math.round(101-30*intensity);
-const b=Math.round(52-20*intensity);
-return `rgb(${r},${g},${b})`;
-}else{
-const intensity=Math.max(0,Math.min(1,(value-1.0)/0.5));
-const r=Math.round(153+50*intensity);
-const g=Math.round(27+20*intensity);
-const b=Math.round(27+20*intensity);
-return `rgb(${r},${g},${b})`;
-}
 }
 function detectStructure(csvRows){
 if(csvRows.length<3)return false;
@@ -377,13 +347,19 @@ document.getElementById('periodLabel1').style.display=compareMode?'':'none';
 if(compareMode){periods1.clear();periods2.clear();}
 renderFilters();refreshAll();
 }
+function toggleChartMode(){
+chartMode=chartMode==='selected'?'withSummary':'selected';
+const btn=document.getElementById('btnChartMode');
+btn.textContent=chartMode==='selected'?'📊 Лише обрані':'📊 З підсумками';
+btn.classList.toggle('active',chartMode==='withSummary');
+if(viewMode==='chart')renderChart();
+}
 function rowsForPeriods(pset){return dataRows.filter(r=>pset.has(r.key)).sort((a,b)=>a.year-b.year||a.month-b.month);}
 function activeRows(){
 if(compareMode){const combined=new Set([...periods1,...periods2]);return dataRows.filter(r=>combined.has(r.key)).sort((a,b)=>a.year-b.year||a.month-b.month);}
 return dataRows.filter(r=>selectedPeriods.has(r.key)).sort((a,b)=>a.year-b.year||a.month-b.month);
 }
 function refreshAll(){renderTable();renderChips();if(viewMode==='chart'){renderChart();renderSummary();}else{renderSummary();}}
-
 function renderTable(){
 const card=document.getElementById('tableCard');card.innerHTML='';
 const data=activeRows();
@@ -394,31 +370,14 @@ card.appendChild(hint);
 const wrap=document.createElement('div');wrap.style.cssText='overflow-x:auto;-webkit-overflow-scrolling:touch;';card.appendChild(wrap);
 const tbl=document.createElement('table');
 const thead=document.createElement('thead');
-// ✅ Colgroup for column striping
-const colgroup=document.createElement('colgroup');
-colgroup.appendChild(document.createElement('col')); // Year
-colgroup.appendChild(document.createElement('col')); // Month
-
 const trG=document.createElement('tr');
 const thY0=document.createElement('th');thY0.className='sub-th sticky-left0';thY0.rowSpan=2;thY0.style.cursor='default';thY0.textContent='Рік';trG.appendChild(thY0);
 const thM0=document.createElement('th');thM0.className='sub-th sticky-left1 grp-sep';thM0.rowSpan=2;thM0.style.cssText='cursor:default;text-align:left;';thM0.textContent='Місяць';trG.appendChild(thM0);
 colGroups.forEach((grp,gi)=>{
-const th=document.createElement('th');th.className='grp-th';
-// ✅ Add group class for visual distinction
-if(/фокс/i.test(grp.name)) th.classList.add('grp-foks');
-else if(/комф|комб/i.test(grp.name)) th.classList.add('grp-komf');
-th.colSpan=grp.cols.length;th.textContent=grp.name;
+const th=document.createElement('th');th.className='grp-th';th.colSpan=grp.cols.length;th.textContent=grp.name;
 if(gi>0)th.classList.add('grp-sep');trG.appendChild(th);
-// ✅ Add delta column striping
-grp.cols.forEach((col,ci)=>{
-const colEl=document.createElement('col');
-if(col.isDelta) colEl.classList.add('delta-col');
-colgroup.appendChild(colEl);
-});
 });
 thead.appendChild(trG);
-tbl.appendChild(colgroup);
-
 const trH=document.createElement('tr');
 colGroups.forEach((grp,gi)=>{
 grp.cols.forEach((col,ci)=>{
@@ -453,20 +412,12 @@ colGroups.forEach((grp,gi)=>{
 grp.cols.forEach((col,ci)=>{
 const td=document.createElement('td');
 if(ci===0&&gi>0)td.classList.add('grp-sep');
-if(col.isDelta){
-td.classList.add('is-delta','col-delta-striped');
-}
 if(selectedCols.has(col.key))td.classList.add('selected-col');
 td.dataset.key=col.key;
 const v=r.vals[col.key];
 if(v!==null&&v!==undefined){
 td.textContent=fmt(v,col.isPct);
-if(col.isDelta){
-const color=getDeltaColor(v);
-if(color) td.style.color=color;
-if(v>0.005)td.classList.add('delta-pos');
-else if(v<-0.005)td.classList.add('delta-neg');
-}
+if(col.isDelta){if(v>0.005)td.classList.add('delta-pos');else if(v<-0.005)td.classList.add('delta-neg');}
 }else{td.textContent='—';td.style.color='#ccc';}
 tr.appendChild(td);
 });
@@ -475,7 +426,6 @@ tbody.appendChild(tr);
 });
 tbl.appendChild(tbody);wrap.appendChild(tbl);
 }
-
 function toggleCol(key){
 if(selectedCols.has(key))selectedCols.delete(key);else selectedCols.add(key);
 document.querySelectorAll('[data-key]').forEach(el=>el.classList.toggle('selected-col',selectedCols.has(el.dataset.key)));
@@ -489,7 +439,6 @@ setTimeout(()=>{b.style.background='';b.style.color='';},1500);
 }
 }
 }
-
 function renderChips(){
 const cont=document.getElementById('selectedChips');cont.innerHTML='';
 const colArr=[...selectedCols];
@@ -519,44 +468,6 @@ const sub=colArr.map(k=>{const c=allCols.find(x=>x.key===k);return c?c.group+': 
 document.getElementById('chartSubtitle').textContent=sub||'Оберіть колонку у таблиці';
 }
 }
-
-function toggleTooltip(){
-tooltipEnabled=!tooltipEnabled;
-const btn=document.getElementById('btnToggleTooltip');
-btn.textContent=tooltipEnabled?'💬 Tooltip: ON':'🔇 Tooltip: OFF';
-btn.classList.toggle('active',!tooltipEnabled);
-if(chartInstance){chartInstance.options.plugins.tooltip.enabled=tooltipEnabled;chartInstance.update('none');}
-}
-
-function toggleChartType(){
-chartType=chartType==='line'?'bar':'line';
-const btn=document.getElementById('btnChartType');
-btn.textContent=chartType==='line'?'📊 Тип: Лінії':'📊 Тип: Стовпчики';
-btn.classList.toggle('active',chartType==='bar');
-if(chartInstance)renderChart();
-}
-
-// ✅ DATALABELS CONFIG FOR BAR CHARTS
-const barDataLabelsConfig = {
-display: true,
-color: '#1d1d1f',
-backgroundColor: 'rgba(255, 255, 255, 0.95)',
-padding: 4,
-font: { size: 10, weight: '600', family: 'Inter' },
-formatter: (value, context) => {
-if (value === null || value === undefined) return '';
-return fmt(value, context.dataset._isPct);
-},
-anchor: 'end',
-align: 'top',
-offset: 4,
-borderWidth: 1,
-borderColor: (context) => context.dataset.borderColor + '60',
-borderRadius: 4,
-clip: true,
-overflow: 'hidden'
-};
-
 function renderChart(){
 const body=document.getElementById('chartBody');
 if(!selectedCols.size){
@@ -567,7 +478,6 @@ renderSummary();return;
 const colArr=[...selectedCols];
 const datasets=[];
 let labels=[];
-let yMin=Infinity,yMax=-Infinity;
 if(compareMode){
 const p1rows=rowsForPeriods(periods1);
 const p2rows=rowsForPeriods(periods2);
@@ -582,32 +492,91 @@ return la||lb;
 colArr.forEach((key,i)=>{
 const col=allCols.find(c=>c.key===key);if(!col)return;
 const c1=P1_SHADES[i%P1_SHADES.length],c2=P2_SHADES[i%P2_SHADES.length];
-const d1=Array.from({length:maxLen},(_,j)=>{const r=p1rows[j];const val=r?(r.vals[key]??null):null;if(val!==null){yMin=Math.min(yMin,val);yMax=Math.max(yMax,val);}return val;});
-const d2=Array.from({length:maxLen},(_,j)=>{const r=p2rows[j];const val=r?(r.vals[key]??null):null;if(val!==null){yMin=Math.min(yMin,val);yMax=Math.max(yMax,val);}return val;});
-datasets.push({label:`${col.sub} (П1)`,data:d1,borderColor:c1,backgroundColor:c1+'60',pointBackgroundColor:c1,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:false,borderDash:[],_isPct:col.isPct});
-datasets.push({label:`${col.sub} (П2)`,data:d2,borderColor:c2,backgroundColor:c2+'60',pointBackgroundColor:c2,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:false,borderDash:[5,3],_isPct:col.isPct});
+const d1=Array.from({length:maxLen},(_,j)=>{const r=p1rows[j];return r?(r.vals[key]??null):null;});
+const d2=Array.from({length:maxLen},(_,j)=>{const r=p2rows[j];return r?(r.vals[key]??null):null;});
+datasets.push({label:`${col.sub} (П1)`,data:d1,borderColor:c1,backgroundColor:c1+'18',pointBackgroundColor:c1,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:false,borderDash:[],_isPct:col.isPct});
+datasets.push({label:`${col.sub} (П2)`,data:d2,borderColor:c2,backgroundColor:c2+'18',pointBackgroundColor:c2,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:false,borderDash:[5,3],_isPct:col.isPct});
 });
+// ✅ Add summary rows if mode is 'withSummary'
+if(chartMode==='withSummary'){
+const summaryData={};
+colArr.forEach(key=>{
+const col=allCols.find(c=>c.key===key);
+if(!col)return;
+const partners=findDeltaPartners(col);
+if(partners){
+const p1Summary=calcDeltaRatio(col,p1rows);
+const p2Summary=calcDeltaRatio(col,p2rows);
+if(p1Summary&&p2Summary){
+summaryData[key]={p1:p1Summary.ratio,p2:p2Summary.ratio,label:`Дельта: ${col.sub}`};
+}
+}
+});
+Object.values(summaryData).forEach((sum,idx)=>{
+const color=CHART_COLORS[idx%CHART_COLORS.length];
+datasets.push({
+label:sum.label,
+data:Array(maxLen-1).fill(null).concat([sum.p1,sum.p2]),
+borderColor:color,
+backgroundColor:color+'18',
+pointBackgroundColor:color,
+pointBorderColor:'#fff',
+pointBorderWidth:2,
+pointRadius:6,
+pointHoverRadius:9,
+borderDash:[],
+tension:0,
+spanGaps:false,
+_isPct:false
+});
+});
+}
 } else {
 const data=activeRows();
 labels=data.map(r=>MONTHS_UK[r.month-1].slice(0,3)+' '+String(r.year).slice(2));
 colArr.forEach((key,i)=>{
 const col=allCols.find(c=>c.key===key);if(!col)return;
 const color=CHART_COLORS[i%CHART_COLORS.length];
-const values=data.map(r=>{const v=r.vals[key];if(v!==null){yMin=Math.min(yMin,v);yMax=Math.max(yMax,v);}return v;});
-datasets.push({label:col.group+': '+col.sub,data:values,borderColor:color,backgroundColor:color+'60',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,_isPct:col.isPct});
+datasets.push({label:col.group+': '+col.sub,data:data.map(r=>r.vals[key]),borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,_isPct:col.isPct});
+});
+// ✅ Add summary if mode is 'withSummary'
+if(chartMode==='withSummary'){
+const summaryData={};
+colArr.forEach(key=>{
+const col=allCols.find(c=>c.key===key);
+if(!col)return;
+const partners=findDeltaPartners(col);
+if(partners){
+const summary=calcDeltaRatio(col,data);
+if(summary){
+summaryData[key]={value:summary.ratio,label:`Дельта: ${col.sub}`};
+}
+}
+});
+Object.values(summaryData).forEach((sum,idx)=>{
+const color=CHART_COLORS[idx%CHART_COLORS.length];
+const lastValue=sum.value;
+datasets.push({
+label:sum.label,
+data:Array(labels.length-1).fill(null).concat([lastValue]),
+borderColor:color,
+backgroundColor:color+'18',
+pointBackgroundColor:color,
+pointBorderColor:'#fff',
+pointBorderWidth:2,
+pointRadius:6,
+pointHoverRadius:9,
+borderDash:[],
+tension:0,
+spanGaps:false,
+_isPct:false
+});
 });
 }
-if(yMin===Infinity){yMin=0;yMax=100;}
-const yRange=yMax-yMin;
-const yPadding=yRange*0.1;
-yMin=Math.max(0,yMin-yPadding);
-yMax=yMax+yPadding;
+}
 if(chartInstance){chartInstance.destroy();chartInstance=null;}
 body.innerHTML='<div class="chart-wrap"><canvas id="cmpChart"></canvas></div>';
-
-// ✅ SMART LABELS FOR LINE CHARTS
 const smartLabels={id:'smartLabels',afterDatasetsDraw(chart){
-if(chartType!=='line') return;
 const ctx=chart.ctx;ctx.save();
 const FS=10,PX=4,PY=3,LH=FS+PY*2+2,GAP=4;
 ctx.font=`600 ${FS}px Inter,sans-serif`;
@@ -639,43 +608,25 @@ const lsy=by+bh;if(p.y-lsy>6){ctx.strokeStyle=p.color+'66';ctx.lineWidth=1;ctx.s
 });
 ctx.restore();
 }};
-
 const ctx2=document.getElementById('cmpChart').getContext('2d');
 chartInstance=new Chart(ctx2,{
-type:chartType,
-data:{labels,datasets},
-plugins: chartType==='line' ? [smartLabels] : [ChartDataLabels],
+type:'line',data:{labels,datasets},plugins:[smartLabels],
 options:{
-responsive:true,
-maintainAspectRatio:false,
-interaction:{mode:'index',intersect:false},
-layout:{padding:{top:chartType==='line'?35:8,left:8,right:8}},
+responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+layout:{padding:{top:30,left:8,right:8}},
 plugins:{
 legend:{display:datasets.length>1,position:'top',labels:{font:{family:'Inter',size:10},boxWidth:20,padding:10}},
-tooltip:{
-enabled:tooltipEnabled,
-backgroundColor:'#1d1d1f',
-titleFont:{family:'Inter',size:11},
-bodyFont:{family:'Inter',size:11},
-padding:10,
-callbacks:{label:c=>` ${c.dataset.label}: ${fmt(c.raw,c.dataset._isPct)}`}
-},
-datalabels: chartType==='bar' ? barDataLabelsConfig : false
+tooltip:{backgroundColor:'#1d1d1f',titleFont:{family:'Inter',size:11},bodyFont:{family:'Inter',size:11},padding:10,
+callbacks:{label:c=>` ${c.dataset.label}: ${fmt(c.raw,c.dataset._isPct)}`}}
 },
 scales:{
 x:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Inter',size:compareMode?8:9},color:'#86868b',maxRotation:compareMode?45:30}},
-y:{
-grid:{color:'#f0f0f0'},
-ticks:{font:{family:'Inter',size:10},color:'#86868b',callback:v=>fmt(v)},
-min:yMin,
-max:yMax
-}
+y:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Inter',size:10},color:'#86868b',callback:v=>fmt(v)}}
 }
 }
 });
 renderSummary();
 }
-
 function ns(s){ return (s||'').toLowerCase().trim().replace(/\s+/g,' '); }
 function isConv(col){ return /конвер/i.test(col.sub)||/конвер/i.test(col.group); }
 function findDeltaPartners(col){
@@ -731,8 +682,13 @@ const diff=v2-v1, pct=v1!==0?(diff/Math.abs(v1)*100):null;
 const cls=Math.abs(diff)<0.0001?'flat':diff>0?'up':'down';
 const arrow=cls==='up'?'▲':cls==='down'?'▼':'→';
 let txt;
-if(isRatio){txt=(diff>0?'+':'')+diff.toFixed(2);if(pct!=null) txt+=' ('+pct.toFixed(1)+'%)';}
-else {txt=(diff>0?'+':'')+fmt(Math.abs(diff));if(pct!=null) txt+=' ('+pct.toFixed(1)+'%)';}
+if(isRatio){
+txt=(diff>0?'+':'')+diff.toFixed(2);
+if(pct!=null) txt+=' ('+pct.toFixed(1)+'%)';
+} else {
+txt=(diff>0?'+':'')+fmt(Math.abs(diff));
+if(pct!=null) txt+=' ('+pct.toFixed(1)+'%)';
+}
 const dRow=document.createElement('div');dRow.className='delta-row';
 const dLbl=document.createElement('div');dLbl.className='delta-label';dLbl.textContent='Відхилення П2 vs П1';
 const badge=document.createElement('div');badge.className='delta-badge delta-'+cls;
@@ -777,7 +733,8 @@ const addPeriodRows=(rows2,r)=>{
 if(!r){rows2.appendChild(mkSRow('дані відсутні','—'));return;}
 rows2.appendChild(mkSRow('КОМФІ',fmtV(r,r.komfAgg)));
 rows2.appendChild(mkSRow('ФОКСТРОТ',fmtV(r,r.foksAgg)));
-rows2.appendChild(mkSRow('Відношення',r.ratio.toFixed(2)));
+// ✅ Changed from "Відношення" to "Дельта"
+rows2.appendChild(mkSRow('Дельта',r.ratio.toFixed(2)));
 };
 const yl1=document.createElement('div');yl1.style.cssText='font-size:10px;font-weight:700;color:#0071e3;margin-bottom:2px;display:flex;align-items:center;gap:4px';
 yl1.innerHTML='<span class="p1-dot"></span>Період 1';rows2.appendChild(yl1);
@@ -817,7 +774,8 @@ const r=calcDeltaRatio(col,data);
 if(!r) return;
 rows2.appendChild(mkSRow('КОМФІ', r.isAvgMode?r.komfAgg.toFixed(2):fmt(r.komfAgg)));
 rows2.appendChild(mkSRow('ФОКСТРОТ', r.isAvgMode?r.foksAgg.toFixed(2):fmt(r.foksAgg)));
-rows2.appendChild(mkSRow('Відношення', r.ratio.toFixed(2)));
+// ✅ Changed from "Відношення" to "Дельта"
+rows2.appendChild(mkSRow('Дельта', r.ratio.toFixed(2)));
 } else {
 const vals=data.map(r=>r.vals[key]).filter(v=>v!=null);if(!vals.length)return;
 if(col.isPct){ rows2.appendChild(mkSRow('Середнє',fmt(vals.reduce((a,b)=>a+b,0)/vals.length,true))); }
