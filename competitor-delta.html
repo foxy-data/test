@@ -59,7 +59,7 @@ td.col-month.p2c{color:#1a7f37}
 th.grp-th{background:#f2f2f7;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#666;cursor:default;text-align:center;border-bottom:1px solid #e0e0e8;position:sticky;top:0;z-index:10;}
 th.grp-th.sticky-yz{left:0;z-index:21;}
 th.grp-th.sticky-yz2{left:38px;z-index:21;}
-/* ✅ Group background colors for Фокстрот and Комфі */
+/* ✅ Group background colors - SOFTER */
 th.grp-th.grp-foks{background:#e3f2fd;color:#1565c0;}
 th.grp-th.grp-komf{background:#e8f5e9;color:#2e7d32;}
 /* Sub-col header */
@@ -76,14 +76,32 @@ tr:hover td.col-year,tr:hover td.col-month{background:#f0f0f5!important;}
 .delta-neg{color:#c0392b;font-weight:700;}
 tr.year-sep td{background:#f5f5f7;font-size:10px;font-weight:800;color:#888;padding:2px 6px;border-bottom:1px solid #e8e8ec;}
 tr.year-sep td.col-year{color:var(--text);font-size:11px;}
-/* ✅ Delta cell gradient coloring */
-td.is-delta{font-weight:700;}
+/* ✅ Column striping - full height highlighting */
+col.striped-col{background:#fff9e6;}
+tr td.col-striped{background:#fff9e6;}
 /* CHART */
 .chart-panel{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px;display:none}
 .chart-panel.visible{display:block}
 .chart-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
 .chart-title{font-size:15px;font-weight:700}
 .chart-subtitle{font-size:11px;color:var(--text-sec);margin-top:2px;max-width:500px;line-height:1.4}
+.chart-controls{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.chart-control-btn{
+border:none;
+background:#f0f0f5;
+border-radius:7px;
+padding:5px 10px;
+font-size:11px;
+font-weight:600;
+cursor:pointer;
+font-family:inherit;
+color:#6e6e73;
+transition:all .15s;
+}
+.chart-control-btn.active{
+background:#1d1d1f;
+color:#fff;
+}
 .chart-wrap{position:relative;height:320px}
 @media(max-width:600px){.chart-wrap{height:240px}}
 .empty-chart{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--text-sec);gap:8px}
@@ -153,7 +171,13 @@ td.is-delta{font-weight:700;}
 <div class="chart-title">Динаміка показників</div>
 <div class="chart-subtitle" id="chartSubtitle">Оберіть колонку у таблиці</div>
 </div>
+<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+<div class="chart-controls">
+<button class="chart-control-btn" id="btnToggleTooltip" onclick="toggleTooltip()">💬 Tooltip: ON</button>
+<button class="chart-control-btn" id="btnChartType" onclick="toggleChartType()">📊 Тип: Лінії</button>
+</div>
 <div class="chip-wrap" id="selectedChips"></div>
+</div>
 </div>
 <div id="chartBody">
 <div class="empty-chart">
@@ -184,6 +208,8 @@ let periods1=new Set(),periods2=new Set();
 // Chart
 let selectedCols=new Set();
 let viewMode='table',chartInstance=null;
+let tooltipEnabled=true;
+let chartType='line'; // 'line' or 'bar'
 // ── PARSE ──
 function parseCSV(text){
 const result=[];let row=[],col='',inQ=false;
@@ -209,7 +235,7 @@ if(Math.abs(n)>=1000)return(n/1000).toFixed(1)+'К';
 if(n%1!==0)return n.toFixed(2);
 return n.toLocaleString('uk-UA');
 }
-// ✅ Delta color gradient: green (low) to red (high)
+// ✅ Delta color gradient: green (low) to red (high) - SOFTER COLORS
 function getDeltaColor(value){
 if(value===null||value===undefined) return '';
 // Normalize: assume delta around 1.0 is neutral
@@ -219,21 +245,21 @@ let r,g,b;
 if(normalized<0){
 // Green to yellow (0 to 0.5)
 const t=(normalized+1)*2; // 0 to 1
-r=Math.round(255*t);
-g=255;
-b=0;
+r=Math.round(100*t);
+g=180;
+b=100;
 }else if(normalized<0.5){
 // Yellow to orange (0.5 to 1.0)
 const t=normalized*2; // 1 to 2
-r=255;
-g=Math.round(255*(1-t+1));
-b=0;
+r=Math.round(180+75*t);
+g=Math.round(180*(1-t+1));
+b=80;
 }else{
 // Orange to red (1.0 to 2.0)
 const t=(normalized-0.5)*2; // 0 to 1
-r=255;
-g=Math.round(128*(1-t));
-b=0;
+r=220;
+g=Math.round(100*(1-t));
+b=80;
 }
 return `rgb(${r},${g},${b})`;
 }
@@ -427,6 +453,10 @@ hint.innerHTML='<span class="hl">💡</span> Натисніть на <span class
 card.appendChild(hint);
 const wrap=document.createElement('div');wrap.style.cssText='overflow-x:auto;-webkit-overflow-scrolling:touch;';card.appendChild(wrap);
 const tbl=document.createElement('table');
+// ✅ Add colgroup for column striping
+const colgroup=document.createElement('colgroup');
+colgroup.appendChild(document.createElement('col')); // Year
+colgroup.appendChild(document.createElement('col')); // Month
 const thead=document.createElement('thead');
 const trG=document.createElement('tr');
 const thY0=document.createElement('th');thY0.className='sub-th sticky-left0';thY0.rowSpan=2;thY0.style.cursor='default';thY0.textContent='Рік';trG.appendChild(thY0);
@@ -439,8 +469,15 @@ if(/фокс/i.test(grp.name)) th.classList.add('grp-foks');
 else if(/комф|комб/i.test(grp.name)) th.classList.add('grp-komf');
 th.colSpan=grp.cols.length;th.textContent=grp.name;
 if(gi>0)th.classList.add('grp-sep');trG.appendChild(th);
+// ✅ Add striped columns
+grp.cols.forEach((col,ci)=>{
+const colEl=document.createElement('col');
+if(col.isDelta) colEl.classList.add('striped-col');
+colgroup.appendChild(colEl);
+});
 });
 thead.appendChild(trG);
+tbl.appendChild(colgroup);
 const trH=document.createElement('tr');
 colGroups.forEach((grp,gi)=>{
 grp.cols.forEach((col,ci)=>{
@@ -473,18 +510,21 @@ if(periods1.has(r.key)&&!periods2.has(r.key))tdM.classList.add('p1c');
 else if(periods2.has(r.key)&&!periods1.has(r.key))tdM.classList.add('p2c');
 }
 tr.appendChild(tdM);
+let colIndex=0;
 colGroups.forEach((grp,gi)=>{
 grp.cols.forEach((col,ci)=>{
 const td=document.createElement('td');
 if(ci===0&&gi>0)td.classList.add('grp-sep');
-if(col.isDelta) td.classList.add('is-delta');
+if(col.isDelta){
+td.classList.add('is-delta','col-striped');
+}
 if(selectedCols.has(col.key))td.classList.add('selected-col');
 td.dataset.key=col.key;
 const v=r.vals[col.key];
 if(v!==null&&v!==undefined){
 td.textContent=fmt(v,col.isPct);
 if(col.isDelta){
-// ✅ Apply gradient color based on delta value
+// ✅ Apply softer gradient color based on delta value
 const color=getDeltaColor(v);
 if(color) td.style.color=color;
 if(v>0.005)td.classList.add('delta-pos');
@@ -492,6 +532,7 @@ else if(v<-0.005)td.classList.add('delta-neg');
 }
 }else{td.textContent='—';td.style.color='#ccc';}
 tr.appendChild(td);
+colIndex++;
 });
 });
 tbody.appendChild(tr);
@@ -539,6 +580,24 @@ chip.addEventListener('click',()=>toggleCol(key));cont.appendChild(chip);
 const sub=colArr.map(k=>{const c=allCols.find(x=>x.key===k);return c?c.group+': '+c.sub:'';}).filter(Boolean).join(' · ');
 document.getElementById('chartSubtitle').textContent=sub||'Оберіть колонку у таблиці';
 }
+}
+// ✅ Chart type toggle
+function toggleTooltip(){
+tooltipEnabled=!tooltipEnabled;
+const btn=document.getElementById('btnToggleTooltip');
+btn.textContent=tooltipEnabled?'💬 Tooltip: ON':'🔇 Tooltip: OFF';
+btn.classList.toggle('active',!tooltipEnabled);
+if(chartInstance){
+chartInstance.options.plugins.tooltip.enabled=tooltipEnabled;
+chartInstance.update('none');
+}
+}
+function toggleChartType(){
+chartType=chartType==='line'?'bar':'line';
+const btn=document.getElementById('btnChartType');
+btn.textContent=chartType==='line'?'📊 Тип: Лінії':'📊 Тип: Стовпчики';
+btn.classList.toggle('active',chartType==='bar');
+if(chartInstance)renderChart();
 }
 function renderChart(){
 const body=document.getElementById('chartBody');
@@ -592,6 +651,7 @@ yMax=yMax+yPadding;
 if(chartInstance){chartInstance.destroy();chartInstance=null;}
 body.innerHTML='<div class="chart-wrap"><canvas id="cmpChart"></canvas></div>';
 const smartLabels={id:'smartLabels',afterDatasetsDraw(chart){
+if(chartType!=='line') return; // Only for line charts
 const ctx=chart.ctx;ctx.save();
 const FS=10,PX=4,PY=3,LH=FS+PY*2+2,GAP=4;
 ctx.font=`600 ${FS}px Inter,sans-serif`;
@@ -625,14 +685,24 @@ ctx.restore();
 }};
 const ctx2=document.getElementById('cmpChart').getContext('2d');
 chartInstance=new Chart(ctx2,{
-type:'line',data:{labels,datasets},plugins:[smartLabels],
+type:chartType,
+data:{labels,datasets},
+plugins:chartType==='line'?[smartLabels]:[],
 options:{
-responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-layout:{padding:{top:30,left:8,right:8}},
+responsive:true,
+maintainAspectRatio:false,
+interaction:{mode:'index',intersect:false},
+layout:{padding:{top:chartType==='line'?30:8,left:8,right:8}},
 plugins:{
 legend:{display:datasets.length>1,position:'top',labels:{font:{family:'Inter',size:10},boxWidth:20,padding:10}},
-tooltip:{backgroundColor:'#1d1d1f',titleFont:{family:'Inter',size:11},bodyFont:{family:'Inter',size:11},padding:10,
-callbacks:{label:c=>` ${c.dataset.label}: ${fmt(c.raw,c.dataset._isPct)}`}}
+tooltip:{
+enabled:tooltipEnabled,
+backgroundColor:'#1d1d1f',
+titleFont:{family:'Inter',size:11},
+bodyFont:{family:'Inter',size:11},
+padding:10,
+callbacks:{label:c=>` ${c.dataset.label}: ${fmt(c.raw,c.dataset._isPct)}`}
+}
 },
 scales:{
 x:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Inter',size:compareMode?8:9},color:'#86868b',maxRotation:compareMode?45:30}},
