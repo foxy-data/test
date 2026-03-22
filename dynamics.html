@@ -866,35 +866,10 @@ function renderChart(){
         id:'smartLabels',
         afterDatasetsDraw(chart){
             const ctx=chart.ctx;ctx.save();
-            const FS=10,PX=4,PY=3,LH=FS+PY*2+2,GAP=4;
-            ctx.font=`600 ${FS}px Inter,sans-serif`;
+            const FS=10,PX=5,PY=3,LH=FS+PY*2+2,GAP=3;
+            ctx.font=`700 ${FS}px Inter,sans-serif`;
 
-            // % виконання: малюємо над точками ТО-датасету (де є _fulData), не над _isPct лінією
-            chart.data.datasets.forEach((ds,di)=>{
-                if(!ds._fulData)return;
-                const meta=chart.getDatasetMeta(di);if(meta.hidden)return;
-                ds._fulData.forEach((ful,pi)=>{
-                    if(ful===null||ful===undefined)return;
-                    const el=meta.data[pi];if(!el)return;
-                    const text=ful.toFixed(1)+'%';
-                    const tw=ctx.measureText(text).width;
-                    const bw=tw+PX*2,bh=FS+PY*2;
-                    const bx=el.x-bw/2, by=el.y-bh-8;
-                    const good=ful>=100;
-                    const fillColor=good?'rgba(52,199,89,0.13)':'rgba(255,59,48,0.10)';
-                    const strokeColor=good?'#34c759':'#ff3b30';
-                    const textColor=good?'#1a7f37':'#c0392b';
-                    ctx.shadowColor='rgba(0,0,0,0.10)';ctx.shadowBlur=3;ctx.shadowOffsetY=1;
-                    ctx.fillStyle=fillColor;ctx.beginPath();ctx.roundRect(bx,by,bw,bh,4);ctx.fill();
-                    ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
-                    ctx.strokeStyle=strokeColor;ctx.lineWidth=1.2;ctx.beginPath();ctx.roundRect(bx,by,bw,bh,4);ctx.stroke();
-                    ctx.fillStyle=textColor;ctx.font=`700 ${FS}px Inter,sans-serif`;
-                    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,el.x,by+bh/2);
-                    ctx.textAlign='left';ctx.textBaseline='alphabetic';
-                });
-            });
-
-            // Звичайні лейбли для не-isPct датасетів
+            // Збираємо всі точки: значення метрик + % виконання — в єдиний масив
             const pts=[];
             chart.data.datasets.forEach((ds,di)=>{
                 if(ds._isPct)return;
@@ -903,33 +878,63 @@ function renderChart(){
                     if(val===null||val===undefined)return;
                     const el=meta.data[pi];if(!el)return;
                     const text=fmt(val);
-                    pts.push({x:el.x,y:el.y,text,color:ds.borderColor,tw:ctx.measureText(text).width});
+                    const tw=ctx.measureText(text).width;
+                    pts.push({x:el.x,y:el.y,text,color:ds.borderColor,tw,isFul:false,fillColor:'#fff'});
                 });
+                // % виконання для цього датасету — додаємо як окрему точку трохи вище
+                if(ds._fulData){
+                    ds._fulData.forEach((ful,pi)=>{
+                        if(ful===null||ful===undefined)return;
+                        const el=meta.data[pi];if(!el)return;
+                        const text=ful.toFixed(1)+'%';
+                        const tw=ctx.measureText(text).width;
+                        const good=ful>=100;
+                        pts.push({
+                            x:el.x,
+                            y:el.y-LH-GAP, // стартова позиція вище ніж точка
+                            text,color:good?'#1a7f37':'#c0392b',tw,isFul:true,
+                            fillColor:good?'rgba(52,199,89,0.13)':'rgba(255,59,48,0.10)',
+                            strokeColor:good?'#34c759':'#ff3b30'
+                        });
+                    });
+                }
             });
+
+            // Антиколізійний алгоритм — групуємо по X, розштовхуємо по Y
             const byX={};
-            pts.forEach(p=>{const k=Math.round(p.x);if(!byX[k])byX[k]=[];byX[k].push(p);});
+            pts.forEach(p=>{const k=Math.round(p.x/4)*4;if(!byX[k])byX[k]=[];byX[k].push(p);});
             Object.values(byX).forEach(grp=>{
                 grp.sort((a,b)=>a.y-b.y);
                 grp.forEach(p=>{p.ly=p.y-LH/2-6;});
-                for(let it=0;it<20;it++){
+                for(let it=0;it<30;it++){
                     let ch=false;
                     for(let i=1;i<grp.length;i++){
-                        const pr=grp[i-1],cu=grp[i],df=(pr.ly+LH+GAP)-cu.ly;
+                        const pr=grp[i-1],cu=grp[i];
+                        const df=(pr.ly+LH+GAP)-cu.ly;
                         if(df>0){pr.ly-=df/2;cu.ly+=df/2;ch=true;}
                     }
                     if(!ch)break;
                 }
                 grp.forEach(p=>{
-                    const bw=p.tw+PX*2,bh=FS+PY*2,bx=p.x-bw/2,by=p.ly-bh/2;
-                    ctx.shadowColor='rgba(0,0,0,0.15)';ctx.shadowBlur=4;ctx.shadowOffsetY=1;
-                    ctx.fillStyle='#fff';ctx.beginPath();ctx.roundRect(bx,by,bw,bh,4);ctx.fill();
+                    const bw=p.tw+PX*2,bh=LH,bx=p.x-bw/2,by=p.ly-bh/2;
+                    ctx.shadowColor='rgba(0,0,0,0.12)';ctx.shadowBlur=4;ctx.shadowOffsetY=1;
+                    ctx.fillStyle=p.fillColor;
+                    ctx.beginPath();ctx.roundRect(bx,by,bw,bh,4);ctx.fill();
                     ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
-                    ctx.strokeStyle=p.color;ctx.lineWidth=1.2;ctx.beginPath();ctx.roundRect(bx,by,bw,bh,4);ctx.stroke();
+                    ctx.strokeStyle=p.strokeColor||p.color;ctx.lineWidth=1.2;
+                    ctx.beginPath();ctx.roundRect(bx,by,bw,bh,4);ctx.stroke();
                     ctx.fillStyle=p.color;ctx.font=`700 ${FS}px Inter,sans-serif`;
-                    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.text,p.x,by+bh/2);
+                    ctx.textAlign='center';ctx.textBaseline='middle';
+                    ctx.fillText(p.text,p.x,by+bh/2);
                     ctx.textAlign='left';ctx.textBaseline='alphabetic';
+                    // лінія від лейбла до точки якщо далеко
                     const lsy=by+bh;
-                    if(p.y-lsy>6){ctx.strokeStyle=p.color+'66';ctx.lineWidth=1;ctx.setLineDash([2,2]);ctx.beginPath();ctx.moveTo(p.x,lsy);ctx.lineTo(p.x,p.y-5);ctx.stroke();ctx.setLineDash([]);}
+                    if(p.y-lsy>8){
+                        ctx.strokeStyle=(p.strokeColor||p.color)+'88';ctx.lineWidth=1;
+                        ctx.setLineDash([2,2]);ctx.beginPath();
+                        ctx.moveTo(p.x,lsy);ctx.lineTo(p.x,p.y-4);ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
                 });
             });
             ctx.restore();
@@ -943,7 +948,7 @@ function renderChart(){
         plugins:chartType==='line'?[smartLabels]:[ChartDataLabels],
         options:{
             responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-            layout:{padding:{top:chartType==='line'?30:45,left:8,right:8}},
+            layout:{padding:{top:chartType==='line'?50:45,left:8,right:8}},
             plugins:{
                 legend:{display:datasets.length>1,position:'top',labels:{font:{family:'Inter',size:10},boxWidth:20,padding:10,
                     generateLabels(c){return c.data.datasets.map((ds,i)=>({text:ds.label,fillStyle:ds.borderColor,strokeStyle:ds.borderColor,lineWidth:2,hidden:c.getDatasetMeta(i).hidden,datasetIndex:i}));}}},
