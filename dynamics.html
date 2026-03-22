@@ -356,7 +356,15 @@ function getAllPairs(){
                  .map(m=>({y,m,key:y+'_'+m}))
     );
 }
-function activePeriods(){ return allYears.flatMap(y=>allMonths.filter(m=>selectedPeriods.has(y+'_'+m)).map(m=>({y,m}))); }
+// activePeriods — тільки пари з реальними даними для хоча б одного показника
+function activePeriods(){
+    return allYears.flatMap(y=>
+        allMonths.filter(m=>
+            selectedPeriods.has(y+'_'+m) &&
+            allMetrics.some(met=>parsedByYear[y]?.[met]?.[m]!=null)
+        ).map(m=>({y,m}))
+    );
+}
 function yColor(y){return yearColorMap[y]||'#86868b';}
 function dsColor(y,mi){const bi=CHART_COLORS.indexOf(yearColorMap[y]);return CHART_COLORS[(bi+mi*2)%CHART_COLORS.length];}
 function badgeCls(name){const lo=name.toLowerCase();for(const g of GROUP_HINTS)if(g.kw.some(k=>lo.includes(k)))return g.cls;if(lo.includes('%')||lo.includes('доля')||lo.includes('конвер'))return'badge-pct';return'badge-other';}
@@ -882,13 +890,42 @@ function renderChart(){
             const ctx=chart.ctx;ctx.save();
             const FS=10,PX=4,PY=3,LH=FS+PY*2+2,GAP=4;
             ctx.font=`600 ${FS}px Inter,sans-serif`;
-            const pts=[];
+
+            // Окремо: _isPct лейбли завжди над точкою (fixed offset від точки вгору)
             chart.data.datasets.forEach((ds,di)=>{
+                if(!ds._isPct)return;
                 const meta=chart.getDatasetMeta(di);if(meta.hidden)return;
                 ds.data.forEach((val,pi)=>{
                     if(val===null||val===undefined)return;
                     const el=meta.data[pi];if(!el)return;
-                    const text=ds._isPct?val.toFixed(1)+'%':fmt(val);
+                    const text=val.toFixed(1)+'%';
+                    const tw=ctx.measureText(text).width;
+                    const bw=tw+PX*2,bh=FS+PY*2;
+                    // малюємо над точкою з відступом 8px
+                    const bx=el.x-bw/2, by=el.y-bh-8;
+                    const good=val>=100;
+                    const fillColor=good?'rgba(52,199,89,0.12)':'rgba(255,59,48,0.10)';
+                    const strokeColor=good?'#34c759':'#ff3b30';
+                    const textColor=good?'#1a7f37':'#c0392b';
+                    ctx.shadowColor='rgba(0,0,0,0.10)';ctx.shadowBlur=3;ctx.shadowOffsetY=1;
+                    ctx.fillStyle=fillColor;ctx.beginPath();ctx.roundRect(bx,by,bw,bh,4);ctx.fill();
+                    ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+                    ctx.strokeStyle=strokeColor;ctx.lineWidth=1.2;ctx.beginPath();ctx.roundRect(bx,by,bw,bh,4);ctx.stroke();
+                    ctx.fillStyle=textColor;ctx.font=`700 ${FS}px Inter,sans-serif`;
+                    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,el.x,by+bh/2);
+                    ctx.textAlign='left';ctx.textBaseline='alphabetic';
+                });
+            });
+
+            // Звичайні лейбли для не-isPct датасетів
+            const pts=[];
+            chart.data.datasets.forEach((ds,di)=>{
+                if(ds._isPct||ds._barHidden)return;
+                const meta=chart.getDatasetMeta(di);if(meta.hidden)return;
+                ds.data.forEach((val,pi)=>{
+                    if(val===null||val===undefined)return;
+                    const el=meta.data[pi];if(!el)return;
+                    const text=fmt(val);
                     pts.push({x:el.x,y:el.y,text,color:ds.borderColor,tw:ctx.measureText(text).width});
                 });
             });
