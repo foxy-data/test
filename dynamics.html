@@ -622,6 +622,7 @@ function renderTable(){
     tbl.appendChild(thead);
     const tbody=document.createElement('tbody');
     let rowIdx=0;
+    const {to: toName, plan: planName}=getTOPlanNames();
     allMetrics.forEach(metric=>{
         if(!years.some(y=>parsedByYear[y]?.[metric]))return;
         const tr=document.createElement('tr');tr.className='metric-row appear';tr.dataset.metric=metric;
@@ -643,40 +644,38 @@ function renderTable(){
         });
         tr.addEventListener('click',()=>toggleMetric(metric));
         tbody.appendChild(tr);
+
+        // ── % виконання одразу після рядка ТО ──
+        if(toName && metric===toName && hasFulfillmentData()){
+            const trF=document.createElement('tr');
+            trF.className='metric-row appear';
+            trF.style.cssText='background:#f4f3ff;animation-delay:'+(rowIdx*0.03)+'s';
+            trF.style.cursor='default';
+            rowIdx++;
+            const tdFN=document.createElement('td');
+            tdFN.className='col-metric';
+            tdFN.style.cssText='color:#5856d6;font-weight:700;background:#f4f3ff;font-size:10px';
+            tdFN.textContent='% виконання';
+            trF.appendChild(tdFN);
+            periods.forEach((p,pi)=>{
+                const val=calcFulfillment(p.y,p.m);
+                const td=document.createElement('td');
+                if(pi>0&&periods[pi-1].y!==p.y)td.classList.add('grp-start');
+                if(val!==null){
+                    const sp=document.createElement('span');
+                    const good=val>=100;
+                    sp.className='badge';
+                    sp.style.cssText=good
+                        ?'background:rgba(52,199,89,.18);color:#1a7f37;font-weight:700'
+                        :'background:rgba(255,59,48,.13);color:#c0392b;font-weight:700';
+                    sp.textContent=val.toFixed(1)+'%';
+                    td.appendChild(sp);
+                } else {td.textContent='—';td.style.color='#ccc';}
+                trF.appendChild(td);
+            });
+            tbody.appendChild(trF);
+        }
     });
-    tbl.appendChild(tbody);
-
-    // ── Фіксований рядок % виконання (завжди якщо є ТО і ТО план) ──
-    if(hasFulfillmentData()){
-        const trF=document.createElement('tr');
-        trF.className='metric-row appear';
-        trF.style.cssText='background:#f0f4ff;animation-delay:'+(rowIdx*0.03)+'s';
-        trF.style.cursor='default';
-        const tdFN=document.createElement('td');
-        tdFN.className='col-metric';
-        tdFN.style.cssText='color:#5856d6;font-weight:700;background:#f0f4ff';
-        tdFN.textContent='% виконання';
-        trF.appendChild(tdFN);
-        periods.forEach((p,pi)=>{
-            const val=calcFulfillment(p.y,p.m);
-            const td=document.createElement('td');
-            if(pi>0&&periods[pi-1].y!==p.y)td.classList.add('grp-start');
-            if(val!==null){
-                const sp=document.createElement('span');
-                const pct=val.toFixed(1)+'%';
-                const good=val>=100;
-                sp.className='badge';
-                sp.style.cssText=good
-                    ?'background:rgba(52,199,89,.15);color:#1a7f37;font-weight:700'
-                    :'background:rgba(255,59,48,.10);color:#c0392b;font-weight:700';
-                sp.textContent=pct;
-                td.appendChild(sp);
-            } else {td.textContent='—';td.style.color='#ccc';}
-            trF.appendChild(td);
-        });
-        tbody.appendChild(trF);
-    }
-
     tbl.appendChild(tbody);wrap.appendChild(tbl);
 }
 
@@ -726,7 +725,9 @@ function renderChips(){
                 cont.appendChild(chip);
             });
         });
-        const periodStr=[...selectedPeriods].sort().map(k=>{const[y,m]=k.split('_');return MONTHS_UK[+m-1].slice(0,3)+' '+String(y).slice(2);}).join(', ');
+        // Subtitle: тільки місяці що реально вибрані (activePeriods), відсортовані хронологічно
+        const activePairs=periods.slice().sort((a,b)=>a.y-b.y||a.m-b.m);
+        const periodStr=activePairs.map(p=>MONTHS_UK[p.m-1].slice(0,3)+' '+String(p.y).slice(2)).join(', ');
         document.getElementById('chartSubtitle').textContent=selectedMetrics.size?periodStr:'Оберіть показники у таблиці';
     }
 }
@@ -823,12 +824,33 @@ function renderChart(){
     body.innerHTML='<div class="chart-wrap"><canvas id="dynChart"></canvas></div>';
 
     const barDataLabelsConfig={
-        display:true,color:'#1d1d1f',backgroundColor:'rgba(255,255,255,0.92)',
-        padding:3,font:{size:10,weight:'600',family:'Inter'},
-        formatter:(value,ctx)=>{if(value===null||value===undefined)return'';return ctx.dataset._isPct?value.toFixed(1)+'%':fmt(value);},
-        anchor:'end',align:'top',offset:3,borderWidth:1,
-        borderColor:(ctx)=>ctx.dataset.borderColor+'60',borderRadius:4,clip:true
+        display:true,
+        color:(ctx)=>ctx.dataset._isPct?'#5856d6':'#1d1d1f',
+        backgroundColor:(ctx)=>ctx.dataset._isPct?'rgba(88,86,214,0.1)':'rgba(255,255,255,0.93)',
+        padding:{top:3,bottom:3,left:5,right:5},
+        font:{size:10,weight:'700',family:'Inter'},
+        formatter:(value,ctx)=>{
+            if(value===null||value===undefined)return'';
+            return ctx.dataset._isPct?value.toFixed(1)+'%':fmt(value);
+        },
+        anchor:'end',
+        align:'top',
+        offset:2,
+        borderWidth:1,
+        borderColor:(ctx)=>ctx.dataset._isPct?'rgba(88,86,214,0.3)':ctx.dataset.borderColor+'55',
+        borderRadius:4,
+        clip:false
     };
+
+    // Насичені кольори заливки для стовпців
+    datasets.forEach(ds=>{
+        if(!ds._isPct){
+            // Насичена заливка: замість color+'18' робимо color+'99' (60% opacity)
+            ds.backgroundColor=ds.borderColor+'99';
+        } else {
+            ds.backgroundColor=ds.borderColor+'40';
+        }
+    });
 
     const smartLabels={
         id:'smartLabels',
@@ -842,7 +864,7 @@ function renderChart(){
                 ds.data.forEach((val,pi)=>{
                     if(val===null||val===undefined)return;
                     const el=meta.data[pi];if(!el)return;
-                    const text=fmt(val);
+                    const text=ds._isPct?val.toFixed(1)+'%':fmt(val);
                     pts.push({x:el.x,y:el.y,text,color:ds.borderColor,tw:ctx.measureText(text).width});
                 });
             });
