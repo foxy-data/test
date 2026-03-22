@@ -772,85 +772,109 @@ function renderChart(){
             datasets.push({label:`${metric} (П2)`,data:data2,borderColor:c2,backgroundColor:c2+'18',pointBackgroundColor:c2,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:false,borderDash:[5,3],_tt:tt2});
         });
     } else {
-        const periods=activePeriods();const years=[...new Set(periods.map(p=>p.y))].sort((a,b)=>a-b);
-        // БАГ-ФІX: вісь X = лише місяці що вибрані хоча б для одного року, відсортовані
-        const xMonths=[...new Set(periods.map(p=>p.m))].sort((a,b)=>a-b);
-        // Але labels будуємо з реальних пар рік+місяць, щоб уникнути дублювання
-        // Якщо кілька років — підписуємо "Міс РР", якщо один рік — просто "Міс"
+        const periods=activePeriods().sort((a,b)=>a.y-b.y||a.m-b.m);
+        const years=[...new Set(periods.map(p=>p.y))].sort((a,b)=>a-b);
+
         if(years.length>1){
-            // Будуємо унікальні комбінації (рік,місяць) в хронологічному порядку
-            const uniqPairs=periods.slice().sort((a,b)=>a.y-b.y||a.m-b.m);
+            // Кілька років: вісь X = унікальні пари рік+місяць хронологічно (тільки вибрані)
+            const uniqPairs=periods; // вже відсортовані, лише активні
             labels=uniqPairs.map(p=>MONTHS_UK[p.m-1].slice(0,3)+' '+String(p.y).slice(2));
+            const hasFul=hasFulfillmentData();
             metrics.forEach((metric,mi)=>{
                 years.forEach(y=>{
                     const mv=parsedByYear[y]?.[metric]||{};
                     const color=dsColor(y,mi);
                     const label=`${metric} (${y})`;
-                    // точок стільки скільки uniqPairs, дані — тільки для свого року
-                    const data=uniqPairs.map(p=>p.y===y&&selectedPeriods.has(p.y+'_'+p.m)?(mv[p.m]??null):null);
-                    datasets.push({label,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true});
+                    const data=uniqPairs.map(p=>p.y===y?(mv[p.m]??null):null);
+                    // fulfillment per point для datalabel overlay
+                    const fulData=hasFul?uniqPairs.map(p=>p.y===y?calcFulfillment(p.y,p.m):null):null;
+                    datasets.push({label,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,_fulData:fulData});
                 });
             });
-            // % виконання для кожного року
-            if(hasFulfillmentData()){
+            // % виконання як окремий dataset тільки для line mode
+            if(hasFul){
                 years.forEach(y=>{
                     const color='#5856d6';
-                    const label=years.length>1?`% виконання (${y})`:'% виконання';
-                    const data=uniqPairs.map(p=>p.y===y&&selectedPeriods.has(p.y+'_'+p.m)?calcFulfillment(p.y,p.m):null);
-                    datasets.push({label,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,borderDash:[4,3],_isPct:true});
+                    const label=`% виконання (${y})`;
+                    const data=uniqPairs.map(p=>p.y===y?calcFulfillment(p.y,p.m):null);
+                    datasets.push({label,data,borderColor:color,backgroundColor:color+'40',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,borderDash:[4,3],_isPct:true,_barHidden:true});
                 });
             }
         } else {
+            // Один рік: вісь X = лише вибрані місяці
+            const y=years[0];
+            const xMonths=[...new Set(periods.map(p=>p.m))].sort((a,b)=>a-b);
             labels=xMonths.map(m=>MONTHS_UK[m-1].slice(0,3));
+            const hasFul=hasFulfillmentData();
             metrics.forEach((metric,mi)=>{
-                years.forEach(y=>{
-                    const mv=parsedByYear[y]?.[metric]||{};
-                    const color=dsColor(y,mi);
-                    const label=metric;
-                    const data=xMonths.map(m=>selectedPeriods.has(y+'_'+m)?(mv[m]??null):null);
-                    datasets.push({label,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true});
-                });
+                const mv=parsedByYear[y]?.[metric]||{};
+                const color=dsColor(y,mi);
+                const data=xMonths.map(m=>mv[m]??null);
+                const fulData=hasFul?xMonths.map(m=>calcFulfillment(y,m)):null;
+                datasets.push({label:metric,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,_fulData:fulData});
             });
-            // % виконання (один рік)
-            if(hasFulfillmentData()){
-                const y=years[0];
+            // % виконання як окремий dataset тільки для line mode
+            if(hasFul){
                 const color='#5856d6';
-                const data=xMonths.map(m=>selectedPeriods.has(y+'_'+m)?calcFulfillment(y,m):null);
-                datasets.push({label:'% виконання',data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,borderDash:[4,3],_isPct:true});
+                const data=xMonths.map(m=>calcFulfillment(y,m));
+                datasets.push({label:'% виконання',data,borderColor:color,backgroundColor:color+'40',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,borderDash:[4,3],_isPct:true,_barHidden:true});
             }
         }
     }
     if(chartInstance){chartInstance.destroy();chartInstance=null;}
     body.innerHTML='<div class="chart-wrap"><canvas id="dynChart"></canvas></div>';
 
-    const barDataLabelsConfig={
-        display:true,
-        color:(ctx)=>ctx.dataset._isPct?'#5856d6':'#1d1d1f',
-        backgroundColor:(ctx)=>ctx.dataset._isPct?'rgba(88,86,214,0.1)':'rgba(255,255,255,0.93)',
-        padding:{top:3,bottom:3,left:5,right:5},
-        font:{size:10,weight:'700',family:'Inter'},
-        formatter:(value,ctx)=>{
-            if(value===null||value===undefined)return'';
-            return ctx.dataset._isPct?value.toFixed(1)+'%':fmt(value);
-        },
-        anchor:'end',
-        align:'top',
-        offset:2,
-        borderWidth:1,
-        borderColor:(ctx)=>ctx.dataset._isPct?'rgba(88,86,214,0.3)':ctx.dataset.borderColor+'55',
-        borderRadius:4,
-        clip:false
-    };
+    // В bar mode — приховуємо _barHidden датасети (% виконання як окрема лінія не потрібна)
+    if(chartType==='bar'){
+        datasets.forEach(ds=>{ if(ds._barHidden) ds.hidden=true; });
+    }
 
     // Насичені кольори заливки для стовпців
     datasets.forEach(ds=>{
-        if(!ds._isPct){
-            // Насичена заливка: замість color+'18' робимо color+'99' (60% opacity)
-            ds.backgroundColor=ds.borderColor+'99';
-        } else {
-            ds.backgroundColor=ds.borderColor+'40';
+        if(chartType==='bar'){
+            ds.backgroundColor=ds._isPct?(ds.borderColor+'40'):(ds.borderColor+'cc');
         }
     });
+
+    // datalabels для bar: показуємо значення + % виконання над стовпцем
+    const barDataLabelsConfig={
+        display:(ctx)=>{
+            const ds=ctx.dataset;
+            if(ds._barHidden||ds._isPct)return false;
+            return ctx.chart.getDatasetMeta(ctx.datasetIndex).hidden?false:true;
+        },
+        color:'#1d1d1f',
+        backgroundColor:'rgba(255,255,255,0.95)',
+        padding:4,
+        font:{size:10,weight:'600',family:'Inter'},
+        formatter:(value,ctx)=>{
+            if(value===null||value===undefined)return'';
+            const ds=ctx.dataset;
+            const idx=ctx.dataIndex;
+            // Якщо є _fulData — додаємо % виконання рядком нижче
+            const ful=ds._fulData?ds._fulData[idx]:null;
+            const mainStr=fmt(value);
+            if(ful!==null&&ful!==undefined){
+                const good=ful>=100;
+                // повертаємо масив рядків — Chart.js datalabels підтримує multiline через \n
+                return mainStr+'\n'+ful.toFixed(1)+'%';
+            }
+            return mainStr;
+        },
+        anchor:'end',
+        align:'top',
+        offset:4,
+        borderWidth:1,
+        borderColor:(ctx)=>ctx.dataset.borderColor+'60',
+        borderRadius:4,
+        clip:false,
+        labels:{
+            value:{
+                color:'#1d1d1f',
+                font:{size:10,weight:'600',family:'Inter'},
+            }
+        }
+    };
 
     const smartLabels={
         id:'smartLabels',
@@ -905,7 +929,7 @@ function renderChart(){
         plugins:chartType==='line'?[smartLabels]:[ChartDataLabels],
         options:{
             responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-            layout:{padding:{top:chartType==='line'?30:8,left:8,right:8}},
+            layout:{padding:{top:chartType==='line'?30:45,left:8,right:8}},
             plugins:{
                 legend:{display:datasets.length>1,position:'top',labels:{font:{family:'Inter',size:10},boxWidth:20,padding:10,
                     generateLabels(c){return c.data.datasets.map((ds,i)=>({text:ds.label,fillStyle:ds.borderColor,strokeStyle:ds.borderColor,lineWidth:2,hidden:c.getDatasetMeta(i).hidden,datasetIndex:i}));}}},
