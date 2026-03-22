@@ -6,6 +6,7 @@
     <title>Динаміка показників</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <style>
         :root { --bg:#f5f5f7;--text:#1d1d1f;--text-sec:#6e6e73;--accent:#0071e3;--border:#d2d2d7;--card:#fff;--shadow:0 4px 20px rgba(0,0,0,0.06); }
         *{box-sizing:border-box;margin:0;padding:0}
@@ -126,7 +127,10 @@
         .delta-flat{background:rgba(134,134,139,.10);color:#6e6e73}
         .delta-arrow{font-size:12px;line-height:1}
 
-        .status-box{padding:40px;text-align:center;color:var(--text-sec);font-size:14px}
+        .chart-controls{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+        .chart-control-btn{border:none;background:#f0f0f5;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;color:#6e6e73;transition:all .15s;}
+        .chart-control-btn.active{background:#1d1d1f;color:#fff;}
+        .fulfillment-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(88,86,214,.12);color:#5856d6;border:1px solid rgba(88,86,214,.2)}
         .status-box.error{color:#ff3b30}
 
         /* COMPARE MODE */
@@ -192,7 +196,13 @@
             <div class="chart-title">Динаміка по місяцях</div>
             <div class="chart-subtitle" id="chartSubtitle">Оберіть показники у таблиці</div>
         </div>
-        <div class="selected-chips" id="selectedChips"></div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+            <div class="chart-controls">
+                <button class="chart-control-btn" id="btnToggleTooltip" onclick="toggleTooltip()">💬 Tooltip: ON</button>
+                <button class="chart-control-btn" id="btnChartType" onclick="toggleChartType()">📊 Тип: Лінії</button>
+            </div>
+            <div class="selected-chips" id="selectedChips"></div>
+        </div>
     </div>
     <div id="chartBody">
         <div class="empty-chart">
@@ -228,16 +238,55 @@ const GROUP_HINTS=[
 function summaryRule(name) {
     const lo = name.toLowerCase().trim();
     if (/лфл/.test(lo)) return {type:'none'};
+    // % виконання — окремий рядок, не підсумовується стандартно
+    if (/^%\s*викон/.test(lo)) return {type:'none'};
     // % метрики — ratio
     if (/послуги\s*%|послуг.*%/.test(lo)) return {type:'ratio', num:'Послуги грн', fallback:'Послуги'};
     if (/acc\s*%|аcc\s*%/.test(lo))       return {type:'ratio', num:'ACC'};
     if (/гурт\s*%/.test(lo))              return {type:'ratio', num:'Гурт'};
     // Конверсія — avg
     if (/конвер/.test(lo)) return {type:'avg'};
-    // Абсолютні суми
-    if (/^то$|товарообіг|трафік|^чеки$|послуги грн|^послуги$|^acc$|^аcc$|^гурт$/.test(lo)) return {type:'sum'};
+    // Абсолютні суми — включаючи ТО план
+    if (/^то$|^то план$|товарообіг|трафік|^чеки$|послуги грн|^послуги$|^acc$|^аcc$|^гурт$/.test(lo)) return {type:'sum'};
     // Решта — avg
     return {type:'avg'};
+}
+
+// Хелпер: знайти назву метрики ТО і ТО план в allMetrics
+function findMetricName(pattern){
+    return allMetrics.find(m=>pattern.test(m.toLowerCase().trim()))||null;
+}
+function getTOPlanNames(){
+    const to=findMetricName(/^то$/);
+    const plan=findMetricName(/^то план$/)||findMetricName(/то.*план/)||findMetricName(/план.*то/);
+    return {to,plan};
+}
+// Розрахунок % виконання для конкретного місяця/року
+function calcFulfillment(y,m){
+    const {to,plan}=getTOPlanNames();
+    if(!to||!plan)return null;
+    const toVal=parsedByYear[y]?.[to]?.[m];
+    const planVal=parsedByYear[y]?.[plan]?.[m];
+    if(toVal==null||planVal==null||planVal===0)return null;
+    return (toVal/planVal)*100;
+}
+// Розрахунок % виконання за набором periods
+function calcFulfillmentPeriod(periodsSet){
+    const {to,plan}=getTOPlanNames();
+    if(!to||!plan)return null;
+    let toSum=0,planSum=0;
+    for(const k of periodsSet){
+        const[y,m]=k.split('_').map(Number);
+        const tv=parsedByYear[y]?.[to]?.[m];
+        const pv=parsedByYear[y]?.[plan]?.[m];
+        if(tv!=null)toSum+=tv;
+        if(pv!=null)planSum+=pv;
+    }
+    return planSum>0?(toSum/planSum)*100:null;
+}
+function hasFulfillmentData(){
+    const {to,plan}=getTOPlanNames();
+    return !!(to&&plan);
 }
 
 // STATE
@@ -250,6 +299,8 @@ let parsedByYear={};
 let compareMode=false;
 let periods1=new Set(); // Період 1
 let periods2=new Set(); // Період 2
+let tooltipEnabled=true;
+let chartType='line';
 
 // CSV
 function parseCSV(text){
@@ -593,6 +644,39 @@ function renderTable(){
         tr.addEventListener('click',()=>toggleMetric(metric));
         tbody.appendChild(tr);
     });
+    tbl.appendChild(tbody);
+
+    // ── Фіксований рядок % виконання (завжди якщо є ТО і ТО план) ──
+    if(hasFulfillmentData()){
+        const trF=document.createElement('tr');
+        trF.className='metric-row appear';
+        trF.style.cssText='background:#f0f4ff;animation-delay:'+(rowIdx*0.03)+'s';
+        trF.style.cursor='default';
+        const tdFN=document.createElement('td');
+        tdFN.className='col-metric';
+        tdFN.style.cssText='color:#5856d6;font-weight:700;background:#f0f4ff';
+        tdFN.textContent='% виконання';
+        trF.appendChild(tdFN);
+        periods.forEach((p,pi)=>{
+            const val=calcFulfillment(p.y,p.m);
+            const td=document.createElement('td');
+            if(pi>0&&periods[pi-1].y!==p.y)td.classList.add('grp-start');
+            if(val!==null){
+                const sp=document.createElement('span');
+                const pct=val.toFixed(1)+'%';
+                const good=val>=100;
+                sp.className='badge';
+                sp.style.cssText=good
+                    ?'background:rgba(52,199,89,.15);color:#1a7f37;font-weight:700'
+                    :'background:rgba(255,59,48,.10);color:#c0392b;font-weight:700';
+                sp.textContent=pct;
+                td.appendChild(sp);
+            } else {td.textContent='—';td.style.color='#ccc';}
+            trF.appendChild(td);
+        });
+        tbody.appendChild(trF);
+    }
+
     tbl.appendChild(tbody);wrap.appendChild(tbl);
 }
 
@@ -688,22 +772,63 @@ function renderChart(){
         });
     } else {
         const periods=activePeriods();const years=[...new Set(periods.map(p=>p.y))].sort((a,b)=>a-b);
-        // Вісь X — унікальні місяці з вибраних periods, відсортовані
+        // БАГ-ФІX: вісь X = лише місяці що вибрані хоча б для одного року, відсортовані
         const xMonths=[...new Set(periods.map(p=>p.m))].sort((a,b)=>a-b);
-        labels=xMonths.map(m=>MONTHS_UK[m-1].slice(0,3));
-        metrics.forEach((metric,mi)=>{
-            years.forEach(y=>{
-                const mv=parsedByYear[y]?.[metric]||{};
-                const color=dsColor(y,mi);
-                const label=years.length>1?`${metric} (${y})`:metric;
-                // дані тільки для місяців що вибрані для цього року
-                const data=xMonths.map(m=>selectedPeriods.has(y+'_'+m)?(mv[m]??null):null);
-                datasets.push({label,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true});
+        // Але labels будуємо з реальних пар рік+місяць, щоб уникнути дублювання
+        // Якщо кілька років — підписуємо "Міс РР", якщо один рік — просто "Міс"
+        if(years.length>1){
+            // Будуємо унікальні комбінації (рік,місяць) в хронологічному порядку
+            const uniqPairs=periods.slice().sort((a,b)=>a.y-b.y||a.m-b.m);
+            labels=uniqPairs.map(p=>MONTHS_UK[p.m-1].slice(0,3)+' '+String(p.y).slice(2));
+            metrics.forEach((metric,mi)=>{
+                years.forEach(y=>{
+                    const mv=parsedByYear[y]?.[metric]||{};
+                    const color=dsColor(y,mi);
+                    const label=`${metric} (${y})`;
+                    // точок стільки скільки uniqPairs, дані — тільки для свого року
+                    const data=uniqPairs.map(p=>p.y===y&&selectedPeriods.has(p.y+'_'+p.m)?(mv[p.m]??null):null);
+                    datasets.push({label,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true});
+                });
             });
-        });
+            // % виконання для кожного року
+            if(hasFulfillmentData()){
+                years.forEach(y=>{
+                    const color='#5856d6';
+                    const label=years.length>1?`% виконання (${y})`:'% виконання';
+                    const data=uniqPairs.map(p=>p.y===y&&selectedPeriods.has(p.y+'_'+p.m)?calcFulfillment(p.y,p.m):null);
+                    datasets.push({label,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,borderDash:[4,3],_isPct:true});
+                });
+            }
+        } else {
+            labels=xMonths.map(m=>MONTHS_UK[m-1].slice(0,3));
+            metrics.forEach((metric,mi)=>{
+                years.forEach(y=>{
+                    const mv=parsedByYear[y]?.[metric]||{};
+                    const color=dsColor(y,mi);
+                    const label=metric;
+                    const data=xMonths.map(m=>selectedPeriods.has(y+'_'+m)?(mv[m]??null):null);
+                    datasets.push({label,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true});
+                });
+            });
+            // % виконання (один рік)
+            if(hasFulfillmentData()){
+                const y=years[0];
+                const color='#5856d6';
+                const data=xMonths.map(m=>selectedPeriods.has(y+'_'+m)?calcFulfillment(y,m):null);
+                datasets.push({label:'% виконання',data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,borderDash:[4,3],_isPct:true});
+            }
+        }
     }
     if(chartInstance){chartInstance.destroy();chartInstance=null;}
     body.innerHTML='<div class="chart-wrap"><canvas id="dynChart"></canvas></div>';
+
+    const barDataLabelsConfig={
+        display:true,color:'#1d1d1f',backgroundColor:'rgba(255,255,255,0.92)',
+        padding:3,font:{size:10,weight:'600',family:'Inter'},
+        formatter:(value,ctx)=>{if(value===null||value===undefined)return'';return ctx.dataset._isPct?value.toFixed(1)+'%':fmt(value);},
+        anchor:'end',align:'top',offset:3,borderWidth:1,
+        borderColor:(ctx)=>ctx.dataset.borderColor+'60',borderRadius:4,clip:true
+    };
 
     const smartLabels={
         id:'smartLabels',
@@ -753,15 +878,18 @@ function renderChart(){
 
     const ctx=document.getElementById('dynChart').getContext('2d');
     chartInstance=new Chart(ctx,{
-        type:'line',data:{labels,datasets},plugins:[smartLabels],
+        type:chartType,
+        data:{labels,datasets},
+        plugins:chartType==='line'?[smartLabels]:[ChartDataLabels],
         options:{
             responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-            layout:{padding:{top:30,left:8,right:8}},
+            layout:{padding:{top:chartType==='line'?30:8,left:8,right:8}},
             plugins:{
                 legend:{display:datasets.length>1,position:'top',labels:{font:{family:'Inter',size:10},boxWidth:20,padding:10,
                     generateLabels(c){return c.data.datasets.map((ds,i)=>({text:ds.label,fillStyle:ds.borderColor,strokeStyle:ds.borderColor,lineWidth:2,hidden:c.getDatasetMeta(i).hidden,datasetIndex:i}));}}},
-                tooltip:{backgroundColor:'#1d1d1f',titleFont:{family:'Inter',size:12},bodyFont:{family:'Inter',size:11},padding:10,
-                    callbacks:{label:c=>{const d=c.dataset._tt?.[c.dataIndex];return` ${c.dataset.label}${d?' ['+d+']':''}: ${fmt(c.raw)}`;}}}
+                tooltip:{enabled:tooltipEnabled,backgroundColor:'#1d1d1f',titleFont:{family:'Inter',size:12},bodyFont:{family:'Inter',size:11},padding:10,
+                    callbacks:{label:c=>{const d=c.dataset._tt?.[c.dataIndex];const raw=c.raw;const val=c.dataset._isPct&&raw!=null?raw.toFixed(1)+'%':fmt(raw);return` ${c.dataset.label}${d?' ['+d+']':''}: ${val}`;}}},
+                datalabels:chartType==='bar'?barDataLabelsConfig:false
             },
             scales:{
                 x:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Inter',size:compareMode?8:10},color:'#86868b',maxRotation:compareMode?45:0,minRotation:0}},
@@ -770,6 +898,21 @@ function renderChart(){
         }
     });
     renderSummary();
+}
+
+function toggleTooltip(){
+    tooltipEnabled=!tooltipEnabled;
+    const btn=document.getElementById('btnToggleTooltip');
+    btn.textContent=tooltipEnabled?'💬 Tooltip: ON':'🔇 Tooltip: OFF';
+    btn.classList.toggle('active',!tooltipEnabled);
+    if(chartInstance){chartInstance.options.plugins.tooltip.enabled=tooltipEnabled;chartInstance.update('none');}
+}
+function toggleChartType(){
+    chartType=chartType==='line'?'bar':'line';
+    const btn=document.getElementById('btnChartType');
+    btn.textContent=chartType==='line'?'📊 Тип: Лінії':'📊 Тип: Стовпці';
+    btn.classList.toggle('active',chartType==='bar');
+    renderChart();
 }
 
 // SUMMARY
@@ -885,6 +1028,50 @@ function renderSummary(){
 
             if(rowsEl.children.length)grid.appendChild(card);
         });
+
+        // ── Картка % виконання в режимі порівняння ──
+        if(hasFulfillmentData()){
+            const card=document.createElement('div');card.className='summary-card';
+            card.style.borderColor='rgba(88,86,214,.3)';
+            const lbl=document.createElement('div');lbl.className='summary-card-label';
+            lbl.style.color='#5856d6';lbl.textContent='% виконання плану';card.appendChild(lbl);
+            const rowsEl=document.createElement('div');rowsEl.className='summary-rows';card.appendChild(rowsEl);
+
+            const vf1=calcFulfillmentPeriod(periods1);
+            const vf2=calcFulfillmentPeriod(periods2);
+
+            const fmtFul=v=>v!=null?v.toFixed(1)+'%':'—';
+            const mkFulRow=(label,val,dotClass)=>{
+                const yl=document.createElement('div');
+                yl.style.cssText=dotClass==='p1'
+                    ?'font-size:10px;font-weight:700;color:#0071e3;margin-bottom:2px;display:flex;align-items:center;gap:4px'
+                    :'font-size:10px;font-weight:700;color:#34c759;margin-bottom:2px;display:flex;align-items:center;gap:4px';
+                yl.innerHTML=`<span class="${dotClass}-dot"></span>${label}`;
+                rowsEl.appendChild(yl);
+                const row=document.createElement('div');row.className='summary-row';
+                const l=document.createElement('div');l.className='summary-row-lbl';l.textContent='Виконання';
+                const v=document.createElement('div');v.className='summary-row-val';
+                if(val!==null){v.style.color=val>=100?'#1a7f37':'#c0392b';v.style.fontWeight='700';}
+                v.textContent=fmtFul(val);
+                row.appendChild(l);row.appendChild(v);rowsEl.appendChild(row);
+            };
+            mkFulRow('Період 1',vf1,'p1');
+            const hr=document.createElement('hr');hr.className='summary-divider';rowsEl.appendChild(hr);
+            mkFulRow('Період 2',vf2,'p2');
+
+            if(vf1!=null&&vf2!=null){
+                const diff=vf2-vf1;
+                const cls=Math.abs(diff)<0.01?'flat':diff>0?'up':'down';
+                const arrow=cls==='up'?'▲':cls==='down'?'▼':'→';
+                const dRow=document.createElement('div');dRow.className='delta-row';
+                const dLbl=document.createElement('div');dLbl.className='delta-label';dLbl.textContent='Відхилення П2 vs П1';
+                const badge=document.createElement('div');badge.className='delta-badge '+cls;
+                badge.innerHTML=`<span class="delta-arrow">${arrow}</span>${(diff>0?'+':'')+diff.toFixed(1)+'%'}`;
+                dRow.appendChild(dLbl);dRow.appendChild(badge);rowsEl.appendChild(dRow);
+            }
+            if(rowsEl.children.length)grid.appendChild(card);
+        }
+
         panel.style.display=grid.children.length?'block':'none';
         return;
     }
@@ -952,6 +1139,39 @@ function renderSummary(){
 
         if(rowsEl.children.length)grid.appendChild(card);
     });
+
+    // ── Картка % виконання за період ──
+    if(hasFulfillmentData()){
+        const card=document.createElement('div');card.className='summary-card';
+        card.style.borderColor='rgba(88,86,214,.3)';
+        const lbl=document.createElement('div');lbl.className='summary-card-label';
+        lbl.style.color='#5856d6';lbl.textContent='% виконання плану';card.appendChild(lbl);
+        const rowsEl=document.createElement('div');rowsEl.className='summary-rows';card.appendChild(rowsEl);
+
+        years.forEach((y,yi)=>{
+            const yMonths=allMonths.filter(m=>selectedPeriods.has(y+'_'+m));
+            const val=calcFulfillmentPeriod(new Set(yMonths.map(m=>y+'_'+m)));
+            if(val===null)return;
+            const yc=yColor(y);
+            if(yi>0){const hr=document.createElement('hr');hr.className='summary-divider';rowsEl.appendChild(hr);}
+            if(years.length>1){
+                const yl=document.createElement('div');
+                yl.style.cssText=`font-size:10px;font-weight:700;color:${yc};margin-bottom:2px;display:flex;align-items:center;gap:4px`;
+                yl.innerHTML=`<span class="year-dot" style="background:${yc}"></span>${y}`;
+                rowsEl.appendChild(yl);
+            }
+            const good=val>=100;
+            const row=document.createElement('div');row.className='summary-row';
+            const l=document.createElement('div');l.className='summary-row-lbl';l.textContent='За період';
+            const v=document.createElement('div');v.className='summary-row-val';
+            v.style.color=good?'#1a7f37':'#c0392b';
+            v.style.fontWeight='700';
+            v.textContent=val.toFixed(1)+'%';
+            row.appendChild(l);row.appendChild(v);rowsEl.appendChild(row);
+        });
+        if(rowsEl.children.length)grid.appendChild(card);
+    }
+
     panel.style.display=grid.children.length?'block':'none';
 }
 
