@@ -1070,7 +1070,7 @@ function renderMiniChart(){
                 const up=diff>0;
                 bDeltaColor=up?'#1a7f37':'#c0392b';
                 const arrow=up?'▲':'▼';
-                if(b.isRatio){bDeltaStr=`${arrow} ${up?'+':''}${diff.toFixed(2)}%`;}
+                if(b.isPercent){bDeltaStr=`${arrow} ${up?'+':''}${diff.toFixed(2)}%`;}
                 else{bDeltaStr=`${arrow} ${up?'+':''}${fmt(Math.abs(diff))}`+(diffPct!=null?` (${diffPct.toFixed(1)}%)`:'');}
             }
 
@@ -1132,34 +1132,44 @@ function renderMiniChart(){
         const rule=summaryRule(metric);
         if(rule.type==='none')return;
 
-        const isRatio=rule.type==='ratio'||rule.type==='avg';
+        // isPercent — тільки справжні % метрики (ratio). avg — абсолютні числа (СРЧ, КТЧ, АСП...)
+        const isPercent=rule.type==='ratio';
+        const isAvg=rule.type==='avg';
+        const isSum=rule.type==='sum';
         const v1=calcPeriodVal(metric,periods1);
         const v2=calcPeriodVal(metric,periods2);
         if(v1===null&&v2===null)return;
 
-        const fmtV=v=>v!=null?(isRatio?v.toFixed(2)+'%':fmt(v)):'—';
+        const fmtV=v=>v!=null?(isPercent?v.toFixed(2)+'%':fmt(v)):'—';
 
-        // Дельта для заголовка (по основному показнику)
+        // Дельта для заголовка
         let deltaStr='',deltaColor='#86868b';
         if(v1!=null&&v2!=null){
-            const diff=v2-v1;const diffPct=v1!==0?(diff/Math.abs(v1)*100):null;const up=diff>0;
-            deltaColor=up?'#1a7f37':'#c0392b';const arrow=up?'▲':'▼';
-            if(isRatio){deltaStr=`${arrow} ${up?'+':''}${diff.toFixed(2)}%`;}
-            else{deltaStr=`${arrow} ${up?'+':''}${fmt(Math.abs(diff))}`+(diffPct!=null?` (${diffPct.toFixed(1)}%)`:'');}
+            const diff=v2-v1;
+            const diffPct=v1!==0?(diff/Math.abs(v1)*100):null;
+            const up=diff>0;
+            deltaColor=up?'#1a7f37':'#c0392b';
+            const arrow=up?'▲':'▼';
+            if(isPercent){
+                deltaStr=`${arrow} ${up?'+':''}${diff.toFixed(2)}%`;
+            } else {
+                deltaStr=`${arrow} ${up?'+':''}${fmt(Math.abs(diff))}`+(diffPct!=null?` (${diffPct.toFixed(1)}%)`:'');
+            }
         }
 
         const blocks=[];
-        if(!isRatio){
-            // Сума
-            blocks.push({label:n1>1||n2>1?'Сума':'',v1,v2,fmt:fmtV,isRatio});
-            // Середнє (тільки якщо >1 місяць хоча б в одному періоді)
+        if(isSum){
+            blocks.push({label:n1>1||n2>1?'Сума':'',v1,v2,fmt:fmtV,isPercent:false});
             if(n1>1||n2>1){
                 const avg1=v1!=null?v1/n1:null;
                 const avg2=v2!=null?v2/n2:null;
-                blocks.push({label:'Середнє',v1:avg1,v2:avg2,fmt:v=>v!=null?fmt(v):'—',isRatio:false});
+                blocks.push({label:'Середнє',v1:avg1,v2:avg2,fmt:v=>v!=null?fmt(v):'—',isPercent:false});
             }
+        } else if(isPercent){
+            blocks.push({label:'',v1,v2,fmt:fmtV,isPercent:true});
         } else {
-            blocks.push({label:'',v1,v2,fmt:fmtV,isRatio:true});
+            // avg — абсолютне значення (СРЧ, КТЧ, АСП тощо)
+            blocks.push({label:n1>1||n2>1?'Середнє':'',v1,v2,fmt:fmtV,isPercent:false});
         }
 
         mkBar(metric, blocks, deltaStr, deltaColor);
@@ -1245,7 +1255,8 @@ function renderSummary(){
             const isRatio=rule.type==='ratio';
             const isAvg=rule.type==='avg';
             const n1=periods1.size,n2=periods2.size;
-            const fmtV=v=>v!=null?(isRatio||isAvg?v.toFixed(2)+'%':fmt(v)):'—';
+            // isRatio — справжні % (послуги%, acc%); isAvg — абсолютні середні (СРЧ, КТЧ...)
+            const fmtV=v=>v!=null?(isRatio?v.toFixed(2)+'%':fmt(v)):'—';
 
             const card=document.createElement('div');card.className='summary-card';
             const lbl=document.createElement('div');lbl.className='summary-card-label';lbl.title=metric;lbl.textContent=metric;card.appendChild(lbl);
@@ -1287,8 +1298,9 @@ function renderSummary(){
                 const diffPct=v1!==0?(diff/Math.abs(v1)*100):null;
                 const cls=Math.abs(diff)<0.001?'flat':diff>0?'up':'down';
                 const arrow=cls==='up'?'▲':cls==='down'?'▼':'→';
-                let diffStr=(isRatio||isAvg)?((diff>0?'+':'')+diff.toFixed(2)+'%'):((diff>0?'+':'')+fmt(Math.abs(diff)));
-                if(diffPct!=null&&!isRatio&&!isAvg) diffStr+=' ('+diffPct.toFixed(1)+'%)';
+                // isRatio — справжні % → показуємо різницю в %; isAvg/sum — абсолютно + %зміни
+                let diffStr=isRatio?((diff>0?'+':'')+diff.toFixed(2)+'%'):((diff>0?'+':'')+fmt(Math.abs(diff)));
+                if(diffPct!=null&&!isRatio) diffStr+=' ('+diffPct.toFixed(1)+'%)';
                 const dRow=document.createElement('div');dRow.className='delta-row';
                 const dLbl=document.createElement('div');dLbl.className='delta-label';dLbl.textContent='Відхилення П2 vs П1';
                 const badge=document.createElement('div');badge.className='delta-badge '+cls;
