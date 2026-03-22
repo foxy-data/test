@@ -1025,7 +1025,6 @@ let miniChartInstances=[];
 function renderMiniChart(){
     const panel=document.getElementById('miniChartPanel');
     const body=document.getElementById('miniChartBody');
-    // Показуємо тільки в compare mode і якщо є обрані метрики
     if(!compareMode||!selectedMetrics.size||(!periods1.size&&!periods2.size)){
         panel.style.display='none';
         miniChartInstances.forEach(c=>c.destroy());miniChartInstances=[];
@@ -1035,124 +1034,151 @@ function renderMiniChart(){
     miniChartInstances.forEach(c=>c.destroy());miniChartInstances=[];
     body.innerHTML='';
 
-    const metrics=[...selectedMetrics];
-    const P1C='#0071e3',P2C='#34c759';
-    const n1=periods1.size,n2=periods2.size;
+    const P1C='#0071e3', P2C='#34c759';
+    const n1=periods1.size, n2=periods2.size;
 
-    metrics.forEach(metric=>{
+    const p1lbl=[...periods1].sort().map(k=>{const[y,m]=k.split('_');return MONTHS_UK[+m-1].slice(0,3)+' '+String(y).slice(2);}).join(', ');
+    const p2lbl=[...periods2].sort().map(k=>{const[y,m]=k.split('_');return MONTHS_UK[+m-1].slice(0,3)+' '+String(y).slice(2);}).join(', ');
+
+    // Хелпер: будує один горизонтальний міні-бар з дельтою
+    function mkBar(title, blocks, deltaStr, deltaColor){
+        // blocks = [{label, v1, v2, fmt, isRatio}]
+        const wrap=document.createElement('div');
+        wrap.style.cssText='margin-bottom:20px';
+
+        // Заголовок з дельтою
+        const hdr=document.createElement('div');
+        hdr.style.cssText='font-size:11px;font-weight:700;color:var(--text-sec);margin-bottom:8px;display:flex;align-items:center;gap:8px';
+        hdr.innerHTML=`<span>${title}</span>`+(deltaStr?`<span style="font-weight:700;color:${deltaColor}">${deltaStr}</span>`:'');
+        wrap.appendChild(hdr);
+
+        blocks.forEach(b=>{
+            if(b.v1===null&&b.v2===null)return;
+            // Підзаголовок блоку (Сума / Середнє)
+            if(b.label){
+                const sub=document.createElement('div');
+                sub.style.cssText='font-size:10px;font-weight:600;color:#a0a0ab;margin-bottom:4px;margin-top:4px;text-transform:uppercase;letter-spacing:.04em';
+                sub.textContent=b.label;
+                wrap.appendChild(sub);
+            }
+            const canvasWrap=document.createElement('div');
+            canvasWrap.style.cssText='height:60px;position:relative';
+            const canvas=document.createElement('canvas');
+            canvasWrap.appendChild(canvas);wrap.appendChild(canvasWrap);
+
+            // Дельта для цього блоку
+            let bDeltaStr='', bDeltaColor='#86868b';
+            if(b.v1!=null&&b.v2!=null){
+                const diff=b.v2-b.v1;
+                const diffPct=b.v1!==0?(diff/Math.abs(b.v1)*100):null;
+                const up=diff>0;
+                bDeltaColor=up?'#1a7f37':'#c0392b';
+                const arrow=up?'▲':'▼';
+                if(b.isRatio){bDeltaStr=`${arrow} ${up?'+':''}${diff.toFixed(2)}%`;}
+                else{bDeltaStr=`${arrow} ${up?'+':''}${fmt(Math.abs(diff))}`+(diffPct!=null?` (${diffPct.toFixed(1)}%)`:'');}
+            }
+
+            const datasets=[
+                {label:`П1: ${p1lbl}`,data:[b.v1??0],backgroundColor:P1C+'cc',borderColor:P1C,borderWidth:1.5,borderRadius:4},
+                {label:`П2: ${p2lbl}`,data:[b.v2??0],backgroundColor:P2C+'cc',borderColor:P2C,borderWidth:1.5,borderRadius:4},
+            ];
+            const inst=new Chart(canvas,{
+                type:'bar',
+                data:{labels:[''],datasets},
+                plugins:[ChartDataLabels],
+                options:{
+                    indexAxis:'y',responsive:true,maintainAspectRatio:false,
+                    layout:{padding:{left:0,right:120,top:2,bottom:2}},
+                    plugins:{
+                        legend:{display:true,position:'right',align:'center',
+                            labels:{font:{family:'Inter',size:9},boxWidth:10,padding:6,
+                                generateLabels(c){
+                                    return c.data.datasets.map((ds,i)=>{
+                                        const val=b.fmt(ds.data[0]);
+                                        return{text:`${ds.label.split(':')[0]}: ${val}`+(bDeltaStr&&i===1?`  ${bDeltaStr}`:''),fillStyle:ds.borderColor,strokeStyle:ds.borderColor,lineWidth:1.5,hidden:false,datasetIndex:i,
+                                            fontColor:i===1&&bDeltaStr?bDeltaColor:undefined};
+                                    });
+                                }
+                            }
+                        },
+                        tooltip:{enabled:false},
+                        datalabels:{
+                            display:true,anchor:'end',align:'right',offset:4,
+                            color:(ctx)=>ctx.dataset.borderColor,
+                            font:{size:11,weight:'700',family:'Inter'},
+                            formatter:(v)=>b.fmt(v)
+                        }
+                    },
+                    scales:{
+                        x:{display:false,beginAtZero:true},
+                        y:{display:false}
+                    }
+                }
+            });
+            miniChartInstances.push(inst);
+        });
+        body.appendChild(wrap);
+    }
+
+    // Перевірка чи метрика пов'язана з виконанням
+    const {to:toName,plan:planName}=getTOPlanNames();
+    const fulMetrics=new Set([toName,planName,'% виконання'].filter(Boolean));
+
+    [...selectedMetrics].forEach(metric=>{
+        if(metric==='% виконання')return; // обробляємо окремо
         const rule=summaryRule(metric);
         if(rule.type==='none')return;
+
+        const isRatio=rule.type==='ratio'||rule.type==='avg';
         const v1=calcPeriodVal(metric,periods1);
         const v2=calcPeriodVal(metric,periods2);
         if(v1===null&&v2===null)return;
 
-        const isRatio=rule.type==='ratio'||rule.type==='avg';
-        const fmtV=v=>v!=null?(isRatio?v.toFixed(2)+'%':fmt(v)):'0';
+        const fmtV=v=>v!=null?(isRatio?v.toFixed(2)+'%':fmt(v)):'—';
 
-        // Підписи П1 / П2
-        const p1lbl=[...periods1].sort().map(k=>{const[y,m]=k.split('_');return MONTHS_UK[+m-1].slice(0,3)+' '+String(y).slice(2);}).join(', ');
-        const p2lbl=[...periods2].sort().map(k=>{const[y,m]=k.split('_');return MONTHS_UK[+m-1].slice(0,3)+' '+String(y).slice(2);}).join(', ');
-
-        // Delta
-        let deltaStr='', deltaColor='#86868b';
+        // Дельта для заголовка (по основному показнику)
+        let deltaStr='',deltaColor='#86868b';
         if(v1!=null&&v2!=null){
-            const diff=v2-v1;
-            const diffPct=v1!==0?(diff/Math.abs(v1)*100):null;
-            const up=diff>0;
-            deltaColor=up?'#1a7f37':'#c0392b';
-            const arrow=up?'▲':'▼';
+            const diff=v2-v1;const diffPct=v1!==0?(diff/Math.abs(v1)*100):null;const up=diff>0;
+            deltaColor=up?'#1a7f37':'#c0392b';const arrow=up?'▲':'▼';
             if(isRatio){deltaStr=`${arrow} ${up?'+':''}${diff.toFixed(2)}%`;}
             else{deltaStr=`${arrow} ${up?'+':''}${fmt(Math.abs(diff))}`+(diffPct!=null?` (${diffPct.toFixed(1)}%)`:'');}
         }
 
-        // Контейнер
-        const wrap=document.createElement('div');
-        wrap.style.cssText='margin-bottom:16px';
-        const title=document.createElement('div');
-        title.style.cssText='font-size:11px;font-weight:700;color:var(--text-sec);margin-bottom:6px;display:flex;align-items:center;gap:8px';
-        title.innerHTML=`<span>${metric}</span>`+(deltaStr?`<span style="font-size:11px;font-weight:700;color:${deltaColor}">${deltaStr}</span>`:'');
-        wrap.appendChild(title);
-
-        // Canvas
-        const canvasWrap=document.createElement('div');canvasWrap.style.cssText='height:90px;position:relative';
-        const canvas=document.createElement('canvas');
-        canvasWrap.appendChild(canvas);wrap.appendChild(canvasWrap);body.appendChild(wrap);
-
-        const datasets=[
-            {label:`П1: ${p1lbl}`,data:[v1??0],backgroundColor:P1C+'cc',borderColor:P1C,borderWidth:1.5,borderRadius:5},
-            {label:`П2: ${p2lbl}`,data:[v2??0],backgroundColor:P2C+'cc',borderColor:P2C,borderWidth:1.5,borderRadius:5},
-        ];
-        // Середнє (якщо sum)
-        if(!isRatio&&n1>1&&v1!=null) datasets[0].label+=` | Сер: ${fmt(v1/n1)}`;
-        if(!isRatio&&n2>1&&v2!=null) datasets[1].label+=` | Сер: ${fmt(v2/n2)}`;
-
-        const cfg={
-            type:'bar',
-            data:{labels:[''],datasets},
-            plugins:[ChartDataLabels],
-            options:{
-                indexAxis:'y',responsive:true,maintainAspectRatio:false,
-                layout:{padding:{left:0,right:60,top:4,bottom:4}},
-                plugins:{
-                    legend:{display:true,position:'right',labels:{font:{family:'Inter',size:10},boxWidth:12,padding:8}},
-                    tooltip:{enabled:false},
-                    datalabels:{
-                        display:true,anchor:'end',align:'right',offset:4,
-                        color:(ctx)=>ctx.dataset.borderColor,
-                        font:{size:11,weight:'700',family:'Inter'},
-                        formatter:(v)=>isRatio?v.toFixed(2)+'%':fmt(v)
-                    }
-                },
-                scales:{
-                    x:{display:false,beginAtZero:true},
-                    y:{display:false}
-                }
+        const blocks=[];
+        if(!isRatio){
+            // Сума
+            blocks.push({label:n1>1||n2>1?'Сума':'',v1,v2,fmt:fmtV,isRatio});
+            // Середнє (тільки якщо >1 місяць хоча б в одному періоді)
+            if(n1>1||n2>1){
+                const avg1=v1!=null?v1/n1:null;
+                const avg2=v2!=null?v2/n2:null;
+                blocks.push({label:'Середнє',v1:avg1,v2:avg2,fmt:v=>v!=null?fmt(v):'—',isRatio:false});
             }
-        };
-        const inst=new Chart(canvas,cfg);
-        miniChartInstances.push(inst);
+        } else {
+            blocks.push({label:'',v1,v2,fmt:fmtV,isRatio:true});
+        }
+
+        mkBar(metric, blocks, deltaStr, deltaColor);
     });
 
-    // % виконання міні-блок окремо
-    if(hasFulfillmentData()){
+    // % виконання — тільки якщо є ТО і ТО план і хоча б одна з них вибрана або % вик вибраний
+    const showFulBlock=hasFulfillmentData()&&(
+        selectedMetrics.has(toName)||selectedMetrics.has(planName)||selectedMetrics.has('% виконання')
+    );
+    if(showFulBlock){
         const vf1=calcFulfillmentPeriod(periods1);
         const vf2=calcFulfillmentPeriod(periods2);
         if(vf1!==null||vf2!==null){
-            const wrap=document.createElement('div');wrap.style.cssText='margin-bottom:16px';
             let deltaStr='',deltaColor='#86868b';
             if(vf1!=null&&vf2!=null){
-                const diff=vf2-vf1;
-                const up=diff>0;deltaColor=up?'#1a7f37':'#c0392b';
+                const diff=vf2-vf1;const up=diff>0;deltaColor=up?'#1a7f37':'#c0392b';
                 deltaStr=`${up?'▲':'▼'} ${up?'+':''}${diff.toFixed(1)}%`;
             }
-            const title=document.createElement('div');
-            title.style.cssText='font-size:11px;font-weight:700;color:var(--text-sec);margin-bottom:6px;display:flex;align-items:center;gap:8px';
-            title.innerHTML=`<span>% виконання плану</span>`+(deltaStr?`<span style="font-size:11px;font-weight:700;color:${deltaColor}">${deltaStr}</span>`:'');
-            wrap.appendChild(title);
-            const canvasWrap=document.createElement('div');canvasWrap.style.cssText='height:90px;position:relative';
-            const canvas=document.createElement('canvas');
-            canvasWrap.appendChild(canvas);wrap.appendChild(canvasWrap);body.appendChild(wrap);
-            const p1lbl=[...periods1].sort().map(k=>{const[y,m]=k.split('_');return MONTHS_UK[+m-1].slice(0,3)+' '+String(y).slice(2);}).join(', ');
-            const p2lbl=[...periods2].sort().map(k=>{const[y,m]=k.split('_');return MONTHS_UK[+m-1].slice(0,3)+' '+String(y).slice(2);}).join(', ');
-            const inst=new Chart(canvas,{
-                type:'bar',
-                data:{labels:[''],datasets:[
-                    {label:`П1: ${p1lbl}`,data:[vf1??0],backgroundColor:'#0071e3cc',borderColor:'#0071e3',borderWidth:1.5,borderRadius:5},
-                    {label:`П2: ${p2lbl}`,data:[vf2??0],backgroundColor:'#34c759cc',borderColor:'#34c759',borderWidth:1.5,borderRadius:5},
-                ]},
-                plugins:[ChartDataLabels],
-                options:{
-                    indexAxis:'y',responsive:true,maintainAspectRatio:false,
-                    layout:{padding:{right:60,top:4,bottom:4}},
-                    plugins:{
-                        legend:{display:true,position:'right',labels:{font:{family:'Inter',size:10},boxWidth:12,padding:8}},
-                        tooltip:{enabled:false},
-                        datalabels:{display:true,anchor:'end',align:'right',offset:4,color:(ctx)=>ctx.dataset.borderColor,font:{size:11,weight:'700',family:'Inter'},formatter:v=>v.toFixed(1)+'%'}
-                    },
-                    scales:{x:{display:false,beginAtZero:true},y:{display:false}}
-                }
-            });
-            miniChartInstances.push(inst);
+            mkBar('% виконання плану',
+                [{label:'',v1:vf1??0,v2:vf2??0,fmt:v=>v.toFixed(1)+'%',isRatio:true}],
+                deltaStr,deltaColor
+            );
         }
     }
 }
