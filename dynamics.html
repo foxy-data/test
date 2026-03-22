@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
@@ -12,149 +13,152 @@
         *{box-sizing:border-box;margin:0;padding:0}
         body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);padding:8px 10px 60px}
 
-        /* ── SKELETON + ANIMATION SYSTEM ── */
-        @keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
-        @keyframes fadeInUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-        .skel{background:linear-gradient(90deg,#eaeaed 25%,#f5f5f7 50%,#eaeaed 75%);background-size:600px 100%;animation:shimmer 1.4s ease-in-out infinite;border-radius:7px}
-        .tbl-row-skel{display:flex;gap:8px;padding:9px 10px;border-bottom:1px solid #f2f2f4}
-        .tbl-row-skel-cell{height:11px;border-radius:5px;flex:1}
-        .tbl-row-skel-cell.wide{flex:2.5}
-        .metric-row.appear{animation:fadeInUp .28s ease both}
-        .filters-wrap.appear{animation:fadeIn .3s ease both}
+```
+    /* ── SKELETON + ANIMATION SYSTEM ── */
+    @keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .skel{background:linear-gradient(90deg,#eaeaed 25%,#f5f5f7 50%,#eaeaed 75%);background-size:600px 100%;animation:shimmer 1.4s ease-in-out infinite;border-radius:7px}
+    .tbl-row-skel{display:flex;gap:8px;padding:9px 10px;border-bottom:1px solid #f2f2f4}
+    .tbl-row-skel-cell{height:11px;border-radius:5px;flex:1}
+    .tbl-row-skel-cell.wide{flex:2.5}
+    .metric-row.appear{animation:fadeInUp .28s ease both}
+    .filters-wrap.appear{animation:fadeIn .3s ease both}
 
-        .top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;flex-wrap:wrap}
-        .back-link{color:var(--accent);text-decoration:none;font-weight:600;font-size:14px}
-        .page-title{font-size:20px;font-weight:700}
-        .view-toggle{display:flex;gap:4px;background:#e5e5ea;border-radius:10px;padding:3px}
-        .view-btn{border:none;background:transparent;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;color:var(--text-sec);font-family:inherit;transition:all .2s}
-        .view-btn.active{background:white;color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+    .top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;flex-wrap:wrap}
+    .back-link{color:var(--accent);text-decoration:none;font-weight:600;font-size:14px}
+    .page-title{font-size:20px;font-weight:700}
+    .view-toggle{display:flex;gap:4px;background:#e5e5ea;border-radius:10px;padding:3px}
+    .view-btn{border:none;background:transparent;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;color:var(--text-sec);font-family:inherit;transition:all .2s}
+    .view-btn.active{background:white;color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.12)}
 
-        /* BI FILTERS */
-        .filters-wrap{
-            background:var(--card);border-radius:14px;box-shadow:var(--shadow);
-            padding:0;margin-bottom:12px;overflow:hidden;
-            display:flex;align-items:stretch;flex-wrap:wrap;
-            border:1px solid rgba(0,0,0,0.06);
-        }
-        .filter-group{
-            display:flex;align-items:flex-start;gap:0;
-            padding:8px 12px;
-            border-right:1px solid #f0f0f2;
-            flex-shrink:0;
-        }
-        /* група місяців — може розтягуватись і переносити pills */
-        .filter-group.filter-months{
-            flex:1;min-width:0;border-right:none;
-        }
-        .filter-group:last-child{border-right:none}
-        .filter-label{
-            font-size:10px;font-weight:700;color:#a0a0ab;
-            text-transform:uppercase;letter-spacing:.06em;
-            white-space:nowrap;margin-right:8px;user-select:none;
-            padding-top:5px;
-        }
-        .pills{display:flex;gap:3px;align-items:center;flex-wrap:wrap}
-        .pill{
-            border:none;background:transparent;
-            padding:4px 8px;border-radius:7px;
-            font-size:11px;font-weight:600;cursor:pointer;
-            font-family:inherit;color:#6e6e73;
-            transition:all .15s;white-space:nowrap;
-            line-height:1.4;
-        }
-        .pill:hover{background:#f2f2f7;color:#1d1d1f}
-        .pill.active{background:#1d1d1f;color:#fff}
-        .pill.year-active{background:#1d1d1f;color:#fff}
-        .filter-row{display:contents}
+    /* BI FILTERS */
+    .filters-wrap{
+        background:var(--card);border-radius:14px;box-shadow:var(--shadow);
+        padding:0;margin-bottom:12px;overflow:hidden;
+        display:flex;align-items:stretch;flex-wrap:wrap;
+        border:1px solid rgba(0,0,0,0.06);
+    }
+    .filter-group{
+        display:flex;align-items:flex-start;gap:0;
+        padding:8px 12px;
+        border-right:1px solid #f0f0f2;
+        flex-shrink:0;
+    }
+    /* група місяців — може розтягуватись і переносити pills */
+    .filter-group.filter-months{
+        flex:1;min-width:0;border-right:none;
+    }
+    .filter-group:last-child{border-right:none}
+    .filter-label{
+        font-size:10px;font-weight:700;color:#a0a0ab;
+        text-transform:uppercase;letter-spacing:.06em;
+        white-space:nowrap;margin-right:8px;user-select:none;
+        padding-top:5px;
+    }
+    .pills{display:flex;gap:3px;align-items:center;flex-wrap:wrap}
+    .pill{
+        border:none;background:transparent;
+        padding:4px 8px;border-radius:7px;
+        font-size:11px;font-weight:600;cursor:pointer;
+        font-family:inherit;color:#6e6e73;
+        transition:all .15s;white-space:nowrap;
+        line-height:1.4;
+    }
+    .pill:hover{background:#f2f2f7;color:#1d1d1f}
+    .pill.active{background:#1d1d1f;color:#fff}
+    .pill.year-active{background:#1d1d1f;color:#fff}
+    .filter-row{display:contents}
 
-        /* TABLE */
-        .table-card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:14px}
-        table{border-collapse:collapse;table-layout:fixed;width:100%}
-        th{text-align:center;padding:6px 4px;color:var(--text-sec);font-size:10px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border);background:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:sticky;top:0;z-index:10}
-        td{padding:4px 4px;border-bottom:1px solid #f2f2f4;font-size:11px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
-        tr:last-child td{border-bottom:none}
-        th.col-metric,td.col-metric{position:sticky;left:0;background:white;z-index:5;text-align:left;font-weight:600;padding-left:10px;box-shadow:4px 0 8px -2px rgba(0,0,0,.1);border-right:1px solid #e0e0e5;white-space:normal;word-break:break-word;line-height:1.25;min-width:110px;max-width:110px;width:110px;font-size:10px;color:var(--text)}
-        th.col-metric{z-index:11;font-size:9px}
-        tr.metric-row:hover td{background:#f0f4ff!important}
-        tr.metric-row.selected td{background:#e8f0fe!important}
-        tr.metric-row.selected td.col-metric{color:var(--accent);font-weight:700}
-        .badge{display:inline-block;border-radius:6px;font-size:10px;font-weight:600;padding:2px 5px;white-space:nowrap}
-        .badge-to    {background:rgba(0,113,227,.12);color:#1a50b8}
-        .badge-serv  {background:rgba(52,199,89,.12);color:#1a7f37}
-        .badge-acc   {background:rgba(255,149,0,.12);color:#b85000}
-        .badge-checks{background:rgba(175,82,222,.12);color:#6d28d9}
-        .badge-pct   {background:rgba(134,134,139,.10);color:#6e6e73}
-        .badge-other {background:rgba(134,134,139,.08);color:#555}
-        .table-hint{font-size:11px;color:var(--text-sec);padding:8px 12px;border-bottom:1px solid #f2f2f4;background:#fafafa;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:6px}
-        .table-hint span{color:var(--accent);font-weight:600}
-        .grp-start{border-left:2px solid #e0e0e5!important}
+    /* TABLE */
+    .table-card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:14px}
+    table{border-collapse:collapse;table-layout:fixed;width:100%}
+    th{text-align:center;padding:6px 4px;color:var(--text-sec);font-size:10px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border);background:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:sticky;top:0;z-index:10}
+    td{padding:4px 4px;border-bottom:1px solid #f2f2f4;font-size:11px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+    tr:last-child td{border-bottom:none}
+    th.col-metric,td.col-metric{position:sticky;left:0;background:white;z-index:5;text-align:left;font-weight:600;padding-left:10px;box-shadow:4px 0 8px -2px rgba(0,0,0,.1);border-right:1px solid #e0e0e5;white-space:normal;word-break:break-word;line-height:1.25;min-width:110px;max-width:110px;width:110px;font-size:10px;color:var(--text)}
+    th.col-metric{z-index:11;font-size:9px}
+    tr.metric-row:hover td{background:#f0f4ff!important}
+    tr.metric-row.selected td{background:#e8f0fe!important}
+    tr.metric-row.selected td.col-metric{color:var(--accent);font-weight:700}
+    .badge{display:inline-block;border-radius:6px;font-size:10px;font-weight:600;padding:2px 5px;white-space:nowrap}
+    .badge-to    {background:rgba(0,113,227,.12);color:#1a50b8}
+    .badge-serv  {background:rgba(52,199,89,.12);color:#1a7f37}
+    .badge-acc   {background:rgba(255,149,0,.12);color:#b85000}
+    .badge-checks{background:rgba(175,82,222,.12);color:#6d28d9}
+    .badge-pct   {background:rgba(134,134,139,.10);color:#6e6e73}
+    .badge-other {background:rgba(134,134,139,.08);color:#555}
+    .table-hint{font-size:11px;color:var(--text-sec);padding:8px 12px;border-bottom:1px solid #f2f2f4;background:#fafafa;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:6px}
+    .table-hint span{color:var(--accent);font-weight:600}
+    .grp-start{border-left:2px solid #e0e0e5!important}
 
-        /* CHART PANEL */
-        .chart-panel{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px;display:none}
-        .chart-panel.visible{display:block}
-        .chart-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
-        .chart-title{font-size:15px;font-weight:700}
-        .chart-subtitle{font-size:11px;color:var(--text-sec);margin-top:2px}
-        .selected-chips{display:flex;flex-wrap:wrap;gap:6px}
-        .chip{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;transition:opacity .15s;user-select:none}
-        .chip .chip-x{opacity:.6;font-size:13px;line-height:1}
-        .chip:hover .chip-x{opacity:1}
-        .chart-wrap{position:relative;height:320px}
-        @media(max-width:600px){.chart-wrap{height:240px}}
-        .empty-chart{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--text-sec);gap:8px}
-        .empty-chart-icon{font-size:36px;opacity:.4}
-        .empty-chart-text{font-size:13px;font-weight:500}
+    /* CHART PANEL */
+    .chart-panel{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px;display:none}
+    .chart-panel.visible{display:block}
+    .chart-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+    .chart-title{font-size:15px;font-weight:700}
+    .chart-subtitle{font-size:11px;color:var(--text-sec);margin-top:2px}
+    .selected-chips{display:flex;flex-wrap:wrap;gap:6px}
+    .chip{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;transition:opacity .15s;user-select:none}
+    .chip .chip-x{opacity:.6;font-size:13px;line-height:1}
+    .chip:hover .chip-x{opacity:1}
+    .chart-wrap{position:relative;height:320px}
+    @media(max-width:600px){.chart-wrap{height:240px}}
+    .empty-chart{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--text-sec);gap:8px}
+    .empty-chart-icon{font-size:36px;opacity:.4}
+    .empty-chart-text{font-size:13px;font-weight:500}
 
-        /* SUMMARY */
-        .summary-panel{margin-top:16px;border-top:1px solid var(--border);padding-top:14px}
-        .summary-title{font-size:11px;font-weight:700;color:var(--text-sec);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
-        .summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px}
-        .summary-card{background:#f9f9fb;border-radius:12px;padding:10px 12px;border:1px solid var(--border)}
-        .summary-card-label{font-size:10px;color:var(--text-sec);font-weight:600;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .summary-rows{display:flex;flex-direction:column;gap:4px}
-        .summary-row{display:flex;justify-content:space-between;align-items:center;gap:6px}
-        .summary-row-lbl{font-size:10px;color:var(--text-sec);display:flex;align-items:center;gap:3px;white-space:nowrap}
-        .year-dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0}
-        .summary-row-val{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap}
-        .summary-row-val.pct{color:#1a50b8}
-        .summary-divider{border:none;border-top:1px solid #ebebef;margin:3px 0}
-        .delta-row{display:flex;flex-direction:column;align-items:flex-start;gap:3px;margin-top:6px;padding-top:6px;border-top:1px dashed #e0e0e5}
-        .delta-label{font-size:10px;color:var(--text-sec);font-weight:500}
-        .delta-badge{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
-        .delta-up  {background:rgba(52,199,89,.15);color:#1a7f37}
-        .delta-down{background:rgba(255,59,48,.12);color:#c0392b}
-        .delta-flat{background:rgba(134,134,139,.10);color:#6e6e73}
-        .delta-arrow{font-size:12px;line-height:1}
+    /* SUMMARY */
+    .summary-panel{margin-top:16px;border-top:1px solid var(--border);padding-top:14px}
+    .summary-title{font-size:11px;font-weight:700;color:var(--text-sec);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+    .summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px}
+    .summary-card{background:#f9f9fb;border-radius:12px;padding:10px 12px;border:1px solid var(--border)}
+    .summary-card-label{font-size:10px;color:var(--text-sec);font-weight:600;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .summary-rows{display:flex;flex-direction:column;gap:4px}
+    .summary-row{display:flex;justify-content:space-between;align-items:center;gap:6px}
+    .summary-row-lbl{font-size:10px;color:var(--text-sec);display:flex;align-items:center;gap:3px;white-space:nowrap}
+    .year-dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0}
+    .summary-row-val{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap}
+    .summary-row-val.pct{color:#1a50b8}
+    .summary-divider{border:none;border-top:1px solid #ebebef;margin:3px 0}
+    .delta-row{display:flex;flex-direction:column;align-items:flex-start;gap:3px;margin-top:6px;padding-top:6px;border-top:1px dashed #e0e0e5}
+    .delta-label{font-size:10px;color:var(--text-sec);font-weight:500}
+    .delta-badge{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
+    .delta-up  {background:rgba(52,199,89,.15);color:#1a7f37}
+    .delta-down{background:rgba(255,59,48,.12);color:#c0392b}
+    .delta-flat{background:rgba(134,134,139,.10);color:#6e6e73}
+    .delta-arrow{font-size:12px;line-height:1}
 
-        .chart-controls{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
-        .chart-control-btn{border:none;background:#f0f0f5;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;color:#6e6e73;transition:all .15s;}
-        .chart-control-btn.active{background:#1d1d1f;color:#fff;}
-        .fulfillment-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(88,86,214,.12);color:#5856d6;border:1px solid rgba(88,86,214,.2)}
-        .status-box.error{color:#ff3b30}
+    .chart-controls{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+    .chart-control-btn{border:none;background:#f0f0f5;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;color:#6e6e73;transition:all .15s;}
+    .chart-control-btn.active{background:#1d1d1f;color:#fff;}
+    .fulfillment-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(88,86,214,.12);color:#5856d6;border:1px solid rgba(88,86,214,.2)}
+    .status-box.error{color:#ff3b30}
 
-        /* COMPARE MODE */
-        .compare-btn{border:none;background:#f0f0f5;border-radius:9px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;color:#6e6e73;transition:all .2s}
-        .compare-btn.on{background:#5856d6;color:#fff}
-        .period-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0}
-        .period-label.p1{background:#e8f1fd;color:#1a50b8}
-        .period-label.p2{background:#e3f8ec;color:#1a7f37}
-        .pill.p1-active{color:#fff}
-        .pill.p2-active{color:#fff}
-        .compare-summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:10px}
-        .cmp-card{background:#f9f9fb;border-radius:12px;padding:10px 12px;border:1px solid var(--border)}
-        .cmp-card-label{font-size:10px;color:var(--text-sec);font-weight:600;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .cmp-row{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:3px}
-        .cmp-row-lbl{font-size:10px;color:var(--text-sec);white-space:nowrap;display:flex;align-items:center;gap:4px}
-        .cmp-row-val{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap}
-        .cmp-divider{border:none;border-top:1px dashed #e0e0e5;margin:5px 0}
-        .cmp-delta{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px}
-        .cmp-delta.up  {background:rgba(52,199,89,.15);color:#1a7f37}
-        .cmp-delta.down{background:rgba(255,59,48,.12);color:#c0392b}
-        .cmp-delta.flat{background:rgba(134,134,139,.10);color:#6e6e73}
-        .p1-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#0071e3;flex-shrink:0}
-        .p2-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#34c759;flex-shrink:0}
-    </style>
+    /* COMPARE MODE */
+    .compare-btn{border:none;background:#f0f0f5;border-radius:9px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;color:#6e6e73;transition:all .2s}
+    .compare-btn.on{background:#5856d6;color:#fff}
+    .period-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0}
+    .period-label.p1{background:#e8f1fd;color:#1a50b8}
+    .period-label.p2{background:#e3f8ec;color:#1a7f37}
+    .pill.p1-active{color:#fff}
+    .pill.p2-active{color:#fff}
+    .compare-summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:10px}
+    .cmp-card{background:#f9f9fb;border-radius:12px;padding:10px 12px;border:1px solid var(--border)}
+    .cmp-card-label{font-size:10px;color:var(--text-sec);font-weight:600;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .cmp-row{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:3px}
+    .cmp-row-lbl{font-size:10px;color:var(--text-sec);white-space:nowrap;display:flex;align-items:center;gap:4px}
+    .cmp-row-val{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap}
+    .cmp-divider{border:none;border-top:1px dashed #e0e0e5;margin:5px 0}
+    .cmp-delta{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px}
+    .cmp-delta.up  {background:rgba(52,199,89,.15);color:#1a7f37}
+    .cmp-delta.down{background:rgba(255,59,48,.12);color:#c0392b}
+    .cmp-delta.flat{background:rgba(134,134,139,.10);color:#6e6e73}
+    .p1-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#0071e3;flex-shrink:0}
+    .p2-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#34c759;flex-shrink:0}
+</style>
+```
+
 </head>
 <body>
 
@@ -199,6 +203,7 @@
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
             <div class="chart-controls">
                 <button class="chart-control-btn" id="btnToggleTooltip" onclick="toggleTooltip()">💬 Tooltip: ON</button>
+                <button class="chart-control-btn" id="btnToggleFulfillment" onclick="toggleFulfillment()">% Вик: ON</button>
                 <button class="chart-control-btn" id="btnChartType" onclick="toggleChartType()">📊 Тип: Лінії</button>
             </div>
             <div class="selected-chips" id="selectedChips"></div>
@@ -217,6 +222,10 @@
     <div class="summary-panel" id="compareSummaryPanel" style="display:none">
         <div class="summary-title">Порівняння періодів</div>
         <div class="compare-summary-grid" id="compareSummaryGrid"></div>
+    </div>
+    <div id="miniChartPanel" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--text-sec);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Порівняльна візуалізація</div>
+        <div id="miniChartBody"></div>
     </div>
 </div>
 
@@ -301,6 +310,7 @@ let periods1=new Set(); // Період 1
 let periods2=new Set(); // Період 2
 let tooltipEnabled=true;
 let chartType='line';
+let showFulfillment=true;
 
 // CSV
 function parseCSV(text){
@@ -576,9 +586,8 @@ function refreshAll(){
     updFilters();
     renderTable();
     renderChips();
-    if(viewMode==='chart') renderChart();
+    if(viewMode==='chart'){renderChart();renderMiniChart();}
     else renderSummary();
-    // compareSummaryPanel більше не використовується — вся логіка в renderSummary
     document.getElementById('compareSummaryPanel').style.display='none';
 }
 
@@ -655,15 +664,16 @@ function renderTable(){
 
         // ── % виконання одразу після рядка ТО ──
         if(toName && metric===toName && hasFulfillmentData()){
+            const FUL_METRIC='% виконання';
             const trF=document.createElement('tr');
             trF.className='metric-row appear';
-            trF.style.cssText='background:#f4f3ff;animation-delay:'+(rowIdx*0.03)+'s';
-            trF.style.cursor='default';
+            trF.style.animationDelay=(rowIdx*0.03)+'s';
             rowIdx++;
+            if(selectedMetrics.has(FUL_METRIC))trF.classList.add('selected');
             const tdFN=document.createElement('td');
             tdFN.className='col-metric';
-            tdFN.style.cssText='color:#5856d6;font-weight:700;background:#f4f3ff;font-size:10px';
-            tdFN.textContent='% виконання';
+            tdFN.style.cssText='font-size:10px;font-weight:600';
+            tdFN.textContent=FUL_METRIC;
             trF.appendChild(tdFN);
             periods.forEach((p,pi)=>{
                 const val=calcFulfillment(p.y,p.m);
@@ -681,6 +691,7 @@ function renderTable(){
                 } else {td.textContent='—';td.style.color='#ccc';}
                 trF.appendChild(td);
             });
+            trF.addEventListener('click',()=>toggleMetric(FUL_METRIC));
             tbody.appendChild(trF);
         }
     });
@@ -746,9 +757,12 @@ function renderChart(){
     if(!selectedMetrics.size){
         if(chartInstance){chartInstance.destroy();chartInstance=null;}
         body.innerHTML=`<div class="empty-chart"><div class="empty-chart-icon">📊</div><div class="empty-chart-text">Натисніть на рядок у таблиці, щоб додати показник</div></div>`;
-        renderSummary();return;
+        renderSummary();renderMiniChart();return;
     }
-    const metrics=[...selectedMetrics];
+    const FUL_METRIC='% виконання';
+    const fulSelected=selectedMetrics.has(FUL_METRIC);
+    // Звичайні метрики без % виконання
+    const metrics=[...selectedMetrics].filter(m=>m!==FUL_METRIC);
     const datasets=[];
     let labels=[];
 
@@ -756,7 +770,6 @@ function renderChart(){
         const p1pairs=[...periods1].map(k=>{const[y,m]=k.split('_');return{y:+y,m:+m};}).sort((a,b)=>a.y-b.y||a.m-b.m);
         const p2pairs=[...periods2].map(k=>{const[y,m]=k.split('_');return{y:+y,m:+m};}).sort((a,b)=>a.y-b.y||a.m-b.m);
         const maxLen=Math.max(p1pairs.length,p2pairs.length);
-        // Вісь X: "Міс П1 / Міс П2" щоб уникнути накладення підписів
         labels=Array.from({length:maxLen},(_,i)=>{
             const a=p1pairs[i],b=p2pairs[i];
             const la=a?MONTHS_UK[a.m-1].slice(0,3)+' '+String(a.y).slice(2):'';
@@ -767,6 +780,7 @@ function renderChart(){
         const P1_SHADES=['#0071e3','#5856d6','#af52de','#ff3b30','#ff9500','#00b388','#5ac8fa','#007aff'];
         const P2_SHADES=['#34c759','#30d158','#32ade6','#ffd60a','#ff6b35','#64d2ff','#a8e063','#b5e48c'];
         const hasFul=hasFulfillmentData();
+        const {to:toName}=getTOPlanNames();
         metrics.forEach((metric,mi)=>{
             const c1=P1_SHADES[mi%P1_SHADES.length];
             const c2=P2_SHADES[mi%P2_SHADES.length];
@@ -774,50 +788,65 @@ function renderChart(){
             const data2=Array.from({length:maxLen},(_,i)=>{const p=p2pairs[i];return p!=null?(parsedByYear[p.y]?.[metric]?.[p.m]??null):null;});
             const tt1=p1pairs.map(p=>MONTHS_UK[p.m-1].slice(0,3)+' '+p.y);
             const tt2=p2pairs.map(p=>MONTHS_UK[p.m-1].slice(0,3)+' '+p.y);
-            while(tt1.length<maxLen) tt1.push('');
-            while(tt2.length<maxLen) tt2.push('');
-            // _fulData: % виконання лише для ТО-датасету (коли є і ТО і ТО план)
-            const {to:toName}=getTOPlanNames();
-            const showFul=hasFul&&toName&&metric===toName;
+            while(tt1.length<maxLen) tt1.push('');while(tt2.length<maxLen) tt2.push('');
+            const showFul=showFulfillment&&hasFul&&toName&&metric===toName;
             const ful1=showFul?Array.from({length:maxLen},(_,i)=>{const p=p1pairs[i];return p?calcFulfillment(p.y,p.m):null;}):null;
             const ful2=showFul?Array.from({length:maxLen},(_,i)=>{const p=p2pairs[i];return p?calcFulfillment(p.y,p.m):null;}):null;
             datasets.push({label:`${metric} (П1)`,data:data1,borderColor:c1,backgroundColor:c1+'18',pointBackgroundColor:c1,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:false,borderDash:[],_tt:tt1,_fulData:ful1});
             datasets.push({label:`${metric} (П2)`,data:data2,borderColor:c2,backgroundColor:c2+'18',pointBackgroundColor:c2,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:false,borderDash:[5,3],_tt:tt2,_fulData:ful2});
         });
+        // % виконання як окремий датасет якщо вибраний
+        if(fulSelected&&hasFul){
+            const fulColor='#5856d6';
+            const fd1=Array.from({length:maxLen},(_,i)=>{const p=p1pairs[i];return p?calcFulfillment(p.y,p.m):null;});
+            const fd2=Array.from({length:maxLen},(_,i)=>{const p=p2pairs[i];return p?calcFulfillment(p.y,p.m):null;});
+            datasets.push({label:'% вик (П1)',data:fd1,borderColor:fulColor,backgroundColor:fulColor+'18',pointBackgroundColor:fulColor,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:false,borderDash:[4,3],_isPctLine:true});
+            datasets.push({label:'% вик (П2)',data:fd2,borderColor:'#af52de',backgroundColor:'#af52de18',pointBackgroundColor:'#af52de',pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:false,borderDash:[4,3],_isPctLine:true});
+        }
     } else {
         const periods=activePeriods().sort((a,b)=>a.y-b.y||a.m-b.m);
         const years=[...new Set(periods.map(p=>p.y))].sort((a,b)=>a-b);
+        const hasFul=hasFulfillmentData();
+        const {to:toName}=getTOPlanNames();
 
         if(years.length>1){
             const uniqPairs=periods;
             labels=uniqPairs.map(p=>MONTHS_UK[p.m-1].slice(0,3)+' '+String(p.y).slice(2));
-            const hasFul=hasFulfillmentData();
-            const {to:toName}=getTOPlanNames();
             metrics.forEach((metric,mi)=>{
                 years.forEach(y=>{
                     const mv=parsedByYear[y]?.[metric]||{};
                     const color=dsColor(y,mi);
-                    const label=`${metric} (${y})`;
                     const data=uniqPairs.map(p=>p.y===y?(mv[p.m]??null):null);
-                    const showFul=hasFul&&toName&&metric===toName;
+                    const showFul=showFulfillment&&hasFul&&toName&&metric===toName;
                     const fulData=showFul?uniqPairs.map(p=>p.y===y?calcFulfillment(p.y,p.m):null):null;
-                    datasets.push({label,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,_fulData:fulData});
+                    datasets.push({label:`${metric} (${y})`,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,_fulData:fulData});
                 });
             });
+            if(fulSelected&&hasFul){
+                years.forEach((y,yi)=>{
+                    const colors=['#5856d6','#af52de','#ff3b30'];
+                    const color=colors[yi%colors.length];
+                    const data=uniqPairs.map(p=>p.y===y?calcFulfillment(p.y,p.m):null);
+                    datasets.push({label:`% вик (${y})`,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,borderDash:[4,3],_isPctLine:true});
+                });
+            }
         } else {
             const y=years[0];
             const xMonths=[...new Set(periods.map(p=>p.m))].sort((a,b)=>a-b);
             labels=xMonths.map(m=>MONTHS_UK[m-1].slice(0,3));
-            const hasFul=hasFulfillmentData();
-            const {to:toName}=getTOPlanNames();
             metrics.forEach((metric,mi)=>{
                 const mv=parsedByYear[y]?.[metric]||{};
                 const color=dsColor(y,mi);
                 const data=xMonths.map(m=>mv[m]??null);
-                const showFul=hasFul&&toName&&metric===toName;
+                const showFul=showFulfillment&&hasFul&&toName&&metric===toName;
                 const fulData=showFul?xMonths.map(m=>calcFulfillment(y,m)):null;
                 datasets.push({label:metric,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,_fulData:fulData});
             });
+            if(fulSelected&&hasFul){
+                const color='#5856d6';
+                const data=xMonths.map(m=>calcFulfillment(y,m));
+                datasets.push({label:'% виконання',data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,borderDash:[4,3],_isPctLine:true});
+            }
         }
     }
     if(chartInstance){chartInstance.destroy();chartInstance=null;}
@@ -845,13 +874,10 @@ function renderChart(){
             if(value===null||value===undefined)return'';
             const ds=ctx.dataset;
             const idx=ctx.dataIndex;
+            if(ds._isPctLine) return value.toFixed(1)+'%';
             const ful=ds._fulData?ds._fulData[idx]:null;
-            const mainStr=fmt(value);
-            // % виконання тільки якщо цей датасет ТО (має _fulData)
-            if(ful!==null&&ful!==undefined){
-                return mainStr+'\n'+ful.toFixed(1)+'%';
-            }
-            return mainStr;
+            if(ful!==null&&ful!==undefined) return fmt(value)+'\n'+ful.toFixed(1)+'%';
+            return fmt(value);
         },
         anchor:'end',
         align:'top',
@@ -874,14 +900,20 @@ function renderChart(){
             chart.data.datasets.forEach((ds,di)=>{
                 if(ds._isPct)return;
                 const meta=chart.getDatasetMeta(di);if(meta.hidden)return;
+                // _isPctLine — % виконання як окремий датасет: форматуємо як %
+                const isPctLine=!!ds._isPctLine;
                 ds.data.forEach((val,pi)=>{
                     if(val===null||val===undefined)return;
                     const el=meta.data[pi];if(!el)return;
-                    const text=fmt(val);
+                    const text=isPctLine?val.toFixed(1)+'%':fmt(val);
                     const tw=ctx.measureText(text).width;
-                    pts.push({x:el.x,y:el.y,text,color:ds.borderColor,tw,isFul:false,fillColor:'#fff'});
+                    const good=isPctLine?(val>=100):true;
+                    const color=isPctLine?(good?'#1a7f37':'#c0392b'):ds.borderColor;
+                    const fillColor=isPctLine?(good?'rgba(52,199,89,0.13)':'rgba(255,59,48,0.10)'):'#fff';
+                    const strokeColor=isPctLine?(good?'#34c759':'#ff3b30'):ds.borderColor;
+                    pts.push({x:el.x,y:el.y,text,color,tw,fillColor,strokeColor});
                 });
-                // % виконання для цього датасету — додаємо як окрему точку трохи вище
+                // % виконання overlay для звичайних датасетів (через _fulData)
                 if(ds._fulData){
                     ds._fulData.forEach((ful,pi)=>{
                         if(ful===null||ful===undefined)return;
@@ -891,8 +923,8 @@ function renderChart(){
                         const good=ful>=100;
                         pts.push({
                             x:el.x,
-                            y:el.y-LH-GAP, // стартова позиція вище ніж точка
-                            text,color:good?'#1a7f37':'#c0392b',tw,isFul:true,
+                            y:el.y-LH-GAP,
+                            text,color:good?'#1a7f37':'#c0392b',tw,
                             fillColor:good?'rgba(52,199,89,0.13)':'rgba(255,59,48,0.10)',
                             strokeColor:good?'#34c759':'#ff3b30'
                         });
@@ -963,6 +995,7 @@ function renderChart(){
         }
     });
     renderSummary();
+    renderMiniChart();
 }
 
 function toggleTooltip(){
@@ -978,6 +1011,150 @@ function toggleChartType(){
     btn.textContent=chartType==='line'?'📊 Тип: Лінії':'📊 Тип: Стовпці';
     btn.classList.toggle('active',chartType==='bar');
     renderChart();
+}
+function toggleFulfillment(){
+    showFulfillment=!showFulfillment;
+    const btn=document.getElementById('btnToggleFulfillment');
+    btn.textContent=showFulfillment?'% Вик: ON':'% Вик: OFF';
+    btn.classList.toggle('active',!showFulfillment);
+    renderChart();
+}
+
+// ── Міні порівняльний графік під summary ──
+let miniChartInstances=[];
+function renderMiniChart(){
+    const panel=document.getElementById('miniChartPanel');
+    const body=document.getElementById('miniChartBody');
+    // Показуємо тільки в compare mode і якщо є обрані метрики
+    if(!compareMode||!selectedMetrics.size||(!periods1.size&&!periods2.size)){
+        panel.style.display='none';
+        miniChartInstances.forEach(c=>c.destroy());miniChartInstances=[];
+        return;
+    }
+    panel.style.display='block';
+    miniChartInstances.forEach(c=>c.destroy());miniChartInstances=[];
+    body.innerHTML='';
+
+    const metrics=[...selectedMetrics];
+    const P1C='#0071e3',P2C='#34c759';
+    const n1=periods1.size,n2=periods2.size;
+
+    metrics.forEach(metric=>{
+        const rule=summaryRule(metric);
+        if(rule.type==='none')return;
+        const v1=calcPeriodVal(metric,periods1);
+        const v2=calcPeriodVal(metric,periods2);
+        if(v1===null&&v2===null)return;
+
+        const isRatio=rule.type==='ratio'||rule.type==='avg';
+        const fmtV=v=>v!=null?(isRatio?v.toFixed(2)+'%':fmt(v)):'0';
+
+        // Підписи П1 / П2
+        const p1lbl=[...periods1].sort().map(k=>{const[y,m]=k.split('_');return MONTHS_UK[+m-1].slice(0,3)+' '+String(y).slice(2);}).join(', ');
+        const p2lbl=[...periods2].sort().map(k=>{const[y,m]=k.split('_');return MONTHS_UK[+m-1].slice(0,3)+' '+String(y).slice(2);}).join(', ');
+
+        // Delta
+        let deltaStr='', deltaColor='#86868b';
+        if(v1!=null&&v2!=null){
+            const diff=v2-v1;
+            const diffPct=v1!==0?(diff/Math.abs(v1)*100):null;
+            const up=diff>0;
+            deltaColor=up?'#1a7f37':'#c0392b';
+            const arrow=up?'▲':'▼';
+            if(isRatio){deltaStr=`${arrow} ${up?'+':''}${diff.toFixed(2)}%`;}
+            else{deltaStr=`${arrow} ${up?'+':''}${fmt(Math.abs(diff))}`+(diffPct!=null?` (${diffPct.toFixed(1)}%)`:'');}
+        }
+
+        // Контейнер
+        const wrap=document.createElement('div');
+        wrap.style.cssText='margin-bottom:16px';
+        const title=document.createElement('div');
+        title.style.cssText='font-size:11px;font-weight:700;color:var(--text-sec);margin-bottom:6px;display:flex;align-items:center;gap:8px';
+        title.innerHTML=`<span>${metric}</span>`+(deltaStr?`<span style="font-size:11px;font-weight:700;color:${deltaColor}">${deltaStr}</span>`:'');
+        wrap.appendChild(title);
+
+        // Canvas
+        const canvasWrap=document.createElement('div');canvasWrap.style.cssText='height:90px;position:relative';
+        const canvas=document.createElement('canvas');
+        canvasWrap.appendChild(canvas);wrap.appendChild(canvasWrap);body.appendChild(wrap);
+
+        const datasets=[
+            {label:`П1: ${p1lbl}`,data:[v1??0],backgroundColor:P1C+'cc',borderColor:P1C,borderWidth:1.5,borderRadius:5},
+            {label:`П2: ${p2lbl}`,data:[v2??0],backgroundColor:P2C+'cc',borderColor:P2C,borderWidth:1.5,borderRadius:5},
+        ];
+        // Середнє (якщо sum)
+        if(!isRatio&&n1>1&&v1!=null) datasets[0].label+=` | Сер: ${fmt(v1/n1)}`;
+        if(!isRatio&&n2>1&&v2!=null) datasets[1].label+=` | Сер: ${fmt(v2/n2)}`;
+
+        const cfg={
+            type:'bar',
+            data:{labels:[''],datasets},
+            plugins:[ChartDataLabels],
+            options:{
+                indexAxis:'y',responsive:true,maintainAspectRatio:false,
+                layout:{padding:{left:0,right:60,top:4,bottom:4}},
+                plugins:{
+                    legend:{display:true,position:'right',labels:{font:{family:'Inter',size:10},boxWidth:12,padding:8}},
+                    tooltip:{enabled:false},
+                    datalabels:{
+                        display:true,anchor:'end',align:'right',offset:4,
+                        color:(ctx)=>ctx.dataset.borderColor,
+                        font:{size:11,weight:'700',family:'Inter'},
+                        formatter:(v)=>isRatio?v.toFixed(2)+'%':fmt(v)
+                    }
+                },
+                scales:{
+                    x:{display:false,beginAtZero:true},
+                    y:{display:false}
+                }
+            }
+        };
+        const inst=new Chart(canvas,cfg);
+        miniChartInstances.push(inst);
+    });
+
+    // % виконання міні-блок окремо
+    if(hasFulfillmentData()){
+        const vf1=calcFulfillmentPeriod(periods1);
+        const vf2=calcFulfillmentPeriod(periods2);
+        if(vf1!==null||vf2!==null){
+            const wrap=document.createElement('div');wrap.style.cssText='margin-bottom:16px';
+            let deltaStr='',deltaColor='#86868b';
+            if(vf1!=null&&vf2!=null){
+                const diff=vf2-vf1;
+                const up=diff>0;deltaColor=up?'#1a7f37':'#c0392b';
+                deltaStr=`${up?'▲':'▼'} ${up?'+':''}${diff.toFixed(1)}%`;
+            }
+            const title=document.createElement('div');
+            title.style.cssText='font-size:11px;font-weight:700;color:var(--text-sec);margin-bottom:6px;display:flex;align-items:center;gap:8px';
+            title.innerHTML=`<span>% виконання плану</span>`+(deltaStr?`<span style="font-size:11px;font-weight:700;color:${deltaColor}">${deltaStr}</span>`:'');
+            wrap.appendChild(title);
+            const canvasWrap=document.createElement('div');canvasWrap.style.cssText='height:90px;position:relative';
+            const canvas=document.createElement('canvas');
+            canvasWrap.appendChild(canvas);wrap.appendChild(canvasWrap);body.appendChild(wrap);
+            const p1lbl=[...periods1].sort().map(k=>{const[y,m]=k.split('_');return MONTHS_UK[+m-1].slice(0,3)+' '+String(y).slice(2);}).join(', ');
+            const p2lbl=[...periods2].sort().map(k=>{const[y,m]=k.split('_');return MONTHS_UK[+m-1].slice(0,3)+' '+String(y).slice(2);}).join(', ');
+            const inst=new Chart(canvas,{
+                type:'bar',
+                data:{labels:[''],datasets:[
+                    {label:`П1: ${p1lbl}`,data:[vf1??0],backgroundColor:'#0071e3cc',borderColor:'#0071e3',borderWidth:1.5,borderRadius:5},
+                    {label:`П2: ${p2lbl}`,data:[vf2??0],backgroundColor:'#34c759cc',borderColor:'#34c759',borderWidth:1.5,borderRadius:5},
+                ]},
+                plugins:[ChartDataLabels],
+                options:{
+                    indexAxis:'y',responsive:true,maintainAspectRatio:false,
+                    layout:{padding:{right:60,top:4,bottom:4}},
+                    plugins:{
+                        legend:{display:true,position:'right',labels:{font:{family:'Inter',size:10},boxWidth:12,padding:8}},
+                        tooltip:{enabled:false},
+                        datalabels:{display:true,anchor:'end',align:'right',offset:4,color:(ctx)=>ctx.dataset.borderColor,font:{size:11,weight:'700',family:'Inter'},formatter:v=>v.toFixed(1)+'%'}
+                    },
+                    scales:{x:{display:false,beginAtZero:true},y:{display:false}}
+                }
+            });
+            miniChartInstances.push(inst);
+        }
+    }
 }
 
 // SUMMARY
@@ -1095,7 +1272,11 @@ function renderSummary(){
         });
 
         // ── Картка % виконання в режимі порівняння ──
-        if(hasFulfillmentData()){
+        const {to:toNc,plan:planNc}=getTOPlanNames();
+        const fulRelC=hasFulfillmentData()&&(
+            selectedMetrics.has(toNc)||selectedMetrics.has(planNc)||selectedMetrics.has('% виконання')
+        );
+        if(fulRelC){
             const card=document.createElement('div');card.className='summary-card';
             card.style.borderColor='rgba(88,86,214,.3)';
             const lbl=document.createElement('div');lbl.className='summary-card-label';
@@ -1205,8 +1386,12 @@ function renderSummary(){
         if(rowsEl.children.length)grid.appendChild(card);
     });
 
-    // ── Картка % виконання за період ──
-    if(hasFulfillmentData()){
+    // ── Картка % виконання за період — тільки якщо ТО, ТО план або % виконання вибрані ──
+    const {to:toN,plan:planN}=getTOPlanNames();
+    const fulRelevant=hasFulfillmentData()&&(
+        selectedMetrics.has(toN)||selectedMetrics.has(planN)||selectedMetrics.has('% виконання')
+    );
+    if(fulRelevant){
         const card=document.createElement('div');card.className='summary-card';
         card.style.borderColor='rgba(88,86,214,.3)';
         const lbl=document.createElement('div');lbl.className='summary-card-label';
@@ -1254,7 +1439,7 @@ function setView(mode){
     document.getElementById('btnChart').classList.toggle('active',mode==='chart');
     document.getElementById('tableSection').style.display=mode==='table'?'':'none';
     document.getElementById('chartPanel').classList.toggle('visible',mode==='chart');
-    if(mode==='chart')renderChart();else renderSummary();
+    if(mode==='chart'){renderChart();renderMiniChart();}else renderSummary();
 }
 
 function showTableSkeleton(card, rows=12, cols=5){
@@ -1299,5 +1484,6 @@ async function init(){
 }
 init();
 </script>
+
 </body>
 </html>
