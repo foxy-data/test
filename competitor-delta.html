@@ -51,9 +51,14 @@ td.col-year{left:0;min-width:38px;width:38px;font-size:10px;font-weight:700;colo
 td.col-month{left:38px;min-width:54px;width:54px;font-size:11px;font-weight:600;text-align:left;box-shadow:4px 0 8px -2px rgba(0,0,0,.07);border-right:1px solid #e8e8ec;}
 td.col-month.p1c{color:#1a50b8}
 td.col-month.p2c{color:#1a7f37}
+/* ✅ Group headers - FIXED TOP with colors */
 th.grp-th{background:#f2f2f7;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#666;cursor:default;text-align:center;border-bottom:1px solid #e0e0e8;position:sticky;top:0;z-index:30;}
 th.grp-th.sticky-yz{left:0;z-index:41;}
 th.grp-th.sticky-yz2{left:38px;z-index:41;}
+/* ✅ Group background colors */
+th.grp-th.grp-foks{background:#e3f2fd;color:#1565c0;}
+th.grp-th.grp-komf{background:#e8f5e9;color:#2e7d32;}
+/* Sub-col header */
 th.sub-th{background:white;font-size:9px;font-weight:700;color:var(--text-sec);text-transform:uppercase;cursor:pointer;text-align:center;position:sticky;top:22px;z-index:20;border-bottom:2px solid var(--border);transition:background .15s;user-select:none;}
 th.sub-th:hover{background:#f0f4ff;color:var(--accent2);}
 th.sub-th.selected-col{background:#e8f0fe;color:var(--accent2);border-bottom-color:var(--accent2);}
@@ -67,7 +72,11 @@ tr:hover td.col-year,tr:hover td.col-month{background:#f0f0f5!important;}
 .delta-neg{color:#c0392b;font-weight:700;}
 tr.year-sep td{background:#f5f5f7;font-size:10px;font-weight:800;color:#888;padding:2px 6px;border-bottom:1px solid #e8e8ec;}
 tr.year-sep td.col-year{color:var(--text);font-size:11px;}
+/* ✅ Delta cell coloring - DARKER green/red */
 td.is-delta{font-weight:700;}
+/* ✅ Column striping - full height highlighting for delta columns */
+col.delta-col{background:#fff3e0;}
+tr td.col-delta-striped{background:#fff3e0;}
 .chart-panel{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px;display:none}
 .chart-panel.visible{display:block}
 .chart-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
@@ -204,6 +213,7 @@ if(Math.abs(n)>=1000)return(n/1000).toFixed(1)+'К';
 if(n%1!==0)return n.toFixed(2);
 return n.toLocaleString('uk-UA');
 }
+// ✅ Delta color - DARKER green/red only
 function getDeltaColor(value){
 if(value===null||value===undefined) return '';
 if(value<1.0){
@@ -373,6 +383,7 @@ if(compareMode){const combined=new Set([...periods1,...periods2]);return dataRow
 return dataRows.filter(r=>selectedPeriods.has(r.key)).sort((a,b)=>a.year-b.year||a.month-b.month);
 }
 function refreshAll(){renderTable();renderChips();if(viewMode==='chart'){renderChart();renderSummary();}else{renderSummary();}}
+
 function renderTable(){
 const card=document.getElementById('tableCard');card.innerHTML='';
 const data=activeRows();
@@ -383,14 +394,31 @@ card.appendChild(hint);
 const wrap=document.createElement('div');wrap.style.cssText='overflow-x:auto;-webkit-overflow-scrolling:touch;';card.appendChild(wrap);
 const tbl=document.createElement('table');
 const thead=document.createElement('thead');
+// ✅ Colgroup for column striping
+const colgroup=document.createElement('colgroup');
+colgroup.appendChild(document.createElement('col')); // Year
+colgroup.appendChild(document.createElement('col')); // Month
+
 const trG=document.createElement('tr');
 const thY0=document.createElement('th');thY0.className='sub-th sticky-left0';thY0.rowSpan=2;thY0.style.cursor='default';thY0.textContent='Рік';trG.appendChild(thY0);
 const thM0=document.createElement('th');thM0.className='sub-th sticky-left1 grp-sep';thM0.rowSpan=2;thM0.style.cssText='cursor:default;text-align:left;';thM0.textContent='Місяць';trG.appendChild(thM0);
 colGroups.forEach((grp,gi)=>{
-const th=document.createElement('th');th.className='grp-th';th.colSpan=grp.cols.length;th.textContent=grp.name;
+const th=document.createElement('th');th.className='grp-th';
+// ✅ Add group class for visual distinction
+if(/фокс/i.test(grp.name)) th.classList.add('grp-foks');
+else if(/комф|комб/i.test(grp.name)) th.classList.add('grp-komf');
+th.colSpan=grp.cols.length;th.textContent=grp.name;
 if(gi>0)th.classList.add('grp-sep');trG.appendChild(th);
+// ✅ Add delta column striping
+grp.cols.forEach((col,ci)=>{
+const colEl=document.createElement('col');
+if(col.isDelta) colEl.classList.add('delta-col');
+colgroup.appendChild(colEl);
+});
 });
 thead.appendChild(trG);
+tbl.appendChild(colgroup);
+
 const trH=document.createElement('tr');
 colGroups.forEach((grp,gi)=>{
 grp.cols.forEach((col,ci)=>{
@@ -425,7 +453,9 @@ colGroups.forEach((grp,gi)=>{
 grp.cols.forEach((col,ci)=>{
 const td=document.createElement('td');
 if(ci===0&&gi>0)td.classList.add('grp-sep');
-if(col.isDelta) td.classList.add('is-delta');
+if(col.isDelta){
+td.classList.add('is-delta','col-delta-striped');
+}
 if(selectedCols.has(col.key))td.classList.add('selected-col');
 td.dataset.key=col.key;
 const v=r.vals[col.key];
@@ -445,6 +475,7 @@ tbody.appendChild(tr);
 });
 tbl.appendChild(tbody);wrap.appendChild(tbl);
 }
+
 function toggleCol(key){
 if(selectedCols.has(key))selectedCols.delete(key);else selectedCols.add(key);
 document.querySelectorAll('[data-key]').forEach(el=>el.classList.toggle('selected-col',selectedCols.has(el.dataset.key)));
@@ -458,6 +489,7 @@ setTimeout(()=>{b.style.background='';b.style.color='';},1500);
 }
 }
 }
+
 function renderChips(){
 const cont=document.getElementById('selectedChips');cont.innerHTML='';
 const colArr=[...selectedCols];
@@ -487,6 +519,7 @@ const sub=colArr.map(k=>{const c=allCols.find(x=>x.key===k);return c?c.group+': 
 document.getElementById('chartSubtitle').textContent=sub||'Оберіть колонку у таблиці';
 }
 }
+
 function toggleTooltip(){
 tooltipEnabled=!tooltipEnabled;
 const btn=document.getElementById('btnToggleTooltip');
@@ -494,6 +527,7 @@ btn.textContent=tooltipEnabled?'💬 Tooltip: ON':'🔇 Tooltip: OFF';
 btn.classList.toggle('active',!tooltipEnabled);
 if(chartInstance){chartInstance.options.plugins.tooltip.enabled=tooltipEnabled;chartInstance.update('none');}
 }
+
 function toggleChartType(){
 chartType=chartType==='line'?'bar':'line';
 const btn=document.getElementById('btnChartType');
@@ -502,7 +536,7 @@ btn.classList.toggle('active',chartType==='bar');
 if(chartInstance)renderChart();
 }
 
-// ✅ КОНФІГУРАЦІЯ DATALABELS ДЛЯ СТОВПЧИКІВ
+// ✅ DATALABELS CONFIG FOR BAR CHARTS
 const barDataLabelsConfig = {
 display: true,
 color: '#1d1d1f',
@@ -571,7 +605,7 @@ yMax=yMax+yPadding;
 if(chartInstance){chartInstance.destroy();chartInstance=null;}
 body.innerHTML='<div class="chart-wrap"><canvas id="cmpChart"></canvas></div>';
 
-// ✅ ПЛАГІН ДЛЯ ЛІНІЙНИХ ГРАФІКІВ
+// ✅ SMART LABELS FOR LINE CHARTS
 const smartLabels={id:'smartLabels',afterDatasetsDraw(chart){
 if(chartType!=='line') return;
 const ctx=chart.ctx;ctx.save();
@@ -610,7 +644,6 @@ const ctx2=document.getElementById('cmpChart').getContext('2d');
 chartInstance=new Chart(ctx2,{
 type:chartType,
 data:{labels,datasets},
-// ✅ ВИКОРИСТОВУЄМО ChartDataLabels для стовпчиків
 plugins: chartType==='line' ? [smartLabels] : [ChartDataLabels],
 options:{
 responsive:true,
@@ -627,7 +660,6 @@ bodyFont:{family:'Inter',size:11},
 padding:10,
 callbacks:{label:c=>` ${c.dataset.label}: ${fmt(c.raw,c.dataset._isPct)}`}
 },
-// ✅ НАЛАШТУВАННЯ DATALABELS ДЛЯ СТОВПЧИКІВ
 datalabels: chartType==='bar' ? barDataLabelsConfig : false
 },
 scales:{
