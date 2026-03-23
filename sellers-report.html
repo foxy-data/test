@@ -679,25 +679,48 @@ function renderFilters(){
         pp.appendChild(b);
     });
 
-    // Продавці — "Всі" toggle
+    // Продавці
     const sp=document.getElementById('sellerPills');sp.innerHTML='';
     const allSellersActive=selSellers.size===0;
+
+    // Кнопка "Всі"
     const sab=document.createElement('button');
     sab.className='pill'+(allSellersActive?' active':'');
     sab.textContent='Всі';
     sab.onclick=()=>{
-        // Toggle: якщо є будь-який окремий вибір → повертаємо "всі" (clear); якщо вже "всі" → нічого (залишаємо "всі")
-        selSellers.clear();
+        if(selSellers.size===0){
+            if(allSellers.length) selSellers.add(allSellers[0]);
+        } else {
+            selSellers.clear();
+        }
         renderFilters();refresh();
     };
     sp.appendChild(sab);
+
     allSellers.forEach(s=>{
-        mkPill(sp,s.split(' ').slice(0,2).join(' '),selSellers.size===0||selSellers.has(s),()=>{
-            if(selSellers.size===0){selSellers.add(s);}
-            else if(selSellers.has(s)){if(selSellers.size>1)selSellers.delete(s);}
-            else{selSellers.add(s);}
+        const active=selSellers.size===0||selSellers.has(s);
+        const b=document.createElement('button');
+        b.className='pill'+(active?' active':'');
+        b.setAttribute('data-seller',s);
+        b.textContent=s.split(' ').slice(0,2).join(' ');
+        b.onclick=()=>{
+            if(selSellers.size===0){
+                // Зараз "всі" → обрати лише цього
+                allSellers.forEach(x=>selSellers.add(x));
+                selSellers.delete(s);
+                // Якщо залишились всі крім одного — ок; якщо це єдиний — залишаємо його
+                if(selSellers.size===0) selSellers.add(s);
+            } else if(selSellers.has(s)){
+                // Зняти цього — але не можна зняти останнього
+                if(selSellers.size>1) selSellers.delete(s);
+            } else {
+                selSellers.add(s);
+                // Якщо вибрані всі — переходимо в режим "всі" (clear)
+                if(selSellers.size===allSellers.length) selSellers.clear();
+            }
             renderFilters();refresh();
-        },'data-seller',s);
+        };
+        sp.appendChild(b);
     });
 }
 
@@ -712,8 +735,11 @@ function mkPill(container,text,active,onclick,attr,val){
     const b=document.createElement('button');b.className='pill'+(active?' active':'');b.textContent=text;if(attr)b.setAttribute(attr,val);b.onclick=onclick;container.appendChild(b);
 }
 function updFilters(){
-    document.querySelectorAll('#sellerPills .pill[data-seller]').forEach(b=>{b.className='pill'+((selSellers.size===0||selSellers.has(b.dataset.seller))?' active':'');});
-    document.querySelector('#sellerPills .pill:not([data-seller])')?.classList.toggle('active',selSellers.size===0);
+    const allActive=selSellers.size===0;
+    document.querySelector('#sellerPills .pill:not([data-seller])')?.classList.toggle('active',allActive);
+    document.querySelectorAll('#sellerPills .pill[data-seller]').forEach(b=>{
+        b.className='pill'+((allActive||selSellers.has(b.dataset.seller))?' active':'');
+    });
 }
 function refresh(){updFilters();if(viewMode==='table')renderTable();else if(viewMode==='rating')renderRating();else if(viewMode==='cat')renderCat();else{renderDynControls();renderDynChart();}}
 
@@ -1221,40 +1247,53 @@ function renderCat(){
         return;
     }
 
-    // Унікальні місяці у вибірці
+    // Унікальні місяці у вибірці (для вибраних продавців)
     const uniqueMonths=new Set(data.map(r=>r.рік+'-'+r.місяць)).size;
 
-    // Сума по кожній категорії за весь вибраний період
+    // Дані по магазину цілком (всі продавці, ті ж самі місяці/фільтри, але без фільтра продавця)
+    const storeData=allData.filter(r=>selPeriods.size===0||selPeriods.has(ymKey(r.рік,r.місяць)));
+    const storeSellers=new Set(storeData.map(r=>r.продавець));
+    const storeSellerCount=storeSellers.size||1;
+
+    // Сума по кожній категорії — для вибраних продавців
     const totals={};let grandTotal=0;
     CAT_KEYS.forEach(k=>{
         const sum=data.reduce((s,r)=>s+(r[k]!=null?r[k]:0),0);
         totals[k]=sum;grandTotal+=sum;
     });
 
-    const activeCats=CAT_KEYS.filter(k=>totals[k]>0);
-    const sorted=[...CAT_KEYS].sort((a,b)=>totals[b]-totals[a]).filter(k=>totals[k]>0);
+    // Сума по кожній категорії — по ВСІХ продавцях магазину (для розрахунку середнього)
+    const storeTotals={};
+    CAT_KEYS.forEach(k=>{
+        storeTotals[k]=storeData.reduce((s,r)=>s+(r[k]!=null?r[k]:0),0);
+    });
 
-    // Середньозважене по місяцю для кожної категорії: сума ÷ кількість місяців у вибірці
-    // Відхилення = сума категорії — її ж місячне середнє × місяців (різниця між тим що є і "рівномірним" місячним темпом)
-    // Але логіка: "відхилення" = сума_кат vs середня_сума_по_всіх_кат_на_місяць × місяців
-    // Тобто: середнє по магазину на місяць по всіх кат = grandTotal / uniqueMonths
-    // Для кожної кат: очікувана сума = (grandTotal / activeCats.length) — рівний розподіл
-    // А порівнюємо місячні: avgMon_кат vs avgMon_по_всіх = grandTotal/activeCats/uniqueMonths
-    const storeAvgMonPerCat = activeCats.length>0 && uniqueMonths>0
-        ? (grandTotal / activeCats.length) / uniqueMonths
-        : 0; // середнє по місяцю на 1 категорію в магазині
+    // Середнє по магазину на 1 продавця для кожної категорії
+    // = сума_кат_по_всіх / кількість_продавців_у_магазині
+    const storeAvgPerSeller={};
+    CAT_KEYS.forEach(k=>{ storeAvgPerSeller[k]=storeTotals[k]/storeSellerCount; });
 
+    // Кількість вибраних продавців
+    const selectedSellerCount=selSellers.size===0?storeSellerCount:selSellers.size;
+    // Очікувана сума для вибраної кількості продавців = середнє × кількість
+    const isAllSellers=selSellers.size===0||selSellers.size===storeSellerCount;
+
+    const activeCats=CAT_KEYS.filter(k=>totals[k]>0||storeTotals[k]>0);
+    const sorted=[...CAT_KEYS].sort((a,b)=>totals[b]-totals[a]).filter(k=>storeTotals[k]>0||totals[k]>0);
+
+    const storeGrandTotal=Object.values(storeTotals).reduce((a,b)=>a+b,0);
     const avgMonthly=uniqueMonths>0?grandTotal/uniqueMonths:0;
 
     // BANNER
     const mkStat=(lbl,val,color='#1d1d1f')=>
         `<div class="cat-stat"><div class="cat-stat-lbl">${lbl}</div><div class="cat-stat-val" style="color:${color}">${val}</div></div>`;
     const dv=`<div class="cat-divider"></div>`;
+    const selLabel=isAllSellers?'Магазин (всі)':`${selectedSellerCount} прод.`;
     banner.innerHTML=`<div class="cat-summary-banner">
         ${mkStat('Загальна сума',fmtV(grandTotal,'money'),'#1d1d1f')}
-        ${dv}${mkStat('Місяців у вибірці',uniqueMonths,'#5856d6')}
-        ${dv}${mkStat('Сер./місяць (загалом)',fmtV(avgMonthly,'money'),'#0071e3')}
-        ${dv}${mkStat('Сер./місяць на кат.',fmtV(storeAvgMonPerCat,'money'),'#34c759')}
+        ${dv}${mkStat('Місяців',uniqueMonths,'#5856d6')}
+        ${dv}${mkStat('Продавців у маг.',storeSellerCount,'#ff9500')}
+        ${dv}${mkStat('Сер./продавець',fmtV(grandTotal/selectedSellerCount,'money'),'#0071e3')}
     </div>`;
 
     if(!sorted.length)return;
@@ -1326,17 +1365,20 @@ function renderCat(){
         }
     });
 
-    // TABLE — Сума / Частка / Сер./міс / Відхилення сер./міс від середнього по кат.
+    // TABLE
     tableWrap.style.display='block';
     const tbl=document.getElementById('catTable');
     tbl.innerHTML='';
     const thead=document.createElement('thead');
+    const devColLabel=isAllSellers
+        ? 'Сер. на продавця'
+        : 'Відхилення від сер. по магазину';
     thead.innerHTML=`<tr>
         <th style="text-align:left;padding-left:14px">Категорія</th>
         <th>Сума за період</th>
         <th>Частка</th>
         <th>Сер./міс</th>
-        <th>Відхилення сер./міс від сер. по маг.</th>
+        <th>${devColLabel}</th>
     </tr>`;
     tbl.appendChild(thead);
     const tbody=document.createElement('tbody');
@@ -1344,30 +1386,43 @@ function renderCat(){
         const val=totals[cat];
         const color=CAT_COLORS[cat];
         const pct=grandTotal>0?(val/grandTotal*100):0;
-        // Середнє на місяць для цієї категорії
         const avgMon=uniqueMonths>0?val/uniqueMonths:0;
-        // Відхилення місячного від середнього по магазину на категорію
-        const dev=avgMon-storeAvgMonPerCat;
-        const devPct=storeAvgMonPerCat>0?(dev/storeAvgMonPerCat*100):0;
-        const devSign=dev>=0?'+':'';
-        const devColor=dev>=0?'#1a7f37':'#c0392b';
+
+        let devCell='';
+        if(isAllSellers){
+            // Магазин: показуємо середнє на 1 продавця
+            const perSeller=val/storeSellerCount;
+            devCell=`<td style="color:#6e6e73">${fmtV(perSeller,'money')}</td>`;
+        } else {
+            // Конкретний продавець: відхилення від середнього по магазину
+            const storeAvg=storeAvgPerSeller[cat]; // середнє на 1 продавця по магазину
+            const dev=val-storeAvg;
+            const devPct=storeAvg>0?(dev/storeAvg*100):0;
+            const devSign=dev>=0?'+':'';
+            const devColor=dev>=0?'#1a7f37':'#c0392b';
+            devCell=`<td style="font-weight:700;color:${devColor}">${dev>=0?'▲':'▼'} ${devSign}${fmtV(Math.abs(dev),'money')} (${devSign}${devPct.toFixed(1)}%)</td>`;
+        }
+
         const tr=document.createElement('tr');
         tr.innerHTML=`
             <td style="padding-left:14px"><span class="cat-color-dot" style="background:${color}"></span><strong>${cat}</strong></td>
             <td style="font-weight:700;color:${color}">${fmtV(val,'money')}</td>
             <td style="font-weight:700">${pct.toFixed(1)}%</td>
             <td style="color:#1d1d1f;font-weight:600">${fmtV(avgMon,'money')}</td>
-            <td style="font-weight:700;color:${devColor}">${dev>=0?'▲':'▼'} ${devSign}${fmtV(Math.abs(dev),'money')} (${devSign}${devPct.toFixed(1)}%)</td>`;
+            ${devCell}`;
         tbody.appendChild(tr);
     });
     // Підсумок
     const trTot=document.createElement('tr');
+    const totDevCell=isAllSellers
+        ? `<td style="color:#6e6e73">${fmtV(grandTotal/storeSellerCount,'money')}</td>`
+        : `<td style="color:#86868b">—</td>`;
     trTot.innerHTML=`
         <td style="padding-left:14px;font-weight:800">Загалом</td>
         <td style="font-weight:800">${fmtV(grandTotal,'money')}</td>
         <td style="font-weight:800">100%</td>
         <td style="font-weight:700">${fmtV(avgMonthly,'money')}</td>
-        <td style="color:#86868b">—</td>`;
+        ${totDevCell}`;
     tbody.appendChild(trTot);
     tbl.appendChild(tbody);
 
