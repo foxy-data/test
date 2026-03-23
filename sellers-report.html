@@ -12,35 +12,37 @@
         *{box-sizing:border-box;margin:0;padding:0}
         body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);padding:8px 10px 60px}
 
-        /* ── SKELETON + ANIMATION SYSTEM ── */
-        @keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
-        @keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-        .skel{
-            background:linear-gradient(90deg,#eaeaed 25%,#f5f5f7 50%,#eaeaed 75%);
-            background-size:600px 100%;
-            animation:shimmer 1.4s ease-in-out infinite;
-            border-radius:7px;
-        }
-        /* skeleton rank card */
-        .rank-card-skel{
-            background:#fff;border-radius:14px;
-            box-shadow:0 2px 10px rgba(0,0,0,.04);
-            padding:11px 14px;display:flex;align-items:center;gap:14px;
-            margin-bottom:7px;
-        }
-        .rank-card-skel-pos{width:24px;height:24px;border-radius:6px}
-        .rank-card-skel-body{flex:1;display:flex;flex-direction:column;gap:7px}
-        .rank-card-skel-line{height:12px;border-radius:6px}
-        .rank-card-skel-sub{height:9px;width:50%;border-radius:5px}
-        .rank-card-skel-val{width:52px;height:18px;border-radius:7px;flex-shrink:0}
-        /* skeleton table row */
-        .tbl-row-skel{display:flex;gap:8px;padding:8px 12px;border-bottom:1px solid #f2f2f4}
-        .tbl-row-skel-cell{height:11px;border-radius:5px;flex:1}
-        .tbl-row-skel-cell.wide{flex:2}
-        /* real cards animate in */
-        .rank-card.appear{animation:fadeInUp .3s ease both}
-        .filters-wrap.appear,.metric-bar.appear,.dyn-controls.appear{animation:fadeIn .25s ease both}
+```
+    /* ── SKELETON + ANIMATION SYSTEM ── */
+    @keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .skel{
+        background:linear-gradient(90deg,#eaeaed 25%,#f5f5f7 50%,#eaeaed 75%);
+        background-size:600px 100%;
+        animation:shimmer 1.4s ease-in-out infinite;
+        border-radius:7px;
+    }
+    /* skeleton rank card */
+    .rank-card-skel{
+        background:#fff;border-radius:14px;
+        box-shadow:0 2px 10px rgba(0,0,0,.04);
+        padding:11px 14px;display:flex;align-items:center;gap:14px;
+        margin-bottom:7px;
+    }
+    .rank-card-skel-pos{width:24px;height:24px;border-radius:6px}
+    .rank-card-skel-body{flex:1;display:flex;flex-direction:column;gap:7px}
+    .rank-card-skel-line{height:12px;border-radius:6px}
+    .rank-card-skel-sub{height:9px;width:50%;border-radius:5px}
+    .rank-card-skel-val{width:52px;height:18px;border-radius:7px;flex-shrink:0}
+    /* skeleton table row */
+    .tbl-row-skel{display:flex;gap:8px;padding:8px 12px;border-bottom:1px solid #f2f2f4}
+    .tbl-row-skel-cell{height:11px;border-radius:5px;flex:1}
+    .tbl-row-skel-cell.wide{flex:2}
+    /* real cards animate in */
+    .rank-card.appear{animation:fadeInUp .3s ease both}
+    .filters-wrap.appear,.metric-bar.appear,.dyn-controls.appear{animation:fadeIn .25s ease both}
+```
 
 ```
     .top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;flex-wrap:wrap}
@@ -228,6 +230,30 @@
     .status-box{padding:40px;text-align:center;color:var(--text-sec);font-size:14px}
     .status-box.error{color:#ff3b30}
 
+    /* CATEGORIES VIEW */
+    .cat-panel{display:none}
+    .cat-panel.visible{display:block}
+    .cat-summary-banner{background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:12px 16px;margin-bottom:12px;display:flex;gap:0;border:1px solid rgba(0,0,0,0.06)}
+    .cat-stat{flex:1;text-align:center;padding:0 8px}
+    .cat-stat-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#a0a0ab;margin-bottom:3px}
+    .cat-stat-val{font-size:16px;font-weight:800;color:#1d1d1f}
+    .cat-divider{width:1px;background:#f0f0f2;flex-shrink:0}
+    .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;margin-bottom:14px}
+    .cat-card{background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:12px 14px;border:1px solid rgba(0,0,0,0.06);position:relative;overflow:hidden}
+    .cat-card-bg{position:absolute;left:0;top:0;height:100%;opacity:.07;pointer-events:none;border-radius:14px}
+    .cat-card-name{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+    .cat-donut-wrap{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+    .cat-donut{flex-shrink:0}
+    .cat-pct{font-size:22px;font-weight:800;line-height:1}
+    .cat-pct-lbl{font-size:9px;color:var(--text-sec);font-weight:600;margin-top:2px}
+    .cat-sum{font-size:13px;font-weight:700;margin-bottom:4px}
+    .cat-dev{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;display:inline-block}
+    .cat-dev.up{background:rgba(52,199,89,.13);color:#1a7f37}
+    .cat-dev.down{background:rgba(255,59,48,.10);color:#c0392b}
+    .cat-dev.flat{background:rgba(134,134,139,.10);color:#6e6e73}
+    .cat-bar-bg{height:5px;background:#ebebef;border-radius:3px;margin-top:8px;overflow:hidden}
+    .cat-bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+
     /* Skeleton */
     @keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
 </style>
@@ -245,6 +271,7 @@
         <button class="view-btn active" id="btnTable" onclick="setView('table')">📋 Таблиця</button>
         <button class="view-btn" id="btnRating" onclick="setView('rating')">🏆 Рейтинг</button>
         <button class="view-btn" id="btnDyn" onclick="setView('dyn')">📈 Динаміка</button>
+        <button class="view-btn" id="btnCat" onclick="setView('cat')">🍩 Категорії</button>
     </div>
 </div>
 
@@ -296,6 +323,13 @@
         <div class="metric-pills" id="metricPills"></div>
     </div>
     <div class="ranking-grid" id="rankingGrid"></div>
+</div>
+
+<!-- CATEGORIES VIEW -->
+
+<div class="cat-panel" id="catPanel">
+    <div id="catSummaryBanner"></div>
+    <div class="cat-grid" id="catGrid"></div>
 </div>
 
 <script>
@@ -595,12 +629,21 @@ function renderFilters(){
     const pp=document.getElementById('periodPills');
     pp.innerHTML='';
 
-    // "Всі"
+    // "Всі" — toggle: якщо всі вибрані → зняти всі (залишити останній), якщо не всі → вибрати всі
     const allActive=selPeriods.size===pairs.length;
     const ab=document.createElement('button');
     ab.className='pill'+(allActive?' active':'');
     ab.textContent='Всі';
-    ab.onclick=()=>{pairs.forEach(p=>selPeriods.add(p.key));renderFilters();refresh();};
+    ab.onclick=()=>{
+        if(selPeriods.size===pairs.length){
+            // Знімаємо всі — залишаємо лише останній (найновіший)
+            selPeriods.clear();
+            selPeriods.add(pairs[pairs.length-1].key);
+        } else {
+            pairs.forEach(p=>selPeriods.add(p.key));
+        }
+        renderFilters();refresh();
+    };
     pp.appendChild(ab);
 
     // Пілюля на кожен місяць-рік: "Січ 24"
@@ -643,7 +686,7 @@ function updFilters(){
     document.querySelectorAll('#sellerPills .pill[data-seller]').forEach(b=>{b.className='pill'+((selSellers.size===0||selSellers.has(b.dataset.seller))?' active':'');});
     document.querySelector('#sellerPills .pill:not([data-seller])')?.classList.toggle('active',selSellers.size===0);
 }
-function refresh(){updFilters();if(viewMode==='table')renderTable();else if(viewMode==='rating')renderRating();else{renderDynControls();renderDynChart();}}
+function refresh(){updFilters();if(viewMode==='table')renderTable();else if(viewMode==='rating')renderRating();else if(viewMode==='cat')renderCat();else{renderDynControls();renderDynChart();}}
 
 // ── TABLE ──
 function renderTable(){
@@ -849,37 +892,35 @@ function renderDynChart(){
     const fd=filteredData();
     if(!fd.length){body.innerHTML='<div class="dyn-empty">Немає даних</div>';return;}
 
-    // Вісь X — унікальні місяці відсортовані
-    const xMonths=[...new Set(fd.map(r=>r.місяць))].sort((a,b)=>a-b);
-    // Роки з вибраних periods
-    const xYears=[...new Set(fd.map(r=>r.рік))].sort((a,b)=>a-b);
-    const labels=xMonths.map(m=>MONTHS_UK[m-1].slice(0,3));
+    // Вісь X — унікальні пари рік+місяць з вибраних periods, відсортовані хронологічно
+    const allPairs=getAllPairs().filter(p=>selPeriods.has(p.key));
+    // Якщо один рік — просто місяці; якщо кілька — "Міс РР"
+    const xYears=[...new Set(allPairs.map(p=>p.y))].sort((a,b)=>a-b);
+    const multiYear=xYears.length>1;
+    const labels=allPairs.map(p=>multiYear
+        ? MONTHS_UK[p.m-1].slice(0,3)+' '+String(p.y).slice(2)
+        : MONTHS_UK[p.m-1].slice(0,3)
+    );
 
     const metricMeta=DYN_METRICS.find(x=>x.key===dynMetricKey)||{key:dynMetricKey,label:dynMetricKey,color:'#0071e3',fmt:'money'};
     const isPct=PCT_KEYS.has(dynMetricKey);
 
     const sellers=[...dynSellerSet];
     const datasets=[];
-    const YEAR_ALPHA=['','aa','bb','cc']; // для варіації кольору по роках
+    const DYN_COLORS=['#0071e3','#34c759','#ff9500','#af52de','#ff3b30','#5856d6','#00b388','#ff6b35','#c8392b','#1abc9c'];
     sellers.forEach((seller,si)=>{
-        const baseColor=DYN_COLORS[si%DYN_COLORS.length];
-        xYears.forEach((y,yi)=>{
-            // Трохи змінюємо яскравість для різних років одного продавця
-            const opacity=yi===0?'ff':yi===1?'cc':'99';
-            const color=baseColor;
-            const dash=yi===0?[]:yi===1?[6,3]:[2,3];
-            const label=xYears.length>1?`${seller.split(' ').slice(0,2).join(' ')} (${y})`:seller.split(' ').slice(0,2).join(' ');
-            const data=xMonths.map(m=>{
-                if(!selPeriods.has(ymKey(y,m)))return null;
-                const rows=allData.filter(r=>r.рік===y&&r.місяць===m&&r.продавець===seller);
-                if(!rows.length)return null;
-                const vals=rows.map(r=>r[dynMetricKey]).filter(v=>v!=null);
-                if(!vals.length)return null;
-                return isPct?vals.reduce((a,b)=>a+b,0)/vals.length:vals.reduce((a,b)=>a+b,0);
-            });
-            if(data.every(v=>v===null))return;
-            datasets.push({label,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true,borderDash:dash});
+        const color=DYN_COLORS[si%DYN_COLORS.length];
+        const label=seller.split(' ').slice(0,2).join(' ');
+        // Дані по кожній парі рік+місяць у хронологічному порядку
+        const data=allPairs.map(p=>{
+            const rows=allData.filter(r=>r.рік===p.y&&r.місяць===p.m&&r.продавець===seller);
+            if(!rows.length)return null;
+            const vals=rows.map(r=>r[dynMetricKey]).filter(v=>v!=null);
+            if(!vals.length)return null;
+            return isPct?vals.reduce((a,b)=>a+b,0)/vals.length:vals.reduce((a,b)=>a+b,0);
         });
+        if(data.every(v=>v===null))return;
+        datasets.push({label,data,borderColor:color,backgroundColor:color+'18',pointBackgroundColor:color,pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,pointHoverRadius:7,tension:0.35,fill:false,spanGaps:true});
     });
 
     if(dynChartInstance){dynChartInstance.destroy();dynChartInstance=null;}
@@ -1124,16 +1165,117 @@ function animateCards(grid){
 }
 
 
+// ── CATEGORIES VIEW ──
+const CAT_KEYS = ['AV','IT','DIG','SDA','MDA','NIP','ACC'];
+const CAT_COLORS = {
+    'AV' :'#c8392b', 'IT' :'#8e44ad', 'DIG':'#e67e22',
+    'SDA':'#d35400', 'MDA':'#2980b9', 'NIP':'#27ae60', 'ACC':'#ff9500'
+};
+const CAT_LABELS = {
+    'AV':'AV','IT':'IT','DIG':'DIG','SDA':'SDA','MDA':'MDA','NIP':'NIP','ACC':'ACC'
+};
+
+function renderCat(){
+    const data=filteredData();
+    const banner=document.getElementById('catSummaryBanner');
+    const grid=document.getElementById('catGrid');
+    banner.innerHTML='';grid.innerHTML='';
+
+    if(!data.length){
+        grid.innerHTML='<div class="status-box">Немає даних за обраний період</div>';
+        return;
+    }
+
+    // Агрегуємо по всіх продавцях
+    const totals={};
+    let grandTotal=0;
+    CAT_KEYS.forEach(k=>{
+        const sum=data.reduce((s,r)=>s+(r[k]!=null?r[k]:0),0);
+        totals[k]=sum;
+        grandTotal+=sum;
+    });
+
+    // Середнє по магазину = grandTotal / кількість унікальних місяців
+    const uniqueMonths=new Set(data.map(r=>r.рік+'-'+r.місяць)).size;
+
+    // Banner — загальна сума + кількість категорій
+    const activeCats=CAT_KEYS.filter(k=>totals[k]>0);
+    const mkStat=(label,val,color='#1d1d1f')=>`
+        <div class="cat-stat">
+            <div class="cat-stat-lbl">${label}</div>
+            <div class="cat-stat-val" style="color:${color}">${val}</div>
+        </div>`;
+    const div=`<div class="cat-divider"></div>`;
+
+    const avgMonthly=uniqueMonths>0?grandTotal/uniqueMonths:0;
+    banner.innerHTML=`<div class="cat-summary-banner">
+        ${mkStat('Загальна сума категорій',fmtV(grandTotal,'money'),'#1d1d1f')}
+        ${div}${mkStat('Місяців у вибірці',uniqueMonths,'#5856d6')}
+        ${div}${mkStat('Сер. на місяць',fmtV(avgMonthly,'money'),'#0071e3')}
+        ${div}${mkStat('Активних кат.',activeCats.length,'#34c759')}
+    </div>`;
+
+    // Сортуємо категорії за сумою
+    const sorted=[...CAT_KEYS].sort((a,b)=>totals[b]-totals[a]);
+    const maxCatVal=totals[sorted[0]]||1;
+
+    // Середнє по категоріях (рівномірний розподіл)
+    const catAvg=activeCats.length>0?grandTotal/activeCats.length:0;
+
+    sorted.forEach(cat=>{
+        const val=totals[cat];
+        const color=CAT_COLORS[cat]||'#5856d6';
+        const pct=grandTotal>0?(val/grandTotal*100):0;
+        const barPct=maxCatVal>0?(val/maxCatVal*100):0;
+
+        // Відхилення від середнього по категоріях
+        const dev=val-catAvg;
+        const devPct=catAvg>0?(dev/catAvg*100):0;
+        const devCls=Math.abs(devPct)<2?'flat':dev>0?'up':'down';
+        const devSign=dev>=0?'+':'';
+        const devStr=`${devSign}${fmtV(Math.abs(dev),'money')} (${devSign}${devPct.toFixed(1)}%)`;
+
+        // Середнє на місяць для категорії
+        const avgMon=uniqueMonths>0?val/uniqueMonths:0;
+
+        const card=document.createElement('div');
+        card.className='cat-card';
+        card.innerHTML=`
+            <div class="cat-card-bg" style="background:${color};width:100%"></div>
+            <div class="cat-card-name" style="color:${color}">${CAT_LABELS[cat]}</div>
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:6px">
+                <div>
+                    <div class="cat-pct" style="color:${color}">${pct.toFixed(1)}%</div>
+                    <div class="cat-pct-lbl">частка продажів</div>
+                </div>
+                <div style="text-align:right">
+                    <div class="cat-sum" style="color:${color}">${fmtV(val,'money')}</div>
+                    <div style="font-size:9px;color:var(--text-sec)">сер. ${fmtV(avgMon,'money')}/міс</div>
+                </div>
+            </div>
+            <span class="cat-dev ${devCls}">
+                ${dev>=0?'▲':'▼'} ${devStr} від сер.
+            </span>
+            <div class="cat-bar-bg">
+                <div class="cat-bar-fill" style="width:${barPct}%;background:${color}"></div>
+            </div>`;
+        grid.appendChild(card);
+    });
+}
+
 function setView(mode){
     viewMode=mode;
     document.getElementById('btnTable').classList.toggle('active',mode==='table');
     document.getElementById('btnRating').classList.toggle('active',mode==='rating');
     document.getElementById('btnDyn').classList.toggle('active',mode==='dyn');
+    document.getElementById('btnCat').classList.toggle('active',mode==='cat');
     document.getElementById('tableSection').style.display=mode==='table'?'':'none';
     document.getElementById('ratingPanel').classList.toggle('visible',mode==='rating');
     document.getElementById('dynPanel').classList.toggle('visible',mode==='dyn');
+    document.getElementById('catPanel').classList.toggle('visible',mode==='cat');
     if(mode==='rating')renderRating();
     else if(mode==='dyn'){renderDynControls();renderDynChart();}
+    else if(mode==='cat')renderCat();
     else renderTable();
 }
 
