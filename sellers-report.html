@@ -7,6 +7,7 @@
     <title>Звіт по продавцях</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <style>
         :root{--bg:#f5f5f7;--text:#1d1d1f;--text-sec:#6e6e73;--accent:#0071e3;--border:#d2d2d7;--card:#fff;--shadow:0 4px 20px rgba(0,0,0,.06)}
         *{box-sizing:border-box;margin:0;padding:0}
@@ -253,6 +254,14 @@
     .cat-dev.flat{background:rgba(134,134,139,.10);color:#6e6e73}
     .cat-bar-bg{height:5px;background:#ebebef;border-radius:3px;margin-top:8px;overflow:hidden}
     .cat-bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+    /* Cat table */
+    #catTable th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#a0a0ab;padding:8px 10px;border-bottom:2px solid #f0f0f2;text-align:right;white-space:nowrap}
+    #catTable th:first-child{text-align:left}
+    #catTable td{font-size:11px;padding:7px 10px;border-bottom:1px solid #f5f5f7;text-align:right;white-space:nowrap}
+    #catTable td:first-child{text-align:left;font-weight:700}
+    #catTable tr:last-child td{border-bottom:none;font-weight:800;background:#f9f9fb}
+    #catTable tr:hover td{background:#f5f8ff}
+    .cat-color-dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;flex-shrink:0}
 
     /* Skeleton */
     @keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
@@ -329,6 +338,17 @@
 
 <div class="cat-panel" id="catPanel">
     <div id="catSummaryBanner"></div>
+    <div id="catDonutWrap" style="background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px;margin-bottom:12px;display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px">
+            <div style="font-size:13px;font-weight:700">Структура продажів за категоріями</div>
+        </div>
+        <div style="position:relative;height:280px;max-width:420px;margin:0 auto">
+            <canvas id="catDonutCanvas"></canvas>
+        </div>
+    </div>
+    <div id="catTableWrap" style="background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow-x:auto;margin-bottom:12px;display:none">
+        <table id="catTable" style="width:100%;border-collapse:collapse;table-layout:auto"></table>
+    </div>
     <div class="cat-grid" id="catGrid"></div>
 </div>
 
@@ -659,15 +679,28 @@ function renderFilters(){
         pp.appendChild(b);
     });
 
-    // Продавці
+    // Продавці — "Всі" toggle
     const sp=document.getElementById('sellerPills');sp.innerHTML='';
-    mkPillAll(sp,'Всі',selSellers.size===0,()=>{selSellers.clear();refresh();});
+    const allSellersActive=selSellers.size===0;
+    const sab=document.createElement('button');
+    sab.className='pill'+(allSellersActive?' active':'');
+    sab.textContent='Всі';
+    sab.onclick=()=>{
+        if(selSellers.size===0){
+            // Знімаємо "всі" — залишаємо першого продавця
+            if(allSellers.length) selSellers.add(allSellers[0]);
+        } else {
+            selSellers.clear(); // вибрати всіх = очистити фільтр
+        }
+        renderFilters();refresh();
+    };
+    sp.appendChild(sab);
     allSellers.forEach(s=>{
         mkPill(sp,s.split(' ').slice(0,2).join(' '),selSellers.size===0||selSellers.has(s),()=>{
             if(selSellers.size===0){selSellers.add(s);}
-            else if(selSellers.has(s)){selSellers.delete(s);}
+            else if(selSellers.has(s)){if(selSellers.size>1)selSellers.delete(s);}
             else{selSellers.add(s);}
-            refresh();
+            renderFilters();refresh();
         },'data-seller',s);
     });
 }
@@ -1175,90 +1208,129 @@ const CAT_LABELS = {
     'AV':'AV','IT':'IT','DIG':'DIG','SDA':'SDA','MDA':'MDA','NIP':'NIP','ACC':'ACC'
 };
 
+let catChartInstance=null;
+
 function renderCat(){
     const data=filteredData();
     const banner=document.getElementById('catSummaryBanner');
     const grid=document.getElementById('catGrid');
+    const donutWrap=document.getElementById('catDonutWrap');
+    const tableWrap=document.getElementById('catTableWrap');
     banner.innerHTML='';grid.innerHTML='';
+    donutWrap.style.display='none';tableWrap.style.display='none';
+    if(catChartInstance){catChartInstance.destroy();catChartInstance=null;}
 
     if(!data.length){
         grid.innerHTML='<div class="status-box">Немає даних за обраний період</div>';
         return;
     }
 
-    // Агрегуємо по всіх продавцях
-    const totals={};
-    let grandTotal=0;
-    CAT_KEYS.forEach(k=>{
-        const sum=data.reduce((s,r)=>s+(r[k]!=null?r[k]:0),0);
-        totals[k]=sum;
-        grandTotal+=sum;
+    const totals={};let grandTotal=0;
+    CAT_KEYS.forEach(k=>{const sum=data.reduce((s,r)=>s+(r[k]!=null?r[k]:0),0);totals[k]=sum;grandTotal+=sum;});
+
+    const uniqueMonths=new Set(data.map(r=>r.рік+'-'+r.місяць)).size;
+    const activeCats=CAT_KEYS.filter(k=>totals[k]>0);
+    const sorted=[...CAT_KEYS].sort((a,b)=>totals[b]-totals[a]).filter(k=>totals[k]>0);
+    const catAvg=activeCats.length>0?grandTotal/activeCats.length:0;
+    const avgMonthly=uniqueMonths>0?grandTotal/uniqueMonths:0;
+
+    // BANNER
+    const mkStat=(label,val,color='#1d1d1f')=>`<div class="cat-stat"><div class="cat-stat-lbl">${label}</div><div class="cat-stat-val" style="color:${color}">${val}</div></div>`;
+    const dv=`<div class="cat-divider"></div>`;
+    banner.innerHTML=`<div class="cat-summary-banner">${mkStat('Загальна сума',fmtV(grandTotal,'money'),'#1d1d1f')}${dv}${mkStat('Місяців',uniqueMonths,'#5856d6')}${dv}${mkStat('Сер./місяць',fmtV(avgMonthly,'money'),'#0071e3')}${dv}${mkStat('Категорій',activeCats.length,'#34c759')}</div>`;
+
+    if(!sorted.length)return;
+
+    // DONUT CHART
+    donutWrap.style.display='block';
+    const canvas=document.getElementById('catDonutCanvas');
+    catChartInstance=new Chart(canvas,{
+        type:'doughnut',
+        plugins:[ChartDataLabels],
+        data:{
+            labels:sorted.map(k=>CAT_LABELS[k]),
+            datasets:[{
+                data:sorted.map(k=>totals[k]),
+                backgroundColor:sorted.map(k=>CAT_COLORS[k]+'dd'),
+                borderColor:sorted.map(k=>CAT_COLORS[k]),
+                borderWidth:2,hoverOffset:8
+            }]
+        },
+        options:{
+            responsive:true,maintainAspectRatio:false,cutout:'56%',
+            layout:{padding:20},
+            plugins:{
+                legend:{display:true,position:'right',
+                    labels:{font:{family:'Inter',size:11,weight:'600'},padding:10,boxWidth:12,boxHeight:12,
+                        generateLabels(c){return c.data.labels.map((lbl,i)=>{
+                            const val=c.data.datasets[0].data[i];
+                            const pct=grandTotal>0?(val/grandTotal*100).toFixed(1):'0';
+                            return{text:`${lbl}  ${pct}%`,fillStyle:c.data.datasets[0].backgroundColor[i],strokeStyle:c.data.datasets[0].borderColor[i],lineWidth:1,index:i};
+                        });}
+                    }
+                },
+                tooltip:{backgroundColor:'#1d1d1f',callbacks:{label:c=>{const pct=grandTotal>0?(c.raw/grandTotal*100).toFixed(1):'0';return` ${fmtV(c.raw,'money')} (${pct}%)`; }}},
+                datalabels:{
+                    display:ctx=>ctx.dataset.data[ctx.dataIndex]/grandTotal>0.04,
+                    color:'#fff',font:{family:'Inter',size:11,weight:'700'},
+                    formatter:(val)=>(grandTotal>0?(val/grandTotal*100).toFixed(1):'0')+'%'
+                }
+            }
+        }
     });
 
-    // Середнє по магазину = grandTotal / кількість унікальних місяців
-    const uniqueMonths=new Set(data.map(r=>r.рік+'-'+r.місяць)).size;
-
-    // Banner — загальна сума + кількість категорій
-    const activeCats=CAT_KEYS.filter(k=>totals[k]>0);
-    const mkStat=(label,val,color='#1d1d1f')=>`
-        <div class="cat-stat">
-            <div class="cat-stat-lbl">${label}</div>
-            <div class="cat-stat-val" style="color:${color}">${val}</div>
-        </div>`;
-    const div=`<div class="cat-divider"></div>`;
-
-    const avgMonthly=uniqueMonths>0?grandTotal/uniqueMonths:0;
-    banner.innerHTML=`<div class="cat-summary-banner">
-        ${mkStat('Загальна сума категорій',fmtV(grandTotal,'money'),'#1d1d1f')}
-        ${div}${mkStat('Місяців у вибірці',uniqueMonths,'#5856d6')}
-        ${div}${mkStat('Сер. на місяць',fmtV(avgMonthly,'money'),'#0071e3')}
-        ${div}${mkStat('Активних кат.',activeCats.length,'#34c759')}
-    </div>`;
-
-    // Сортуємо категорії за сумою
-    const sorted=[...CAT_KEYS].sort((a,b)=>totals[b]-totals[a]);
-    const maxCatVal=totals[sorted[0]]||1;
-
-    // Середнє по категоріях (рівномірний розподіл)
-    const catAvg=activeCats.length>0?grandTotal/activeCats.length:0;
-
+    // TABLE
+    tableWrap.style.display='block';
+    const tbl=document.getElementById('catTable');
+    tbl.innerHTML='';
+    const thead=document.createElement('thead');
+    thead.innerHTML=`<tr>
+        <th style="text-align:left;padding-left:14px">Категорія</th>
+        <th>Сума</th><th>Частка</th><th>Сер./міс</th><th>Відхилення від сер.</th>
+    </tr>`;
+    tbl.appendChild(thead);
+    const tbody=document.createElement('tbody');
     sorted.forEach(cat=>{
-        const val=totals[cat];
-        const color=CAT_COLORS[cat]||'#5856d6';
+        const val=totals[cat];const color=CAT_COLORS[cat];
+        const pct=grandTotal>0?(val/grandTotal*100):0;
+        const avgMon=uniqueMonths>0?val/uniqueMonths:0;
+        const dev=val-catAvg;const devPct=catAvg>0?(dev/catAvg*100):0;
+        const devSign=dev>=0?'+':'';const devColor=dev>=0?'#1a7f37':'#c0392b';
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
+            <td style="padding-left:14px"><span class="cat-color-dot" style="background:${color}"></span>${cat}</td>
+            <td style="font-weight:700;color:${color}">${fmtV(val,'money')}</td>
+            <td style="font-weight:700">${pct.toFixed(1)}%</td>
+            <td style="color:#6e6e73">${fmtV(avgMon,'money')}</td>
+            <td style="font-weight:700;color:${devColor}">${dev>=0?'▲':'▼'} ${devSign}${fmtV(Math.abs(dev),'money')} (${devSign}${devPct.toFixed(1)}%)</td>`;
+        tbody.appendChild(tr);
+    });
+    const trTot=document.createElement('tr');
+    trTot.innerHTML=`<td style="padding-left:14px;font-weight:800">Загалом</td><td style="font-weight:800">${fmtV(grandTotal,'money')}</td><td style="font-weight:800">100%</td><td style="color:#6e6e73;font-weight:700">${fmtV(avgMonthly,'money')}</td><td>—</td>`;
+    tbody.appendChild(trTot);
+    tbl.appendChild(tbody);
+
+    // CARDS
+    grid.innerHTML='';
+    const maxCatVal=totals[sorted[0]]||1;
+    sorted.forEach(cat=>{
+        const val=totals[cat];const color=CAT_COLORS[cat]||'#5856d6';
         const pct=grandTotal>0?(val/grandTotal*100):0;
         const barPct=maxCatVal>0?(val/maxCatVal*100):0;
-
-        // Відхилення від середнього по категоріях
-        const dev=val-catAvg;
-        const devPct=catAvg>0?(dev/catAvg*100):0;
+        const dev=val-catAvg;const devPct=catAvg>0?(dev/catAvg*100):0;
         const devCls=Math.abs(devPct)<2?'flat':dev>0?'up':'down';
         const devSign=dev>=0?'+':'';
-        const devStr=`${devSign}${fmtV(Math.abs(dev),'money')} (${devSign}${devPct.toFixed(1)}%)`;
-
-        // Середнє на місяць для категорії
         const avgMon=uniqueMonths>0?val/uniqueMonths:0;
-
-        const card=document.createElement('div');
-        card.className='cat-card';
+        const card=document.createElement('div');card.className='cat-card';
         card.innerHTML=`
             <div class="cat-card-bg" style="background:${color};width:100%"></div>
-            <div class="cat-card-name" style="color:${color}">${CAT_LABELS[cat]}</div>
+            <div class="cat-card-name" style="color:${color}">${cat}</div>
             <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:6px">
-                <div>
-                    <div class="cat-pct" style="color:${color}">${pct.toFixed(1)}%</div>
-                    <div class="cat-pct-lbl">частка продажів</div>
-                </div>
-                <div style="text-align:right">
-                    <div class="cat-sum" style="color:${color}">${fmtV(val,'money')}</div>
-                    <div style="font-size:9px;color:var(--text-sec)">сер. ${fmtV(avgMon,'money')}/міс</div>
-                </div>
+                <div><div class="cat-pct" style="color:${color}">${pct.toFixed(1)}%</div><div class="cat-pct-lbl">частка</div></div>
+                <div style="text-align:right"><div class="cat-sum" style="color:${color}">${fmtV(val,'money')}</div><div style="font-size:9px;color:var(--text-sec)">сер. ${fmtV(avgMon,'money')}/міс</div></div>
             </div>
-            <span class="cat-dev ${devCls}">
-                ${dev>=0?'▲':'▼'} ${devStr} від сер.
-            </span>
-            <div class="cat-bar-bg">
-                <div class="cat-bar-fill" style="width:${barPct}%;background:${color}"></div>
-            </div>`;
+            <span class="cat-dev ${devCls}">${dev>=0?'▲':'▼'} ${devSign}${fmtV(Math.abs(dev),'money')} (${devSign}${devPct.toFixed(1)}%)</span>
+            <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${barPct}%;background:${color}"></div></div>`;
         grid.appendChild(card);
     });
 }
