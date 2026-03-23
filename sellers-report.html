@@ -686,12 +686,8 @@ function renderFilters(){
     sab.className='pill'+(allSellersActive?' active':'');
     sab.textContent='Всі';
     sab.onclick=()=>{
-        if(selSellers.size===0){
-            // Знімаємо "всі" — залишаємо першого продавця
-            if(allSellers.length) selSellers.add(allSellers[0]);
-        } else {
-            selSellers.clear(); // вибрати всіх = очистити фільтр
-        }
+        // Toggle: якщо є будь-який окремий вибір → повертаємо "всі" (clear); якщо вже "всі" → нічого (залишаємо "всі")
+        selSellers.clear();
         renderFilters();refresh();
     };
     sp.appendChild(sab);
@@ -1221,23 +1217,45 @@ function renderCat(){
     if(catChartInstance){catChartInstance.destroy();catChartInstance=null;}
 
     if(!data.length){
-        grid.innerHTML='<div class="status-box">Немає даних за обраний період</div>';
+        banner.innerHTML='<div class="status-box">Немає даних за обраний період</div>';
         return;
     }
 
-    const totals={};let grandTotal=0;
-    CAT_KEYS.forEach(k=>{const sum=data.reduce((s,r)=>s+(r[k]!=null?r[k]:0),0);totals[k]=sum;grandTotal+=sum;});
-
+    // Унікальні місяці у вибірці
     const uniqueMonths=new Set(data.map(r=>r.рік+'-'+r.місяць)).size;
+
+    // Сума по кожній категорії за весь вибраний період
+    const totals={};let grandTotal=0;
+    CAT_KEYS.forEach(k=>{
+        const sum=data.reduce((s,r)=>s+(r[k]!=null?r[k]:0),0);
+        totals[k]=sum;grandTotal+=sum;
+    });
+
     const activeCats=CAT_KEYS.filter(k=>totals[k]>0);
     const sorted=[...CAT_KEYS].sort((a,b)=>totals[b]-totals[a]).filter(k=>totals[k]>0);
-    const catAvg=activeCats.length>0?grandTotal/activeCats.length:0;
+
+    // Середньозважене по місяцю для кожної категорії: сума ÷ кількість місяців у вибірці
+    // Відхилення = сума категорії — її ж місячне середнє × місяців (різниця між тим що є і "рівномірним" місячним темпом)
+    // Але логіка: "відхилення" = сума_кат vs середня_сума_по_всіх_кат_на_місяць × місяців
+    // Тобто: середнє по магазину на місяць по всіх кат = grandTotal / uniqueMonths
+    // Для кожної кат: очікувана сума = (grandTotal / activeCats.length) — рівний розподіл
+    // А порівнюємо місячні: avgMon_кат vs avgMon_по_всіх = grandTotal/activeCats/uniqueMonths
+    const storeAvgMonPerCat = activeCats.length>0 && uniqueMonths>0
+        ? (grandTotal / activeCats.length) / uniqueMonths
+        : 0; // середнє по місяцю на 1 категорію в магазині
+
     const avgMonthly=uniqueMonths>0?grandTotal/uniqueMonths:0;
 
     // BANNER
-    const mkStat=(label,val,color='#1d1d1f')=>`<div class="cat-stat"><div class="cat-stat-lbl">${label}</div><div class="cat-stat-val" style="color:${color}">${val}</div></div>`;
+    const mkStat=(lbl,val,color='#1d1d1f')=>
+        `<div class="cat-stat"><div class="cat-stat-lbl">${lbl}</div><div class="cat-stat-val" style="color:${color}">${val}</div></div>`;
     const dv=`<div class="cat-divider"></div>`;
-    banner.innerHTML=`<div class="cat-summary-banner">${mkStat('Загальна сума',fmtV(grandTotal,'money'),'#1d1d1f')}${dv}${mkStat('Місяців',uniqueMonths,'#5856d6')}${dv}${mkStat('Сер./місяць',fmtV(avgMonthly,'money'),'#0071e3')}${dv}${mkStat('Категорій',activeCats.length,'#34c759')}</div>`;
+    banner.innerHTML=`<div class="cat-summary-banner">
+        ${mkStat('Загальна сума',fmtV(grandTotal,'money'),'#1d1d1f')}
+        ${dv}${mkStat('Місяців у вибірці',uniqueMonths,'#5856d6')}
+        ${dv}${mkStat('Сер./місяць (загалом)',fmtV(avgMonthly,'money'),'#0071e3')}
+        ${dv}${mkStat('Сер./місяць на кат.',fmtV(storeAvgMonPerCat,'money'),'#34c759')}
+    </div>`;
 
     if(!sorted.length)return;
 
@@ -1248,93 +1266,114 @@ function renderCat(){
         type:'doughnut',
         plugins:[ChartDataLabels],
         data:{
-            labels:sorted.map(k=>CAT_LABELS[k]),
+            labels:sorted.map(k=>k),
             datasets:[{
                 data:sorted.map(k=>totals[k]),
-                backgroundColor:sorted.map(k=>CAT_COLORS[k]+'dd'),
-                borderColor:sorted.map(k=>CAT_COLORS[k]),
-                borderWidth:2,hoverOffset:8
+                backgroundColor:sorted.map(k=>CAT_COLORS[k]),
+                borderColor:'#fff',
+                borderWidth:3,
+                hoverOffset:10
             }]
         },
         options:{
-            responsive:true,maintainAspectRatio:false,cutout:'56%',
-            layout:{padding:20},
+            responsive:true,maintainAspectRatio:false,cutout:'52%',
+            layout:{padding:{top:10,bottom:10,left:10,right:10}},
             plugins:{
-                legend:{display:true,position:'right',
-                    labels:{font:{family:'Inter',size:11,weight:'600'},padding:10,boxWidth:12,boxHeight:12,
-                        generateLabels(c){return c.data.labels.map((lbl,i)=>{
-                            const val=c.data.datasets[0].data[i];
-                            const pct=grandTotal>0?(val/grandTotal*100).toFixed(1):'0';
-                            return{text:`${lbl}  ${pct}%`,fillStyle:c.data.datasets[0].backgroundColor[i],strokeStyle:c.data.datasets[0].borderColor[i],lineWidth:1,index:i};
-                        });}
+                legend:{
+                    display:true,position:'right',
+                    labels:{
+                        font:{family:'Inter',size:11,weight:'600'},
+                        padding:12,boxWidth:13,boxHeight:13,
+                        generateLabels(c){
+                            return c.data.labels.map((lbl,i)=>{
+                                const val=c.data.datasets[0].data[i];
+                                const pct=grandTotal>0?(val/grandTotal*100).toFixed(1):'0';
+                                const avgM=uniqueMonths>0?val/uniqueMonths:0;
+                                return{
+                                    text:`${lbl}  ${pct}%  ${fmtV(val,'money')}`,
+                                    fillStyle:c.data.datasets[0].backgroundColor[i],
+                                    strokeStyle:'#fff',lineWidth:0,index:i
+                                };
+                            });
+                        }
                     }
                 },
-                tooltip:{backgroundColor:'#1d1d1f',callbacks:{label:c=>{const pct=grandTotal>0?(c.raw/grandTotal*100).toFixed(1):'0';return` ${fmtV(c.raw,'money')} (${pct}%)`; }}},
+                tooltip:{
+                    backgroundColor:'#1d1d1f',
+                    callbacks:{
+                        label:c=>{
+                            const pct=grandTotal>0?(c.raw/grandTotal*100).toFixed(1):'0';
+                            const avgM=uniqueMonths>0?c.raw/uniqueMonths:0;
+                            return[
+                                ` Сума: ${fmtV(c.raw,'money')} (${pct}%)`,
+                                ` Сер./міс: ${fmtV(avgM,'money')}`
+                            ];
+                        }
+                    }
+                },
                 datalabels:{
-                    display:ctx=>ctx.dataset.data[ctx.dataIndex]/grandTotal>0.04,
-                    color:'#fff',font:{family:'Inter',size:11,weight:'700'},
-                    formatter:(val)=>(grandTotal>0?(val/grandTotal*100).toFixed(1):'0')+'%'
+                    display:ctx=>ctx.dataset.data[ctx.dataIndex]/grandTotal>0.03,
+                    color:'#fff',
+                    font:{family:'Inter',size:10,weight:'700'},
+                    textAlign:'center',
+                    formatter:(val,ctx)=>{
+                        const lbl=ctx.chart.data.labels[ctx.dataIndex];
+                        const pct=grandTotal>0?(val/grandTotal*100).toFixed(1):'0';
+                        return `${lbl}\n${pct}%`;
+                    }
                 }
             }
         }
     });
 
-    // TABLE
+    // TABLE — Сума / Частка / Сер./міс / Відхилення сер./міс від середнього по кат.
     tableWrap.style.display='block';
     const tbl=document.getElementById('catTable');
     tbl.innerHTML='';
     const thead=document.createElement('thead');
     thead.innerHTML=`<tr>
         <th style="text-align:left;padding-left:14px">Категорія</th>
-        <th>Сума</th><th>Частка</th><th>Сер./міс</th><th>Відхилення від сер.</th>
+        <th>Сума за період</th>
+        <th>Частка</th>
+        <th>Сер./міс</th>
+        <th>Відхилення сер./міс від сер. по маг.</th>
     </tr>`;
     tbl.appendChild(thead);
     const tbody=document.createElement('tbody');
     sorted.forEach(cat=>{
-        const val=totals[cat];const color=CAT_COLORS[cat];
+        const val=totals[cat];
+        const color=CAT_COLORS[cat];
         const pct=grandTotal>0?(val/grandTotal*100):0;
+        // Середнє на місяць для цієї категорії
         const avgMon=uniqueMonths>0?val/uniqueMonths:0;
-        const dev=val-catAvg;const devPct=catAvg>0?(dev/catAvg*100):0;
-        const devSign=dev>=0?'+':'';const devColor=dev>=0?'#1a7f37':'#c0392b';
+        // Відхилення місячного від середнього по магазину на категорію
+        const dev=avgMon-storeAvgMonPerCat;
+        const devPct=storeAvgMonPerCat>0?(dev/storeAvgMonPerCat*100):0;
+        const devSign=dev>=0?'+':'';
+        const devColor=dev>=0?'#1a7f37':'#c0392b';
         const tr=document.createElement('tr');
         tr.innerHTML=`
-            <td style="padding-left:14px"><span class="cat-color-dot" style="background:${color}"></span>${cat}</td>
+            <td style="padding-left:14px"><span class="cat-color-dot" style="background:${color}"></span><strong>${cat}</strong></td>
             <td style="font-weight:700;color:${color}">${fmtV(val,'money')}</td>
             <td style="font-weight:700">${pct.toFixed(1)}%</td>
-            <td style="color:#6e6e73">${fmtV(avgMon,'money')}</td>
+            <td style="color:#1d1d1f;font-weight:600">${fmtV(avgMon,'money')}</td>
             <td style="font-weight:700;color:${devColor}">${dev>=0?'▲':'▼'} ${devSign}${fmtV(Math.abs(dev),'money')} (${devSign}${devPct.toFixed(1)}%)</td>`;
         tbody.appendChild(tr);
     });
+    // Підсумок
     const trTot=document.createElement('tr');
-    trTot.innerHTML=`<td style="padding-left:14px;font-weight:800">Загалом</td><td style="font-weight:800">${fmtV(grandTotal,'money')}</td><td style="font-weight:800">100%</td><td style="color:#6e6e73;font-weight:700">${fmtV(avgMonthly,'money')}</td><td>—</td>`;
+    trTot.innerHTML=`
+        <td style="padding-left:14px;font-weight:800">Загалом</td>
+        <td style="font-weight:800">${fmtV(grandTotal,'money')}</td>
+        <td style="font-weight:800">100%</td>
+        <td style="font-weight:700">${fmtV(avgMonthly,'money')}</td>
+        <td style="color:#86868b">—</td>`;
     tbody.appendChild(trTot);
     tbl.appendChild(tbody);
 
-    // CARDS
-    grid.innerHTML='';
-    const maxCatVal=totals[sorted[0]]||1;
-    sorted.forEach(cat=>{
-        const val=totals[cat];const color=CAT_COLORS[cat]||'#5856d6';
-        const pct=grandTotal>0?(val/grandTotal*100):0;
-        const barPct=maxCatVal>0?(val/maxCatVal*100):0;
-        const dev=val-catAvg;const devPct=catAvg>0?(dev/catAvg*100):0;
-        const devCls=Math.abs(devPct)<2?'flat':dev>0?'up':'down';
-        const devSign=dev>=0?'+':'';
-        const avgMon=uniqueMonths>0?val/uniqueMonths:0;
-        const card=document.createElement('div');card.className='cat-card';
-        card.innerHTML=`
-            <div class="cat-card-bg" style="background:${color};width:100%"></div>
-            <div class="cat-card-name" style="color:${color}">${cat}</div>
-            <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:6px">
-                <div><div class="cat-pct" style="color:${color}">${pct.toFixed(1)}%</div><div class="cat-pct-lbl">частка</div></div>
-                <div style="text-align:right"><div class="cat-sum" style="color:${color}">${fmtV(val,'money')}</div><div style="font-size:9px;color:var(--text-sec)">сер. ${fmtV(avgMon,'money')}/міс</div></div>
-            </div>
-            <span class="cat-dev ${devCls}">${dev>=0?'▲':'▼'} ${devSign}${fmtV(Math.abs(dev),'money')} (${devSign}${devPct.toFixed(1)}%)</span>
-            <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${barPct}%;background:${color}"></div></div>`;
-        grid.appendChild(card);
-    });
+    // Без карток
+    grid.style.display='none';
 }
-
 function setView(mode){
     viewMode=mode;
     document.getElementById('btnTable').classList.toggle('active',mode==='table');
