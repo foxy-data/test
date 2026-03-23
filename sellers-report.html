@@ -230,6 +230,19 @@
 
     .status-box{padding:40px;text-align:center;color:var(--text-sec);font-size:14px}
     .status-box.error{color:#ff3b30}
+    /* DYN INFO TABLE */
+    #dynInfoTable table{width:100%;border-collapse:collapse;table-layout:auto}
+    #dynInfoTable th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#a0a0ab;padding:8px 12px;border-bottom:2px solid #f0f0f2;text-align:right;white-space:nowrap;position:sticky;top:0;background:#fff;z-index:2}
+    #dynInfoTable th:first-child{text-align:left;z-index:3}
+    #dynInfoTable td{font-size:11px;padding:7px 12px;border-bottom:1px solid #f5f5f7;text-align:right;white-space:nowrap}
+    #dynInfoTable td:first-child{text-align:left;font-weight:700;font-size:10px;color:var(--text-sec);position:sticky;left:0;background:#fff;z-index:1;border-right:1px solid #f0f0f2}
+    #dynInfoTable tr:last-child td{border-bottom:none}
+    #dynInfoTable tr:hover td{background:#f5f8ff}
+    #dynInfoTable tr:hover td:first-child{background:#f5f8ff}
+    .dyn-val-cell{font-weight:700}
+    .dyn-dev-up{color:#1a7f37;font-weight:700}
+    .dyn-dev-down{color:#c0392b;font-weight:700}
+    .dyn-dev-flat{color:#86868b}
 
     /* CATEGORIES VIEW */
     .cat-panel{display:none}
@@ -315,6 +328,7 @@
     <div class="dyn-chart-card">
         <div id="dynChartBody"><div class="dyn-empty">📊 Оберіть показник і продавця</div></div>
     </div>
+    <div id="dynInfoTable" style="display:none;background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow-x:auto;margin-top:0;-webkit-overflow-scrolling:touch"></div>
 </div>
 
 <!-- RATING VIEW -->
@@ -1036,6 +1050,159 @@ function renderDynChart(){
             }
         }
     });
+    renderDynInfoTable(sellers, fd);
+}
+
+// ── CALC metric value for a set of rows (з правильними формулами) ──
+function calcMetricForRows(rows, key){
+    if(!rows.length) return null;
+    const sum=k=>rows.reduce((s,r)=>s+(r[k]!=null?r[k]:0),0);
+    const avg=k=>{const vals=rows.map(r=>r[k]).filter(v=>v!=null);return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;};
+    switch(key){
+        // Абсолютні суми
+        case 'ТО': case 'Шт': case 'Чеки':
+        case 'Послуги грн': case 'ACC':
+        case 'AV': case 'DIG': case 'IT': case 'MDA': case 'NIP': case 'SDA':
+            return sum(key);
+        // % показники — формули
+        case 'Доля Послуг':{
+            const to=sum('ТО'); return to>0?(sum('Послуги грн')/to*100):null;
+        }
+        case '% Доля ACC':{
+            const to=sum('ТО'); return to>0?(sum('ACC')/to*100):null;
+        }
+        // Середній чек = ТО / Чеки
+        case 'Ср. Чек':{
+            const ch=sum('Чеки'); return ch>0?(sum('ТО')/ch):null;
+        }
+        // КПЧ = Шт / Чеки
+        case 'КПЧ':{
+            const ch=sum('Чеки'); return ch>0?(sum('Шт')/ch):null;
+        }
+        // ASP = Ср.Чек / КПЧ = ТО / Шт
+        case 'ASP':{
+            const sh=sum('Шт'); return sh>0?(sum('ТО')/sh):null;
+        }
+        // Конверсія — просто середнє
+        case 'Конверсія ПК':
+        case 'Конверсія ПК Offline':
+            return avg(key);
+        // CSI — середнє
+        case 'CSI': return avg(key);
+        // % УДС — сума (це грн)
+        case '% УДС': return sum(key);
+        default: return avg(key);
+    }
+}
+
+// Чи потрібно ділити на кількість продавців при порівнянні (абсолютні показники)
+function isAbsMetric(key){
+    return ['ТО','Шт','Чеки','Послуги грн','ACC','AV','DIG','IT','MDA','NIP','SDA','% УДС'].includes(key);
+}
+function isFormulaOrPct(key){
+    return ['Доля Послуг','% Доля ACC','Ср. Чек','КПЧ','ASP','Конверсія ПК','Конверсія ПК Offline','CSI'].includes(key);
+}
+
+function renderDynInfoTable(sellers, fd){
+    const wrap=document.getElementById('dynInfoTable');
+    wrap.style.display='none';
+    if(!sellers.length||!fd.length){return;}
+
+    // Метрики для рядків — показуємо ВСІ ключові показники незалежно від обраного
+    const INFO_METRICS=[
+        {key:'ТО',          label:'ТО',          fmt:'money'},
+        {key:'Послуги грн', label:'Послуги',      fmt:'money'},
+        {key:'Доля Послуг', label:'Посл.%',       fmt:'pct'},
+        {key:'ACC',         label:'ACC',          fmt:'money'},
+        {key:'% Доля ACC',  label:'ACC%',         fmt:'pct'},
+        {key:'Шт',          label:'Шт',           fmt:'int'},
+        {key:'Чеки',        label:'Чеки',         fmt:'int'},
+        {key:'Ср. Чек',     label:'Сер.чек',      fmt:'money'},
+        {key:'КПЧ',         label:'КПЧ',          fmt:'dec2'},
+        {key:'ASP',         label:'ASP',          fmt:'money'},
+        {key:'Конверсія ПК',label:'Конверсія',    fmt:'pct'},
+        {key:'AV',          label:'AV',           fmt:'money'},
+        {key:'IT',          label:'IT',           fmt:'money'},
+        {key:'DIG',         label:'DIG',          fmt:'money'},
+        {key:'SDA',         label:'SDA',          fmt:'money'},
+        {key:'MDA',         label:'MDA',          fmt:'money'},
+        {key:'NIP',         label:'NIP',          fmt:'money'},
+    ];
+
+    // Дані по магазину (всі продавці, ті ж місяці)
+    const storeRows=allData.filter(r=>selPeriods.size===0||selPeriods.has(ymKey(r.рік,r.місяць)));
+    const storeSellerCount=new Set(storeRows.map(r=>r.продавець)).size||1;
+
+    const DYN_COLORS=['#0071e3','#34c759','#ff9500','#af52de','#ff3b30','#5856d6','#00b388','#ff6b35'];
+
+    // Будуємо таблицю
+    wrap.style.display='block';
+    const tbl=document.createElement('table');
+
+    // Заголовок
+    const thead=document.createElement('thead');
+    let thHtml=`<th>Показник</th>`;
+    sellers.forEach((s,si)=>{
+        const color=DYN_COLORS[si%DYN_COLORS.length];
+        const sName=s.split(' ').slice(0,2).join(' ');
+        thHtml+=`<th style="color:${color}">${sName}</th><th style="color:${color};opacity:.7">↔ від маг.</th>`;
+    });
+    if(sellers.length>1) thHtml+=`<th style="color:#5856d6">Магазин сер.</th>`;
+    thead.innerHTML=`<tr>${thHtml}</tr>`;
+    tbl.appendChild(thead);
+
+    const tbody=document.createElement('tbody');
+
+    INFO_METRICS.forEach(m=>{
+        // Перевіряємо чи є хоч якісь дані по цьому показнику
+        const storeVal=calcMetricForRows(storeRows, m.key);
+        if(storeVal===null) return;
+
+        // Середнє по магазину на 1 продавця (для абсолютних)
+        const storeAvgPerSeller=isAbsMetric(m.key)?storeVal/storeSellerCount:storeVal;
+
+        const tr=document.createElement('tr');
+        // Виділяємо обраний показник
+        const isSelected=m.key===dynMetricKey;
+        if(isSelected) tr.style.cssText='background:#f0f4ff';
+
+        let tdHtml=`<td style="${isSelected?'color:var(--accent);':''}font-weight:${isSelected?'800':'700'}">${m.label}</td>`;
+
+        sellers.forEach((seller,si)=>{
+            const color=DYN_COLORS[si%DYN_COLORS.length];
+            const sellerRows=fd.filter(r=>r.продавець===seller);
+            const val=calcMetricForRows(sellerRows, m.key);
+            const valStr=val!=null?fmtV(val,m.fmt):'—';
+
+            // Відхилення: для абсолютних — від середнього на 1 продавця; для формульних — від значення магазину
+            let devHtml='<td class="dyn-dev-flat">—</td>';
+            if(val!=null&&storeVal!=null){
+                const ref=storeAvgPerSeller;
+                const dev=val-ref;
+                const devPct=ref!==0?(dev/Math.abs(ref)*100):0;
+                const devSign=dev>=0?'+':'';
+                const cls=Math.abs(devPct)<0.5?'dyn-dev-flat':dev>0?'dyn-dev-up':'dyn-dev-down';
+                const arrow=cls==='dyn-dev-flat'?'→':dev>0?'▲':'▼';
+                if(isFormulaOrPct(m.key)||m.fmt==='pct'){
+                    devHtml=`<td class="${cls}">${arrow} ${devSign}${fmtV(Math.abs(dev),m.fmt)}</td>`;
+                } else {
+                    devHtml=`<td class="${cls}">${arrow} ${devSign}${fmtV(Math.abs(dev),m.fmt)} (${devSign}${devPct.toFixed(1)}%)</td>`;
+                }
+            }
+            tdHtml+=`<td class="dyn-val-cell" style="color:${color}">${valStr}</td>${devHtml}`;
+        });
+
+        // Середнє по магазину (якщо кілька продавців)
+        if(sellers.length>1){
+            tdHtml+=`<td class="dyn-val-cell" style="color:#5856d6">${fmtV(storeAvgPerSeller,m.fmt)}</td>`;
+        }
+
+        tr.innerHTML=tdHtml;
+        tbody.appendChild(tr);
+    });
+    tbl.appendChild(tbody);
+    wrap.innerHTML='';
+    wrap.appendChild(tbl);
 }
 
 function renderRating(){
