@@ -287,6 +287,24 @@
     #catTable tr:hover td{background:#f5f8ff}
     .cat-color-dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;flex-shrink:0}
 
+    /* POTENTIAL VIEW */
+    .pot-panel{display:none}
+    .pot-section-title{font-size:11px;font-weight:700;color:var(--text-sec);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px}
+    .pot-store-banner{background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:12px 16px;margin-bottom:10px;display:flex;gap:0;border:1px solid rgba(0,0,0,0.06)}
+    .pot-stat{flex:1;text-align:center;padding:0 8px}
+    .pot-stat-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#a0a0ab;margin-bottom:3px}
+    .pot-stat-val{font-size:15px;font-weight:800}
+    .pot-divider{width:1px;background:#f0f0f2;flex-shrink:0}
+    .pot-card{background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:12px 14px;margin-bottom:8px;border:1px solid rgba(0,0,0,0.06);position:relative;overflow:hidden}
+    .pot-card-name{font-size:12px;font-weight:700;margin-bottom:8px}
+    .pot-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;margin-bottom:4px}
+    .pot-row-lbl{color:var(--text-sec);font-weight:500}
+    .pot-row-val{font-weight:700}
+    .pot-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap}
+    .pot-badge.has{background:rgba(255,59,48,.10);color:#c0392b}
+    .pot-badge.none{background:rgba(52,199,89,.12);color:#1a7f37}
+    .pot-total{margin-top:8px;padding-top:8px;border-top:1px dashed #e0e0e5}
+
     /* Skeleton */
     @keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
 </style>
@@ -305,6 +323,7 @@
         <button class="view-btn" id="btnRating" onclick="setView('rating')">🏆 Рейтинг</button>
         <button class="view-btn" id="btnDyn" onclick="setView('dyn')">📈 Динаміка</button>
         <button class="view-btn" id="btnCat" onclick="setView('cat')">🍩 Категорії</button>
+        <button class="view-btn" id="btnPot" onclick="setView('pot')">🎯 Потенціал</button>
     </div>
 </div>
 
@@ -370,6 +389,8 @@
                     style="border:none;padding:4px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:white;color:#1d1d1f;box-shadow:0 1px 4px rgba(0,0,0,.12)">🍩 По магазину</button>
                 <button id="catModeSeller" onclick="setCatMode('seller')"
                     style="border:none;padding:4px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:#6e6e73">👤 По категорії</button>
+                <button id="catModeCumul" onclick="setCatMode('cumul')"
+                    style="border:none;padding:4px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:#6e6e73">📊 Накопичувальна</button>
             </div>
         </div>
         <!-- Вибір категорій (для режиму seller) -->
@@ -397,7 +418,24 @@
         <div id="catSellerCharts"></div>
     </div>
 
+    <!-- Режим: Накопичувальна (stacked bar) -->
+    <div id="catCumulView" style="display:none">
+        <!-- Пілюлі категорій для накопичувальної -->
+        <div style="background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:8px 14px;margin-bottom:12px;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-size:10px;font-weight:700;color:#a0a0ab;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">Категорії</span>
+            <div class="pills" id="catCumulCatPills" style="flex-wrap:wrap"></div>
+        </div>
+        <div style="background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px;margin-bottom:12px">
+            <div style="position:relative;height:340px"><canvas id="catCumulCanvas"></canvas></div>
+        </div>
+    </div>
+
     <div class="cat-grid" id="catGrid"></div>
+</div>
+
+<!-- POTENTIAL VIEW -->
+<div id="potPanel" style="display:none">
+    <div id="potContent"></div>
 </div>
 
 <script>
@@ -789,7 +827,7 @@ function updFilters(){
         b.className='pill'+((allActive||selSellers.has(b.dataset.seller))?' active':'');
     });
 }
-function refresh(){updFilters();if(viewMode==='table')renderTable();else if(viewMode==='rating')renderRating();else if(viewMode==='cat')renderCat();else{renderDynControls();renderDynChart();}}
+function refresh(){updFilters();if(viewMode==='table')renderTable();else if(viewMode==='rating')renderRating();else if(viewMode==='cat')renderCat();else if(viewMode==='pot')renderPot();else{renderDynControls();renderDynChart();}}
 
 // ── TABLE ──
 function renderTable(){
@@ -1436,17 +1474,23 @@ let catSellerChartInstances=[];
 let catMode='structure'; // 'structure' | 'seller'
 let catSelectedCats=new Set(['AV']); // вибрані категорії для режиму seller
 
+let catCumulChartInstance=null;
+let catCumulSelectedCats=new Set(CAT_KEYS.slice(0,3)); // перші 3 за замовчуванням
+
 function setCatMode(mode){
     catMode=mode;
-    document.getElementById('catModeStructure').style.cssText=mode==='structure'
-        ?'border:none;padding:4px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:white;color:#1d1d1f;box-shadow:0 1px 4px rgba(0,0,0,.12)'
-        :'border:none;padding:4px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:#6e6e73';
-    document.getElementById('catModeSeller').style.cssText=mode==='seller'
-        ?'border:none;padding:4px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:white;color:#1d1d1f;box-shadow:0 1px 4px rgba(0,0,0,.12)'
-        :'border:none;padding:4px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:#6e6e73';
+    const modes=['structure','seller','cumul'];
+    const btns=['catModeStructure','catModeSeller','catModeCumul'];
+    const activeStyle='border:none;padding:4px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:white;color:#1d1d1f;box-shadow:0 1px 4px rgba(0,0,0,.12)';
+    const inactiveStyle='border:none;padding:4px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:#6e6e73';
+    btns.forEach((id,i)=>{
+        const el=document.getElementById(id);
+        if(el) el.style.cssText=modes[i]===mode?activeStyle:inactiveStyle;
+    });
     document.getElementById('catCatPillsWrap').style.display=mode==='seller'?'flex':'none';
     document.getElementById('catStructureView').style.display=mode==='structure'?'':'none';
     document.getElementById('catSellerView').style.display=mode==='seller'?'':'none';
+    document.getElementById('catCumulView').style.display=mode==='cumul'?'':'none';
     renderCat();
 }
 
@@ -1612,13 +1656,24 @@ function renderCat(){
     if(catMode==='seller'){
         document.getElementById('catStructureView').style.display='none';
         document.getElementById('catSellerView').style.display='';
+        document.getElementById('catCumulView').style.display='none';
         renderCatCatPills();
         renderCatSellerView(data);
         document.getElementById('catGrid').style.display='none';
         return;
     }
+    if(catMode==='cumul'){
+        document.getElementById('catStructureView').style.display='none';
+        document.getElementById('catSellerView').style.display='none';
+        document.getElementById('catCumulView').style.display='';
+        renderCatCumulPills();
+        renderCatCumul(data);
+        document.getElementById('catGrid').style.display='none';
+        return;
+    }
     document.getElementById('catStructureView').style.display='';
     document.getElementById('catSellerView').style.display='none';
+    document.getElementById('catCumulView').style.display='none';
     document.getElementById('catGrid').style.display='none';
 
     const banner=document.getElementById('catSummaryBanner');
@@ -1815,19 +1870,251 @@ function renderCat(){
     // Без карток
     grid.style.display='none';
 }
+// ── CUMULATIVE STACKED BAR ──
+function renderCatCumulPills(){
+    const wrap=document.getElementById('catCumulCatPills');
+    wrap.innerHTML='';
+    CAT_KEYS.forEach(cat=>{
+        const color=CAT_COLORS[cat];
+        const active=catCumulSelectedCats.has(cat);
+        const b=document.createElement('button');
+        b.className='pill'+(active?' active':'');
+        if(active){b.style.background=color;b.style.color='#fff';}
+        b.textContent=cat;
+        b.onclick=()=>{
+            if(catCumulSelectedCats.has(cat)){
+                if(catCumulSelectedCats.size>1) catCumulSelectedCats.delete(cat);
+            } else {
+                catCumulSelectedCats.add(cat);
+            }
+            renderCatCumulPills();
+            renderCatCumul(filteredData());
+        };
+        wrap.appendChild(b);
+    });
+}
+
+function renderCatCumul(data){
+    if(catCumulChartInstance){catCumulChartInstance.destroy();catCumulChartInstance=null;}
+    const canvas=document.getElementById('catCumulCanvas');
+    if(!data.length){canvas.parentElement.innerHTML='<div class="dyn-empty">Немає даних</div>';return;}
+
+    // Продавці відсортовані за загальною сумою обраних категорій
+    const sellers=[...new Set(data.map(r=>r.продавець))].sort();
+    const sellerTotals=sellers.map(s=>{
+        const rows=data.filter(r=>r.продавець===s);
+        return [...catCumulSelectedCats].reduce((sum,cat)=>sum+rows.reduce((s2,r)=>s2+(r[cat]||0),0),0);
+    });
+    // Сортуємо за загальним ТО
+    const sorted=sellers.map((s,i)=>({s,total:sellerTotals[i]})).sort((a,b)=>b.total-a.total);
+    const labels=sorted.map(x=>x.s.split(' ').slice(0,2).join(' '));
+
+    // Датасети по категоріях
+    const datasets=[...catCumulSelectedCats].map(cat=>{
+        const color=CAT_COLORS[cat];
+        return {
+            label:cat,
+            data:sorted.map(({s})=>{
+                const rows=data.filter(r=>r.продавець===s);
+                return rows.reduce((sum,r)=>sum+(r[cat]||0),0);
+            }),
+            backgroundColor:color+'cc',
+            borderColor:color,
+            borderWidth:1,
+            borderRadius:3,
+            borderSkipped:false
+        };
+    });
+
+    catCumulChartInstance=new Chart(canvas,{
+        type:'bar',
+        plugins:[ChartDataLabels],
+        data:{labels,datasets},
+        options:{
+            responsive:true,maintainAspectRatio:false,
+            interaction:{mode:'index',intersect:false},
+            layout:{padding:{top:30,left:4,right:4,bottom:4}},
+            plugins:{
+                legend:{display:true,position:'top',labels:{font:{family:'Inter',size:10},boxWidth:12,padding:10}},
+                tooltip:{backgroundColor:'#1d1d1f',callbacks:{
+                    label:c=>` ${c.dataset.label}: ${fmtV(c.raw,'money')}`,
+                    footer:items=>{const tot=items.reduce((s,i)=>s+i.raw,0);return`Разом: ${fmtV(tot,'money')}`;}
+                }},
+                datalabels:{
+                    display:ctx=>{
+                        // Показуємо лише для останнього датасету — загальна сума зверху
+                        const isLast=ctx.datasetIndex===datasets.length-1;
+                        if(!isLast)return false;
+                        // Рахуємо total stack для цього бару
+                        const idx=ctx.dataIndex;
+                        const tot=datasets.reduce((s,ds)=>s+(ds.data[idx]||0),0);
+                        return tot>0;
+                    },
+                    anchor:'end',align:'top',offset:2,
+                    color:'#1d1d1f',
+                    font:{family:'Inter',size:10,weight:'700'},
+                    formatter:(val,ctx)=>{
+                        const idx=ctx.dataIndex;
+                        const tot=datasets.reduce((s,ds)=>s+(ds.data[idx]||0),0);
+                        return fmtV(tot,'money');
+                    }
+                }
+            },
+            scales:{
+                x:{stacked:true,grid:{color:'#f0f0f0'},ticks:{font:{family:'Inter',size:9},color:'#86868b',maxRotation:30}},
+                y:{stacked:true,grid:{color:'#f0f0f0'},ticks:{font:{family:'Inter',size:9},color:'#86868b',callback:v=>fmtV(v,'money')}}
+            }
+        }
+    });
+}
+
+// ── POTENTIAL VIEW ──
+function renderPot(){
+    const data=filteredData();
+    const container=document.getElementById('potContent');
+    container.innerHTML='';
+
+    if(!data.length){
+        container.innerHTML='<div class="status-box">Немає даних за обраний фільтр</div>';return;
+    }
+
+    // Всі продавці з filteredData + дані магазину (всі продавці ті ж місяці)
+    const storeData=allData.filter(r=>selPeriods.size===0||selPeriods.has(ymKey(r.рік,r.місяць)));
+    const storeSellers=[...new Set(storeData.map(r=>r.продавець))].sort();
+    // Обрані продавці (або всі якщо selSellers порожній)
+    const activeSellers=selSellers.size===0?storeSellers:[...selSellers].sort();
+
+    // Допоміжна функція: дані по продавцю
+    function sellerStats(seller,srcData){
+        const rows=srcData.filter(r=>r.продавець===seller);
+        if(!rows.length)return null;
+        const months=new Set(rows.map(r=>r.рік+'-'+r.місяць)).size||1;
+        const sum=k=>rows.reduce((s,r)=>s+(r[k]||0),0);
+        const avg=k=>{const vals=rows.map(r=>r[k]).filter(v=>v!=null);return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;};
+        const sumTO=sum('ТО'),sumSht=sum('Шт'),sumCheky=sum('Чеки'),sumACC=sum('ACC'),sumPoslugy=sum('Послуги грн');
+        const avgTO=sumTO/months;
+        const avgSht=sumSht/months;
+        const avgASP=sumSht>0?sumTO/sumSht:0;  // ASP = ТО/Шт
+        const avgCheky=sumCheky/months;
+        return{months,sumTO,sumSht,sumCheky,sumACC,sumPoslugy,avgTO,avgSht,avgASP,avgCheky};
+    }
+
+    // Статистика по магазину (всі продавці)
+    const storeStats=storeSellers.map(s=>sellerStats(s,storeData)).filter(Boolean);
+    const n=storeStats.length||1;
+    const storeAvgTO=storeStats.reduce((s,x)=>s+x.avgTO,0)/n;
+    const storeAvgSht=storeStats.reduce((s,x)=>s+x.avgSht,0)/n;
+    const storeAvgASP=storeStats.reduce((s,x)=>s+x.avgASP,0)/n;
+
+    // ── Банер по магазину ──
+    const mkStat=(lbl,val,color='#1d1d1f')=>`<div class="pot-stat"><div class="pot-stat-lbl">${lbl}</div><div class="pot-stat-val" style="color:${color}">${val}</div></div>`;
+    const dv=`<div class="pot-divider"></div>`;
+    const storeBanner=document.createElement('div');
+    storeBanner.className='pot-store-banner';
+    storeBanner.innerHTML=
+        mkStat('Продавців у вибірці',activeSellers.length)+dv+
+        mkStat('Сер. ТО/міс по маг.',fmtV(storeAvgTO,'money'),'#0071e3')+dv+
+        mkStat('Сер. Шт/міс по маг.',fmtV(storeAvgSht,'int'),'#34c759')+dv+
+        mkStat('Сер. ASP по маг.',fmtV(storeAvgASP,'money'),'#ff9500');
+    container.appendChild(storeBanner);
+
+    // ── Картки продавців ──
+    let totalPotSht=0,totalPotASP=0,totalPotTO=0;
+
+    const title=document.createElement('div');
+    title.className='pot-section-title';
+    title.textContent='Потенціал по продавцях';
+    container.appendChild(title);
+
+    activeSellers.forEach((seller,si)=>{
+        const st=sellerStats(seller,data);
+        if(!st)return;
+
+        // ШТ: відхилення місячного від середнього по магазину
+        const devSht=storeAvgSht-st.avgSht; // >0 значить є потенціал
+        const potSht=devSht>0?devSht*st.avgASP*st.months:0; // потенціал = відхилення × ASP × місяців
+
+        // ASP: відхилення від середнього по магазину
+        const devASP=storeAvgASP-st.avgASP;
+        const potASP=devASP>0?devASP*st.avgCheky*st.months:0; // відхилення × сер.чеки × місяців
+
+        // ТО: з існуючого рейтингу — відхилення місячного від середнього × місяці
+        const devTO=storeAvgTO-st.avgTO;
+        const potTO=devTO>0?devTO*st.months:0;
+
+        const potTotal=potSht+potASP; // ТО окремо
+        totalPotSht+=potSht;totalPotASP+=potASP;totalPotTO+=potTO;
+
+        const hasPot=potTotal>0||potTO>0;
+        const COLORS=['#0071e3','#34c759','#ff9500','#af52de','#ff3b30','#5856d6','#00b388','#ff6b35','#c8392b','#1abc9c','#e67e22','#8e44ad'];
+        const color=COLORS[si%COLORS.length];
+
+        const card=document.createElement('div');
+        card.className='pot-card';
+        card.style.borderLeft=`4px solid ${color}`;
+
+        const mkRow=(lbl,val,valColor='#1d1d1f',sub='')=>`
+            <div class="pot-row">
+                <div class="pot-row-lbl">${lbl}</div>
+                <div class="pot-row-val" style="color:${valColor}">${val}${sub?`<span style="font-size:9px;color:#86868b;font-weight:400;margin-left:4px">${sub}</span>`:''}</div>
+            </div>`;
+
+        card.innerHTML=`
+            <div class="pot-card-name" style="color:${color}">${seller}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 12px">
+                <div>
+                    ${mkRow('Місяців у вибірці',st.months)}
+                    ${mkRow('Сер. ТО/міс',fmtV(st.avgTO,'money'),devTO>0?'#c0392b':'#1a7f37',`vs ${fmtV(storeAvgTO,'money')}`)}
+                    ${mkRow('Сер. Шт/міс',fmtV(st.avgSht,'int'),devSht>0?'#c0392b':'#1a7f37',`vs ${fmtV(storeAvgSht,'int')}`)}
+                    ${mkRow('ASP продавця',fmtV(st.avgASP,'money'),devASP>0?'#c0392b':'#1a7f37',`vs ${fmtV(storeAvgASP,'money')}`)}
+                </div>
+                <div>
+                    <div class="pot-total">
+                        <div style="font-size:10px;font-weight:700;color:#a0a0ab;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Потенціал ШТ+ASP</div>
+                        ${potSht>0?mkRow('↑ Шт → ТО',fmtV(potSht,'money'),'#c0392b'):'<div class="pot-row"><div class="pot-row-lbl">↑ Шт</div><span class="pot-badge none">✓ Вище сер.</span></div>'}
+                        ${potASP>0?mkRow('↑ ASP → ТО',fmtV(potASP,'money'),'#c0392b'):'<div class="pot-row"><div class="pot-row-lbl">↑ ASP</div><span class="pot-badge none">✓ Вище сер.</span></div>'}
+                        ${potTotal>0?mkRow('Разом потенціал',fmtV(potTotal,'money'),'#c0392b'):'<div class="pot-row"><div class="pot-row-lbl">Разом</div><span class="pot-badge none">✓ Немає</span></div>'}
+                    </div>
+                    <div class="pot-total" style="margin-top:6px;padding-top:6px;border-top:1px dashed #e0e0e5">
+                        <div style="font-size:10px;font-weight:700;color:#a0a0ab;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Потенціал ТО (окремо)</div>
+                        ${potTO>0?mkRow('↑ ТО від сер.',fmtV(potTO,'money'),'#e67e22'):'<div class="pot-row"><div class="pot-row-lbl">ТО</div><span class="pot-badge none">✓ Вище сер.</span></div>'}
+                    </div>
+                </div>
+            </div>`;
+        container.appendChild(card);
+    });
+
+    // ── Підсумок по магазину ──
+    const summTitle=document.createElement('div');
+    summTitle.className='pot-section-title';
+    summTitle.textContent='Загальний потенціал магазину';
+    container.appendChild(summTitle);
+
+    const summBanner=document.createElement('div');
+    summBanner.className='pot-store-banner';
+    summBanner.innerHTML=
+        mkStat('Потенціал ШТ→ТО',fmtV(totalPotSht,'money'),'#c0392b')+dv+
+        mkStat('Потенціал ASP→ТО',fmtV(totalPotASP,'money'),'#c0392b')+dv+
+        mkStat('ШТ+ASP разом',fmtV(totalPotSht+totalPotASP,'money'),'#c0392b')+dv+
+        mkStat('Потенціал ТО',fmtV(totalPotTO,'money'),'#e67e22');
+    container.appendChild(summBanner);
+}
+
 function setView(mode){
     viewMode=mode;
-    document.getElementById('btnTable').classList.toggle('active',mode==='table');
-    document.getElementById('btnRating').classList.toggle('active',mode==='rating');
-    document.getElementById('btnDyn').classList.toggle('active',mode==='dyn');
-    document.getElementById('btnCat').classList.toggle('active',mode==='cat');
+    ['table','rating','dyn','cat','pot'].forEach(m=>{
+        const btn=document.getElementById('btn'+m.charAt(0).toUpperCase()+m.slice(1));
+        if(btn) btn.classList.toggle('active',m===mode);
+    });
     document.getElementById('tableSection').style.display=mode==='table'?'':'none';
     document.getElementById('ratingPanel').classList.toggle('visible',mode==='rating');
     document.getElementById('dynPanel').classList.toggle('visible',mode==='dyn');
     document.getElementById('catPanel').classList.toggle('visible',mode==='cat');
+    document.getElementById('potPanel').style.display=mode==='pot'?'':'none';
     if(mode==='rating')renderRating();
     else if(mode==='dyn'){renderDynControls();renderDynChart();}
     else if(mode==='cat')renderCat();
+    else if(mode==='pot')renderPot();
     else renderTable();
 }
 
