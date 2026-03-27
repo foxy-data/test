@@ -241,6 +241,19 @@
     .dyn-dev-up{color:#1a7f37;font-weight:700}
     .dyn-dev-down{color:#c0392b;font-weight:700}
     .dyn-dev-flat{color:#86868b}
+    /* CAT SELLER VIEW */
+    .cat-seller-card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px;margin-bottom:12px}
+    .cat-seller-title{font-size:14px;font-weight:700;margin-bottom:4px}
+    .cat-seller-sub{font-size:11px;color:var(--text-sec);margin-bottom:14px}
+    .cat-seller-chart-wrap{position:relative;height:260px}
+    @media(max-width:600px){.cat-seller-chart-wrap{height:200px}}
+    .cat-seller-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:6px 0;border-bottom:1px solid #f5f5f7}
+    .cat-seller-row:last-child{border-bottom:none}
+    .cat-seller-name{font-size:11px;font-weight:600;min-width:90px;max-width:120px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .cat-seller-bar-bg{flex:1;height:16px;background:#f0f0f5;border-radius:4px;overflow:hidden;min-width:40px}
+    .cat-seller-bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+    .cat-seller-val{font-size:11px;font-weight:700;min-width:48px;text-align:right;flex-shrink:0}
+    .cat-seller-pct{font-size:10px;color:var(--text-sec);min-width:36px;text-align:right;flex-shrink:0}
 
     /* CATEGORIES VIEW */
     .cat-panel{display:none}
@@ -348,18 +361,42 @@
 
 <!-- CATEGORIES VIEW -->
 <div class="cat-panel" id="catPanel">
-    <div id="catSummaryBanner"></div>
-    <div id="catDonutWrap" style="background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px;margin-bottom:12px;display:none">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px">
-            <div style="font-size:13px;font-weight:700">Структура продажів за категоріями</div>
+    <!-- Режим -->
+    <div style="background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:0;margin-bottom:12px;overflow:hidden;border:1px solid rgba(0,0,0,0.06);display:flex;align-items:stretch;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;padding:8px 14px;border-right:1px solid #f0f0f2;gap:8px;flex-shrink:0">
+            <span style="font-size:10px;font-weight:700;color:#a0a0ab;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">Режим</span>
+            <div style="display:flex;gap:3px;background:#f0f0f5;border-radius:9px;padding:3px">
+                <button id="catModeStructure" onclick="setCatMode('structure')"
+                    style="border:none;padding:4px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:white;color:#1d1d1f;box-shadow:0 1px 4px rgba(0,0,0,.12)">🍩 По магазину</button>
+                <button id="catModeSeller" onclick="setCatMode('seller')"
+                    style="border:none;padding:4px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:#6e6e73">👤 По категорії</button>
+            </div>
         </div>
-        <div style="position:relative;height:280px;max-width:420px;margin:0 auto">
-            <canvas id="catDonutCanvas"></canvas>
+        <!-- Вибір категорій (для режиму seller) -->
+        <div id="catCatPillsWrap" style="display:none;align-items:center;padding:6px 10px;flex-wrap:wrap;gap:3px;flex:1">
+            <span style="font-size:10px;font-weight:700;color:#a0a0ab;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;margin-right:6px">Категорія</span>
+            <div class="pills" id="catCatPills" style="flex-wrap:wrap"></div>
         </div>
     </div>
-    <div id="catTableWrap" style="background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow-x:auto;margin-bottom:12px;display:none">
-        <table id="catTable" style="width:100%;border-collapse:collapse;table-layout:auto"></table>
+
+    <!-- Режим: По магазину -->
+    <div id="catStructureView">
+        <div id="catSummaryBanner"></div>
+        <div id="catDonutWrap" style="background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px;margin-bottom:12px;display:none">
+            <div style="position:relative;height:300px">
+                <canvas id="catDonutCanvas"></canvas>
+            </div>
+        </div>
+        <div id="catTableWrap" style="background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow-x:auto;margin-bottom:12px;display:none">
+            <table id="catTable" style="width:100%;border-collapse:collapse;table-layout:auto"></table>
+        </div>
     </div>
+
+    <!-- Режим: По категорії (внесок продавців) -->
+    <div id="catSellerView" style="display:none">
+        <div id="catSellerCharts"></div>
+    </div>
+
     <div class="cat-grid" id="catGrid"></div>
 </div>
 
@@ -1395,16 +1432,201 @@ const CAT_LABELS = {
 };
 
 let catChartInstance=null;
+let catSellerChartInstances=[];
+let catMode='structure'; // 'structure' | 'seller'
+let catSelectedCats=new Set(['AV']); // вибрані категорії для режиму seller
+
+function setCatMode(mode){
+    catMode=mode;
+    document.getElementById('catModeStructure').style.cssText=mode==='structure'
+        ?'border:none;padding:4px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:white;color:#1d1d1f;box-shadow:0 1px 4px rgba(0,0,0,.12)'
+        :'border:none;padding:4px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:#6e6e73';
+    document.getElementById('catModeSeller').style.cssText=mode==='seller'
+        ?'border:none;padding:4px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:white;color:#1d1d1f;box-shadow:0 1px 4px rgba(0,0,0,.12)'
+        :'border:none;padding:4px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:#6e6e73';
+    document.getElementById('catCatPillsWrap').style.display=mode==='seller'?'flex':'none';
+    document.getElementById('catStructureView').style.display=mode==='structure'?'':'none';
+    document.getElementById('catSellerView').style.display=mode==='seller'?'':'none';
+    renderCat();
+}
+
+function renderCatCatPills(){
+    const wrap=document.getElementById('catCatPills');
+    wrap.innerHTML='';
+    CAT_KEYS.forEach(cat=>{
+        const color=CAT_COLORS[cat];
+        const active=catSelectedCats.has(cat);
+        const b=document.createElement('button');
+        b.className='pill'+(active?' active':'');
+        if(active){b.style.background=color;b.style.color='#fff';}
+        b.textContent=cat;
+        b.onclick=()=>{
+            if(catSelectedCats.has(cat)){
+                if(catSelectedCats.size>1) catSelectedCats.delete(cat);
+            } else {
+                catSelectedCats.add(cat);
+            }
+            renderCatCatPills();
+            renderCatSellerView(filteredData());
+        };
+        wrap.appendChild(b);
+    });
+}
+
+function renderCatSellerView(data){
+    const container=document.getElementById('catSellerCharts');
+    container.innerHTML='';
+    catSellerChartInstances.forEach(c=>c.destroy());
+    catSellerChartInstances=[];
+
+    if(!data.length){
+        container.innerHTML='<div class="status-box">Немає даних</div>';return;
+    }
+
+    const uniqueMonths=new Set(data.map(r=>r.рік+'-'+r.місяць)).size;
+    // Всі продавці з даних
+    const sellers=[...new Set(data.map(r=>r.продавець))].sort();
+
+    const SELLER_COLORS=['#0071e3','#34c759','#ff9500','#af52de','#ff3b30','#5856d6','#00b388','#ff6b35','#c8392b','#1abc9c','#e67e22','#8e44ad'];
+
+    [...catSelectedCats].forEach(cat=>{
+        const color=CAT_COLORS[cat]||'#5856d6';
+
+        // Сума по кожному продавцю для цієї категорії
+        const sellerVals=sellers.map(s=>{
+            const rows=data.filter(r=>r.продавець===s);
+            return rows.reduce((sum,r)=>sum+(r[cat]!=null?r[cat]:0),0);
+        });
+        const catTotal=sellerVals.reduce((a,b)=>a+b,0);
+        if(catTotal===0) return;
+
+        // Сортуємо продавців за сумою
+        const sorted=sellers.map((s,i)=>({seller:s,val:sellerVals[i]}))
+            .filter(x=>x.val>0)
+            .sort((a,b)=>b.val-a.val);
+
+        const card=document.createElement('div');
+        card.className='cat-seller-card';
+
+        const avgPerSeller=sorted.length>0?catTotal/sorted.length:0;
+
+        card.innerHTML=`
+            <div class="cat-seller-title" style="color:${color}">${cat}</div>
+            <div class="cat-seller-sub">
+                Загалом: <strong>${fmtV(catTotal,'money')}</strong> &nbsp;·&nbsp;
+                Сер./міс: <strong>${fmtV(uniqueMonths>0?catTotal/uniqueMonths:0,'money')}</strong> &nbsp;·&nbsp;
+                Сер. на продавця: <strong>${fmtV(avgPerSeller,'money')}</strong>
+            </div>`;
+
+        // Donut chart + рядки
+        const chartRow=document.createElement('div');
+        chartRow.style.cssText='display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap';
+
+        // Donut
+        const donutWrap=document.createElement('div');
+        donutWrap.style.cssText='flex-shrink:0;width:200px;height:200px;position:relative';
+        const canvas=document.createElement('canvas');
+        donutWrap.appendChild(canvas);
+        chartRow.appendChild(donutWrap);
+
+        // Рядки продавців
+        const rowsWrap=document.createElement('div');
+        rowsWrap.style.cssText='flex:1;min-width:220px;padding-top:4px';
+        const maxVal=sorted[0]?.val||1;
+
+        sorted.forEach((item,i)=>{
+            const pct=catTotal>0?(item.val/catTotal*100):0;
+            const sColor=SELLER_COLORS[i%SELLER_COLORS.length];
+            const dev=item.val-avgPerSeller;
+            const devPct=avgPerSeller>0?(dev/avgPerSeller*100):0;
+            const devSign=dev>=0?'+':'';
+            const devColor=dev>=0?'#1a7f37':'#c0392b';
+
+            const row=document.createElement('div');
+            row.className='cat-seller-row';
+            row.innerHTML=`
+                <div class="cat-seller-name" style="color:${sColor}" title="${item.seller}">${item.seller.split(' ').slice(0,2).join(' ')}</div>
+                <div class="cat-seller-bar-bg">
+                    <div class="cat-seller-bar-fill" style="width:${(item.val/maxVal*100).toFixed(1)}%;background:${sColor}"></div>
+                </div>
+                <div class="cat-seller-val" style="color:${sColor}">${fmtV(item.val,'money')}</div>
+                <div class="cat-seller-pct">${pct.toFixed(1)}%</div>
+                <div style="font-size:10px;font-weight:700;color:${devColor};min-width:70px;text-align:right;flex-shrink:0">${dev>=0?'▲':'▼'} ${devSign}${fmtV(Math.abs(dev),'money')}</div>`;
+            rowsWrap.appendChild(row);
+        });
+        chartRow.appendChild(rowsWrap);
+        card.appendChild(chartRow);
+        container.appendChild(card);
+
+        // Donut
+        const inst=new Chart(canvas,{
+            type:'doughnut',
+            plugins:[ChartDataLabels],
+            data:{
+                labels:sorted.map(x=>x.seller.split(' ').slice(0,2).join(' ')),
+                datasets:[{
+                    data:sorted.map(x=>x.val),
+                    backgroundColor:sorted.map((_,i)=>SELLER_COLORS[i%SELLER_COLORS.length]+'cc'),
+                    borderColor:'#fff',
+                    borderWidth:2,
+                    hoverOffset:6
+                }]
+            },
+            options:{
+                responsive:true,maintainAspectRatio:false,cutout:'54%',
+                layout:{padding:4},
+                plugins:{
+                    legend:{display:false},
+                    tooltip:{backgroundColor:'#1d1d1f',callbacks:{
+                        label:c=>{
+                            const pct=catTotal>0?(c.raw/catTotal*100).toFixed(1):'0';
+                            return` ${fmtV(c.raw,'money')} (${pct}%)`;
+                        }
+                    }},
+                    datalabels:{
+                        display:ctx=>ctx.dataset.data[ctx.dataIndex]/catTotal>0.04,
+                        color:'#fff',
+                        font:{family:'Inter',size:9,weight:'700'},
+                        textAlign:'center',
+                        formatter:(val,ctx)=>{
+                            const lbl=ctx.chart.data.labels[ctx.dataIndex];
+                            const pct=catTotal>0?(val/catTotal*100).toFixed(1):'0';
+                            return`${lbl}\n${pct}%`;
+                        }
+                    }
+                }
+            }
+        });
+        catSellerChartInstances.push(inst);
+    });
+}
 
 function renderCat(){
     const data=filteredData();
+
+    // Destroy old charts
+    if(catChartInstance){catChartInstance.destroy();catChartInstance=null;}
+    catSellerChartInstances.forEach(c=>c.destroy());catSellerChartInstances=[];
+
+    // Route to correct mode
+    if(catMode==='seller'){
+        document.getElementById('catStructureView').style.display='none';
+        document.getElementById('catSellerView').style.display='';
+        renderCatCatPills();
+        renderCatSellerView(data);
+        document.getElementById('catGrid').style.display='none';
+        return;
+    }
+    document.getElementById('catStructureView').style.display='';
+    document.getElementById('catSellerView').style.display='none';
+    document.getElementById('catGrid').style.display='none';
+
     const banner=document.getElementById('catSummaryBanner');
     const grid=document.getElementById('catGrid');
     const donutWrap=document.getElementById('catDonutWrap');
     const tableWrap=document.getElementById('catTableWrap');
     banner.innerHTML='';grid.innerHTML='';
     donutWrap.style.display='none';tableWrap.style.display='none';
-    if(catChartInstance){catChartInstance.destroy();catChartInstance=null;}
 
     if(!data.length){
         banner.innerHTML='<div class="status-box">Немає даних за обраний період</div>';
