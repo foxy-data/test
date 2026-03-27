@@ -117,6 +117,16 @@
         }
         @media (min-width: 1200px) { .banner-card { padding: 18px 20px; height: 185px; flex: 1 1 calc(14.28% - 13px); min-width: 175px; max-width: 235px; } }
         .banner-card:hover { transform: translateY(-4px); box-shadow: 0 14px 36px rgba(0,0,0,0.12); }
+        /* --- LOCKED BANNER --- */
+        .banner-card.banner-locked {
+            opacity: 0.45;
+            cursor: not-allowed;
+            filter: grayscale(0.3);
+        }
+        .banner-card.banner-locked:hover {
+            transform: none;
+            box-shadow: 0 2px 14px rgba(0,0,0,0.07);
+        }
 
         /* М'які пастельні фони без рамки */
         .banner-special     { background: linear-gradient(145deg, #eef2ff 0%, #e3eaff 100%); }
@@ -294,6 +304,7 @@
         .dpc-fact  { font-size:17px; font-weight:600; color:var(--color-text); }
         .dpc-rest  { font-size:11px; color:var(--color-text-secondary); margin-top:1px; }
     </style>
+    <script src="auth.js"></script>
 </head>
 <body>
 
@@ -304,6 +315,7 @@
         <input type="password" id="pass-input" placeholder="Введіть пароль" onkeypress="if(event.key==='Enter') checkPass()">
         <button onclick="checkPass()">Увійти</button>
         <p id="error-msg" class="error-msg">Невірний пароль. Спробуйте ще раз.</p>
+        <div id="access-denied-msg" class="error-msg" style="display:none">⛔ Недостатньо прав. Увійдіть як адміністратор.</div>
     </div>
 </div>
 
@@ -383,17 +395,14 @@
 </div>
 
 <script>
-    // --- АВТОРИЗАЦІЯ ---
-    const SECRET_PASSWORD = "gteam";
-    const EXPIRY_DAYS = 30;
+    // --- АВТОРИЗАЦІЯ (auth.js підключено у <head>) ---
 
     function checkPass() {
         const input = document.getElementById('pass-input').value;
         const error = document.getElementById('error-msg');
-        if (input === SECRET_PASSWORD) {
-            const now = new Date();
-            localStorage.setItem('auth_date', now.getTime());
-            localStorage.setItem('isAuthorized', 'true');
+        const role  = AUTH.checkPassword(input);
+        if (role) {
+            AUTH.save(role);
             unlockSite();
         } else {
             error.style.display = 'block';
@@ -470,19 +479,16 @@
     }
 
     function logout() {
-        localStorage.removeItem('isAuthorized');
-        localStorage.removeItem('auth_date');
+        AUTH.clear();
         location.reload();
     }
 
     window.onload = function() {
-        const isAuth = localStorage.getItem('isAuthorized');
-        const authDate = localStorage.getItem('auth_date');
-        if (isAuth === 'true' && authDate) {
-            const now = new Date().getTime();
-            const expiryMs = EXPIRY_DAYS * 24 * 60 * 60 * 1000;
-            if (now - authDate < expiryMs) { unlockSite(); } else { logout(); }
+        // Показати повідомлення якщо редирект через відмову в доступі
+        if (window.location.search.includes('access=denied')) {
+            document.getElementById('access-denied-msg').style.display = 'block';
         }
+        if (AUTH.isValid()) { unlockSite(); }
     };
 
     // --- CSV PARSER ---
@@ -910,16 +916,20 @@
         carouselWrapper.className = 'carousel-wrapper';
 
         const createBanner = (title, subtitle, icon, colorClass, href, isBlank = false) => {
-            const banner = document.createElement('a');
-            banner.className = `banner-card banner-${colorClass}`;
-            banner.href = href;
-            if (isBlank) banner.target = '_blank';
+            const filename = href.split('/').pop().split('?')[0];
+            const locked = AUTH.adminOnly.includes(filename) && AUTH.getRole() !== 'admin';
+            const banner = document.createElement(locked ? 'div' : 'a');
+            banner.className = `banner-card banner-${colorClass}${locked ? ' banner-locked' : ''}`;
+            if (!locked) {
+                banner.href = href;
+                if (isBlank) banner.target = '_blank';
+            }
             banner.innerHTML = `
                 <div class="banner-top">
-                    <div class="banner-icon">${icon.img}</div>
-                    <div class="banner-content"><h2>${title}</h2><p>${subtitle}</p></div>
+                    <div class="banner-icon">${locked ? '🔒' : icon.img}</div>
+                    <div class="banner-content"><h2>${title}</h2><p>${locked ? 'Тільки для адміністратора' : subtitle}</p></div>
                 </div>
-                <div class="banner-footer"><div class="banner-cta">Переглянути →</div></div>`;
+                <div class="banner-footer"><div class="banner-cta">${locked ? '' : 'Переглянути →'}</div></div>`;
             return banner;
         };
 
