@@ -13,37 +13,35 @@
         *{box-sizing:border-box;margin:0;padding:0}
         body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);padding:8px 10px 60px}
 
-```
-    /* ── SKELETON + ANIMATION SYSTEM ── */
-    @keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
-    @keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-    .skel{
-        background:linear-gradient(90deg,#eaeaed 25%,#f5f5f7 50%,#eaeaed 75%);
-        background-size:600px 100%;
-        animation:shimmer 1.4s ease-in-out infinite;
-        border-radius:7px;
-    }
-    /* skeleton rank card */
-    .rank-card-skel{
-        background:#fff;border-radius:14px;
-        box-shadow:0 2px 10px rgba(0,0,0,.04);
-        padding:11px 14px;display:flex;align-items:center;gap:14px;
-        margin-bottom:7px;
-    }
-    .rank-card-skel-pos{width:24px;height:24px;border-radius:6px}
-    .rank-card-skel-body{flex:1;display:flex;flex-direction:column;gap:7px}
-    .rank-card-skel-line{height:12px;border-radius:6px}
-    .rank-card-skel-sub{height:9px;width:50%;border-radius:5px}
-    .rank-card-skel-val{width:52px;height:18px;border-radius:7px;flex-shrink:0}
-    /* skeleton table row */
-    .tbl-row-skel{display:flex;gap:8px;padding:8px 12px;border-bottom:1px solid #f2f2f4}
-    .tbl-row-skel-cell{height:11px;border-radius:5px;flex:1}
-    .tbl-row-skel-cell.wide{flex:2}
-    /* real cards animate in */
-    .rank-card.appear{animation:fadeInUp .3s ease both}
-    .filters-wrap.appear,.metric-bar.appear,.dyn-controls.appear{animation:fadeIn .25s ease both}
-```
+        /* ── SKELETON + ANIMATION SYSTEM ── */
+        @keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
+        @keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        .skel{
+            background:linear-gradient(90deg,#eaeaed 25%,#f5f5f7 50%,#eaeaed 75%);
+            background-size:600px 100%;
+            animation:shimmer 1.4s ease-in-out infinite;
+            border-radius:7px;
+        }
+        /* skeleton rank card */
+        .rank-card-skel{
+            background:#fff;border-radius:14px;
+            box-shadow:0 2px 10px rgba(0,0,0,.04);
+            padding:11px 14px;display:flex;align-items:center;gap:14px;
+            margin-bottom:7px;
+        }
+        .rank-card-skel-pos{width:24px;height:24px;border-radius:6px}
+        .rank-card-skel-body{flex:1;display:flex;flex-direction:column;gap:7px}
+        .rank-card-skel-line{height:12px;border-radius:6px}
+        .rank-card-skel-sub{height:9px;width:50%;border-radius:5px}
+        .rank-card-skel-val{width:52px;height:18px;border-radius:7px;flex-shrink:0}
+        /* skeleton table row */
+        .tbl-row-skel{display:flex;gap:8px;padding:8px 12px;border-bottom:1px solid #f2f2f4}
+        .tbl-row-skel-cell{height:11px;border-radius:5px;flex:1}
+        .tbl-row-skel-cell.wide{flex:2}
+        /* real cards animate in */
+        .rank-card.appear{animation:fadeInUp .3s ease both}
+        .filters-wrap.appear,.metric-bar.appear,.dyn-controls.appear{animation:fadeIn .25s ease both}
 
 ```
     .top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;flex-wrap:wrap}
@@ -349,7 +347,6 @@
 </div>
 
 <!-- CATEGORIES VIEW -->
-
 <div class="cat-panel" id="catPanel">
     <div id="catSummaryBanner"></div>
     <div id="catDonutWrap" style="background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px;margin-bottom:12px;display:none">
