@@ -1968,6 +1968,9 @@ function renderCatCumul(data){
     });
 }
 
+// ── POTENTIAL VIEW toggle state ──
+let potShowTO = true; // чи показувати колонку потенціалу ТО
+
 // ── POTENTIAL VIEW ──
 function renderPot(){
     const data=filteredData();
@@ -2000,20 +2003,38 @@ function renderPot(){
     }
 
     // Статистика по магазину (всі продавці)
+    // Середнє ТО — зважене (як на вкладці Рейтинг): Σ(sumTO) / Σ(місяці)
     const storeStats=storeSellers.map(s=>sellerStats(s,storeData)).filter(Boolean);
     const n=storeStats.length||1;
-    const storeAvgTO=storeStats.reduce((s,x)=>s+x.avgTO,0)/n;
-    const storeAvgSht=storeStats.reduce((s,x)=>s+x.avgSht,0)/n;
-    const storeAvgASP=storeStats.reduce((s,x)=>s+x.avgASP,0)/n;
+    // Зважене середнє ТО/міс (той самий принцип що у renderRating: totalRaw / totalMonths)
+    const totalRawTO=storeStats.reduce((s,x)=>s+x.sumTO,0);
+    const totalMonthsStore=storeStats.reduce((s,x)=>s+x.months,0)||1;
+    const storeAvgTO=totalRawTO/totalMonthsStore;
+    // Для Шт і ASP — також зважені
+    const totalRawSht=storeStats.reduce((s,x)=>s+x.sumSht,0);
+    const storeAvgSht=totalRawSht/totalMonthsStore;
+    const storeAvgASP=totalRawSht>0?totalRawTO/totalRawSht:0;
 
     // ── Банер по магазину ──
     const mkStat=(lbl,val,color='#1d1d1f')=>`<div class="pot-stat"><div class="pot-stat-lbl">${lbl}</div><div class="pot-stat-val" style="color:${color}">${val}</div></div>`;
     const dv=`<div class="pot-divider"></div>`;
+
+    // Перемикач показу потенціалу ТО
+    const toggleWrap=document.createElement('div');
+    toggleWrap.style.cssText='display:flex;align-items:center;justify-content:flex-end;margin-bottom:8px;gap:8px';
+    toggleWrap.innerHTML=`
+        <span style="font-size:11px;color:#86868b;font-weight:500">Потенціал ТО:</span>
+        <div style="display:flex;gap:2px;background:#e5e5ea;border-radius:8px;padding:2px" id="potTOToggle">
+            <button id="potTOOn" onclick="setPotTO(true)" style="border:none;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;${potShowTO?'background:white;color:#1d1d1f;box-shadow:0 1px 4px rgba(0,0,0,.12)':'background:transparent;color:#6e6e73'}">Показати</button>
+            <button id="potTOOff" onclick="setPotTO(false)" style="border:none;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;${!potShowTO?'background:white;color:#1d1d1f;box-shadow:0 1px 4px rgba(0,0,0,.12)':'background:transparent;color:#6e6e73'}">Приховати</button>
+        </div>`;
+    container.appendChild(toggleWrap);
+
     const storeBanner=document.createElement('div');
     storeBanner.className='pot-store-banner';
     storeBanner.innerHTML=
         mkStat('Продавців у вибірці',activeSellers.length)+dv+
-        mkStat('Сер. ТО/міс по маг.',fmtV(storeAvgTO,'money'),'#0071e3')+dv+
+        mkStat('Сер. ТО/міс (зважене)',fmtV(storeAvgTO,'money'),'#0071e3')+dv+
         mkStat('Сер. Шт/міс по маг.',fmtV(storeAvgSht,'int'),'#34c759')+dv+
         mkStat('Сер. ASP по маг.',fmtV(storeAvgASP,'money'),'#ff9500');
     container.appendChild(storeBanner);
@@ -2075,10 +2096,10 @@ function renderPot(){
                         ${potASP>0?mkRow('↑ ASP → ТО',fmtV(potASP,'money'),'#c0392b'):'<div class="pot-row"><div class="pot-row-lbl">↑ ASP</div><span class="pot-badge none">✓ Вище сер.</span></div>'}
                         ${potTotal>0?mkRow('Разом потенціал',fmtV(potTotal,'money'),'#c0392b'):'<div class="pot-row"><div class="pot-row-lbl">Разом</div><span class="pot-badge none">✓ Немає</span></div>'}
                     </div>
-                    <div class="pot-total" style="margin-top:6px;padding-top:6px;border-top:1px dashed #e0e0e5">
-                        <div style="font-size:10px;font-weight:700;color:#a0a0ab;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Потенціал ТО (окремо)</div>
+                    ${potShowTO?`<div class="pot-total" style="margin-top:6px;padding-top:6px;border-top:1px dashed #e0e0e5">
+                        <div style="font-size:10px;font-weight:700;color:#a0a0ab;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Потенціал ТО (зважене)</div>
                         ${potTO>0?mkRow('↑ ТО від сер.',fmtV(potTO,'money'),'#e67e22'):'<div class="pot-row"><div class="pot-row-lbl">ТО</div><span class="pot-badge none">✓ Вище сер.</span></div>'}
-                    </div>
+                    </div>`:''}
                 </div>
             </div>`;
         container.appendChild(card);
@@ -2095,9 +2116,14 @@ function renderPot(){
     summBanner.innerHTML=
         mkStat('Потенціал ШТ→ТО',fmtV(totalPotSht,'money'),'#c0392b')+dv+
         mkStat('Потенціал ASP→ТО',fmtV(totalPotASP,'money'),'#c0392b')+dv+
-        mkStat('ШТ+ASP разом',fmtV(totalPotSht+totalPotASP,'money'),'#c0392b')+dv+
-        mkStat('Потенціал ТО',fmtV(totalPotTO,'money'),'#e67e22');
+        mkStat('ШТ+ASP разом',fmtV(totalPotSht+totalPotASP,'money'),'#c0392b')+
+        (potShowTO?dv+mkStat('Потенціал ТО (зважене)',fmtV(totalPotTO,'money'),'#e67e22'):'');
     container.appendChild(summBanner);
+}
+
+function setPotTO(val){
+    potShowTO=val;
+    renderPot();
 }
 
 function setView(mode){
