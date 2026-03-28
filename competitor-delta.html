@@ -190,6 +190,13 @@ tr td.col-delta-striped{background:#fff3e0;}
 <div style="font-size:13px;font-weight:700;margin-bottom:12px">📈 Дельта тотал — графік</div>
 <div id="totalChartWrap" style="position:relative;height:280px"></div>
 </div>
+<div style="background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px;margin-top:12px">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+<div style="font-size:13px;font-weight:700">📊 Порівняння категорій за підсумками</div>
+<div style="font-size:11px;color:var(--text-sec);background:#f0f0f5;padding:3px 8px;border-radius:20px">КОМФІ vs ФОКСТРОТ · дельта по категоріях</div>
+</div>
+<div id="catCompareWrap" style="position:relative;height:320px"></div>
+</div>
 </div>
 <script>
 const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vSgOmIYjnODMGFZYOmo-Yg6zfsGRh1Cm4MYJkLn7V6cFe4PsoWs24mf5KaEUPq8KOl28onGBS-90OKY/pub?output=csv';
@@ -807,6 +814,172 @@ return found&&foks?komf/foks:null;
 }
 
 let totalChartInstance=null;
+let catCompareChartInstance=null;
+
+function renderCatCompareChart(t1, t2, isCompare) {
+    const wrap = document.getElementById('catCompareWrap');
+    if (!wrap) return;
+    if (catCompareChartInstance) { catCompareChartInstance.destroy(); catCompareChartInstance = null; }
+    wrap.innerHTML = '<canvas id="catCompareChart"></canvas>';
+
+    // Збираємо catDetails — список категорій з komf/foks/ratio
+    const details1 = t1 ? t1.catDetails : [];
+    const details2 = t2 ? t2.catDetails : [];
+
+    // Мітки — назви категорій
+    const allNames = [...new Set([...details1.map(d=>d.name), ...details2.map(d=>d.name)])];
+    if (!allNames.length) return;
+
+    const fmt2 = v => v == null ? null : (Math.abs(v) >= 1e6 ? (v/1e6).toFixed(2)+'М' : Math.abs(v) >= 1e3 ? (v/1e3).toFixed(0)+'К' : v.toFixed(0));
+
+    const datasets = [];
+
+    if (isCompare) {
+        // П1 КОМФІ, П1 ФОКСТРОТ, П2 КОМФІ, П2 ФОКСТРОТ
+        datasets.push({
+            label: 'КОМФІ (П1)', barPercentage: 0.85, categoryPercentage: 0.7,
+            data: allNames.map(n => { const d=details1.find(x=>x.name===n); return d?d.komf:null; }),
+            backgroundColor: '#0071e3cc', borderColor: '#0071e3', borderWidth: 1.5, borderRadius: 3,
+            _isKomf: true, _period: 1
+        });
+        datasets.push({
+            label: 'ФОКСТРОТ (П1)', barPercentage: 0.85, categoryPercentage: 0.7,
+            data: allNames.map(n => { const d=details1.find(x=>x.name===n); return d?d.foks:null; }),
+            backgroundColor: '#af52decc', borderColor: '#af52de', borderWidth: 1.5, borderRadius: 3,
+            _isKomf: false, _period: 1
+        });
+        datasets.push({
+            label: 'КОМФІ (П2)', barPercentage: 0.85, categoryPercentage: 0.7,
+            data: allNames.map(n => { const d=details2.find(x=>x.name===n); return d?d.komf:null; }),
+            backgroundColor: '#34c759cc', borderColor: '#34c759', borderWidth: 1.5, borderRadius: 3,
+            _isKomf: true, _period: 2
+        });
+        datasets.push({
+            label: 'ФОКСТРОТ (П2)', barPercentage: 0.85, categoryPercentage: 0.7,
+            data: allNames.map(n => { const d=details2.find(x=>x.name===n); return d?d.foks:null; }),
+            backgroundColor: '#ff9500cc', borderColor: '#ff9500', borderWidth: 1.5, borderRadius: 3,
+            _isKomf: false, _period: 2
+        });
+    } else {
+        datasets.push({
+            label: 'КОМФІ', barPercentage: 0.85, categoryPercentage: 0.7,
+            data: allNames.map(n => { const d=details1.find(x=>x.name===n); return d?d.komf:null; }),
+            backgroundColor: '#0071e3cc', borderColor: '#0071e3', borderWidth: 1.5, borderRadius: 3,
+            _isKomf: true, _period: 1
+        });
+        datasets.push({
+            label: 'ФОКСТРОТ', barPercentage: 0.85, categoryPercentage: 0.7,
+            data: allNames.map(n => { const d=details1.find(x=>x.name===n); return d?d.foks:null; }),
+            backgroundColor: '#ff3b30cc', borderColor: '#ff3b30', borderWidth: 1.5, borderRadius: 3,
+            _isKomf: false, _period: 1
+        });
+    }
+
+    // Delta datalabels config — показуємо дельту над парою барів
+    // Будемо малювати дельту власним plugin після draw
+    const catDeltaLabels = {
+        id: 'catDeltaLabels',
+        afterDatasetsDraw(chart) {
+            const ctx = chart.ctx; ctx.save();
+            const FS = 10, PX = 5, PY = 3;
+            ctx.font = `700 ${FS}px Inter,sans-serif`;
+
+            // Для кожного label index (категорія) — знаходимо КОМФІ і ФОКСТРОТ пару і малюємо дельту над ними
+            const pairs = isCompare
+                ? [{ki:0,fi:1,color:'#0071e3',label:'П1'},{ki:2,fi:3,color:'#34c759',label:'П2'}]
+                : [{ki:0,fi:1,color:'#5856d6',label:''}];
+
+            allNames.forEach((name, ni) => {
+                pairs.forEach(({ki,fi,color,label}) => {
+                    const komfDs = datasets[ki], foksDs = datasets[fi];
+                    if (!komfDs || !foksDs) return;
+                    const kv = komfDs.data[ni], fv = foksDs.data[ni];
+                    if (kv == null || fv == null || fv === 0) return;
+                    const ratio = kv / fv;
+
+                    // X центр між двома барами
+                    const metaK = chart.getDatasetMeta(ki);
+                    const metaF = chart.getDatasetMeta(fi);
+                    const elK = metaK.data[ni], elF = metaF.data[ni];
+                    if (!elK || !elF) return;
+                    const cx = (elK.x + elF.x) / 2;
+                    const topY = Math.min(elK.y, elF.y) - 8;
+
+                    const deltaGood = ratio >= 1;
+                    const txt = ratio.toFixed(3);
+                    const tw = ctx.measureText(txt).width;
+                    const bw = tw + PX*2, bh = FS + PY*2;
+                    const bx = cx - bw/2, by = topY - bh;
+
+                    const fillColor = deltaGood ? 'rgba(52,199,89,0.13)' : 'rgba(255,59,48,0.10)';
+                    const strokeColor = deltaGood ? '#34c759' : '#ff3b30';
+                    const textColor = deltaGood ? '#1a7f37' : '#c0392b';
+
+                    ctx.shadowColor = 'rgba(0,0,0,0.12)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 1;
+                    ctx.fillStyle = fillColor;
+                    ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 4); ctx.fill();
+                    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+                    ctx.strokeStyle = strokeColor; ctx.lineWidth = 1.2;
+                    ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 4); ctx.stroke();
+                    ctx.fillStyle = textColor;
+                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText(txt, cx, by + bh/2);
+                    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+                });
+            });
+            ctx.restore();
+        }
+    };
+
+    const barDLConfig = {
+        display: true,
+        color: '#fff',
+        backgroundColor: ctx => ctx.dataset.borderColor + '33',
+        padding: { top:3, bottom:3, left:4, right:4 },
+        font: { size: 9, weight: '600', family: 'Inter' },
+        formatter: v => v != null ? fmt2(v) : '',
+        anchor: 'center', align: 'center',
+        borderRadius: 3,
+        borderWidth: 0,
+        clip: false
+    };
+
+    const ctx2 = document.getElementById('catCompareChart').getContext('2d');
+    catCompareChartInstance = new Chart(ctx2, {
+        type: 'bar',
+        data: { labels: allNames, datasets },
+        plugins: [ChartDataLabels, catDeltaLabels],
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            layout: { padding: { top: 36, left: 6, right: 6, bottom: 4 } },
+            plugins: {
+                legend: { display: true, position: 'top', labels: { font: { family: 'Inter', size: 10 }, boxWidth: 14, padding: 10 } },
+                tooltip: {
+                    backgroundColor: '#1d1d1f',
+                    callbacks: {
+                        label: c => {
+                            const v = c.raw;
+                            const komf = datasets.find(d=>d._isKomf && d._period === c.dataset._period)?.data[c.dataIndex];
+                            const foks = datasets.find(d=>!d._isKomf && d._period === c.dataset._period)?.data[c.dataIndex];
+                            let extra = '';
+                            if (komf != null && foks != null && foks !== 0) {
+                                extra = ` → Δ ${(komf/foks).toFixed(3)}`;
+                            }
+                            return ` ${c.dataset.label}: ${fmt2(v)}${extra}`;
+                        }
+                    }
+                },
+                datalabels: barDLConfig
+            },
+            scales: {
+                x: { grid: { color: '#f0f0f0' }, ticks: { font: { family: 'Inter', size: 10 }, color: '#86868b' } },
+                y: { grid: { color: '#f0f0f0' }, ticks: { font: { family: 'Inter', size: 10 }, color: '#86868b', callback: v => fmt2(v) } }
+            }
+        }
+    });
+}
+
 
 function renderTotalBlock(){
 const container=document.getElementById('totalDeltaBlock');
@@ -828,11 +1001,13 @@ const t1=calcTotalDelta(p1rows);
 const t2=calcTotalDelta(p2rows);
 renderTotalTable(t1,t2,true);
 renderTotalChart(p1rows,p2rows,true);
+renderCatCompareChart(t1,t2,true);
 } else {
 const rows=activeRows();
 const total=calcTotalDelta(rows);
 renderTotalTable(total,null,false);
 renderTotalChart(rows,null,false);
+renderCatCompareChart(total,null,false);
 }
 }
 
