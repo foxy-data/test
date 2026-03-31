@@ -378,6 +378,16 @@
         .sm-tbl tr.sm-plan-row td { color: var(--color-text-secondary); font-weight: 500; font-size: 11px; }
         .sm-tbl tr + tr td { border-top: 1px solid rgba(0,0,0,0.05); padding-top: 6px; }
 
+
+        /* --- Перемикач метрик (ТО/Послуги/АСС) --- */
+        .sm-metric-bar { display:flex; gap:6px; align-items:center; margin-bottom:12px; }
+        .sm-metric-btn {
+            flex:1; padding:7px 4px; border-radius:10px; border:1.5px solid var(--color-border);
+            background:transparent; font-size:12px; font-weight:600; cursor:pointer;
+            color:var(--color-text-secondary); font-family:inherit; transition:all 0.18s; text-align:center;
+        }
+        .sm-metric-btn.active { background:var(--color-accent); color:#fff; border-color:var(--color-accent); }
+        .sm-metric-btn:hover:not(.active) { border-color:var(--color-accent); color:var(--color-accent); }
         /* --- Перемикач цілі --- */
         .sm-target-bar { display:flex; gap:6px; align-items:center; margin-bottom:14px; flex-wrap:wrap; }
         .sm-target-label { font-size:10px; font-weight:700; text-transform:uppercase; color:var(--color-text-secondary); margin-right:4px; letter-spacing:0.04em; }
@@ -572,6 +582,11 @@ const AUTH = {
                     <span class="store-metrics-date" id="sm-date">—</span>
                 </div>
                 <button class="store-metrics-refresh" onclick="loadStoreMetrics()">↻ Оновити</button>
+            </div>
+            <div class="sm-metric-bar">
+                <button class="sm-metric-btn active" onclick="setMetric('to', this)">💰 ТО</button>
+                <button class="sm-metric-btn" onclick="setMetric('serv', this)">🛠 Послуги</button>
+                <button class="sm-metric-btn" onclick="setMetric('acc', this)">🎧 АСС</button>
             </div>
             <div class="sm-target-bar">
                 <span class="sm-target-label">Ціль:</span>
@@ -1033,11 +1048,19 @@ const AUTH = {
         renderStoreMetrics();
     }
 
-    let smTarget = 1.00; // поточна ціль (1.00 = 100%, 1.05 = 105%, ...)
+    let smTarget = 1.00; // поточна ціль
+    let smMetric = 'to'; // поточна метрика: 'to' | 'serv' | 'acc'
 
     function setTarget(val, btn) {
         smTarget = val;
         document.querySelectorAll('.sm-target-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderStoreMetrics();
+    }
+
+    function setMetric(metric, btn) {
+        smMetric = metric;
+        document.querySelectorAll('.sm-metric-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         renderStoreMetrics();
     }
@@ -1141,11 +1164,12 @@ const AUTH = {
             </div>`;
         }
 
-        const html = `<div class="store-metrics-groups">
-            ${group('sm-group-to',   '💰', 'ТО',       toPlan,   toFact,   null, toPrognTempo,   toPrognPlan,   null, null)}
-            ${group('sm-group-serv', '🛠', 'Послуги',  servPlan, servFact, null, servPrognTempo, servPrognPlan, null, servDola ? 'Доля: ' + fDola(servDola) : null)}
-            ${group('sm-group-acc',  '🎧', 'АСС',      accPlan,  accFact,  null, accPrognTempo,  accPrognPlan,  null, accDola  ? 'Доля: ' + fDola(accDola)  : null)}
-        </div>`;
+        const groups = {
+            to:   group('sm-group-to',   '💰', 'ТО',      toPlan,   toFact,   null, toPrognTempo,   toPrognPlan,   null, null),
+            serv: group('sm-group-serv', '🛠', 'Послуги', servPlan, servFact, null, servPrognTempo, servPrognPlan, null, servDola ? 'Доля: ' + fDola(servDola) : null),
+            acc:  group('sm-group-acc',  '🎧', 'АСС',     accPlan,  accFact,  null, accPrognTempo,  accPrognPlan,  null, accDola  ? 'Доля: ' + fDola(accDola)  : null),
+        };
+        const html = `<div class="store-metrics-groups">${groups[smMetric]}</div>`;
 
         document.getElementById('store-metrics-content').innerHTML = html;
     }
