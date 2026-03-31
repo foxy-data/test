@@ -303,8 +303,189 @@
         .dpc-plan  { font-size:11px; color:var(--color-text-secondary); }
         .dpc-fact  { font-size:17px; font-weight:600; color:var(--color-text); }
         .dpc-rest  { font-size:11px; color:var(--color-text-secondary); margin-top:1px; }
+
+        /* --- STORE METRICS BLOCK --- */
+        /* --- STORE METRICS BLOCK --- */
+        .store-metrics-block {
+            background: var(--color-card-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 22px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-md);
+        }
+        .store-metrics-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .store-metrics-title {
+            font-size: 15px; font-weight: 700; color: var(--color-text);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .store-metrics-date {
+            font-size: 11px; color: var(--color-text-secondary);
+            background: #f5f5f7; padding: 3px 10px; border-radius: 8px;
+        }
+        .store-metrics-refresh {
+            background: none; border: 1px solid var(--color-border); border-radius: 8px;
+            padding: 4px 10px; font-size: 11px; font-weight: 500;
+            color: var(--color-text-secondary); cursor: pointer;
+            transition: all 0.2s; font-family: inherit;
+        }
+        .store-metrics-refresh:hover { color: var(--color-accent); border-color: var(--color-accent); }
+        .sm-loading { text-align:center; color:var(--color-text-secondary); font-size:13px; padding:20px; }
+
+        /* Три групи в ряд */
+        .store-metrics-groups {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        @media (max-width: 700px) { .store-metrics-groups { grid-template-columns: 1fr; } }
+
+        /* Одна група */
+        .sm-group {
+            background: #f5f5f7;
+            border-radius: 16px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .sm-group-to   { border-top: 3px solid #0071e3; }
+        .sm-group-serv { border-top: 3px solid #34c759; }
+        .sm-group-acc  { border-top: 3px solid #ff9500; }
+
+        .sm-group-title {
+            font-size: 11px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.05em; color: var(--color-text);
+        }
+
+        /* Рядок план або факт — 5 клітинок */
+        .sm-tbl { width: 100%; border-collapse: collapse; }
+        .sm-tbl th {
+            font-size: 8.5px; font-weight: 700; text-transform: uppercase;
+            color: var(--color-text-secondary); letter-spacing: 0.04em;
+            padding: 0 4px 6px; text-align: right;
+        }
+        .sm-tbl th:first-child { text-align: left; padding-left: 0; }
+        .sm-tbl td {
+            padding: 4px 4px; text-align: right;
+            font-size: 12px; font-weight: 600; color: var(--color-text);
+            vertical-align: middle;
+        }
+        .sm-tbl td:first-child { text-align: left; padding-left: 0; font-size: 11px; font-weight: 600; color: var(--color-text-secondary); }
+        .sm-tbl tr.sm-plan-row td { color: var(--color-text-secondary); font-weight: 500; font-size: 11px; }
+        .sm-tbl tr + tr td { border-top: 1px solid rgba(0,0,0,0.05); padding-top: 6px; }
+
+        /* --- Перемикач цілі --- */
+        .sm-target-bar { display:flex; gap:6px; align-items:center; margin-bottom:14px; flex-wrap:wrap; }
+        .sm-target-label { font-size:10px; font-weight:700; text-transform:uppercase; color:var(--color-text-secondary); margin-right:4px; letter-spacing:0.04em; }
+        .sm-target-btn {
+            padding: 4px 11px; border-radius: 20px; border: 1.5px solid var(--color-border);
+            background: transparent; font-size: 12px; font-weight: 600; cursor: pointer;
+            color: var(--color-text-secondary); font-family: inherit; transition: all 0.18s;
+        }
+        .sm-target-btn.active { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
+        .sm-target-btn:hover:not(.active) { border-color: var(--color-accent); color: var(--color-accent); }
+        .rest-positive { color: #ff3b30; font-weight:600; }
+        .rest-done { color: #34c759; font-weight:600; }
+        .sm-sub { font-size: 9px; font-weight: 500; color: var(--color-text-secondary); display: block; margin-top: 1px; }
+
+        .sm-pct {
+            font-size: 10px; font-weight: 700; padding: 2px 7px;
+            border-radius: 6px; display: inline-block; white-space: nowrap;
+        }
+        .sm-val-prognoz { color: #0071e3 !important; }
+        .sm-val-rest { color: var(--color-text-secondary) !important; font-size: 11px !important; }
     </style>
-    <script src="auth.js"></script>
+    <script>
+// ============================================================
+//  auth.js  —  GORODOK Dashboard · Role-based auth
+//  Ролі: admin (повний доступ) | viewer (без захищених сторінок)
+//  Захищені сторінки: dynamics.html, competitor-delta.html, daily-delta.html
+// ============================================================
+
+const AUTH = {
+  // --- Паролі (змінюй тут) ---
+  passwords: {
+    admin:  "gteam-admin",   // пароль для адміна
+    viewer: "gteam"          // пароль для viewer (старий пароль — тепер viewer)
+  },
+
+  // --- Захищені сторінки (тільки admin) ---
+  adminOnly: [
+    "dynamics.html",
+    "competitor-delta.html",
+    "daily-delta.html"
+  ],
+
+  EXPIRY_DAYS: 30,
+
+  // --- Зберегти сесію ---
+  save(role) {
+    localStorage.setItem("auth_role",    role);
+    localStorage.setItem("auth_date",    Date.now());
+    localStorage.setItem("isAuthorized", "true");
+  },
+
+  // --- Очистити сесію ---
+  clear() {
+    localStorage.removeItem("auth_role");
+    localStorage.removeItem("auth_date");
+    localStorage.removeItem("isAuthorized");
+  },
+
+  // --- Перевірити чи сесія ще діє ---
+  isValid() {
+    const saved = localStorage.getItem("isAuthorized");
+    const date  = parseInt(localStorage.getItem("auth_date") || "0");
+    if (saved !== "true") return false;
+    const expired = (Date.now() - date) > this.EXPIRY_DAYS * 864e5;
+    if (expired) { this.clear(); return false; }
+    return true;
+  },
+
+  // --- Поточна роль ---
+  getRole() {
+    return localStorage.getItem("auth_role") || null;
+  },
+
+  // --- Перевірити пароль і повернути роль (або null) ---
+  checkPassword(input) {
+    if (input === this.passwords.admin)  return "admin";
+    if (input === this.passwords.viewer) return "viewer";
+    return null;
+  },
+
+  // --- Чи має поточний юзер доступ до сторінки ---
+  canAccess(filename) {
+    if (!this.isValid()) return false;
+    if (this.adminOnly.includes(filename) && this.getRole() !== "admin") return false;
+    return true;
+  },
+
+  // --- Ім'я поточної html-сторінки ---
+  currentPage() {
+    return window.location.pathname.split("/").pop() || "index.html";
+  },
+
+  // --- Викликати на захищених сторінках ---
+  guardPage() {
+    if (!this.isValid()) {
+      window.location.href = "index.html";
+      return false;
+    }
+    const page = this.currentPage();
+    if (this.adminOnly.includes(page) && this.getRole() !== "admin") {
+      window.location.href = "index.html?access=denied";
+      return false;
+    }
+    return true;
+  }
+};
+
+    </script>
 </head>
 <body>
 
@@ -383,6 +564,27 @@
             </div>
         </div>
 
+        <!-- БЛОК ПОКАЗНИКИ МАГАЗИНУ -->
+        <div class="store-metrics-block" id="store-metrics-block">
+            <div class="store-metrics-header">
+                <div class="store-metrics-title">
+                    <span>🏪</span> Показники магазину
+                    <span class="store-metrics-date" id="sm-date">—</span>
+                </div>
+                <button class="store-metrics-refresh" onclick="loadStoreMetrics()">↻ Оновити</button>
+            </div>
+            <div class="sm-target-bar">
+                <span class="sm-target-label">Ціль:</span>
+                <button class="sm-target-btn active" onclick="setTarget(1.00, this)">100%</button>
+                <button class="sm-target-btn" onclick="setTarget(1.05, this)">105%</button>
+                <button class="sm-target-btn" onclick="setTarget(1.10, this)">110%</button>
+                <button class="sm-target-btn" onclick="setTarget(1.15, this)">115%</button>
+            </div>
+            <div id="store-metrics-content">
+                <div class="sm-loading">Завантаження...</div>
+            </div>
+        </div>
+
         <div id="sales-cards"></div>
     </div>
 
@@ -396,6 +598,7 @@
 
 <script>
     // --- АВТОРИЗАЦІЯ (auth.js підключено у <head>) ---
+    let _weightsPromise = null; // ваги днів місяця
 
     function checkPass() {
         const input = document.getElementById('pass-input').value;
@@ -474,6 +677,7 @@
         container.appendChild(cardsGrid);
     }
 
+    _weightsPromise = loadDayWeights();
     loadPlanData().then(() => loadData());
     renderSkeletons(5);
     }
@@ -745,6 +949,207 @@
         return r > 0 ? '-' + formatFull(r) : '✓';
     }
 
+    // --- АРКУШ 5: ВАГИ ДНІВ МІСЯЦЯ ---
+    // gid для аркуша 5 — підбираємо runtime; URL базовий той самий
+    const WEIGHTS_BASE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTOUXHhUpCkh6tgvNpJzY-w5tVrhPkvEeC0W0ZWuy2YxPayuO3pvahfeKYmMZ1DwHnILTpsJFNtXLsH/pub';
+    const WEIGHTS_GID = 1846430742; // аркуш 6 — Доля та Дата для прогнозу
+    let dayWeights = []; // [{date: Date, weight: float}]
+
+    async function loadDayWeights() {
+        const gidsToTry = WEIGHTS_GID !== null
+            ? [WEIGHTS_GID]
+            : [1793183400, 473240415, 812345, 999999, 1234567890, 987654321, 11, 5, 4, 3, 2, 1, 0];
+        for (const gid of gidsToTry) {
+            try {
+                const url = WEIGHTS_BASE_URL + '?gid=' + gid + '&single=true&output=csv&t=' + Date.now();
+                const res = await fetch(url);
+                if (!res.ok) continue;
+                const text = await res.text();
+                const rows = parseCSV(text);
+                if (!rows.length) continue;
+                const hdr = rows[0].map(h => h.trim().toLowerCase());
+                const iDate = hdr.findIndex(h => h.includes('дат') || h === 'date');
+                const iWeight = hdr.findIndex(h => h.includes('дол') || h.includes('вага') || h.includes('weight') || h.includes('частка'));
+                if (iDate < 0 || iWeight < 0) continue;
+                const parsed = rows.slice(1).map(r => {
+                    const ds = (r[iDate] || '').trim();
+                    if (!ds) return null;
+                    // Формати: DD.MM.YYYY, YYYY-MM-DD, DD/MM/YYYY
+                    let d = null;
+                    const m1 = ds.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})$/);
+                    if (m1) {
+                        const y = m1[3].length === 2 ? 2000 + +m1[3] : +m1[3];
+                        d = new Date(y, +m1[2] - 1, +m1[1]);
+                    } else {
+                        d = new Date(ds);
+                    }
+                    if (isNaN(d)) return null;
+                    const w = parseFloat((r[iWeight] || '0').replace(',', '.')) || 0;
+                    return { date: d, weight: w };
+                }).filter(Boolean);
+                if (parsed.length > 0) { dayWeights = parsed; return; }
+            } catch(e) {}
+        }
+    }
+
+    // Нелінійний прогноз на основі ваг днів — повертає { tempo, plan }
+    function calcPrognoz(fact, plan, today) {
+        if (!dayWeights.length) return null;
+        const year = today.getFullYear();
+        const month = today.getMonth();
+        const monthWeights = dayWeights.filter(w => w.date.getFullYear() === year && w.date.getMonth() === month);
+        if (!monthWeights.length) return null;
+        monthWeights.sort((a, b) => a.date - b.date);
+        const totalWeight = monthWeights.reduce((s, w) => s + w.weight, 0);
+        if (!totalWeight) return null;
+        const todayDay = today.getDate();
+        // Вага вже відпрацьованих днів (до сьогодні, сьогодні ще не закінчився)
+        const passedWeight = monthWeights
+            .filter(w => w.date.getDate() < todayDay)
+            .reduce((s, w) => s + w.weight, 0);
+        if (!passedWeight) return null;
+        // Вага залишку: сьогодні + майбутні дні
+        const remainWeight = monthWeights
+            .filter(w => w.date.getDate() >= todayDay)
+            .reduce((s, w) => s + w.weight, 0);
+        // Прогноз (темп): екстраполяція поточного темпу на весь місяць
+        const tempo = Math.round(fact / passedWeight * totalWeight);
+        // Прогноз (план): факт + те що ще треба добрати по плану за залишок днів
+        let planPrognoz = null;
+        if (plan) {
+            const remainPlanShare = remainWeight / totalWeight;
+            planPrognoz = Math.round(fact + plan * remainPlanShare);
+        }
+        return { tempo, plan: planPrognoz };
+    }
+
+    // --- STORE METRICS ---
+    async function loadStoreMetrics() {
+        document.getElementById('store-metrics-content').innerHTML = '<div class="sm-loading">Завантаження...</div>';
+        const promises = [];
+        if (!Object.keys(planData).length) promises.push(loadPlanData());
+        if (!dayWeights.length) promises.push(_weightsPromise || loadDayWeights());
+        if (promises.length) await Promise.all(promises);
+        renderStoreMetrics();
+    }
+
+    let smTarget = 1.00; // поточна ціль (1.00 = 100%, 1.05 = 105%, ...)
+
+    function setTarget(val, btn) {
+        smTarget = val;
+        document.querySelectorAll('.sm-target-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderStoreMetrics();
+    }
+
+    function renderStoreMetrics() {
+        const today = new Date();
+        const todayStr = today.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' });
+        document.getElementById('sm-date').textContent = todayStr;
+
+        const store = currentData.find(d => /показники магазину|тотал|total/i.test(d.name));
+        const pl = getPlan('Показники магазину') || getPlan('тотал') || getPlan('total');
+
+        const toFact   = store ? (store.metrics['ТО']?.value || 0) : 0;
+        const accFact  = store ? (store.metrics['ACC']?.value || 0) : 0;
+        const servFact = store ? (store.metrics['Послуги грн']?.value || store.metrics['Послуги']?.value || 0) : 0;
+        const accDola  = store ? (store.metrics['% Доля ACC']?.value || 0) : 0;
+        const servDola = store ? (store.metrics['Доля Послуг']?.value || 0) : 0;
+
+        const toPlan   = pl?.to   || 0;
+        const accPlan  = pl?.acc  || 0;
+        const servPlan = pl?.serv || 0;
+
+        const toProgns   = calcPrognoz(toFact,   toPlan,   today);
+        const accProgns  = calcPrognoz(accFact,  accPlan,  today);
+        const servProgns = calcPrognoz(servFact, servPlan, today);
+        const toPrognTempo   = toProgns?.tempo   ?? null;
+        const toPrognPlan    = toProgns?.plan    ?? null;
+        const accPrognTempo  = accProgns?.tempo  ?? null;
+        const accPrognPlan   = accProgns?.plan   ?? null;
+        const servPrognTempo = servProgns?.tempo ?? null;
+        const servPrognPlan  = servProgns?.plan  ?? null;
+
+        function pctBadge(fact, plan) {
+            if (!plan) return '—';
+            const p = Math.round(fact / plan * 100);
+            const cls = p >= 100 ? 'pct-good' : p >= 70 ? 'pct-mid' : 'pct-bad';
+            return `<span class="sm-pct ${cls}">${p}%</span>`;
+        }
+        const fV  = v => v ? formatFull(v) : '—';
+        const fP  = v => (v !== null && v !== undefined) ? formatFull(v) : '—';
+        const fRst = (fact, plan) => {
+            if (!plan) return '—';
+            const r = plan - fact;
+            return r > 0 ? '−' + formatFull(r) : '✓';
+        };
+        const fDola = v => v ? v.toFixed(2) + '%' : '—';
+
+        function group(cls, icon, label, plan, fact, pct, prognTempo, prognPlan, rest, sub) {
+            // Ціль з урахуванням обраного множника
+            const targetVal = plan ? Math.round(plan * smTarget) : null;
+            const restToTarget = targetVal ? targetVal - fact : null;
+            const restStr = restToTarget === null ? '—'
+                : restToTarget > 0
+                    ? `<span class="rest-positive">−${formatFull(restToTarget)}</span>`
+                    : `<span class="rest-done">✓</span>`;
+
+            const pctFact = plan ? Math.round(fact / plan * 100) : null;
+            const pctPrognTempo = plan && prognTempo ? Math.round(prognTempo / plan * 100) : null;
+            const pctPrognPlan  = plan && prognPlan  ? Math.round(prognPlan  / plan * 100) : null;
+            const badge = (p) => p !== null ? `<span class="sm-pct ${p >= 100 ? 'pct-good' : p >= 70 ? 'pct-mid' : 'pct-bad'}" style="font-size:9px">${p}%</span>` : '—';
+            const targetLabel = smTarget === 1 ? 'план' : `план×${smTarget.toFixed(2).replace('.','').replace(/^10/,'')}%`;
+            return `
+            <div class="sm-group ${cls}">
+                <div class="sm-group-title">${icon} ${label}</div>
+                <table class="sm-tbl">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Сума</th>
+                            <th>Вик.</th>
+                            <th>Залишок до ${Math.round(smTarget*100)}%</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="sm-plan-row">
+                            <td>План</td>
+                            <td>${fV(plan)}</td>
+                            <td>—</td>
+                            <td>${targetVal && targetVal !== plan ? '<span style="font-size:9px;color:#6e6e73">Ціль: ' + formatFull(targetVal) + '</span>' : '—'}</td>
+                        </tr>
+                        <tr>
+                            <td>Факт${sub ? `<span class="sm-sub">${sub}</span>` : ''}</td>
+                            <td>${fV(fact)}</td>
+                            <td>${badge(pctFact)}</td>
+                            <td>${restStr}</td>
+                        </tr>
+                        <tr style="border-top:1px dashed var(--color-border)">
+                            <td><span style="font-size:9px;font-weight:600;text-transform:uppercase;color:#6e6e73">Прогн.темп</span></td>
+                            <td class="sm-val-prognoz">${fP(prognTempo)}</td>
+                            <td>${badge(pctPrognTempo)}</td>
+                            <td style="font-size:9px;color:#8e8e93">екстраполяція</td>
+                        </tr>
+                        <tr>
+                            <td><span style="font-size:9px;font-weight:600;text-transform:uppercase;color:#6e6e73">Прогн.план</span></td>
+                            <td class="sm-val-prognoz" style="color:#34c759">${fP(prognPlan)}</td>
+                            <td>${badge(pctPrognPlan)}</td>
+                            <td style="font-size:9px;color:#8e8e93">факт + залишок</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>`;
+        }
+
+        const html = `<div class="store-metrics-groups">
+            ${group('sm-group-to',   '💰', 'ТО',       toPlan,   toFact,   null, toPrognTempo,   toPrognPlan,   null, null)}
+            ${group('sm-group-serv', '🛠', 'Послуги',  servPlan, servFact, null, servPrognTempo, servPrognPlan, null, servDola ? 'Доля: ' + fDola(servDola) : null)}
+            ${group('sm-group-acc',  '🎧', 'АСС',      accPlan,  accFact,  null, accPrognTempo,  accPrognPlan,  null, accDola  ? 'Доля: ' + fDola(accDola)  : null)}
+        </div>`;
+
+        document.getElementById('store-metrics-content').innerHTML = html;
+    }
+
     // --- ДАНІ КАРТОК ---
     let currentData = [];
 
@@ -885,6 +1290,9 @@
 
             currentData = [storeTotals, ...currentData];
             renderCards(currentData);
+            // Чекаємо ваги днів перед прогнозом
+            if (_weightsPromise) await _weightsPromise;
+            renderStoreMetrics();
         } catch (error) {
             console.error('Помилка завантаження даних з Google Sheets:', error);
             // Fallback: спробуємо статичний JSON
@@ -892,6 +1300,8 @@
                 const response = await fetch('sales-data.json?t=' + Date.now());
                 currentData = await response.json();
                 renderCards(currentData);
+                if (_weightsPromise) await _weightsPromise;
+                renderStoreMetrics();
             } catch (e) { console.error('Fallback теж не спрацював:', e); }
         }
     }
