@@ -377,6 +377,18 @@
         .sm-tbl td:first-child { text-align: left; padding-left: 0; font-size: 11px; font-weight: 600; color: var(--color-text-secondary); }
         .sm-tbl tr.sm-plan-row td { color: var(--color-text-secondary); font-weight: 500; font-size: 11px; }
         .sm-tbl tr + tr td { border-top: 1px solid rgba(0,0,0,0.05); padding-top: 6px; }
+        .sm-tbl tr.sm-fact-row td {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--color-text);
+            padding-top: 8px;
+            padding-bottom: 8px;
+        }
+        .sm-tbl tr.sm-fact-row td:first-child {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--color-text);
+        }
 
 
         /* --- Перемикач метрик (ТО/Послуги/АСС) — тільки мобільний --- */
@@ -1144,7 +1156,7 @@ const AUTH = {
                             <td>—</td>
                             <td>${targetVal && targetVal !== plan ? '<span style="font-size:9px;color:#6e6e73">Ціль: ' + formatFull(targetVal) + '</span>' : '—'}</td>
                         </tr>
-                        <tr>
+                        <tr class="sm-fact-row">
                             <td>Факт${sub ? `<span class="sm-sub">${sub}</span>` : ''}</td>
                             <td>${fV(fact)}</td>
                             <td>${badge(pctFact)}</td>
