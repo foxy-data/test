@@ -379,8 +379,8 @@
         .sm-tbl tr + tr td { border-top: 1px solid rgba(0,0,0,0.05); padding-top: 6px; }
 
 
-        /* --- Перемикач метрик (ТО/Послуги/АСС) --- */
-        .sm-metric-bar { display:flex; gap:6px; align-items:center; margin-bottom:12px; }
+        /* --- Перемикач метрик (ТО/Послуги/АСС) — тільки мобільний --- */
+        .sm-metric-bar { display:none; gap:6px; align-items:center; margin-bottom:12px; }
         .sm-metric-btn {
             flex:1; padding:7px 4px; border-radius:10px; border:1.5px solid var(--color-border);
             background:transparent; font-size:12px; font-weight:600; cursor:pointer;
@@ -388,6 +388,9 @@
         }
         .sm-metric-btn.active { background:var(--color-accent); color:#fff; border-color:var(--color-accent); }
         .sm-metric-btn:hover:not(.active) { border-color:var(--color-accent); color:var(--color-accent); }
+        @media (max-width: 768px) {
+            .sm-metric-bar { display:flex; }
+        }
         /* --- Перемикач цілі --- */
         .sm-target-bar { display:flex; gap:6px; align-items:center; margin-bottom:14px; flex-wrap:wrap; }
         .sm-target-label { font-size:10px; font-weight:700; text-transform:uppercase; color:var(--color-text-secondary); margin-right:4px; letter-spacing:0.04em; }
@@ -1164,12 +1167,12 @@ const AUTH = {
             </div>`;
         }
 
-        const groups = {
-            to:   group('sm-group-to',   '💰', 'ТО',      toPlan,   toFact,   null, toPrognTempo,   toPrognPlan,   null, null),
-            serv: group('sm-group-serv', '🛠', 'Послуги', servPlan, servFact, null, servPrognTempo, servPrognPlan, null, servDola ? 'Доля: ' + fDola(servDola) : null),
-            acc:  group('sm-group-acc',  '🎧', 'АСС',     accPlan,  accFact,  null, accPrognTempo,  accPrognPlan,  null, accDola  ? 'Доля: ' + fDola(accDola)  : null),
-        };
-        const html = `<div class="store-metrics-groups">${groups[smMetric]}</div>`;
+        const grpTo   = group('sm-group-to',   '💰', 'ТО',      toPlan,   toFact,   null, toPrognTempo,   toPrognPlan,   null, null);
+        const grpServ = group('sm-group-serv', '🛠', 'Послуги', servPlan, servFact, null, servPrognTempo, servPrognPlan, null, servDola ? 'Доля: ' + fDola(servDola) : null);
+        const grpAcc  = group('sm-group-acc',  '🎧', 'АСС',     accPlan,  accFact,  null, accPrognTempo,  accPrognPlan,  null, accDola  ? 'Доля: ' + fDola(accDola)  : null);
+        const isMobile = window.innerWidth <= 768;
+        const activeGroup = { to: grpTo, serv: grpServ, acc: grpAcc }[smMetric];
+        const html = `<div class="store-metrics-groups">${isMobile ? activeGroup : grpTo + grpServ + grpAcc}</div>`;
 
         document.getElementById('store-metrics-content').innerHTML = html;
     }
