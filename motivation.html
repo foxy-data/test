@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Мотивація продавців</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <script src="auth.js"></script>
+    <script src="page-guard.js"></script>
+    <style>
+        :root {
+            --bg: #f5f5f7;
+            --text: #1d1d1f;
+            --text-sec: #6e6e73;
+            --accent: #0071e3;
+            --border: #d2d2d7;
+            --card: #fff;
+            --shadow: 0 4px 20px rgba(0,0,0,.06);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 12px 14px 60px; }
+
+        /* TOP BAR */
+        .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; gap: 10px; flex-wrap: wrap; }
+        .back-link { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 4px; }
+        .back-link:hover { opacity: 0.75; }
+        .page-title { font-size: 20px; font-weight: 700; }
+
+        /* HERO */
+        .hero {
+            background: linear-gradient(135deg, #eef2ff 0%, #e8f4ff 50%, #edfaf3 100%);
+            border-radius: 20px;
+            padding: 24px 22px 20px;
+            margin-bottom: 18px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .hero-badge {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            background: rgba(0,113,227,0.12);
+            color: #0055b3;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+        }
+        .hero h1 { font-size: clamp(20px, 4vw, 28px); font-weight: 700; color: var(--text); line-height: 1.25; margin-bottom: 6px; }
+        .hero p { font-size: 13px; color: var(--text-sec); line-height: 1.5; }
+
+        /* BLOCKS */
+        .blocks { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+
+        .block {
+            background: var(--card);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .block-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            border-bottom: 1px solid #f2f2f4;
+        }
+
+        .block-num {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700;
+            flex-shrink: 0;
+        }
+        .block-num.n1 { background: #e8f0fe; color: #1a56db; }
+        .block-num.n2 { background: #edfaf3; color: #0a6640; }
+        .block-num.n3 { background: #fff4e6; color: #92400e; }
+
+        .block-title h2 { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+        .block-title span { font-size: 11px; color: var(--text-sec); }
+
+        .block-body { padding: 14px 18px; }
+
+        /* BRAND TAGS */
+        .brands-grid { display: flex; flex-wrap: wrap; gap: 7px; }
+        .brand-tag {
+            display: inline-flex; align-items: center;
+            font-size: 12px; font-weight: 600;
+            padding: 5px 13px;
+            border-radius: 20px;
+            border: 1px solid;
+        }
+        .brand-tag.blue { background: #e8f0fe; color: #1a56db; border-color: #bfcefb; }
+        .brand-tag.green { background: #edfaf3; color: #0a6640; border-color: #a7f3cc; }
+
+        /* APPLE TABLE */
+        .apple-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .apple-icon {
+            width: 42px; height: 42px;
+            background: #fff4e6;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            font-size: 22px;
+        }
+        .apple-text h3 { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+        .apple-text p { font-size: 11px; color: var(--text-sec); }
+
+        .models-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .models-table th {
+            background: #fff4e6;
+            color: #92400e;
+            font-weight: 700;
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #fcd9a6;
+        }
+        .models-table th:last-child { text-align: center; white-space: nowrap; }
+        .models-table td {
+            padding: 9px 12px;
+            border-bottom: 1px solid #f2f2f4;
+            color: var(--text);
+            vertical-align: middle;
+        }
+        .models-table td:first-child { font-size: 11px; color: var(--text-sec); white-space: nowrap; }
+        .models-table td:last-child { text-align: center; }
+        .models-table tr:last-child td { border-bottom: none; }
+        .models-table tr:hover td { background: #fafafa; }
+        .bonus-badge {
+            display: inline-block;
+            background: #fff4e6;
+            color: #92400e;
+            border: 1px solid #fcd9a6;
+            border-radius: 12px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* REWARD SECTION */
+        .section-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 14px; }
+
+        .reward-tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+        .tab-btn {
+            padding: 7px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text-sec);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+        .tab-btn.active { background: #e8f0fe; color: #1a56db; border-color: #bfcefb; }
+
+        .reward-block { background: var(--card); border-radius: 18px; box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.05); overflow: hidden; display: none; }
+        .reward-block.visible { display: block; }
+
+        .reward-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .reward-table th {
+            background: #f5f5f7;
+            color: var(--text-sec);
+            font-weight: 700;
+            padding: 9px 10px;
+            text-align: center;
+            border-bottom: 1px solid #e8e8ed;
+            font-size: 11px;
+        }
+        .reward-table th.left { text-align: left; }
+        .reward-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #f2f2f4;
+            text-align: center;
+            color: var(--text);
+            font-size: 12px;
+        }
+        .reward-table td.left { text-align: left; font-weight: 700; }
+        .reward-table tr:last-child td { border-bottom: none; }
+        .num { font-weight: 700; }
+        .place-1 td { background: #fffbf0; }
+        .place-2 td { background: #f5f5f7; }
+        .place-3 td { background: #f0f6ff; }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 11px;
+            color: var(--text-sec);
+        }
+
+        @media (max-width: 600px) {
+            .reward-table th, .reward-table td { padding: 7px 6px; font-size: 11px; }
+            .models-table th, .models-table td { padding: 7px 8px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <a href="index.html" class="back-link">← Головна</a>
+    <div class="page-title">Мотивація продавців</div>
+    <div></div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-badge">Програма мотивації</div>
+    <h1>Ваші бренди — ваші можливості</h1>
+    <p>Продавайте більше з нашими партнерськими брендами та заробляйте більше щомісяця</p>
+</div>
+
+<!-- BLOCKS -->
+<div class="blocks">
+
+    <!-- BLOCK 1 -->
+    <div class="block">
+        <div class="block-header">
+            <div class="block-num n1">1</div>
+            <div class="block-title">
+                <h2>Побут, здоров'я та кухня</h2>
+                <span>Домашні товари та гігієна</span>
+            </div>
+        </div>
+        <div class="block-body">
+            <div class="brands-grid">
+                <span class="brand-tag blue">Krauff</span>
+                <span class="brand-tag blue">Martex</span>
+                <span class="brand-tag blue">Oral-B</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- BLOCK 2 -->
+    <div class="block">
+        <div class="block-header">
+            <div class="block-num n2">2</div>
+            <div class="block-title">
+                <h2>Геймінг, периферія та аксесуари</h2>
+                <span>Електроніка та ігрове спорядження</span>
+            </div>
+        </div>
+        <div class="block-body">
+            <div class="brands-grid">
+                <span class="brand-tag green">GamePro</span>
+                <span class="brand-tag green">Fifine</span>
+                <span class="brand-tag green">Ipega</span>
+                <span class="brand-tag green">Anda Seat</span>
+                <span class="brand-tag green">OfficePro</span>
+                <span class="brand-tag green">Epomaker</span>
+                <span class="brand-tag green">Ajazz</span>
+                <span class="brand-tag green">Sihoo</span>
+                <span class="brand-tag green">Boya</span>
+                <span class="brand-tag green">Gelius</span>
+                <span class="brand-tag green">XO</span>
+                <span class="brand-tag green">USAMS</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- BLOCK 3 — APPLE -->
+    <div class="block">
+        <div class="block-header">
+            <div class="block-num n3">3</div>
+            <div class="block-title">
+                <h2>Apple-екосистема</h2>
+                <span>Аксесуари до планшетних ПК — ТМ Apple</span>
+            </div>
+        </div>
+        <div class="block-body">
+            <div class="apple-header">
+                <div class="apple-icon">🍎</div>
+                <div class="apple-text">
+                    <h3>ТМ Apple — бонус продавцю за 1 шт.</h3>
+                    <p>Аксесуари до планшетних ПК</p>
+                </div>
+            </div>
+            <table class="models-table">
+                <thead>
+                    <tr>
+                        <th>Код</th>
+                        <th>Назва товару</th>
+                        <th>Бонус / шт.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>6862510</td>
+                        <td>tab/other APPLE Magic Keyboard for 11" iPad Pro 3rd gen — Ukrainian</td>
+                        <td><span class="bonus-badge">700 грн</span></td>
+                    </tr>
+                    <tr>
+                        <td>6842511</td>
+                        <td>tab case APPLE iPad Pro 12.9" 5th gen Magic Case-Keyboard, Ukr, Black</td>
+                        <td><span class="bonus-badge">700 грн</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- REWARD TABLES -->
+<div class="section-title">Таблиця винагород — Блоки 1 і 2</div>
+
+<div class="reward-tabs">
+    <button class="tab-btn active" onclick="showTab('b1', this)">Блок 1 — Побут / Гігієна</button>
+    <button class="tab-btn" onclick="showTab('b2', this)">Блок 2 — Геймінг / Аксесуари</button>
+</div>
+
+<div id="tab-b1" class="reward-block visible">
+    <table class="reward-table">
+        <thead>
+            <tr>
+                <th class="left">Рейтинг магазину</th>
+                <th>Рейтинг ПК<br>в магазині</th>
+                <th>1 кластер</th>
+                <th>2 кластер</th>
+                <th>3 кластер</th>
+                <th>4 кластер</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="place-1"><td class="left" rowspan="3">1 місце</td><td class="num">1</td><td>2 800</td><td>2 800</td><td>2 800</td><td>2 800</td></tr>
+            <tr class="place-1"><td class="num">2</td><td>2 300</td><td>2 300</td><td>2 300</td><td>—</td></tr>
+            <tr class="place-1"><td class="num">3</td><td>1 000</td><td>1 000</td><td>—</td><td>—</td></tr>
+            <tr class="place-2"><td class="left" rowspan="3">2 місце</td><td class="num">1</td><td>2 300</td><td>2 300</td><td>2 300</td><td>2 300</td></tr>
+            <tr class="place-2"><td class="num">2</td><td>1 800</td><td>1 800</td><td>1 800</td><td>—</td></tr>
+            <tr class="place-2"><td class="num">3</td><td>900</td><td>900</td><td>—</td><td>—</td></tr>
+            <tr class="place-3"><td class="left" rowspan="3">3 місце</td><td class="num">1</td><td>2 100</td><td>2 100</td><td>2 100</td><td>2 100</td></tr>
+            <tr class="place-3"><td class="num">2</td><td>1 400</td><td>1 400</td><td>1 400</td><td>—</td></tr>
+            <tr class="place-3"><td class="num">3</td><td>800</td><td>800</td><td>—</td><td>—</td></tr>
+            <tr><td class="left" rowspan="3">4 місце</td><td class="num">1</td><td>1 700</td><td>1 700</td><td>1 700</td><td>1 700</td></tr>
+            <tr><td class="num">2</td><td>1 200</td><td>1 200</td><td>1 200</td><td>—</td></tr>
+            <tr><td class="num">3</td><td>700</td><td>700</td><td>—</td><td>—</td></tr>
+            <tr><td class="left" rowspan="3">5 місце</td><td class="num">1</td><td>1 400</td><td>1 400</td><td>1 400</td><td>1 400</td></tr>
+            <tr><td class="num">2</td><td>900</td><td>900</td><td>900</td><td>—</td></tr>
+            <tr><td class="num">3</td><td>600</td><td>600</td><td>—</td><td>—</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div id="tab-b2" class="reward-block">
+    <table class="reward-table">
+        <thead>
+            <tr>
+                <th class="left">Рейтинг магазину</th>
+                <th>Рейтинг ПК<br>в магазині</th>
+                <th>1 кластер</th>
+                <th>2 кластер</th>
+                <th>3 кластер</th>
+                <th>4 кластер</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="place-1"><td class="left" rowspan="3">1 місце</td><td class="num">1</td><td>2 800</td><td>2 800</td><td>2 800</td><td>2 800</td></tr>
+            <tr class="place-1"><td class="num">2</td><td>2 300</td><td>2 300</td><td>2 300</td><td>—</td></tr>
+            <tr class="place-1"><td class="num">3</td><td>1 000</td><td>1 000</td><td>—</td><td>—</td></tr>
+            <tr class="place-2"><td class="left" rowspan="3">2 місце</td><td class="num">1</td><td>2 300</td><td>2 300</td><td>2 300</td><td>2 300</td></tr>
+            <tr class="place-2"><td class="num">2</td><td>1 800</td><td>1 800</td><td>1 800</td><td>—</td></tr>
+            <tr class="place-2"><td class="num">3</td><td>900</td><td>900</td><td>—</td><td>—</td></tr>
+            <tr class="place-3"><td class="left" rowspan="3">3 місце</td><td class="num">1</td><td>2 100</td><td>2 100</td><td>2 100</td><td>2 100</td></tr>
+            <tr class="place-3"><td class="num">2</td><td>1 400</td><td>1 400</td><td>1 400</td><td>—</td></tr>
+            <tr class="place-3"><td class="num">3</td><td>800</td><td>800</td><td>—</td><td>—</td></tr>
+            <tr><td class="left" rowspan="3">4 місце</td><td class="num">1</td><td>1 700</td><td>1 700</td><td>1 700</td><td>1 700</td></tr>
+            <tr><td class="num">2</td><td>1 200</td><td>1 200</td><td>1 200</td><td>—</td></tr>
+            <tr><td class="num">3</td><td>700</td><td>700</td><td>—</td><td>—</td></tr>
+            <tr><td class="left" rowspan="3">5 місце</td><td class="num">1</td><td>1 400</td><td>1 400</td><td>1 400</td><td>1 400</td></tr>
+            <tr><td class="num">2</td><td>900</td><td>900</td><td>900</td><td>—</td></tr>
+            <tr><td class="num">3</td><td>600</td><td>600</td><td>—</td><td>—</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="footer-note">Питання? Зверніться до свого менеджера або відділу мотивації</div>
+
+<script>
+function showTab(id, btn) {
+    document.querySelectorAll('.reward-block').forEach(el => el.classList.remove('visible'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('visible');
+    btn.classList.add('active');
+}
+</script>
+</body>
+</html>
