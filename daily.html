@@ -849,10 +849,7 @@ const TOTEMS = [
 
 // ===== MEME APIS =====
 const MEME_APIS = [
-    'https://meme-api.com/gimme',
     'https://meme-api.com/gimme/ukraine',
-    'https://meme-api.com/gimme/dankmemes',
-    'https://meme-api.com/gimme/memes'
 ];
 
 let currentMemeUrl = '';
@@ -1268,52 +1265,6 @@ function buildRatingMetricPills() {
     }
 }
 
-// ===== TOTEM & COLLECTION FUNCTIONS =====
-function getRandomTotem() {
-    return TOTEMS[Math.floor(Math.random() * TOTEMS.length)];
-}
-
-function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-function renderCollection() {
-    const grid = document.getElementById('collection-grid');
-    if (!grid) return;
-    
-    const data = COLLECTION_STORE.get();
-    grid.innerHTML = '';
-    
-    TOTEMS.forEach(t => {
-        const item = data[t.id] || { count: 0 };
-        const isComplete = item.count >= t.target;
-        const pct = Math.min((item.count / t.target) * 100, 100);
-        
-        const div = document.createElement('div');
-        div.className = `collection-item ${isComplete ? '' : 'locked'}`;
-        div.innerHTML = `
-            <span class="collection-count">${item.count}/${t.target}</span>
-            <div class="totem-badge totem-${t.style}">${t.svg}</div>
-            <div class="collection-name">${t.name}</div>
-            <div class="collection-progress"><div class="collection-fill" style="width:${pct}%"></div></div>
-            ${isComplete ? '<div class="collection-complete">✅ Бонус!</div>' : ''}
-        `;
-        grid.appendChild(div);
-    });
-}
-
-function addToCollection(totemId) {
-    const updated = COLLECTION_STORE.add(totemId);
-    const cfg = TOTEMS.find(t => t.id === totemId);
-    
-    if (updated.count >= cfg.target) {
-        showToast(`🎁 Сет "${cfg.name}" зібрано! Бонус +500 грн!`);
-    }
-    return updated;
-}
 
 // ===== RENDER RANKING WITH TOTEMS =====
 function renderRankingCards() {
