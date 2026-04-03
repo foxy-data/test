@@ -1982,11 +1982,11 @@ function renderPot(){
         container.innerHTML='<div class="status-box">Немає даних за обраний фільтр</div>';return;
     }
 
-    // Всі продавці з filteredData + дані магазину (всі продавці ті ж місяці)
-    const storeData=allData.filter(r=>selPeriods.size===0||selPeriods.has(ymKey(r.рік,r.місяць)));
-    const storeSellers=[...new Set(storeData.map(r=>r.продавець))].sort();
+    // Дані за обраний період (всі продавці)
+    const periodData=allData.filter(r=>selPeriods.size===0||selPeriods.has(ymKey(r.рік,r.місяць)));
+    const allPeriodSellers=[...new Set(periodData.map(r=>r.продавець))].sort();
     // Обрані продавці (або всі якщо selSellers порожній)
-    const activeSellers=selSellers.size===0?storeSellers:[...selSellers].sort();
+    const activeSellers=selSellers.size===0?allPeriodSellers:[...selSellers].sort();
 
     // Допоміжна функція: дані по продавцю
     function sellerStats(seller,srcData){
@@ -1994,26 +1994,22 @@ function renderPot(){
         if(!rows.length)return null;
         const months=new Set(rows.map(r=>r.рік+'-'+r.місяць)).size||1;
         const sum=k=>rows.reduce((s,r)=>s+(r[k]||0),0);
-        const avg=k=>{const vals=rows.map(r=>r[k]).filter(v=>v!=null);return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;};
         const sumTO=sum('ТО'),sumSht=sum('Шт'),sumCheky=sum('Чеки'),sumACC=sum('ACC'),sumPoslugy=sum('Послуги грн');
         const avgTO=sumTO/months;
         const avgSht=sumSht/months;
-        const avgASP=sumSht>0?sumTO/sumSht:0;  // ASP = ТО/Шт
+        const avgASP=sumSht>0?sumTO/sumSht:0;
         const avgCheky=sumCheky/months;
         return{months,sumTO,sumSht,sumCheky,sumACC,sumPoslugy,avgTO,avgSht,avgASP,avgCheky};
     }
 
-    // Статистика по магазину (всі продавці)
-    // Середнє ТО — зважене (як на вкладці Рейтинг): Σ(sumTO) / Σ(місяці)
-    const storeStats=storeSellers.map(s=>sellerStats(s,storeData)).filter(Boolean);
-    const n=storeStats.length||1;
-    // Зважене середнє ТО/міс (той самий принцип що у renderRating: totalRaw / totalMonths)
-    const totalRawTO=storeStats.reduce((s,x)=>s+x.sumTO,0);
-    const totalMonthsStore=storeStats.reduce((s,x)=>s+x.months,0)||1;
-    const storeAvgTO=totalRawTO/totalMonthsStore;
-    // Для Шт і ASP — також зважені
-    const totalRawSht=storeStats.reduce((s,x)=>s+x.sumSht,0);
-    const storeAvgSht=totalRawSht/totalMonthsStore;
+    // ── Середнє рахується ТІЛЬКИ по activeSellers (обраних у фільтрі) ──
+    // Це дозволяє порівнювати продавців між собою в межах вибірки
+    const activeStats=activeSellers.map(s=>sellerStats(s,periodData)).filter(Boolean);
+    const totalRawTO=activeStats.reduce((s,x)=>s+x.sumTO,0);
+    const totalMonthsActive=activeStats.reduce((s,x)=>s+x.months,0)||1;
+    const storeAvgTO=totalRawTO/totalMonthsActive;
+    const totalRawSht=activeStats.reduce((s,x)=>s+x.sumSht,0);
+    const storeAvgSht=totalRawSht/totalMonthsActive;
     const storeAvgASP=totalRawSht>0?totalRawTO/totalRawSht:0;
 
     // ── Банер по магазину ──
@@ -2035,9 +2031,9 @@ function renderPot(){
     storeBanner.className='pot-store-banner';
     storeBanner.innerHTML=
         mkStat('Продавців у вибірці',activeSellers.length)+dv+
-        mkStat('Сер. ТО/міс (зважене)',fmtV(storeAvgTO,'money'),'#0071e3')+dv+
-        mkStat('Сер. Шт/міс по маг.',fmtV(storeAvgSht,'int'),'#34c759')+dv+
-        mkStat('Сер. ASP по маг.',fmtV(storeAvgASP,'money'),'#ff9500');
+        mkStat('Сер. ТО/міс (вибірка)',fmtV(storeAvgTO,'money'),'#2563eb')+dv+
+        mkStat('Сер. Шт/міс (вибірка)',fmtV(storeAvgSht,'int'),'#16a34a')+dv+
+        mkStat('Сер. ASP (вибірка)',fmtV(storeAvgASP,'money'),'#d97706');
     container.appendChild(storeBanner);
 
     // ── Картки продавців ──
@@ -2109,7 +2105,7 @@ function renderPot(){
     // ── Підсумок по магазину ──
     const summTitle=document.createElement('div');
     summTitle.className='pot-section-title';
-    summTitle.textContent='Загальний потенціал магазину';
+    summTitle.textContent='Загальний потенціал вибірки';
     container.appendChild(summTitle);
 
     const summBanner=document.createElement('div');
