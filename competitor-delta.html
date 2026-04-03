@@ -117,6 +117,18 @@ tr td.col-delta-striped{background:#fff3e0;}
 .p2-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#34c759;flex-shrink:0}
 .status-box{padding:40px;text-align:center;color:var(--text-sec);font-size:14px}
 .status-box.error{color:#ff3b30}
+
+/* ── DELTA / DIFF ROWS ── */
+tr.diff-row td { font-size: 10px; font-weight: 700; padding: 2px 6px; border-bottom: 1px solid #f2f2f4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+tr.diff-row td.col-year { background: #fef9f0 !important; color: #78350f; font-size: 9px; font-weight: 700; }
+tr.diff-row td.col-month { background: #fef9f0 !important; color: #92400e; font-size: 9.5px; font-weight: 700; }
+tr.diff-row td { background: #fef9f0 !important; }
+tr.diff-row:hover td { background: #fdf0d8 !important; }
+.diff-pos { color: #15803d; }
+.diff-neg { color: #b91c1c; }
+.diff-zero { color: #9ca3af; }
+.delta-mode-btn { border: none; background: #f0f0f5; border-radius: 9px; padding: 5px 12px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; color: #6e6e73; transition: all .2s; }
+.delta-mode-btn.on { background: #78350f; color: #fff; }
 </style>
 </head>
 <body>
@@ -134,6 +146,7 @@ tr td.col-delta-striped{background:#fff3e0;}
 <div class="filter-mode-row">
 <span class="filter-mode-label">Режим</span>
 <button class="compare-btn" id="compareModeBtn" onclick="toggleCompareMode()">⚖️ Порівняння</button>
+<button class="delta-mode-btn" id="deltaRowsBtn" onclick="toggleDeltaRows()">↔ Відхилення</button>
 </div>
 <div class="filter-periods-row" id="filterRow1">
 <span class="period-label p1" id="periodLabel1" style="display:none">Період 1</span>
@@ -211,6 +224,7 @@ let selectedPeriods=new Set();
 let compareMode=false;
 let periods1=new Set(),periods2=new Set();
 let selectedCols=new Set();
+let showDeltaRows=false;
 let viewMode='table',chartInstance=null;
 let tooltipEnabled=true;
 let chartType='line';
@@ -395,6 +409,21 @@ block.appendChild(moRow);
 yp.appendChild(block);
 });
 }
+
+function toggleDeltaRows(){
+showDeltaRows=!showDeltaRows;
+document.getElementById('deltaRowsBtn').classList.toggle('on',showDeltaRows);
+const hint=document.querySelector('.table-hint');
+if(hint){
+hint.querySelector('#deltaHint')?.remove();
+if(showDeltaRows){
+const sp=document.createElement('span');sp.id='deltaHint';sp.style.cssText='margin-left:8px;color:#92400e;font-weight:600;';sp.textContent='↔ — відхилення від попереднього рядка';
+hint.appendChild(sp);
+}
+}
+renderTable();
+}
+
 function toggleCompareMode(){
 compareMode=!compareMode;
 document.getElementById('compareModeBtn').classList.toggle('on',compareMode);
@@ -457,9 +486,11 @@ th.onclick=()=>toggleCol(col.key);trH.appendChild(th);
 thead.appendChild(trH);tbl.appendChild(thead);
 const tbody=document.createElement('tbody');
 let lastY=null;
+let prevDataRow=null;
 data.forEach(r=>{
 if(r.year!==lastY){
 lastY=r.year;
+prevDataRow=null;
 const trY=document.createElement('tr');trY.className='year-sep';
 const tdY=document.createElement('td');tdY.className='col-year';tdY.textContent=r.year;trY.appendChild(tdY);
 const tdM=document.createElement('td');tdM.className='col-month';tdM.textContent='';trY.appendChild(tdM);
@@ -498,6 +529,40 @@ tr.appendChild(td);
 });
 });
 tbody.appendChild(tr);
+// ── DELTA ROW ──
+if(showDeltaRows&&prevDataRow){
+const diffTr=document.createElement('tr');diffTr.className='diff-row';
+const tdY2=document.createElement('td');tdY2.className='col-year';tdY2.textContent='';diffTr.appendChild(tdY2);
+const tdM2=document.createElement('td');tdM2.className='col-month';
+tdM2.textContent='↔ '+MONTHS_UK[prevDataRow.month-1].slice(0,3);diffTr.appendChild(tdM2);
+colGroups.forEach((grp,gi)=>{
+grp.cols.forEach((col,ci)=>{
+const td2=document.createElement('td');
+if(ci===0&&gi>0)td2.classList.add('grp-sep');
+const cur=r.vals[col.key],prev2=prevDataRow.vals[col.key];
+if(cur!==null&&cur!==undefined&&prev2!==null&&prev2!==undefined){
+let diff=cur-prev2;
+if(col.isDelta){
+// delta: show absolute difference in delta ratio
+const sign=diff>=0?'+':'';
+td2.textContent=sign+diff.toFixed(2);
+td2.className+=' '+(diff>0.005?'diff-neg':diff<-0.005?'diff-pos':'diff-zero');
+}else if(col.isPct){
+const sign=diff>=0?'+':'';
+td2.textContent=sign+diff.toFixed(1)+'%';
+td2.className+=' '+(diff>=0?'diff-pos':'diff-neg');
+}else{
+const sign=diff>=0?'+':'';
+td2.textContent=sign+fmt(diff)+(diff>=0?' ↑':' ↓');
+td2.className+=' '+(diff>=0?'diff-pos':'diff-neg');
+}
+}else{td2.textContent='—';td2.style.color='#ccc';}
+diffTr.appendChild(td2);
+});
+});
+tbody.appendChild(diffTr);
+}
+prevDataRow=r;
 });
 tbl.appendChild(tbody);wrap.appendChild(tbl);
 }
