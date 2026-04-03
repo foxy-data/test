@@ -133,10 +133,13 @@
             background: var(--surface);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .table-scroll {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior-x: contain;
-            border: 1px solid var(--border);
         }
 
         table { border-collapse: collapse; table-layout: fixed; }
@@ -506,6 +509,7 @@
 
 <div id="tableWrap">
     <div class="table-card">
+        <div class="table-scroll">
         <div id="loader" class="loading">Завантаження…</div>
         <table id="tbl" style="display:none">
             <thead>
@@ -514,6 +518,7 @@
             </thead>
             <tbody id="tbody"></tbody>
         </table>
+        </div>
     </div>
 </div>
 
@@ -729,7 +734,7 @@ function buildTable(dataRows) {
     });
 
     if (window.innerWidth < 768) {
-        const card = document.querySelector('.table-card');
+        const card = document.querySelector('.table-scroll');
         const snaps = [];
         let x = 0;
         GROUPS.forEach(g => {
