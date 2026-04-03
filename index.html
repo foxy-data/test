@@ -920,28 +920,31 @@ const AUTH = {
                     const hue = Math.round(ratio * 120);
                     const bg = `hsl(${hue},70%,${Math.round(88-ratio*10)}%)`;
                     const fg = `hsl(${hue},60%,${Math.round(28+ratio*10)}%)`;
-                    // Smart display: shorten if too long
+                    // Відображаємо % як є з джерела, без скорочень
                     let dispVal = val;
                     const nPct = parseFloat(val.replace('%','').replace(/\s/g,'').replace(',','.'));
                     if (!isNaN(nPct)) {
-                        // Show max 1 decimal place for %, strip trailing zeros
-                        dispVal = nPct.toFixed(1).replace(/\.0$/, '') + '%';
+                        // Зберігаємо оригінальну точність, лише нормалізуємо формат
+                        const decimals = (val.replace('%','').trim().split(/[.,]/)[1] || '').length;
+                        dispVal = nPct.toFixed(Math.min(decimals, 2)) + '%';
                     }
                     html += `<td><span class="cell-badge" style="background:${bg};color:${fg}">${esc(dispVal)}</span></td>`;
                     return;
                 }
 
                 const numVal = parseFloat(val.replace(/\s/g,'').replace(',','.'));
-                // Числові значення — форматуємо компактно
+                // Числові значення — повний формат без скорочень
                 if (!isNaN(numVal) && val !== '') {
                     const bg = isTotal ? 'rgba(0,113,227,0.10)' : 'rgba(134,134,139,0.08)';
                     const fg = isTotal ? '#1a50b8' : '#3d3d3f';
-                    // Format numbers compactly
-                    let dispNum = val;
-                    if (Math.abs(numVal) >= 1000000) dispNum = (numVal/1000000).toFixed(1) + 'М';
-                    else if (Math.abs(numVal) >= 1000) dispNum = (numVal/1000).toFixed(0) + 'К';
-                    else if (numVal % 1 !== 0) dispNum = numVal.toFixed(1);
-                    else dispNum = Math.round(numVal).toLocaleString('uk-UA').replace(/\s/g,'');
+                    let dispNum;
+                    if (numVal % 1 !== 0) {
+                        // Дробове — зберігаємо до 2 знаків після коми
+                        const decimals = (val.replace(/\s/g,'').split(/[.,]/)[1] || '').length;
+                        dispNum = numVal.toLocaleString('uk-UA', { minimumFractionDigits: Math.min(decimals, 2), maximumFractionDigits: Math.min(decimals, 2) });
+                    } else {
+                        dispNum = Math.round(numVal).toLocaleString('uk-UA');
+                    }
                     html += `<td><span class="cell-badge" style="background:${bg};color:${fg}">${esc(dispNum)}</span></td>`;
                     return;
                 }
@@ -1364,9 +1367,8 @@ const AUTH = {
     }
 
     function formatNumber(num) {
-        if (num >= 1000000) return (num / 1000000).toFixed(2) + 'М';
-        if (num >= 1000)    return (num / 1000).toFixed(1) + 'К';
-        return num;
+        if (!num && num !== 0) return '0';
+        return Math.round(num).toLocaleString('uk-UA');
     }
     function formatFull(num) {
         if (!num && num !== 0) return '0';
