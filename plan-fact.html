@@ -1,161 +1,448 @@
 <!DOCTYPE html>
-
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>План-Факт</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #f5f5f7; --text: #1d1d1f; --accent: #0071e3; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 8px 10px; }
-        .back-link { color: var(--accent); text-decoration: none; font-weight: 500; display: inline-block; margin-bottom: 8px; font-size: 14px; }
+        :root {
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --surface2: #f7f8fa;
+            --border: #e4e7ed;
+            --text: #111827;
+            --text2: #6b7280;
+            --text3: #9ca3af;
 
-        /* ── SKELETON + ANIMATION SYSTEM ── */
-        @keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
-        @keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-        .skel{
-            background:linear-gradient(90deg,#eaeaed 25%,#f5f5f7 50%,#eaeaed 75%);
-            background-size:600px 100%;
-            animation:shimmer 1.4s ease-in-out infinite;
-            border-radius:7px;
+            --to:    #2563eb;
+            --to-bg: rgba(37,99,235,0.09);
+            --serv:  #16a34a;
+            --serv-bg: rgba(22,163,74,0.09);
+            --acc:   #d97706;
+            --acc-bg: rgba(217,119,6,0.09);
+            --chk:   #7c3aed;
+            --chk-bg: rgba(124,58,237,0.09);
+
+            --plan-bg: rgba(107,114,128,0.09);
+            --plan-text: #6b7280;
+
+            --radius: 14px;
+            --shadow: 0 1px 4px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.05);
         }
-        .rank-card-skel{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.04);padding:10px 14px;display:flex;flex-direction:column;gap:8px;margin-bottom:7px}
-        .rank-card-skel-top{display:flex;align-items:center;gap:12px}
-        .rank-card-skel-pos{width:24px;height:24px;border-radius:6px;flex-shrink:0}
-        .rank-card-skel-body{flex:1;display:flex;flex-direction:column;gap:7px}
-        .rank-card-skel-line{height:12px;border-radius:6px}
-        .rank-card-skel-sub{height:9px;width:50%;border-radius:5px}
-        .rank-card-skel-val{width:52px;height:16px;border-radius:7px;flex-shrink:0}
-        .rank-card-skel-bar{height:5px;border-radius:3px;margin-top:2px}
-        .rank-card.appear{animation:fadeInUp .3s ease both}
-        .tbl-row-skel{display:flex;gap:8px;padding:8px 12px;border-bottom:1px solid #f2f2f4}
-        .tbl-row-skel-cell{height:11px;border-radius:5px;flex:1}
-        .tbl-row-skel-cell.wide{flex:2}
 
-```
-    .table-card {
-        background: white; border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-        overflow-x: auto; -webkit-overflow-scrolling: touch;
-        overscroll-behavior-x: contain;
-    }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    table { border-collapse: collapse; table-layout: fixed; }
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 10px 10px 32px;
+        }
 
-    th {
-        text-align: center; padding: 5px 3px; color: #86868b;
-        font-size: 10px; font-weight: 600; text-transform: uppercase;
-        border-bottom: 1px solid #d2d2d7; background: white;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    td {
-        padding: 3px 3px; border-bottom: 1px solid #f2f2f4;
-        font-size: 12px; text-align: center;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
+        /* ── ANIMATIONS ── */
+        @keyframes shimmer {
+            0%   { background-position: -600px 0 }
+            100% { background-position:  600px 0 }
+        }
+        @keyframes fadeUp {
+            from { opacity:0; transform:translateY(12px) }
+            to   { opacity:1; transform:translateY(0) }
+        }
+        @keyframes barGrow {
+            from { width: 0 }
+        }
 
-    .group-header {
-        text-align: center; font-size: 10px; font-weight: 800;
-        text-transform: uppercase; padding: 6px 4px;
-        border-bottom: 1px solid #d2d2d7; background: white;
-    }
-    .g-to     { color: #0071e3; border-bottom: 3px solid #0071e3 !important; }
-    .g-serv   { color: #34c759; border-bottom: 3px solid #34c759 !important; }
-    .g-acc    { color: #ff9500; border-bottom: 3px solid #ff9500 !important; }
-    .g-checks { color: #af52de; border-bottom: 3px solid #af52de !important; }
+        /* ── TOP BAR ── */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--to);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+            padding: 5px 10px 5px 6px;
+            border-radius: 8px;
+            transition: background .15s;
+        }
+        .back-link:hover { background: var(--to-bg); }
+        .back-link svg { flex-shrink:0; }
 
-    .grp-start { border-left: 2px solid #d2d2d7 !important; }
+        .page-title {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -.3px;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-    .name-cell, th.name-th {
-        position: sticky; left: 0; background: white; z-index: 100;
-        font-weight: 600; white-space: normal; line-height: 1.15;
-        word-break: break-word; text-align: left;
-        box-shadow: 4px 0 8px -2px rgba(0,0,0,0.12);
-        border-right: 1px solid #e0e0e5;
-        font-size: 9px;
-    }
-    th.name-th { z-index: 101; font-size: 9px; }
+        /* ── VIEW TOGGLE ── */
+        .view-toggle {
+            display: flex;
+            gap: 3px;
+            background: var(--border);
+            border-radius: 11px;
+            padding: 3px;
+        }
+        .view-btn {
+            border: none;
+            background: transparent;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--text2);
+            font-family: inherit;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+        .view-btn.active {
+            background: var(--surface);
+            color: var(--text);
+            box-shadow: 0 1px 4px rgba(0,0,0,.12);
+        }
 
-    .badge {
-        display: block; border-radius: 5px; font-size: 9.5px; font-weight: 600;
-        text-align: center; padding: 1px 2px; white-space: nowrap;
-    }
-    .b-plan   { background: rgba(134,134,139,0.10); color: #6e6e73; font-size: 8.5px; }
-    .b-to     { background: rgba(0,113,227,0.12);   color: #1a50b8; }
-    .b-serv   { background: rgba(52,199,89,0.12);   color: #1a7f37; }
-    .b-acc    { background: rgba(255,149,0,0.12);   color: #b85000; }
-    .b-checks { background: rgba(175,82,222,0.12);  color: #6d28d9; }
+        /* ── SKELETON ── */
+        .skel {
+            background: linear-gradient(90deg, #e8eaed 25%, #f3f4f6 50%, #e8eaed 75%);
+            background-size: 600px 100%;
+            animation: shimmer 1.4s ease-in-out infinite;
+            border-radius: 6px;
+        }
 
-    .total-row td           { background: #e8f0fe !important; font-weight: 700; }
-    .total-row td.name-cell { background: #e8f0fe !important; color: #1d1d1f; }
-    .dev-row td             { font-style: italic; color: #86868b !important; font-size: 10px; }
-    .dev-row td.name-cell   { font-style: italic; color: #86868b !important; }
+        /* ── TABLE CARD ── */
+        .table-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-x: contain;
+            border: 1px solid var(--border);
+        }
 
-    .loading { padding: 40px; text-align: center; color: #86868b; }
-    .error   { padding: 40px; text-align: center; color: #ff3b30; }
-    /* ── RATING VIEW ── */
-    .top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px;flex-wrap:wrap}
-    .view-toggle{display:flex;gap:4px;background:#e5e5ea;border-radius:10px;padding:3px}
-    .view-btn{border:none;background:transparent;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;color:#6e6e73;font-family:inherit;transition:all .2s}
-    .view-btn.active{background:white;color:#1d1d1f;box-shadow:0 1px 4px rgba(0,0,0,.12)}
-    .rating-panel{display:none;margin-top:8px}
-    .rating-panel.visible{display:block}
-    .metric-bar{
-        background:white;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.06);
-        padding:0;margin-bottom:10px;overflow:hidden;
-        display:flex;align-items:stretch;flex-wrap:wrap;
-        border:1px solid rgba(0,0,0,0.06);
-    }
-    .metric-bar-title{
-        font-size:10px;font-weight:700;color:#a0a0ab;
-        text-transform:uppercase;letter-spacing:.06em;
-        white-space:nowrap;user-select:none;
-        display:flex;align-items:center;padding:8px 14px;
-        border-right:1px solid #f0f0f2;
-    }
-    .metric-pills{display:flex;gap:3px;align-items:center;flex-wrap:wrap;padding:6px 10px}
-    .mpill{
-        border:none;background:transparent;
-        padding:4px 9px;border-radius:7px;
-        font-size:11px;font-weight:600;cursor:pointer;
-        font-family:inherit;color:#6e6e73;
-        transition:all .15s;white-space:nowrap;line-height:1.4;
-    }
-    .mpill:hover{background:#f2f2f7;color:#1d1d1f}
-    .mpill.active{color:white;border-color:transparent}
-    .ranking-grid{display:flex;flex-direction:column;gap:7px}
-    .rank-card{background:white;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.06);padding:10px 14px;display:flex;flex-direction:column;gap:5px;position:relative;overflow:hidden;transition:transform .15s}
-    .rank-card:hover{transform:translateY(-1px)}
-    .rank-bg{position:absolute;left:0;top:0;height:100%;opacity:.07;border-radius:14px;pointer-events:none;transition:width .5s ease}
-    .rank-top{display:flex;align-items:flex-start;gap:10px}
-    .rank-pos{font-size:17px;font-weight:800;min-width:26px;text-align:center;line-height:1.4;flex-shrink:0}
-    .rank-pos.gold{color:#f5a623}.rank-pos.silver{color:#9b9b9b}.rank-pos.bronze{color:#c47a3a}.rank-pos.rest{color:#ccc;font-size:13px}
-    .rank-name{flex:1;min-width:0}
-    .rank-name-text{font-size:12px;font-weight:700;white-space:normal;word-break:break-word;line-height:1.35}
-    .rank-sub{font-size:10px;color:#6e6e73;margin-top:2px}
-    .rank-val{text-align:right;flex-shrink:0}
-    .rank-val-main{font-size:13px;font-weight:800;line-height:1.2}
-    .rank-val-sub{font-size:10px;color:#6e6e73}
-    .rank-bar-bg{height:5px;background:#ebebef;border-radius:3px;overflow:hidden;margin-left:36px}
-    .rank-bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
-</style>
-```
+        table { border-collapse: collapse; table-layout: fixed; }
 
+        /* Group headers */
+        .group-header {
+            text-align: center;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            padding: 8px 4px 6px;
+            border-bottom: 2px solid currentColor;
+            background: var(--surface);
+            white-space: nowrap;
+        }
+        .g-to     { color: var(--to);   }
+        .g-serv   { color: var(--serv); }
+        .g-acc    { color: var(--acc);  }
+        .g-checks { color: var(--chk);  }
+
+        /* Column headers */
+        th {
+            text-align: center;
+            padding: 5px 3px 7px;
+            font-size: 9.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface2);
+            color: var(--text3);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        th.name-th {
+            position: sticky; left: 0; z-index: 101;
+            background: var(--surface2);
+            box-shadow: 3px 0 8px -2px rgba(0,0,0,.08);
+            border-right: 1px solid var(--border);
+        }
+
+        /* Data cells */
+        td {
+            padding: 4px 3px;
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .name-cell {
+            position: sticky; left: 0;
+            background: var(--surface);
+            z-index: 100;
+            font-weight: 600;
+            font-size: 10px;
+            white-space: normal;
+            line-height: 1.3;
+            word-break: break-word;
+            text-align: left;
+            box-shadow: 3px 0 8px -2px rgba(0,0,0,.08);
+            border-right: 1px solid var(--border);
+            padding: 5px 7px;
+        }
+
+        .grp-start { border-left: 1px solid var(--border) !important; }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 4px;
+            white-space: nowrap;
+            line-height: 1.3;
+        }
+        .b-plan   { background: var(--plan-bg); color: var(--plan-text); }
+        .b-to     { background: var(--to-bg);   color: var(--to); }
+        .b-serv   { background: var(--serv-bg); color: var(--serv); }
+        .b-acc    { background: var(--acc-bg);  color: var(--acc); }
+        .b-checks { background: var(--chk-bg);  color: var(--chk); }
+
+        /* Special rows */
+        .total-row td {
+            background: rgba(37,99,235,.06) !important;
+            font-weight: 800;
+        }
+        .total-row td.name-cell { background: rgba(37,99,235,.06) !important; }
+        .dev-row td {
+            font-style: italic;
+            color: var(--text3) !important;
+            font-size: 10px;
+        }
+        .dev-row td.name-cell { color: var(--text3) !important; }
+
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover td { background: var(--surface2) !important; }
+        tbody tr:hover td.name-cell { background: var(--surface2) !important; }
+
+        .loading { padding: 48px; text-align: center; color: var(--text3); font-size: 14px; }
+        .error   { padding: 48px; text-align: center; color: #ef4444; font-size: 14px; }
+
+        /* ── RATING PANEL ── */
+        .rating-panel { display: none; margin-top: 0; }
+        .rating-panel.visible { display: block; }
+
+        /* Metric selector */
+        .metric-section {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .metric-section-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            color: var(--text3);
+            padding: 8px 14px 0;
+        }
+        .metric-pills {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            padding: 7px 10px 10px;
+        }
+        .mpill {
+            border: 1.5px solid transparent;
+            background: var(--surface2);
+            padding: 5px 13px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            color: var(--text2);
+            transition: all .15s;
+            white-space: nowrap;
+        }
+        .mpill:hover { background: var(--border); color: var(--text); }
+        .mpill.active {
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Rank cards */
+        .ranking-grid { display: flex; flex-direction: column; gap: 7px; }
+
+        .rank-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            position: relative;
+            overflow: hidden;
+            transition: transform .15s, box-shadow .15s;
+            animation: fadeUp .3s ease both;
+        }
+        .rank-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 24px rgba(0,0,0,.1);
+        }
+        .rank-bg {
+            position: absolute; left: 0; top: 0;
+            height: 100%; opacity: .05;
+            border-radius: var(--radius);
+            pointer-events: none;
+            transition: width .6s ease;
+        }
+        .rank-top { display: flex; align-items: center; gap: 11px; }
+
+        .rank-pos {
+            font-size: 20px;
+            min-width: 32px;
+            text-align: center;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .rank-pos.rest {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text3);
+            background: var(--surface2);
+            border-radius: 7px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rank-name { flex: 1; min-width: 0; }
+        .rank-name-text {
+            font-size: 13px;
+            font-weight: 700;
+            white-space: normal;
+            word-break: break-word;
+            line-height: 1.3;
+            color: var(--text);
+        }
+        .rank-sub {
+            font-size: 11px;
+            color: var(--text2);
+            margin-top: 3px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .pct-pill {
+            display: inline-block;
+            border-radius: 20px;
+            padding: 1px 7px;
+            font-size: 10.5px;
+            font-weight: 700;
+        }
+        .pct-pill.good  { background: rgba(22,163,74,.12); color: #16a34a; }
+        .pct-pill.warn  { background: rgba(245,158,11,.12); color: #d97706; }
+        .pct-pill.bad   { background: rgba(239,68,68,.12);  color: #dc2626; }
+
+        .rank-val { text-align: right; flex-shrink: 0; }
+        .rank-val-main {
+            font-size: 15px;
+            font-weight: 800;
+            line-height: 1.1;
+        }
+        .rank-val-sub {
+            font-size: 10.5px;
+            color: var(--text3);
+            margin-top: 2px;
+        }
+
+        .rank-bar-bg {
+            height: 4px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-left: 43px;
+        }
+        .rank-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            animation: barGrow .6s ease both;
+        }
+
+        /* Skeleton cards */
+        .rank-card-skel {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+        .rank-card-skel-top { display:flex; align-items:center; gap:12px; }
+        .rank-card-skel-pos  { width:28px; height:28px; border-radius:8px; flex-shrink:0; }
+        .rank-card-skel-body { flex:1; display:flex; flex-direction:column; gap:7px; }
+        .rank-card-skel-line { height:13px; border-radius:6px; }
+        .rank-card-skel-sub  { height:9px; width:45%; border-radius:5px; }
+        .rank-card-skel-val  { width:54px; height:18px; border-radius:8px; flex-shrink:0; }
+        .rank-card-skel-bar  { height:4px; border-radius:3px; }
+    </style>
 </head>
 <body>
-    <div class="top-bar">
-        <a href="index.html" class="back-link">← На головну</a>
-        <div class="view-toggle">
-            <button class="view-btn active" id="btnTable" onclick="setView('table')">📋 Таблиця</button>
-            <button class="view-btn" id="btnRating" onclick="setView('rating')">🏆 Рейтинг</button>
-        </div>
+
+<div class="top-bar">
+    <a href="index.html" class="back-link">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Назад
+    </a>
+    <span class="page-title">План–Факт</span>
+    <div class="view-toggle">
+        <button class="view-btn active" id="btnTable" onclick="setView('table')">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <rect x="1" y="1" width="4" height="4" rx="1" fill="currentColor" opacity=".5"/>
+                <rect x="7" y="1" width="5" height="4" rx="1" fill="currentColor"/>
+                <rect x="1" y="7" width="4" height="5" rx="1" fill="currentColor"/>
+                <rect x="7" y="7" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/>
+            </svg>
+            Таблиця
+        </button>
+        <button class="view-btn" id="btnRating" onclick="setView('rating')">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M6.5 1L8 5H12L8.8 7.5L10 11.5L6.5 9L3 11.5L4.2 7.5L1 5H5L6.5 1Z" fill="currentColor"/>
+            </svg>
+            Рейтинг
+        </button>
     </div>
-    <div id="tableWrap">
+</div>
+
+<div id="tableWrap">
     <div class="table-card">
-        <div id="loader" class="loading">Завантаження...</div>
+        <div id="loader" class="loading">Завантаження…</div>
         <table id="tbl" style="display:none">
             <thead>
                 <tr id="tr-groups"></tr>
@@ -164,18 +451,18 @@
             <tbody id="tbody"></tbody>
         </table>
     </div>
+</div>
+
+<div class="rating-panel" id="ratingPanel">
+    <div class="metric-section">
+        <div class="metric-section-label">Метрика</div>
+        <div class="metric-pills" id="metricPills"></div>
     </div>
-    <div class="rating-panel" id="ratingPanel">
-        <div class="metric-bar">
-            <span class="metric-bar-title">Метрика</span>
-            <div class="metric-pills" id="metricPills"></div>
-        </div>
-        <div class="ranking-grid" id="rankingGrid"></div>
-    </div>
+    <div class="ranking-grid" id="rankingGrid"></div>
+</div>
 
 <script>
 // ======= CONFIG =======
-// Групи: назва, css-клас, [{ label, csvIdx, type, badge }]
 const GROUPS = [
     { name:'Товарообіг', cls:'g-to', cols:[
         { label:'План',  idx:1,  type:'plan',  b:'b-plan' },
@@ -218,68 +505,54 @@ function parseCSV(text) {
 function toNum(v) {
     return parseFloat((v||'').toString().replace('%','').replace(/\s/g,'').replace(',','.')) || 0;
 }
-function fmtInt(v) { const n=toNum(v); return n ? Math.round(n).toLocaleString('uk-UA') : (v||'0'); }
+function fmtInt(v)   { const n=toNum(v); return n ? Math.round(n).toLocaleString('uk-UA') : (v||'0'); }
 function fmtShare(v) { return toNum(v).toFixed(2); }
 function fmtPct(v) {
     let n=toNum(v);
-    if (!(v||'').toString().includes('%') && n>0 && n<2) n*=100;
+    if (!(v||'').toString().includes('%')&&n>0&&n<2) n*=100;
     return n.toFixed(1)+'%';
 }
 function pctNum(v) {
     let n=toNum(v);
-    if (!(v||'').toString().includes('%') && n>0 && n<2) n*=100;
+    if (!(v||'').toString().includes('%')&&n>0&&n<2) n*=100;
     return n;
 }
 
 // ======= WIDTHS =======
-// Задаємо ширини в px через JS щоб браузер не міг нічого переробити
 function getWidths() {
     const mob = window.innerWidth < 768;
-    if (!mob) {
-        return { name: 110, c3: 82, c4: 78 };
-    }
+    if (!mob) return { name:110, c3:82, c4:78 };
     const nameW = 82;
-    const avail = window.innerWidth - nameW - 1; // -1 px запас
-    return {
-        name: nameW,
-        c3: Math.floor(avail / 3),   // для груп по 3 колонки
-        c4: Math.floor(avail / 4),   // для груп по 4 колонки
-    };
+    const avail = window.innerWidth - nameW - 1;
+    return { name:nameW, c3:Math.floor(avail/3), c4:Math.floor(avail/4) };
 }
 
 // ======= BUILD TABLE =======
 function buildTable(dataRows) {
     const W = getWidths();
-
     const tbl = document.getElementById('tbl');
     tbl.style.display = '';
-
-    // Загальна ширина таблиці
-    // ТО: 3*c3, Посл: 4*c4, АСС: 4*c4, Чеки: 3*c4
     const totalW = W.name + 3*W.c3 + 4*W.c4 + 4*W.c4 + 3*W.c4;
     tbl.style.width = totalW + 'px';
 
-    // Colgroup
     const cg = document.createElement('colgroup');
     function addCol(w) {
         const c = document.createElement('col');
-        c.style.width = w + 'px';
+        c.style.width = w+'px';
         cg.appendChild(c);
     }
     addCol(W.name);
     GROUPS.forEach(g => {
-        const cw = g.cols.length === 3 ? W.c3 : W.c4;
+        const cw = g.cols.length===3 ? W.c3 : W.c4;
         g.cols.forEach(() => addCol(cw));
     });
     tbl.prepend(cg);
 
-    // Рядок групових заголовків
     const trG = document.getElementById('tr-groups');
-    // corner
     const corner = document.createElement('th');
     corner.rowSpan = 2;
     corner.className = 'name-th';
-    corner.style.width = W.name + 'px';
+    corner.style.width = W.name+'px';
     corner.textContent = 'ПК';
     trG.appendChild(corner);
 
@@ -291,22 +564,19 @@ function buildTable(dataRows) {
         trG.appendChild(th);
     });
 
-    // Рядок підзаголовків
     const trH = document.getElementById('tr-heads');
     GROUPS.forEach(g => {
         g.cols.forEach((col, ci) => {
             const th = document.createElement('th');
-            th.className = g.cls + (ci===0 ? ' grp-start' : '');
+            th.className = g.cls + (ci===0?' grp-start':'');
             th.textContent = col.label;
             trH.appendChild(th);
         });
     });
 
-    // Збираємо % spans для colorize
     const pctSpans = GROUPS.map(() => []);
-
-    // Рядки даних
     const tbody = document.getElementById('tbody');
+
     dataRows.forEach(row => {
         if (!row[0]||!row[0].trim()) return;
         const name = row[0].trim();
@@ -318,10 +588,9 @@ function buildTable(dataRows) {
         if (isTotal) tr.className = 'total-row';
         if (isDev)   tr.className = 'dev-row';
 
-        // name cell
         const nc = document.createElement('td');
         nc.className = 'name-cell';
-        nc.style.width = W.name + 'px';
+        nc.style.width = W.name+'px';
         nc.textContent = name;
         tr.appendChild(nc);
 
@@ -330,7 +599,7 @@ function buildTable(dataRows) {
             g.cols.forEach((col, ci) => {
                 const val = (row[col.idx]||'').trim();
                 const td = document.createElement('td');
-                td.style.width = cw + 'px';
+                td.style.width = cw+'px';
                 if (ci===0) td.classList.add('grp-start');
 
                 if (isDev) {
@@ -352,11 +621,10 @@ function buildTable(dataRows) {
                 tr.appendChild(td);
             });
         });
-
         tbody.appendChild(tr);
     });
 
-    // Динамічна заливка %
+    // Dynamic % coloring (heatmap)
     pctSpans.forEach(spans => {
         if (!spans.length) return;
         const vals = spans.map(s => +s.dataset.pct);
@@ -364,51 +632,48 @@ function buildTable(dataRows) {
         spans.forEach(s => {
             const ratio = (+s.dataset.pct - min) / range;
             const h = Math.round(ratio*120);
-            s.style.background = `hsl(${h},70%,${Math.round(88-ratio*10)}%)`;
-            s.style.color      = `hsl(${h},60%,${Math.round(28+ratio*10)}%)`;
+            s.style.background = `hsl(${h},65%,${Math.round(90-ratio*8)}%)`;
+            s.style.color = `hsl(${h},55%,${Math.round(30+ratio*8)}%)`;
         });
     });
-    // total рядок % — по значенню
     tbody.querySelectorAll('.total-row .badge[data-pct]').forEach(s => {
         const n = +s.dataset.pct;
-        s.style.background = n>=100?'rgba(52,199,89,0.20)':n>=80?'rgba(255,204,0,0.15)':'rgba(255,59,48,0.13)';
-        s.style.color = '#1d1d1f';
+        s.style.background = n>=100 ? 'rgba(22,163,74,.18)' : n>=80 ? 'rgba(245,158,11,.15)' : 'rgba(239,68,68,.13)';
+        s.style.color = n>=100 ? '#16a34a' : n>=80 ? '#d97706' : '#dc2626';
+        s.style.fontWeight = '800';
     });
 
-    // Scroll snap через JS (touchend)
+    // Scroll snap
     if (window.innerWidth < 768) {
         const card = document.querySelector('.table-card');
-        // Позиції snap = початок кожної групи
         const snaps = [];
         let x = 0;
         GROUPS.forEach(g => {
             snaps.push(x);
             x += (g.cols.length===3 ? W.c3 : W.c4) * g.cols.length;
         });
-
         let t0x = 0;
-        card.addEventListener('touchstart', e => { t0x = e.touches[0].clientX; }, { passive:true });
+        card.addEventListener('touchstart', e => { t0x = e.touches[0].clientX; }, {passive:true});
         card.addEventListener('touchend', e => {
             const dx = t0x - e.changedTouches[0].clientX;
             const cur = card.scrollLeft;
-            // найближча позиція
             let best = snaps.reduce((a,b) => Math.abs(b-cur)<Math.abs(a-cur)?b:a, snaps[0]);
             let idx = snaps.indexOf(best);
             if (dx > 40 && idx < snaps.length-1) best = snaps[idx+1];
             if (dx < -40 && idx > 0) best = snaps[idx-1];
             card.scrollTo({ left: best, behavior: 'smooth' });
-        }, { passive:true });
+        }, {passive:true});
     }
 }
 
 // ======= RATING =======
 const RATING_METRICS = [
-    { key:'to_fact',   label:'ТО',          idx:2,  color:'#0071e3', planIdx:1,  pctIdx:3,  fmt:'int' },
-    { key:'serv_fact', label:'Послуги',      idx:5,  color:'#34c759', planIdx:4,  pctIdx:7,  fmt:'int' },
-    { key:'acc_fact',  label:'ACC',          idx:9,  color:'#ff9500', planIdx:8,  pctIdx:11, fmt:'int' },
-    { key:'chk_fact',  label:'Чеки',         idx:13, color:'#af52de', planIdx:12, pctIdx:14, fmt:'int' },
-    { key:'serv_shr',  label:'Частка посл.', idx:6,  color:'#34c759', fmt:'share' },
-    { key:'acc_shr',   label:'Частка ACC',   idx:10, color:'#ff9500', fmt:'share' },
+    { key:'to_fact',   label:'ТО',          idx:2,  color:'#2563eb', planIdx:1,  pctIdx:3,  fmt:'int' },
+    { key:'serv_fact', label:'Послуги',      idx:5,  color:'#16a34a', planIdx:4,  pctIdx:7,  fmt:'int' },
+    { key:'acc_fact',  label:'Аксесуари',    idx:9,  color:'#d97706', planIdx:8,  pctIdx:11, fmt:'int' },
+    { key:'chk_fact',  label:'Чеки',         idx:13, color:'#7c3aed', planIdx:12, pctIdx:14, fmt:'int' },
+    { key:'serv_shr',  label:'Частка посл.', idx:6,  color:'#16a34a', fmt:'share' },
+    { key:'acc_shr',   label:'Частка ACC',   idx:10, color:'#d97706', fmt:'share' },
 ];
 let allRatingRows = [];
 let activeMetricKey = 'to_fact';
@@ -438,7 +703,9 @@ function buildMetricPills() {
         const btn = document.createElement('button');
         btn.className = 'mpill' + (m.key===activeMetricKey?' active':'');
         btn.textContent = m.label;
-        if (m.key===activeMetricKey) btn.style.background = m.color;
+        if (m.key===activeMetricKey) {
+            btn.style.background = m.color;
+        }
         btn.onclick = () => { activeMetricKey=m.key; buildMetricPills(); renderRankingCards(); };
         c.appendChild(btn);
     });
@@ -465,54 +732,73 @@ function renderRankingCards() {
     items.sort((a,b)=>b.val-a.val);
     const maxVal = items.length ? items[0].val : 1;
 
-    items.forEach((item,i) => {
+    items.forEach((item, i) => {
         const pos = i+1;
-        const posClass = pos===1?'gold':pos===2?'silver':pos===3?'bronze':'rest';
         const barPct = maxVal>0 ? Math.round(item.val/maxVal*100) : 0;
-        let pctStr = null;
+
+        let pctVal = null;
         if (item.pct!=null) {
-            let n=item.pct;
+            let n = item.pct;
             if (!String(item.pct).includes('%')&&n>0&&n<2) n*=100;
-            pctStr = n.toFixed(1)+'%';
+            pctVal = n;
         }
+
         const card = document.createElement('div');
         card.className = 'rank-card';
+        card.style.animationDelay = (i*0.045)+'s';
+
+        let posHtml;
+        if (pos===1) posHtml = `<div class="rank-pos">🥇</div>`;
+        else if (pos===2) posHtml = `<div class="rank-pos">🥈</div>`;
+        else if (pos===3) posHtml = `<div class="rank-pos">🥉</div>`;
+        else posHtml = `<div class="rank-pos rest">${pos}</div>`;
+
+        let pctHtml = '';
+        if (pctVal!=null) {
+            const cls = pctVal>=100 ? 'good' : pctVal>=80 ? 'warn' : 'bad';
+            pctHtml = `<span class="pct-pill ${cls}">${pctVal.toFixed(1)}%</span>`;
+        }
+
         card.innerHTML = `
             <div class="rank-bg" style="background:${m.color};width:${barPct}%"></div>
             <div class="rank-top">
-                <div class="rank-pos ${posClass}">${pos<=3?['🥇','🥈','🥉'][pos-1]:pos}</div>
+                ${posHtml}
                 <div class="rank-name">
                     <div class="rank-name-text">${item.name}</div>
-                    ${pctStr?`<div class="rank-sub">Виконання: ${pctStr}</div>`:''}
+                    ${pctVal!=null ? `<div class="rank-sub">Виконання: ${pctHtml}</div>` : ''}
                 </div>
                 <div class="rank-val">
                     <div class="rank-val-main" style="color:${m.color}">${fmtRatingVal(item.val,m.fmt)}</div>
-                    ${item.plan?`<div class="rank-val-sub">план: ${fmtRatingVal(item.plan,m.fmt)}</div>`:''}
+                    ${item.plan ? `<div class="rank-val-sub">план: ${fmtRatingVal(item.plan,m.fmt)}</div>` : ''}
                 </div>
             </div>
-            <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${barPct}%;background:${m.color}"></div></div>`;
+            <div class="rank-bar-bg">
+                <div class="rank-bar-fill" style="width:${barPct}%;background:${m.color};animation-delay:${i*0.045}s"></div>
+            </div>`;
         grid.appendChild(card);
     });
 
-    if (!items.length) grid.innerHTML='<div style="padding:40px;text-align:center;color:#86868b">Немає даних</div>';
-    else { grid.querySelectorAll('.rank-card').forEach((c,i)=>{c.classList.add('appear');c.style.animationDelay=(i*0.055)+'s';}); }
+    if (!items.length) {
+        grid.innerHTML = '<div style="padding:48px;text-align:center;color:var(--text3);font-size:14px">Немає даних</div>';
+    }
 }
 
-function showRatingSkeleton(grid, count=7){
-    grid.innerHTML='';
-    for(let i=0;i<count;i++){
-        const card=document.createElement('div');card.className='rank-card-skel';
-        const delay=(i*0.06)+'s';
-        card.innerHTML=`
+function showRatingSkeleton(grid, count=7) {
+    grid.innerHTML = '';
+    for (let i=0; i<count; i++) {
+        const d = (i*0.06)+'s';
+        const card = document.createElement('div');
+        card.className = 'rank-card-skel';
+        card.innerHTML = `
             <div class="rank-card-skel-top">
-                <div class="rank-card-skel-pos skel" style="animation-delay:${delay}"></div>
+                <div class="rank-card-skel-pos skel" style="animation-delay:${d}"></div>
                 <div class="rank-card-skel-body">
-                    <div class="rank-card-skel-line skel" style="width:${55+(i*7)%36}%;animation-delay:${delay}"></div>
-                    <div class="rank-card-skel-sub skel" style="animation-delay:${delay}"></div>
+                    <div class="rank-card-skel-line skel" style="width:${55+(i*7)%36}%;animation-delay:${d}"></div>
+                    <div class="rank-card-skel-sub skel" style="animation-delay:${d}"></div>
                 </div>
-                <div class="rank-card-skel-val skel" style="animation-delay:${delay}"></div>
+                <div class="rank-card-skel-val skel" style="animation-delay:${d}"></div>
             </div>
-            <div class="rank-card-skel-bar skel" style="width:${100-(i*10)%55}%;animation-delay:${delay}"></div>`;
+            <div class="rank-card-skel-bar skel" style="animation-delay:${d}"></div>`;
         grid.appendChild(card);
     }
 }
@@ -521,7 +807,7 @@ function renderRating() {
     const grid = document.getElementById('rankingGrid');
     showRatingSkeleton(grid, 7);
     buildMetricPills();
-    setTimeout(()=>{ grid.innerHTML=''; renderRankingCards(); }, 180);
+    setTimeout(() => { grid.innerHTML=''; renderRankingCards(); }, 200);
 }
 
 async function load() {
@@ -540,16 +826,15 @@ async function load() {
 }
 load();
 
-// Свайп назад
-let x0=0,y0=0,sw=false;
-document.addEventListener('touchstart',e=>{x0=e.changedTouches[0].screenX;y0=e.changedTouches[0].screenY;sw=true;},{passive:true});
-document.addEventListener('touchmove', e=>{if(Math.abs(e.changedTouches[0].screenY-y0)>25)sw=false;},{passive:true});
-document.addEventListener('touchend',  e=>{
-    if(sw&&e.changedTouches[0].screenX-x0>120&&Math.abs(e.changedTouches[0].screenY-y0)<50)
+// Swipe back
+let x0=0, y0=0, sw=false;
+document.addEventListener('touchstart', e=>{ x0=e.changedTouches[0].screenX; y0=e.changedTouches[0].screenY; sw=true; }, {passive:true});
+document.addEventListener('touchmove',  e=>{ if(Math.abs(e.changedTouches[0].screenY-y0)>25) sw=false; }, {passive:true});
+document.addEventListener('touchend',   e=>{
+    if(sw && e.changedTouches[0].screenX-x0 > 120 && Math.abs(e.changedTouches[0].screenY-y0)<50)
         window.location.href='index.html';
     sw=false;
-},{passive:true});
+}, {passive:true});
 </script>
-
 </body>
 </html>
