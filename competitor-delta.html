@@ -490,7 +490,6 @@ let prevDataRow=null;
 data.forEach(r=>{
 if(r.year!==lastY){
 lastY=r.year;
-prevDataRow=null;
 const trY=document.createElement('tr');trY.className='year-sep';
 const tdY=document.createElement('td');tdY.className='col-year';tdY.textContent=r.year;trY.appendChild(tdY);
 const tdM=document.createElement('td');tdM.className='col-month';tdM.textContent='';trY.appendChild(tdM);

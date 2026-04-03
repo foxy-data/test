@@ -266,7 +266,7 @@
         .gsheet-table thead th { background: #f5f5f7; padding: 5px 6px; text-align: left; font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--color-text-secondary); letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: sticky; top: 0; z-index: 1; border-bottom: 1px solid var(--color-border); }
         .gsheet-table tbody tr { border-bottom: 1px solid rgba(0,0,0,0.04); }
         .gsheet-table tbody tr:last-child { border-bottom: none; }
-        .gsheet-table tbody td { padding: 4px 5px; white-space: normal; word-break: break-word; vertical-align: top; font-size: 10px; line-height: 1.25; color: var(--color-text); }
+        .gsheet-table tbody td { padding: 3px 2px; white-space: normal; word-break: break-word; vertical-align: middle; font-size: 10px; line-height: 1.25; color: var(--color-text); }
         .gsheet-table tbody td:first-child { font-weight: 600; border-left: 3px solid transparent; padding-left: 6px; width: 55px; min-width: 55px; max-width: 55px; white-space: normal; word-break: break-word; }
         .gsheet-row-acc { background: #fff7ed; } .gsheet-row-acc td:first-child { color: #c05800; border-left-color: #f97316; } .gsheet-row-acc:hover { background: #ffedd5; }
         .gsheet-row-av  { background: #eff6ff; } .gsheet-row-av  td:first-child { color: #1d4ed8; border-left-color: #3b82f6; } .gsheet-row-av:hover  { background: #dbeafe; }
@@ -284,7 +284,11 @@
         .gsheet-error { padding: 16px; text-align: center; color: #ff3b30; font-size: 12px; }
 
         /* cell-badge для КМОТ */
-        .cell-badge { display: block; border-radius: 6px; font-size: 10px; font-weight: 600; text-align: center; padding: 2px 3px; white-space: nowrap; }
+        .cell-badge {
+            display: block; border-radius: 6px; font-size: 9px; font-weight: 600;
+            text-align: center; padding: 2px 2px; white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+        }
 
         /* --- PLAN CSS --- */
         .plan-metrics { margin-top:12px; padding-top:12px; border-top:1px solid var(--color-border); }
@@ -870,9 +874,9 @@ const AUTH = {
         });
 
         // Ширини колонок
-        const lastW = 14;
-        const preLastW = 16;
-        const firstW = 16;
+        const lastW = 12;
+        const preLastW = 14;
+        const firstW = 14;
         const restW = Math.floor((100 - firstW - lastW - preLastW) / Math.max(numCols - 3, 1));
         let colgroup = '<colgroup>';
         headers.forEach((_, i) => {
@@ -916,16 +920,29 @@ const AUTH = {
                     const hue = Math.round(ratio * 120);
                     const bg = `hsl(${hue},70%,${Math.round(88-ratio*10)}%)`;
                     const fg = `hsl(${hue},60%,${Math.round(28+ratio*10)}%)`;
-                    html += `<td><span class="cell-badge" style="background:${bg};color:${fg}">${esc(val)}</span></td>`;
+                    // Smart display: shorten if too long
+                    let dispVal = val;
+                    const nPct = parseFloat(val.replace('%','').replace(/\s/g,'').replace(',','.'));
+                    if (!isNaN(nPct)) {
+                        // Show max 1 decimal place for %, strip trailing zeros
+                        dispVal = nPct.toFixed(1).replace(/\.0$/, '') + '%';
+                    }
+                    html += `<td><span class="cell-badge" style="background:${bg};color:${fg}">${esc(dispVal)}</span></td>`;
                     return;
                 }
 
                 const numVal = parseFloat(val.replace(/\s/g,'').replace(',','.'));
-                // Числові значення — сірий бейдж БЕЗ округлення
+                // Числові значення — форматуємо компактно
                 if (!isNaN(numVal) && val !== '') {
                     const bg = isTotal ? 'rgba(0,113,227,0.10)' : 'rgba(134,134,139,0.08)';
                     const fg = isTotal ? '#1a50b8' : '#3d3d3f';
-                    html += `<td><span class="cell-badge" style="background:${bg};color:${fg}">${esc(val)}</span></td>`;
+                    // Format numbers compactly
+                    let dispNum = val;
+                    if (Math.abs(numVal) >= 1000000) dispNum = (numVal/1000000).toFixed(1) + 'М';
+                    else if (Math.abs(numVal) >= 1000) dispNum = (numVal/1000).toFixed(0) + 'К';
+                    else if (numVal % 1 !== 0) dispNum = numVal.toFixed(1);
+                    else dispNum = Math.round(numVal).toLocaleString('uk-UA').replace(/\s/g,'');
+                    html += `<td><span class="cell-badge" style="background:${bg};color:${fg}">${esc(dispNum)}</span></td>`;
                     return;
                 }
 

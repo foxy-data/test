@@ -131,6 +131,18 @@
     .delta-flat{background:rgba(134,134,139,.10);color:#6e6e73}
     .delta-arrow{font-size:12px;line-height:1}
 
+
+    /* ── DIFF ROWS ── */
+    tr.diff-row td { font-size: 10px; font-weight: 700; padding: 2px 4px; border-bottom: 1px solid #f5f0e8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: #fef9f0 !important; cursor: default; }
+    tr.diff-row td.col-metric { background: #fef9f0 !important; color: #92400e; font-size: 9px; font-weight: 700; box-shadow: 4px 0 8px -2px rgba(0,0,0,.1); border-right: 1px solid #e0e0e5; }
+    tr.diff-row:hover td { background: #fdf0d8 !important; }
+    tr.diff-row:hover td.col-metric { background: #fdf0d8 !important; }
+    .dyn-diff-pos { color: #15803d; }
+    .dyn-diff-neg { color: #b91c1c; }
+    .dyn-diff-zero { color: #9ca3af; }
+    .delta-row-btn { border: none; background: #f0f0f5; border-radius: 9px; padding: 5px 12px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; color: #6e6e73; transition: all .2s; }
+    .delta-row-btn.on { background: #78350f; color: #fff; }
+
     .chart-controls{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
     .chart-control-btn{border:none;background:#f0f0f5;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;color:#6e6e73;transition:all .15s;}
     .chart-control-btn.active{background:#1d1d1f;color:#fff;}
@@ -179,6 +191,7 @@
     <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid #f0f0f2;flex-wrap:wrap">
         <span style="font-size:10px;font-weight:700;color:#a0a0ab;text-transform:uppercase;letter-spacing:.06em">Режим</span>
         <button class="compare-btn" id="compareModeBtn" onclick="toggleCompareMode()">⚖️ Порівняння</button>
+        <button class="delta-row-btn" id="deltaRowBtn" onclick="toggleDynDeltaRows()">↔ Відхилення</button>
     </div>
     <div id="filterRow1" style="display:flex;align-items:flex-start;padding:7px 10px;flex-wrap:wrap;gap:4px">
         <span class="period-label p1" id="periodLabel1" style="display:none;margin-top:2px">Період 1</span>
@@ -306,6 +319,7 @@ let selectedPeriods=new Set(); // "рік_місяць"
 let selectedMetrics=new Set();
 const yearColorMap={};
 let viewMode='table',chartInstance=null;
+let showDynDelta=false;
 let parsedByYear={};
 let compareMode=false;
 let periods1=new Set(); // Період 1
@@ -593,6 +607,13 @@ function refreshAll(){
     document.getElementById('compareSummaryPanel').style.display='none';
 }
 
+
+function toggleDynDeltaRows(){
+    showDynDelta=!showDynDelta;
+    document.getElementById('deltaRowBtn').classList.toggle('on',showDynDelta);
+    renderTable();
+}
+
 // TABLE
 function renderTable(){
     const card=document.getElementById('tableCard');card.innerHTML='';
@@ -663,6 +684,34 @@ function renderTable(){
         });
         tr.addEventListener('click',()=>toggleMetric(metric));
         tbody.appendChild(tr);
+
+        // ── DIFF ROW after each metric ──
+        if(showDynDelta && periods.length > 1){
+            const diffTr=document.createElement('tr');diffTr.className='diff-row';
+            diffTr.dataset.metric=metric;
+            const tdDN=document.createElement('td');tdDN.className='col-metric';
+            tdDN.textContent='↔ зміна';diffTr.appendChild(tdDN);
+            periods.forEach((p,pi)=>{
+                const td2=document.createElement('td');
+                if(pi>0&&periods[pi-1].y!==p.y)td2.classList.add('grp-start');
+                if(pi===0){td2.textContent='—';td2.style.color='#ccc';diffTr.appendChild(td2);return;}
+                const cur=parsedByYear[p.y]?.[metric]?.[p.m];
+                const prev=parsedByYear[periods[pi-1].y]?.[metric]?.[periods[pi-1].m];
+                if(cur!=null&&prev!=null){
+                    const diff=cur-prev;
+                    const isPct=metric.includes('%')||/конвер|доля/i.test(metric);
+                    const sign=diff>=0?'+':'';
+                    if(isPct){
+                        td2.textContent=sign+diff.toFixed(1)+'п.п.';
+                    } else {
+                        td2.textContent=sign+fmt(diff)+(diff>=0?' ↑':' ↓');
+                    }
+                    td2.className+=' '+(diff>0?'dyn-diff-pos':diff<0?'dyn-diff-neg':'dyn-diff-zero');
+                } else {td2.textContent='—';td2.style.color='#ccc';}
+                diffTr.appendChild(td2);
+            });
+            tbody.appendChild(diffTr);
+        }
 
         // ── % виконання одразу після рядка ТО ──
         if(toName && metric===toName && hasFulfillmentData()){
