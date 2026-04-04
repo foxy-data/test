@@ -747,104 +747,73 @@ const TOTEMS = [
 ];
 
 // ===== УКРАЇНСЬКІ МЕМИ через Claude AI =====
-const UA_MEME_THEMES = [
-    "продавець закрив місяць достроково",
-    "клієнт каже «я ще подумаю» але ти вже знаєш відповідь",
-    "понеділок і перший дзвінок клієнту о 9 ранку",
-    "кінець місяця залишилось 3 дні і 30% плану",
-    "ти топ-1 по товарообігу сьогодні",
-    "CRM не відкривається в п'ятницю о 17:55",
-    "план збільшили після рекордного місяця",
-    "колега вже виконав план а ти ні",
-    "клієнт пішов подумати і повернувся купувати",
-    "середній чек сьогодні — особистий рекорд",
-    "три відмови поспіль але четвертий купив",
-    "прийшов клієнт з попередньої роботи твого колеги",
-    "виконав план у перший день місяця",
-    "телефон сів прямо під час важливого дзвінка",
-    "клієнт попросив знижку і ти витримав паузу"
+// ===== БАНК УКРАЇНСЬКИХ МЕМІВ (локальний, без зовнішніх запитів) =====
+const MEME_BANK = [
+    { top: 'КЛІЄНТ ЗА ГОДИНУ ДО ЗАКРИТТЯ', bottom: 'Я ЩЕ ПОДУМАЮ', emoji: '🤔💀', title: 'Найстрашніші слова в роздробі' },
+    { top: 'ПЛАН НА МІСЯЦЬ', bottom: 'ВИКОНАВ ЗА 3 ДНІ', emoji: '🚀🔥', title: 'Коли ракета, а не продавець' },
+    { top: 'CRM У П\'ЯТНИЦЮ О 17:55', bottom: 'СЕРВЕР НЕ ВІДПОВІДАЄ', emoji: '💻😭', title: 'Технічна підтримка вихідних' },
+    { top: 'ВІДМОВИВ КЛІЄНТУ', bottom: 'ВІН ПОВЕРНУВСЯ І КУПИВ', emoji: '😏💰', title: 'Терпіння — це навик' },
+    { top: 'МІЙ СЕРЕДНІЙ ЧЕК СЬОГОДНІ', bottom: 'КОЛЕГИ В ШОЦІ', emoji: '📊🤯', title: 'Рекордний день' },
+    { top: 'ПЛАН ЗБІЛЬШИЛИ НА 20%', bottom: 'ПІСЛЯ РЕКОРДНОГО МІСЯЦЯ', emoji: '📈😤', title: 'Логіка керівництва' },
+    { top: 'ЗАКРИВ МІСЯЦЬ ДОСТРОКОВО', bottom: 'ПЛАН НА 1-ГЕ ВЖЕ ЧЕКАЄ', emoji: '🏆😮', title: 'Хибне відчуття безпеки' },
+    { top: 'ТЕЛЕФОН СІВ ПІД ЧАС', bottom: 'НАЙВАЖЛИВІШОГО ДЗВІНКА', emoji: '📵🔋', title: 'Зарядка — святе' },
+    { top: 'КЛІЄНТ ПРОСИТЬ ЗНИЖКУ', bottom: 'Я ВИТРИМУЮ ПАУЗУ', emoji: '🎭🤫', title: 'Пауза коштує грошей' },
+    { top: 'ТОП-1 ПО ТО ТРИ ДНІ ПОСПІЛЬ', bottom: 'НАМАГАЮСЬ ВИГЛЯДАТИ СКРОМНО', emoji: '👑😌', title: 'Скромний лідер' },
+    { top: 'ПОНЕДІЛОК 9:00', bottom: 'ПЕРШИЙ ДЗВІНОК УЖЕ КУПУЄ', emoji: '🌅💥', title: 'Понеділок для сильних' },
+    { top: 'ПЛАН: 100%', bottom: 'ФАКТ: 150% ЩЕ ДО П\'ЯТНИЦІ', emoji: '📉📈', title: 'Коли план занижений' },
+    { top: 'КОЛЕГА ЗАКРИВ МІСЯЦЬ', bottom: 'Я: ТРИМАЙ МОЮ КАВУ', emoji: '☕💪', title: 'Натхнення від колеги' },
+    { top: 'ТРИ ВІДМОВИ ПОСПІЛЬ', bottom: 'ЧЕТВЕРТИЙ БЕЗ ПИТАНЬ КУПИВ', emoji: '🎲🏅', title: 'Гра чисел' },
+    { top: 'КЛІЄНТ КАЖЕ: ДОРОГО', bottom: 'Я: ДОЗВОЛЬТЕ ПОЯСНИТИ ЦІННІСТЬ', emoji: '🎩💬', title: 'Мистецтво заперечень' },
+    { top: 'КАМ\'ЯНЕ ОБЛИЧЧЯ', bottom: 'КОЛИ ЧУЄШ «ЩЕ ПОДУМАЮ» №7', emoji: '😐🧘', title: 'Внутрішній спокій продавця' },
+    { top: 'ВИКОНАВ ПЛАН ЗА 2 ТИЖНІ', bottom: 'ХОДЖУ ГЕРОЄМ ДО КІНЦЯ МІСЯЦЯ', emoji: '🦸🎉', title: 'Законний відпочинок' },
+    { top: 'ПООБІДАТИ АБО', bottom: 'ДОТИСНУТИ КЛІЄНТА', emoji: '🍕🤝', title: 'Важкий вибір продавця' },
+    { top: 'ПЛАН НА ЗАВТРА', bottom: 'ВИКОНАВ СЬОГОДНІ О 11:00', emoji: '⏰✅', title: 'Ефективність на максимумі' },
+    { top: 'КІНЕЦЬ МІСЯЦЯ', bottom: 'КОЖЕН ДЗВІНОК — ЗОЛОТИЙ', emoji: '⏳🏆', title: 'Остання миля' },
+    { top: 'АСС: 0% ВІД ПЛАНУ', bottom: 'ВЧОРА ЦЕ БУВ Я', emoji: '😂📦', title: 'Чесність — сила' },
+    { top: 'ПОСЛУГИ ПРОДАНО', bottom: 'КЛІЄНТ НЕ ВСТИГ ЗЛЯКАТИСЬ', emoji: '💨💼', title: 'Швидше за сумнів' },
+    { top: 'ЧЕКИ: НОВИЙ РЕКОРД', bottom: 'СЕРЕДНІЙ ЧЕК: ТЕЖ РЕКОРД', emoji: '🧾🔥', title: 'Подвійний удар' },
+    { top: 'ПРИЙШОВ БЕЗ ГРОШЕЙ', bottom: 'ПІШОВ З КРЕДИТОМ І ПОСМІШКОЮ', emoji: '😊💳', title: 'Магія фінансових рішень' },
+    { top: 'ЗНОВУ ПИТАЮТЬ:', bottom: 'ЦЕ ВЖЕ ОСТАННЯ ЦІНА?', emoji: '😤💰', title: 'Питання на мільйон' },
+    { top: 'ВИХОДИШ НА ОБІД', bottom: 'ДЗВОНИТЬ НАЙВАЖЛИВІШИЙ КЛІЄНТ', emoji: '🥗📞', title: 'Закон підлості' },
+    { top: 'НАПИСАВ ЗВІТ В CRM', bottom: 'СИСТЕМА ЗАВИСЛА', emoji: '💾😡', title: 'Цифрова трагедія' },
+    { top: 'КЛІЄНТ: МНЕ ПРОСТО ПОДИВИТИСЬ', bottom: 'ЧЕРЕЗ 40 ХВ: БЕРУ ВСЕ', emoji: '👀🛒', title: 'Просто подивитись' },
+    { top: 'НОВА АКЦІЯ З ПОНЕДІЛКА', bottom: 'КЛІЄНТ ПРИЙШОВ У НЕДІЛЮ', emoji: '📅😬', title: 'Завжди не вчасно' },
+    { top: 'ДОЛЯ АСС 100%', bottom: 'ПРОДАВ ТІЛЬКИ ОДИН ТОВАР', emoji: '🎯😅', title: 'Математика продавця' },
 ];
 
 const MEME_BG_PALETTES = [
-    { bg: '#1e3a8a', accent: '#3b82f6' },
-    { bg: '#14532d', accent: '#22c55e' },
-    { bg: '#4c1d95', accent: '#a855f7' },
-    { bg: '#7c2d12', accent: '#f97316' },
-    { bg: '#134e4a', accent: '#14b8a6' },
-    { bg: '#1c1917', accent: '#f59e0b' },
-    { bg: '#1e1b4b', accent: '#818cf8' },
-    { bg: '#450a0a', accent: '#ef4444' },
-    { bg: '#052e16', accent: '#4ade80' },
-    { bg: '#0c0a09', accent: '#fbbf24' },
+    { bg: '#1e3a8a', accent: '#60a5fa' },
+    { bg: '#14532d', accent: '#4ade80' },
+    { bg: '#4c1d95', accent: '#c084fc' },
+    { bg: '#7c2d12', accent: '#fb923c' },
+    { bg: '#134e4a', accent: '#2dd4bf' },
+    { bg: '#1c1917', accent: '#fbbf24' },
+    { bg: '#1e1b4b', accent: '#a5b4fc' },
+    { bg: '#450a0a', accent: '#f87171' },
+    { bg: '#052e16', accent: '#86efac' },
+    { bg: '#3b0764', accent: '#f0abfc' },
 ];
 
-let memeLoading = false;
-let lastMemeThemeIdx = -1;
+let lastMemeIdx = -1;
 
-async function loadRandomMeme() {
-    if (memeLoading) return;
-    memeLoading = true;
-
+function loadRandomMeme() {
     const container = document.getElementById('memeContainer');
     const titleEl = document.getElementById('memeTitle');
     const btn = document.querySelector('.btn-meme');
-    if (!container || !titleEl) { memeLoading = false; return; }
+    if (!container || !titleEl) return;
 
-    if (btn) { btn.disabled = true; btn.textContent = '⏳ Генерую...'; }
-    container.innerHTML = `<div class="meme-loading">Генерую мем українською... 🇺🇦</div>`;
-    titleEl.textContent = 'AI придумує мем...';
+    if (btn) btn.disabled = true;
 
-    // Беремо тему, яка не повторює попередню
-    let themeIdx;
-    do { themeIdx = Math.floor(Math.random() * UA_MEME_THEMES.length); }
-    while (themeIdx === lastMemeThemeIdx && UA_MEME_THEMES.length > 1);
-    lastMemeThemeIdx = themeIdx;
-    const theme = UA_MEME_THEMES[themeIdx];
+    let idx;
+    do { idx = Math.floor(Math.random() * MEME_BANK.length); }
+    while (idx === lastMemeIdx && MEME_BANK.length > 1);
+    lastMemeIdx = idx;
 
+    const meme = MEME_BANK[idx];
     const palette = MEME_BG_PALETTES[Math.floor(Math.random() * MEME_BG_PALETTES.length)];
+    renderMemeCard(container, titleEl, meme, palette);
 
-    let attempts = 0;
-    while (attempts < 2) {
-        attempts++;
-        try {
-            const response = await fetch("https://api.anthropic.com/v1/messages", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    model: "claude-sonnet-4-20250514",
-                    max_tokens: 300,
-                    messages: [{
-                        role: "user",
-                        content: `Створи короткий смішний мем для продавців роздрібної мережі на тему: "${theme}".
-Відповідай ТІЛЬКИ JSON (без markdown, без коментарів):
-{"title":"заголовок до 55 символів укр","top":"верхній текст мему КАПСОМ макс 8 слів укр","bottom":"нижній текст мему КАПСОМ макс 8 слів укр","emoji":"1-2 емодзі що підходять"}
-Мем має бути дотепним, впізнаваним для продавців. НЕ повторюй слова з теми дослівно.`
-                    }]
-                })
-            });
-
-            if (!response.ok) throw new Error('HTTP ' + response.status);
-            const data = await response.json();
-            const raw = data.content?.find(b => b.type === 'text')?.text || '';
-            const meme = JSON.parse(raw.replace(/```json|```/g, '').trim());
-
-            if (!meme.top || !meme.bottom) throw new Error('bad json');
-
-            renderMemeCard(container, titleEl, meme, palette);
-            break;
-
-        } catch(e) {
-            console.error('Meme attempt', attempts, e);
-            if (attempts >= 2) {
-                // останній резерв — хоч щось показати
-                container.innerHTML = `<div class="meme-loading" style="color:#fbbf24;">😅 Не вдалось завантажити мем.<br>Спробуй ще раз!</div>`;
-                titleEl.textContent = 'Помилка завантаження';
-            }
-        }
-    }
-
-    memeLoading = false;
-    if (btn) { btn.disabled = false; btn.textContent = '🔄 Інший мем'; }
+    setTimeout(() => { if (btn) btn.disabled = false; }, 300);
 }
 
 function renderMemeCard(container, titleEl, meme, palette) {
@@ -855,38 +824,36 @@ function renderMemeCard(container, titleEl, meme, palette) {
     container.innerHTML = `
         <div style="
             width:100%; min-height:230px;
-            background: linear-gradient(145deg, ${bg} 0%, ${bg}cc 100%);
+            background: linear-gradient(145deg, ${bg} 0%, ${bg}ee 100%);
             display:flex; flex-direction:column;
             align-items:center; justify-content:space-between;
             padding:24px 20px; box-sizing:border-box;
             font-family:'Inter',sans-serif;
             position:relative; overflow:hidden;
         ">
-            <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:${accent}22;pointer-events:none;"></div>
+            <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:${accent}25;pointer-events:none;"></div>
             <div style="position:absolute;bottom:-30px;left:-30px;width:120px;height:120px;border-radius:50%;background:${accent}18;pointer-events:none;"></div>
             <div style="
                 color:#fff; font-size:clamp(14px,4vw,18px); font-weight:900;
                 text-align:center; text-transform:uppercase; letter-spacing:0.05em;
-                text-shadow: 0 2px 8px rgba(0,0,0,0.6);
-                position:relative; z-index:1; line-height:1.25;
-                max-width:92%; padding:0 4px;
-                border-bottom: 2px solid ${accent}88; padding-bottom:12px;
+                text-shadow:0 2px 8px rgba(0,0,0,0.7);
+                position:relative; z-index:1; line-height:1.3;
+                max-width:92%;
+                border-bottom:2px solid ${accent}99; padding-bottom:14px;
             ">${meme.top}</div>
-
             <div style="font-size:clamp(56px,15vw,76px); line-height:1; position:relative; z-index:1;
-                filter:drop-shadow(0 4px 12px rgba(0,0,0,0.4)); margin:4px 0;">${emoji}</div>
-
+                filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5)); margin:6px 0;">${emoji}</div>
             <div style="
                 color:#fff; font-size:clamp(14px,4vw,18px); font-weight:900;
                 text-align:center; text-transform:uppercase; letter-spacing:0.05em;
-                text-shadow: 0 2px 8px rgba(0,0,0,0.6);
-                position:relative; z-index:1; line-height:1.25;
-                max-width:92%; padding:0 4px;
-                border-top: 2px solid ${accent}88; padding-top:12px;
+                text-shadow:0 2px 8px rgba(0,0,0,0.7);
+                position:relative; z-index:1; line-height:1.3;
+                max-width:92%;
+                border-top:2px solid ${accent}99; padding-top:14px;
             ">${meme.bottom}</div>
         </div>`;
 
-    titleEl.textContent = meme.title || theme;
+    titleEl.textContent = meme.title;
 }
 
 function renderTable(headers, rows, compact) {
@@ -1334,7 +1301,7 @@ const TOP_REWARDS = [
 ];
 
 const SILVER_REWARDS = [
-    { icon: '🥈', title: 'Срібний гравець', desc: 'Крок від вершини' },
+    { icon: '🥈', title: 'Срібло', desc: 'Крок від вершини' },
     { icon: '🐺', title: 'Сірий вовк', desc: 'Наздоганяє лідера' },
     { icon: '💪', title: 'Боєць', desc: 'Сильний результат' },
     { icon: '🎸', title: 'Рок-зірка дня', desc: 'Виступив гідно' },
@@ -1342,7 +1309,7 @@ const SILVER_REWARDS = [
 ];
 
 const BRONZE_REWARDS = [
-    { icon: '🥉', title: 'Бронзовий гравець', desc: 'Тримається в трійці' },
+    { icon: '🥉', title: 'Бронза', desc: 'Тримається в трійці' },
     { icon: '🐯', title: 'Тигреня', desc: 'Підростає до топу' },
     { icon: '🌱', title: 'Молодий ріст', desc: 'Є куди рости' },
     { icon: '🔑', title: 'Відкриває двері', desc: 'Знайшов свій ключ' },
