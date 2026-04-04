@@ -17,7 +17,6 @@
             --header-text: #fff;
             --shadow: 0 2px 12px rgba(0,0,0,0.08);
             --header-height: 112px;
-            /* Totem colors */
             --folk-bg: linear-gradient(135deg, #b45309, #d97706);
             --cyber-bg: linear-gradient(135deg, #ec4899, #06b6d4);
             --min-bg: linear-gradient(135deg, #475569, #94a3b8);
@@ -32,7 +31,6 @@
             overflow-x: hidden;
         }
 
-        /* ── SKELETON ── */
         @keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
         @keyframes fadeInUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -50,7 +48,6 @@
         .tbl-row-skel-cell{height:11px;border-radius:5px;flex:1}
         .tbl-row-skel-cell.wide{flex:2.5}
 
-        /* ── HEADER ── */
         .page-header {
             background: var(--header-bg);
             border-bottom: none;
@@ -81,7 +78,6 @@
         }
         .compact-toggle.on { background: rgba(0,113,227,0.5); color: #fff; border-color: rgba(0,113,227,0.6); }
 
-        /* ── TAB BAR ── */
         .tab-bar {
             display: flex; gap: 0;
             border-bottom: none;
@@ -98,7 +94,6 @@
         .tab-btn.active { color: #fff; border-bottom-color: #4d9fff; }
         .tab-icon { font-size: 14px; }
 
-        /* ── CONTENT PANELS ── */
         .panel { 
             display: none; 
             padding: 14px; 
@@ -107,13 +102,11 @@
         }
         .panel.visible { display: block; }
         
-        /* Фікс для скролу в рейтинг/інсайти */
         #panelRating, #panelInsights {
             padding-top: 14px;
             padding-bottom: 20px;
         }
 
-        /* ── TABLE ─ */
         .table-card {
             background: var(--card); 
             border-radius: 16px;
@@ -132,7 +125,6 @@
             min-width: 100%;
         }
 
-        /* ── Груповий заголовок (верхній рядок) ── */
         th.group-header {
             text-align: center; font-size: 10px; font-weight: 800;
             text-transform: uppercase; letter-spacing: 0.6px;
@@ -145,7 +137,6 @@
         th.group-header.g-checks { background: #6d28d9; }
         th.group-header.g-none   { background: #4b5563; }
 
-        /* ── Підзаголовки (другий рядок) ── */
         th {
             text-align: center; padding: 7px 5px; color: rgba(255,255,255,0.9);
             font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
@@ -165,12 +156,10 @@
         }
         .grp-start { border-left: 2px solid rgba(0,0,0,0.07) !important; }
 
-        /* Sticky thead — прилипає до верху таблиці */
         thead th { position: sticky; z-index: 10; background: var(--header-bg); }
         thead tr:first-child th  { top: 0; z-index: 15; }
         thead tr:nth-child(2) th { top: 24px; z-index: 12; }
 
-        /* Sticky перша колонка — імені продавця */
         th:first-child, td.name-cell {
             position: sticky; 
             left: 0; 
@@ -198,7 +187,6 @@
             min-width: 140px;
         }
 
-        /* ── Бейджи ── */
         .cell-badge {
             display: block; border-radius: 5px; font-size: 11px; font-weight: 700;
             text-align: center; padding: 3px 5px; white-space: nowrap;
@@ -210,7 +198,6 @@
         .badge-fact-checks { background: rgba(112,48,208,0.10);  color: #5c1fa8; }
         .badge-fact-none   { background: rgba(100,100,110,0.07); color: #3d3d4f; }
 
-        /* ── Спеціальні рядки ── */
         .time-row td           { background: #f2f3f7 !important; font-weight: 700; color: #4a4a5a; font-size: 10.5px; }
         .time-row td.name-cell { background: #e8eaf0 !important; color: #3a3a4a !important; }
         .summary-row td           { background: #dde9ff !important; font-weight: 700; color: #1a2a5a !important; border-top: 2px solid #a8bce8; }
@@ -221,7 +208,6 @@
         .loading { padding: 40px; text-align: center; color: #86868b; }
         .error   { padding: 40px; text-align: center; color: #ff3b30; }
 
-        /* ── MOBILE FIXES ── */
         @media (max-width: 767px) {
             :root { --header-height: 104px; }
             body { padding-top: var(--header-height); }
@@ -249,7 +235,6 @@
             }
         }
 
-        /* ── DESKTOP FIXES ── */
         @media (min-width: 768px) {
             .name-cell, th:first-child {
                 width: 160px;
@@ -263,7 +248,6 @@
             .table-card { border-radius: 20px; }
         }
 
-        /* ── RATING ── */
         .metric-scroll {
             display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px;
             margin-bottom: 14px; scrollbar-width: none;
@@ -300,7 +284,6 @@
 
         .ranking-grid { display: flex; flex-direction: column; gap: 8px; }
         
-        /* ── НОВИЙ ДИЗАЙН РЕЙТИНГУ ── */
         .rank-card {
             background: var(--card); 
             border-radius: 16px;
@@ -431,7 +414,6 @@
             animation: shimmer 2s infinite;
         }
 
-        /* ── TOTEM BADGE ── */
         .totem-badge {
             width: 36px; height: 36px;
             border-radius: 50%;
@@ -446,7 +428,6 @@
         .totem-min { background: var(--min-bg); }
         @keyframes pop { 0% { transform: scale(0) rotate(-20deg); } 100% { transform: scale(1) rotate(0); } }
 
-        /* ── MEME CARD WITH IMAGES ── */
         .meme-card {
             margin-top: 16px;
             background: var(--card);
@@ -460,7 +441,7 @@
             position: relative;
             width: 100%;
             min-height: 200px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -486,7 +467,7 @@
             padding: 40px 20px;
         }
         .meme-loading::before {
-            content: '🎲';
+            content: '🇺🇦';
             font-size: 48px;
             display: block;
             margin-bottom: 12px;
@@ -551,7 +532,6 @@
             margin-bottom: 8px;
         }
 
-        /* ── COLLECTION GRID ── */
         .collection-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
@@ -606,7 +586,6 @@
             margin-top: 3px;
         }
 
-        /* ── TOAST NOTIFICATION ── */
         .toast {
             position: fixed;
             bottom: 20px;
@@ -629,7 +608,6 @@
             transform: translateX(-50%) translateY(-10px);
         }
 
-        /* ── INSIGHTS ── */
         @keyframes insightFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
         .insights-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         .insight-card {
@@ -711,10 +689,9 @@
     <div id="storeBanner"></div>
     <div class="ranking-grid" id="rankingGrid"></div>
     
-    <!-- MEME CARD -->
     <div class="meme-card">
         <div class="meme-image-container" id="memeContainer">
-            <div class="meme-loading">Завантаження мему...</div>
+            <div class="meme-loading">Завантаження українського мему...</div>
         </div>
         <div class="meme-footer">
             <div class="meme-title" id="memeTitle">Мем завантажується...</div>
@@ -722,7 +699,6 @@
         </div>
     </div>
     
-    <!-- COLLECTION SECTION -->
     <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
             <h3 style="margin:0; font-size:1.1em;">🎒 Твоя колекція</h3>
@@ -739,7 +715,6 @@
 <div id="toast" class="toast">🎁 Бонус розблоковано!</div>
 
 <script>
-// ===== CSV =====
 function parseCSV(text) {
     const rows = [];
     for (const line of text.split(/\r?\n/)) {
@@ -757,7 +732,6 @@ function parseCSV(text) {
     return rows;
 }
 
-// ===== ГРУПИ =====
 function colInfo(h) {
     const u = h.toUpperCase().trim();
     let g = '', t = 'fact';
@@ -801,7 +775,6 @@ function pctBg(v) {
     return             { bg:'rgba(52,199,89,0.20)',  fg:'#155724' };
 }
 
-// ===== ДИНАМІЧНА ЗАЛИВКА SHARE =====
 function colorizeShareCols(headers) {
     const tbody = document.getElementById('tbody');
     if (!tbody) return;
@@ -833,12 +806,10 @@ function colorizeShareCols(headers) {
     });
 }
 
-// ===== ЗБЕРЕЖЕНІ ДАНІ =====
 let savedHeaders = [];
 let savedRows = [];
 let isCompact = false;
 
-// ===== TOTEMS CONFIG =====
 const TOTEMS = [
     { id: "folk_sun", name: "Сонце-Вепр", style: "folk", target: 5, svg: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="#fbbf24" stroke-width="6" stroke-dasharray="10 5"/><path d="M50 10 L55 20 L65 15 L60 25 L75 30 L60 35 L65 50 L55 45 L50 65 L45 45 L35 50 L40 35 L25 30 L40 25 L35 15 L45 20 Z" fill="#f59e0b"/></svg>` },
     { id: "cyber_stork", name: "Кібер-Лелека", style: "cyber", target: 5, svg: `<svg viewBox="0 0 100 100"><path d="M20 80 Q50 10 80 80 L50 60 Z" fill="none" stroke="#ec4899" stroke-width="4"/><circle cx="50" cy="30" r="10" fill="#06b6d4"/><path d="M50 30 L90 10 L50 40 Z" fill="none" stroke="#00ffff" stroke-width="2"/><line x1="50" y1="60" x2="50" y2="90" stroke="#ec4899" stroke-width="4"/></svg>` },
@@ -847,42 +818,48 @@ const TOTEMS = [
     { id: "folk_flower", name: "Квітка Життя", style: "folk", target: 5, svg: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="20" fill="none" stroke="#fbbf24" stroke-width="3"/><circle cx="50" cy="20" r="20" fill="none" stroke="#d97706" stroke-width="3"/><circle cx="50" cy="80" r="20" fill="none" stroke="#d97706" stroke-width="3"/><circle cx="20" cy="50" r="20" fill="none" stroke="#d97706" stroke-width="3"/><circle cx="80" cy="50" r="20" fill="none" stroke="#d97706" stroke-width="3"/></svg>` }
 ];
 
-// ===== MEME APIS =====
+// ===== ПЕРЕВІРЕНІ УКРАЇНСЬКІ MEME APIs =====
 const MEME_APIS = [
-    'https://meme-api.com/gimme',
     'https://meme-api.com/gimme/ukraine',
-    'https://meme-api.com/gimme/dankmemes',
-    'https://meme-api.com/gimme/memes'
+    'https://meme-api.com/gimme/ukyem',
+    'https://meme-api.com/gimme/druzhba',
+    'https://meme-api.com/gimme/Palianytsia'
+];
+
+const UA_TEXT_MEMES = [
+    { text: "Коли закрив місяць за 3 дні 😎", emoji: "💪" },
+    { text: "Клієнт: \"Я ще подумаю\"\nЯ: *знаю що купить* 🤝", emoji: "💰" },
+    { text: "План: 100%\nФакт: 150%\nНастрій: 🚀", emoji: "📈" },
+    { text: "Коли CRM каже 'збережено' ", emoji: "💾" },
+    { text: "П'ятниця 17:55 - останній дзвінок 📞", emoji: "⏰" },
+    { text: "Продавець не втомлюється,\nпродавець заряджається 💪", emoji: "🔋" },
+    { text: "Коли ТОП-1 по ТО 👑", emoji: "🏆" },
+    { text: "Мій план на день:\n1. Продати\n2. Повторити ☕", emoji: "📊" }
 ];
 
 let currentMemeUrl = '';
 
-// ===== MEME FUNCTIONS =====
 async function loadRandomMeme() {
     const container = document.getElementById('memeContainer');
     const titleEl = document.getElementById('memeTitle');
     
     if (!container || !titleEl) return;
     
-    // Показуємо завантаження
-    container.innerHTML = '<div class="meme-loading">Завантаження мему...</div>';
-    titleEl.textContent = 'Завантаження...';
+    container.innerHTML = '<div class="meme-loading">Завантаження українського мему... 🇺🇦</div>';
+    titleEl.textContent = 'Шукаємо найкращий мем...';
     
     try {
-        // Вибираємо випадковий API
         const apiUrl = MEME_APIS[Math.floor(Math.random() * MEME_APIS.length)];
-        
         const response = await fetch(apiUrl + '?t=' + Date.now());
+        
         if (!response.ok) throw new Error('API error');
         
         const data = await response.json();
         
-        // Перевіряємо чи це зображення
-        if (!data.url || !data.title) {
+        if (!data.url || !data.title || data.nsfw) {
             throw new Error('Invalid data');
         }
         
-        // Створюємо image елемент для попереднього завантаження
         const img = new Image();
         img.onload = () => {
             container.innerHTML = '';
@@ -891,11 +868,8 @@ async function loadRandomMeme() {
             container.appendChild(img);
             currentMemeUrl = data.url;
             
-            // Оновлюємо заголовок
-            const cleanTitle = data.title 
-                ? data.title.replace(/[#*_`\[\]]/g, '').substring(0, 100)
-                : 'Випадковий мем';
-            titleEl.textContent = cleanTitle;
+            const cleanTitle = data.title.replace(/[#*_`\[\]]/g, '').substring(0, 100);
+            titleEl.textContent = cleanTitle || 'Український мем 🇺🇦';
         };
         
         img.onerror = () => {
@@ -903,20 +877,35 @@ async function loadRandomMeme() {
         };
         
         img.src = data.url;
+        img.crossOrigin = "anonymous";
         
     } catch (error) {
         console.error('Meme load error:', error);
-        container.innerHTML = `
-            <div class="meme-error">
-                Не вдалося завантажити мем<br>
-                <small>Спробуйте ще раз</small>
-            </div>
-        `;
-        titleEl.textContent = 'Помилка завантаження';
+        showUkrainianTextMeme(container, titleEl);
     }
 }
 
-// ===== COLLECTION STORAGE =====
+function showUkrainianTextMeme(container, titleEl) {
+    const meme = UA_TEXT_MEMES[Math.floor(Math.random() * UA_TEXT_MEMES.length)];
+    
+    container.innerHTML = `
+        <div style="
+            padding: 40px 20px;
+            text-align: center;
+            color: white;
+            font-size: 16px;
+            line-height: 1.6;
+            font-weight: 600;
+            white-space: pre-line;
+        ">
+            <div style="font-size: 64px; margin-bottom: 16px;">${meme.emoji}</div>
+            <div>${meme.text}</div>
+        </div>
+    `;
+    
+    titleEl.textContent = 'Український текстовий мем 🇺';
+}
+
 const COLLECTION_STORE = {
     key: 'seller_totems_collection',
     get() {
@@ -938,7 +927,6 @@ const COLLECTION_STORE = {
     }
 };
 
-// ===== RENDER TABLE =====
 function renderTable(headers, rows, compact) {
     const isMob = window.innerWidth < 768;
     const nameW = isMob ? 110 : 160;
@@ -956,7 +944,6 @@ function renderTable(headers, rows, compact) {
         }
     }
 
-    const totalCols = colIndexes.length;
     let colWidths = [];
     if (compact) {
         const cw = Math.max(70, Math.floor(avail / 4));
@@ -1098,7 +1085,6 @@ function renderTable(headers, rows, compact) {
     });
 }
 
-// ===== TOGGLE =====
 function toggleCompact() {
     isCompact = !isCompact;
     const btn = document.getElementById('toggleBtn');
@@ -1108,7 +1094,6 @@ function toggleCompact() {
     renderTable(savedHeaders, savedRows, isCompact);
 }
 
-// ===== RATING =====
 const RATING_DEFS = [
     { key:'to',        label:'ТО',          color:'#0071e3', gFilter:'to',       tFilter:'fact'  },
     { key:'serv',      label:'Послуги',      color:'#34c759', gFilter:'serv',     tFilter:'fact'  },
@@ -1139,9 +1124,9 @@ function setView(mode) {
         setTimeout(() => { 
             grid.innerHTML = ''; 
             renderRankingCards(); 
-            renderCollection(); // Показуємо колекцію при відкритті рейтингу
+            renderCollection();
         }, 180);
-        loadRandomMeme(); // Завантажуємо мем
+        loadRandomMeme();
     } else if (mode === 'insights') {
         const grid = document.getElementById('insightsGrid');
         showInsightsSkeleton(grid);
@@ -1149,7 +1134,6 @@ function setView(mode) {
     }
 }
 
-// ===== INSIGHTS =====
 const INSIGHT_DEFS = [
     { key:'to',       label:'Найкращий по ТО',          icon:'💰', color:'#0071e3', iconBg:'rgba(0,113,227,0.12)', gFilter:'to',     tFilter:'fact' },
     { key:'serv',     label:'Король послуг',             icon:'🔧', color:'#34c759', iconBg:'rgba(52,199,89,0.12)', gFilter:'serv',   tFilter:'fact' },
@@ -1268,7 +1252,6 @@ function buildRatingMetricPills() {
     }
 }
 
-// ===== TOTEM & COLLECTION FUNCTIONS =====
 function getRandomTotem() {
     return TOTEMS[Math.floor(Math.random() * TOTEMS.length)];
 }
@@ -1315,7 +1298,6 @@ function addToCollection(totemId) {
     return updated;
 }
 
-// ===== RENDER RANKING WITH TOTEMS =====
 function renderRankingCards() {
     const grid = document.getElementById('rankingGrid');
     grid.innerHTML = '';
@@ -1336,7 +1318,6 @@ function renderRankingCards() {
         return;
     }
 
-    // ── ПЛАШКА МАГАЗИНУ ──
     const sumKeywords = ['разом','сума','total','тотал','підсумок','всього','итого'];
     const storeRow = savedRows.find(r => {
         const nl = (r[0]||'').trim().toLowerCase();
@@ -1419,11 +1400,10 @@ function renderRankingCards() {
             return Number.isInteger(n) ? n.toLocaleString('uk-UA') : n.toLocaleString('uk-UA', {minimumFractionDigits:2, maximumFractionDigits:2});
         };
 
-        // ── TOTEM LOGIC: тільки топ-3 отримують рандомний тотем ──
         let totemHtml = '';
         if (pos <= 3) {
             const totem = getRandomTotem();
-            addToCollection(totem.id); // Додаємо в колекцію
+            addToCollection(totem.id);
             totemHtml = `<div class="totem-badge totem-${totem.style}">${totem.svg}</div>`;
         }
 
@@ -1434,7 +1414,7 @@ function renderRankingCards() {
         else if (pos === 3) card.classList.add('top-3');
         
         const posClass = pos===1?'gold':pos===2?'silver':pos===3?'bronze':'rest';
-        const medal = pos<=3 ? ['🥇','🥈','🥉'][pos-1] : pos;
+        const medal = pos<=3 ? ['🥇','','🥉'][pos-1] : pos;
 
         card.innerHTML = `
             <div class="rank-bg" style="background:${def.color};width:${barPct}%"></div>
@@ -1483,7 +1463,6 @@ function showRatingSkeleton(grid, count=7){
     }
 }
 
-// ===== ЗАВАНТАЖЕННЯ =====
 async function load() {
     const tableCard = document.getElementById('tableCard');
     const loader = document.getElementById('loader');
@@ -1528,7 +1507,6 @@ async function load() {
 
 load();
 
-// Свайп назад
 let x0=0, y0=0, sw=false;
 document.addEventListener('touchstart', e=>{x0=e.changedTouches[0].screenX; y0=e.changedTouches[0].screenY; sw=true;},{passive:true});
 document.addEventListener('touchmove',  e=>{if(Math.abs(e.changedTouches[0].screenY-y0)>25) sw=false;},{passive:true});
@@ -1538,7 +1516,6 @@ document.addEventListener('touchend',   e=>{
     sw=false;
 },{passive:true});
 
-// Фікс для запобігання "підтягування" контенту під хедер на мобільному
 window.addEventListener('scroll', function() {
     if (window.scrollY < 0) {
         window.scrollTo(0, 0);
@@ -1547,4 +1524,3 @@ window.addEventListener('scroll', function() {
 </script>
 </body>
 </html>
-
