@@ -1231,14 +1231,19 @@ const AUTH = {
         const toFact   = store ? (store.metrics['ТО']?.value || 0) : 0;
         const accFact  = store ? (store.metrics['ACC']?.value || 0) : 0;
         const servFact = store ? (store.metrics['Послуги грн']?.value || store.metrics['Послуги']?.value || 0) : 0;
-        const accDola  = store ? (store.metrics['% Доля ACC']?.value || 0) : 0;
-        const servDola = store ? (store.metrics['Доля Послуг']?.value || 0) : 0;
-
         // Додаємо результат дня якщо режим "day"
         const dd = (smMode === 'day' && dailyDelta) ? dailyDelta : { to: 0, serv: 0, acc: 0 };
         const toFactFinal   = toFact   + dd.to;
         const accFactFinal  = accFact  + dd.acc;
         const servFactFinal = servFact + dd.serv;
+
+        // Доля ACC і Послуг — перераховуємо якщо є delta, інакше беремо з метрик
+        const accDola  = toFactFinal > 0 && (smMode === 'day' && dailyDelta)
+            ? Math.round(accFactFinal  / toFactFinal * 10000) / 100
+            : (store ? (store.metrics['% Доля ACC']?.value  || 0) : 0);
+        const servDola = toFactFinal > 0 && (smMode === 'day' && dailyDelta)
+            ? Math.round(servFactFinal / toFactFinal * 10000) / 100
+            : (store ? (store.metrics['Доля Послуг']?.value || 0) : 0);
 
         const toPlan   = pl?.to   || 0;
         const accPlan  = pl?.acc  || 0;
