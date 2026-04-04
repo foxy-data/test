@@ -534,6 +534,17 @@
 
 
 
+        .reward-badge {
+            display: flex; align-items: center; gap: 8px;
+            margin-top: 8px; padding: 7px 12px;
+            border-radius: 10px; font-size: 12px; font-weight: 700;
+            border-top: 1px dashed var(--border);
+            padding-top: 10px; margin-top: 6px;
+        }
+        .reward-badge .reward-icon { font-size: 18px; flex-shrink:0; }
+        .reward-badge .reward-text { color: var(--text-sec); line-height:1.3; }
+        .reward-badge .reward-title { color: var(--text); font-weight: 800; font-size: 11.5px; display:block; }
+
         @keyframes insightFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
         .insights-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         .insight-card {
@@ -737,19 +748,38 @@ const TOTEMS = [
 
 // ===== УКРАЇНСЬКІ МЕМИ через Claude AI =====
 const UA_MEME_THEMES = [
-    "продавець виконав план на 150%",
-    "клієнт каже 'я ще подумаю'",
-    "понеділок, перший дзвінок клієнту",
-    "кінець місяця, залишилось 3 дні",
-    "топ-1 по товарообігу",
+    "продавець закрив місяць достроково",
+    "клієнт каже «я ще подумаю» але ти вже знаєш відповідь",
+    "понеділок і перший дзвінок клієнту о 9 ранку",
+    "кінець місяця залишилось 3 дні і 30% плану",
+    "ти топ-1 по товарообігу сьогодні",
     "CRM не відкривається в п'ятницю о 17:55",
-    "план збільшили ще раз",
-    "колега вже закрив місяць, а ти ні",
-    "клієнт повернувся і купив",
-    "середній чек рекорд дня"
+    "план збільшили після рекордного місяця",
+    "колега вже виконав план а ти ні",
+    "клієнт пішов подумати і повернувся купувати",
+    "середній чек сьогодні — особистий рекорд",
+    "три відмови поспіль але четвертий купив",
+    "прийшов клієнт з попередньої роботи твого колеги",
+    "виконав план у перший день місяця",
+    "телефон сів прямо під час важливого дзвінка",
+    "клієнт попросив знижку і ти витримав паузу"
+];
+
+const MEME_BG_PALETTES = [
+    { bg: '#1e3a8a', accent: '#3b82f6' },
+    { bg: '#14532d', accent: '#22c55e' },
+    { bg: '#4c1d95', accent: '#a855f7' },
+    { bg: '#7c2d12', accent: '#f97316' },
+    { bg: '#134e4a', accent: '#14b8a6' },
+    { bg: '#1c1917', accent: '#f59e0b' },
+    { bg: '#1e1b4b', accent: '#818cf8' },
+    { bg: '#450a0a', accent: '#ef4444' },
+    { bg: '#052e16', accent: '#4ade80' },
+    { bg: '#0c0a09', accent: '#fbbf24' },
 ];
 
 let memeLoading = false;
+let lastMemeThemeIdx = -1;
 
 async function loadRandomMeme() {
     if (memeLoading) return;
@@ -761,126 +791,102 @@ async function loadRandomMeme() {
     if (!container || !titleEl) { memeLoading = false; return; }
 
     if (btn) { btn.disabled = true; btn.textContent = '⏳ Генерую...'; }
-
     container.innerHTML = `<div class="meme-loading">Генерую мем українською... 🇺🇦</div>`;
-    titleEl.textContent = 'AI малює мем...';
+    titleEl.textContent = 'AI придумує мем...';
 
-    const theme = UA_MEME_THEMES[Math.floor(Math.random() * UA_MEME_THEMES.length)];
+    // Беремо тему, яка не повторює попередню
+    let themeIdx;
+    do { themeIdx = Math.floor(Math.random() * UA_MEME_THEMES.length); }
+    while (themeIdx === lastMemeThemeIdx && UA_MEME_THEMES.length > 1);
+    lastMemeThemeIdx = themeIdx;
+    const theme = UA_MEME_THEMES[themeIdx];
 
-    try {
-        const response = await fetch("https://api.anthropic.com/v1/messages", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                model: "claude-sonnet-4-20250514",
-                max_tokens: 1000,
-                messages: [{
-                    role: "user",
-                    content: `Створи смішний мем для продавців роздрібної мережі на тему: "${theme}".
-Відповідь ТІЛЬКИ JSON без markdown, формат:
-{"title": "заголовок мему (до 60 символів, укр)", "top": "верхній текст (ukr, caps)", "bottom": "нижній текст (ukr, caps)", "emoji": "1-2 емодзі", "bg": "hex колір фону", "color": "hex колір тексту"}`
-                }]
-            })
-        });
+    const palette = MEME_BG_PALETTES[Math.floor(Math.random() * MEME_BG_PALETTES.length)];
 
-        const data = await response.json();
-        const raw = data.content?.find(b => b.type === 'text')?.text || '';
-        const clean = raw.replace(/```json|```/g, '').trim();
-        const meme = JSON.parse(clean);
+    let attempts = 0;
+    while (attempts < 2) {
+        attempts++;
+        try {
+            const response = await fetch("https://api.anthropic.com/v1/messages", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: "claude-sonnet-4-20250514",
+                    max_tokens: 300,
+                    messages: [{
+                        role: "user",
+                        content: `Створи короткий смішний мем для продавців роздрібної мережі на тему: "${theme}".
+Відповідай ТІЛЬКИ JSON (без markdown, без коментарів):
+{"title":"заголовок до 55 символів укр","top":"верхній текст мему КАПСОМ макс 8 слів укр","bottom":"нижній текст мему КАПСОМ макс 8 слів укр","emoji":"1-2 емодзі що підходять"}
+Мем має бути дотепним, впізнаваним для продавців. НЕ повторюй слова з теми дослівно.`
+                    }]
+                })
+            });
 
-        renderMemeCard(container, titleEl, meme, theme);
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            const data = await response.json();
+            const raw = data.content?.find(b => b.type === 'text')?.text || '';
+            const meme = JSON.parse(raw.replace(/```json|```/g, '').trim());
 
-    } catch(e) {
-        console.error('Meme error:', e);
-        const fallback = UA_TEXT_MEMES[Math.floor(Math.random() * UA_TEXT_MEMES.length)];
-        showUkrainianTextMeme(container, titleEl, fallback);
-    } finally {
-        memeLoading = false;
-        if (btn) { btn.disabled = false; btn.textContent = '🔄 Інший мем'; }
+            if (!meme.top || !meme.bottom) throw new Error('bad json');
+
+            renderMemeCard(container, titleEl, meme, palette);
+            break;
+
+        } catch(e) {
+            console.error('Meme attempt', attempts, e);
+            if (attempts >= 2) {
+                // останній резерв — хоч щось показати
+                container.innerHTML = `<div class="meme-loading" style="color:#fbbf24;">😅 Не вдалось завантажити мем.<br>Спробуй ще раз!</div>`;
+                titleEl.textContent = 'Помилка завантаження';
+            }
+        }
     }
+
+    memeLoading = false;
+    if (btn) { btn.disabled = false; btn.textContent = '🔄 Інший мем'; }
 }
 
-function renderMemeCard(container, titleEl, meme, theme) {
-    const bg = meme.bg || '#1e3a8a';
-    const color = meme.color || '#ffffff';
+function renderMemeCard(container, titleEl, meme, palette) {
+    const bg = palette.bg;
+    const accent = palette.accent;
     const emoji = meme.emoji || '😄';
 
     container.innerHTML = `
         <div style="
-            width:100%; min-height:220px;
-            background:${bg};
+            width:100%; min-height:230px;
+            background: linear-gradient(145deg, ${bg} 0%, ${bg}cc 100%);
             display:flex; flex-direction:column;
             align-items:center; justify-content:space-between;
             padding:24px 20px; box-sizing:border-box;
             font-family:'Inter',sans-serif;
             position:relative; overflow:hidden;
         ">
+            <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:${accent}22;pointer-events:none;"></div>
+            <div style="position:absolute;bottom:-30px;left:-30px;width:120px;height:120px;border-radius:50%;background:${accent}18;pointer-events:none;"></div>
             <div style="
-                position:absolute; inset:0;
-                background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.08) 0%, transparent 60%),
-                            radial-gradient(ellipse at 70% 80%, rgba(0,0,0,0.15) 0%, transparent 60%);
-                pointer-events:none;
-            "></div>
-            <div style="
-                color:${color}; font-size:clamp(13px,3.5vw,17px); font-weight:800;
-                text-align:center; text-transform:uppercase; letter-spacing:0.04em;
-                text-shadow:2px 2px 6px rgba(0,0,0,0.5), 0 0 20px rgba(0,0,0,0.3);
-                position:relative; z-index:1; line-height:1.3;
-                -webkit-text-stroke: 0.5px rgba(0,0,0,0.3);
-                max-width:90%;
-            ">${meme.top || ''}</div>
+                color:#fff; font-size:clamp(14px,4vw,18px); font-weight:900;
+                text-align:center; text-transform:uppercase; letter-spacing:0.05em;
+                text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+                position:relative; z-index:1; line-height:1.25;
+                max-width:92%; padding:0 4px;
+                border-bottom: 2px solid ${accent}88; padding-bottom:12px;
+            ">${meme.top}</div>
 
-            <div style="font-size:clamp(52px,14vw,72px); line-height:1; margin:8px 0; position:relative; z-index:1; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.3));">${emoji}</div>
+            <div style="font-size:clamp(56px,15vw,76px); line-height:1; position:relative; z-index:1;
+                filter:drop-shadow(0 4px 12px rgba(0,0,0,0.4)); margin:4px 0;">${emoji}</div>
 
             <div style="
-                color:${color}; font-size:clamp(13px,3.5vw,17px); font-weight:800;
-                text-align:center; text-transform:uppercase; letter-spacing:0.04em;
-                text-shadow:2px 2px 6px rgba(0,0,0,0.5), 0 0 20px rgba(0,0,0,0.3);
-                position:relative; z-index:1; line-height:1.3;
-                -webkit-text-stroke: 0.5px rgba(0,0,0,0.3);
-                max-width:90%;
-            ">${meme.bottom || ''}</div>
+                color:#fff; font-size:clamp(14px,4vw,18px); font-weight:900;
+                text-align:center; text-transform:uppercase; letter-spacing:0.05em;
+                text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+                position:relative; z-index:1; line-height:1.25;
+                max-width:92%; padding:0 4px;
+                border-top: 2px solid ${accent}88; padding-top:12px;
+            ">${meme.bottom}</div>
         </div>`;
 
     titleEl.textContent = meme.title || theme;
-}
-
-const UA_TEXT_MEMES = [
-    { text: "Коли закрив місяць за 3 дні 😎", emoji: "💪", bg: "#1e3a8a" },
-    { text: "Клієнт: «Я ще подумаю»\nЯ: *знаю що купить* 🤝", emoji: "💰", bg: "#14532d" },
-    { text: "ПЛАН: 100%\nФАКТ: 150%\nНАСТРІЙ: 🚀", emoji: "📈", bg: "#4c1d95" },
-    { text: "Коли CRM нарешті збережено", emoji: "💾", bg: "#1c1917" },
-    { text: "П'ЯТНИЦЯ 17:55\nОСТАННІЙ ДЗВІНОК", emoji: "⏰", bg: "#7c2d12" },
-    { text: "ПРОДАВЕЦЬ НЕ ВТОМЛЮЄТЬСЯ,\nПРОДАВЕЦЬ ЗАРЯДЖАЄТЬСЯ", emoji: "🔋", bg: "#134e4a" },
-    { text: "КОЛИ ТОП-1 ПО ТО", emoji: "👑", bg: "#78350f" },
-    { text: "МІЙ ПЛАН НА ДЕНЬ:\n1. ПРОДАТИ\n2. ПОВТОРИТИ", emoji: "☕", bg: "#1e40af" }
-];
-
-function showUkrainianTextMeme(container, titleEl, meme) {
-    if (!meme) meme = UA_TEXT_MEMES[Math.floor(Math.random() * UA_TEXT_MEMES.length)];
-    
-    container.innerHTML = `
-        <div style="
-            padding: 36px 20px;
-            text-align: center;
-            background: ${meme.bg || '#1e3a8a'};
-            color: white;
-            font-size: clamp(14px,3.5vw,17px);
-            line-height: 1.6;
-            font-weight: 800;
-            white-space: pre-line;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            text-shadow: 2px 2px 6px rgba(0,0,0,0.5);
-            min-height: 220px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
-        ">
-            <div style="font-size: clamp(52px,14vw,72px); line-height:1;">${meme.emoji}</div>
-            <div>${meme.text}</div>
-        </div>
-    `;
-    
-    titleEl.textContent = 'Мем від AI 🇺🇦';
 }
 
 function renderTable(headers, rows, compact) {
@@ -1309,6 +1315,45 @@ function renderRankingCards() {
             return Number.isInteger(n) ? n.toLocaleString('uk-UA') : n.toLocaleString('uk-UA', {minimumFractionDigits:2, maximumFractionDigits:2});
         };
 
+const TOP_REWARDS = [
+    { icon: '🦅', title: 'Орел продажів', desc: 'Найвищий результат дня' },
+    { icon: '🔥', title: 'Вогонь дня', desc: 'Палить конкурентів результатом' },
+    { icon: '⚡', title: 'Блискавка', desc: 'Швидко, точно, без промахів' },
+    { icon: '🎯', title: 'Снайпер', desc: 'Влучає в кожну угоду' },
+    { icon: '💎', title: 'Діамантовий продавець', desc: 'Рідкісний результат' },
+    { icon: '🚀', title: 'Ракета', desc: 'Злетів вище всіх' },
+    { icon: '🦁', title: 'Лев торгового залу', desc: 'Тримає ринг' },
+    { icon: '🏋️', title: 'Важковаговик', desc: 'Тягне найбільше' },
+    { icon: '🌟', title: 'Зірка зміни', desc: 'Всі рівняються на нього' },
+    { icon: '🐉', title: 'Дракон виторгу', desc: 'Ніхто не переплюне' },
+    { icon: '🎖️', title: 'Ветеран результату', desc: 'Стабільний бійець' },
+    { icon: '🧲', title: 'Магніт клієнтів', desc: 'До нього самі йдуть' },
+    { icon: '🦊', title: 'Хитрий лис', desc: 'Знає як закрити угоду' },
+    { icon: '⚔️', title: 'Козак продажів', desc: 'Воює за кожну гривню' },
+    { icon: '🌊', title: 'Хвиля успіху', desc: 'Змітає всі рекорди' },
+];
+
+const SILVER_REWARDS = [
+    { icon: '🥈', title: 'Срібний гравець', desc: 'Крок від вершини' },
+    { icon: '🐺', title: 'Сірий вовк', desc: 'Наздоганяє лідера' },
+    { icon: '💪', title: 'Боєць', desc: 'Сильний результат' },
+    { icon: '🎸', title: 'Рок-зірка дня', desc: 'Виступив гідно' },
+    { icon: '🛡️', title: 'Надійний щит', desc: 'Тримає планку' },
+];
+
+const BRONZE_REWARDS = [
+    { icon: '🥉', title: 'Бронзовий гравець', desc: 'Тримається в трійці' },
+    { icon: '🐯', title: 'Тигреня', desc: 'Підростає до топу' },
+    { icon: '🌱', title: 'Молодий ріст', desc: 'Є куди рости' },
+    { icon: '🔑', title: 'Відкриває двері', desc: 'Знайшов свій ключ' },
+    { icon: '⭐', title: 'Зірка в підйомі', desc: 'Слід стежити' },
+];
+
+function pickReward(pos) {
+    const pool = pos === 1 ? TOP_REWARDS : pos === 2 ? SILVER_REWARDS : BRONZE_REWARDS;
+    return pool[Math.floor(Math.random() * pool.length)];
+}
+
         const card = document.createElement('div');
         card.className = 'rank-card';
         if (pos === 1) card.classList.add('top-1');
@@ -1317,6 +1362,7 @@ function renderRankingCards() {
         
         const posClass = pos===1?'gold':pos===2?'silver':pos===3?'bronze':'rest';
         const medal = pos<=3 ? ['🥇','','🥉'][pos-1] : pos;
+        const reward = pos <= 3 ? pickReward(pos) : null;
 
         card.innerHTML = `
             <div class="rank-bg" style="background:${def.color};width:${barPct}%"></div>
@@ -1331,7 +1377,11 @@ function renderRankingCards() {
                     ${item.plan ? `<div class="rank-val-sub">план: ${valFmt(item.plan)}</div>` : ''}
                 </div>
             </div>
-            <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${barPct}%;background:${def.color}"></div></div>`;
+            <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${barPct}%;background:${def.color}"></div></div>
+            ${reward ? `<div class="reward-badge">
+                <span class="reward-icon">${reward.icon}</span>
+                <span class="reward-text"><span class="reward-title">${reward.title}</span>${reward.desc}</span>
+            </div>` : ''}`;
         grid.appendChild(card);
     });
 
