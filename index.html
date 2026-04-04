@@ -428,6 +428,30 @@
         }
         .sm-val-prognoz { color: #0071e3 !important; }
         .sm-val-rest { color: var(--color-text-secondary) !important; font-size: 11px !important; }
+
+        /* --- Перемикач режиму (стандарт / +день) --- */
+        .sm-mode-bar { display:flex; gap:8px; align-items:center; margin-bottom:12px; }
+        .sm-mode-label { font-size:10px; font-weight:700; text-transform:uppercase; color:var(--color-text-secondary); margin-right:2px; letter-spacing:0.04em; }
+        .sm-mode-btn {
+            padding: 5px 14px; border-radius: 20px; border: 1.5px solid var(--color-border);
+            background: transparent; font-size: 12px; font-weight: 600; cursor: pointer;
+            color: var(--color-text-secondary); font-family: inherit; transition: all 0.18s;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .sm-mode-btn.active { background: #1d1d1f; color: #fff; border-color: #1d1d1f; }
+        .sm-mode-btn:hover:not(.active) { border-color: #1d1d1f; color: #1d1d1f; }
+        .sm-mode-btn .sm-mode-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: currentColor; opacity: 0.7; flex-shrink: 0;
+        }
+        .sm-day-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 10px; font-weight: 600; color: #34c759;
+            background: rgba(52,199,89,0.12); padding: 2px 7px; border-radius: 6px;
+            margin-left: 4px; white-space: nowrap;
+        }
+        .sm-day-loading { font-size: 11px; color: var(--color-text-secondary); padding: 4px 8px; }
+        .sm-day-error   { font-size: 11px; color: #ff3b30; padding: 4px 8px; }
     </style>
     <script>
 // ============================================================
@@ -602,6 +626,16 @@ const AUTH = {
                     <span class="store-metrics-date" id="sm-date">—</span>
                 </div>
                 <button class="store-metrics-refresh" onclick="loadStoreMetrics()">↻ Оновити</button>
+            </div>
+            <div class="sm-mode-bar">
+                <span class="sm-mode-label">Режим:</span>
+                <button class="sm-mode-btn active" id="sm-mode-std" onclick="setMode('std', this)">
+                    <span class="sm-mode-dot"></span> Стандартний
+                </button>
+                <button class="sm-mode-btn" id="sm-mode-day" onclick="setMode('day', this)">
+                    <span class="sm-mode-dot"></span> + Результат дня
+                </button>
+                <span id="sm-day-status"></span>
             </div>
             <div class="sm-metric-bar">
                 <button class="sm-metric-btn active" onclick="setMetric('to', this)">💰 ТО</button>
@@ -1086,6 +1120,91 @@ const AUTH = {
 
     let smTarget = 1.00; // поточна ціль
     let smMetric = 'to'; // поточна метрика: 'to' | 'serv' | 'acc'
+    let smMode   = 'std'; // 'std' | 'day'
+
+    // --- Дані з daily.html (щоденний звіт) ---
+    const DAILY_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOxz-ozH9yNLW3IAzlkMlbRqOTrR4sIUO1__KpAMBFEvvpMXr4LWTnRvzYGb_y6za7WBxOUhl2DV84/pub?output=csv';
+    let dailyDelta = null; // { to, serv, acc } — Факт Тотал з щоденного звіту
+    let dailyLoading = false;
+
+    function colInfoDaily(h) {
+        const u = h.toUpperCase().trim();
+        let g = '', t = 'fact';
+        if      (u.includes('ПОСЛУГ') || u.includes('ПОСЛ')) g = 'serv';
+        else if (u.includes('АСС') || u.includes('ACC') || u.includes('АКСЕС')) g = 'acc';
+        else if (u.includes(' ТО') || u.startsWith('ТО') || u.endsWith('ТО')) g = 'to';
+        if      (u.includes('ПЛАН'))                         t = 'plan';
+        else if (u.includes('%') || u.includes('ВИКО'))      t = 'pct';
+        else if (u.includes('ДОЛЯ') || u.includes('SHARE'))  t = 'share';
+        return { g, t };
+    }
+
+    async function loadDailyDelta() {
+        if (dailyLoading) return;
+        dailyLoading = true;
+        const statusEl = document.getElementById('sm-day-status');
+        if (statusEl) statusEl.innerHTML = '<span class="sm-day-loading">⏳ Завантаження щоденних...</span>';
+        try {
+            const res = await fetch(DAILY_CSV_URL + '&t=' + Date.now());
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const rows = parseCSV(await res.text());
+            if (rows.length < 2) throw new Error('Немає даних');
+            const headers = rows[0];
+            const dataRows = rows.slice(1);
+            const sumKw = ['разом','сума','total','тотал','підсумок','всього','итого'];
+            const totalRow = dataRows.find(r => {
+                const nl = (r[0]||'').trim().toLowerCase();
+                return sumKw.some(k => nl.includes(k));
+            });
+            if (!totalRow) throw new Error('Рядок Тотал не знайдено');
+
+            // Знаходимо індекси колонок fact для to/serv/acc
+            let toIdx = -1, servIdx = -1, accIdx = -1;
+            for (let i = 1; i < headers.length; i++) {
+                const { g, t } = colInfoDaily(headers[i]);
+                if (t === 'fact') {
+                    if (g === 'to'   && toIdx   < 0) toIdx   = i;
+                    if (g === 'serv' && servIdx  < 0) servIdx = i;
+                    if (g === 'acc'  && accIdx   < 0) accIdx  = i;
+                }
+            }
+            const num = v => { const n = parseFloat((v||'0').replace(/[\s\u00a0]/g,'').replace(',','.')); return isNaN(n) ? 0 : n; };
+            dailyDelta = {
+                to:   toIdx   >= 0 ? num(totalRow[toIdx])   : 0,
+                serv: servIdx >= 0 ? num(totalRow[servIdx])  : 0,
+                acc:  accIdx  >= 0 ? num(totalRow[accIdx])   : 0,
+            };
+            if (statusEl) {
+                const parts = [];
+                if (dailyDelta.to)   parts.push('ТО: +' + formatFull(dailyDelta.to));
+                if (dailyDelta.serv) parts.push('Посл: +' + formatFull(dailyDelta.serv));
+                if (dailyDelta.acc)  parts.push('АСС: +' + formatFull(dailyDelta.acc));
+                statusEl.innerHTML = parts.length
+                    ? '<span class="sm-day-badge">📅 ' + parts.join(' · ') + '</span>'
+                    : '<span class="sm-day-badge">📅 дані завантажено</span>';
+            }
+        } catch(e) {
+            dailyDelta = null;
+            if (statusEl) statusEl.innerHTML = '<span class="sm-day-error">⚠️ ' + e.message + '</span>';
+        }
+        dailyLoading = false;
+        renderStoreMetrics();
+    }
+
+    async function setMode(mode, btn) {
+        smMode = mode;
+        document.querySelectorAll('.sm-mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (mode === 'day' && !dailyDelta && !dailyLoading) {
+            await loadDailyDelta();
+        } else {
+            if (mode === 'std') {
+                const statusEl = document.getElementById('sm-day-status');
+                if (statusEl) statusEl.innerHTML = '';
+            }
+            renderStoreMetrics();
+        }
+    }
 
     function setTarget(val, btn) {
         smTarget = val;
@@ -1115,13 +1234,19 @@ const AUTH = {
         const accDola  = store ? (store.metrics['% Доля ACC']?.value || 0) : 0;
         const servDola = store ? (store.metrics['Доля Послуг']?.value || 0) : 0;
 
+        // Додаємо результат дня якщо режим "day"
+        const dd = (smMode === 'day' && dailyDelta) ? dailyDelta : { to: 0, serv: 0, acc: 0 };
+        const toFactFinal   = toFact   + dd.to;
+        const accFactFinal  = accFact  + dd.acc;
+        const servFactFinal = servFact + dd.serv;
+
         const toPlan   = pl?.to   || 0;
         const accPlan  = pl?.acc  || 0;
         const servPlan = pl?.serv || 0;
 
-        const toProgns   = calcPrognoz(toFact,   toPlan,   today);
-        const accProgns  = calcPrognoz(accFact,  accPlan,  today);
-        const servProgns = calcPrognoz(servFact, servPlan, today);
+        const toProgns   = calcPrognoz(toFactFinal,   toPlan,   today);
+        const accProgns  = calcPrognoz(accFactFinal,  accPlan,  today);
+        const servProgns = calcPrognoz(servFactFinal, servPlan, today);
         const toPrognTempo   = toProgns?.tempo   ?? null;
         const toPrognPlan    = toProgns?.plan    ?? null;
         const accPrognTempo  = accProgns?.tempo  ?? null;
@@ -1144,7 +1269,7 @@ const AUTH = {
         };
         const fDola = v => v ? v.toFixed(2) + '%' : '—';
 
-        function group(cls, icon, label, plan, fact, pct, prognTempo, prognPlan, rest, sub) {
+        function group(cls, icon, label, plan, fact, pct, prognTempo, prognPlan, rest, sub, dayAdd) {
             // Ціль з урахуванням обраного множника
             const targetVal = plan ? Math.round(plan * smTarget) : null;
             const restToTarget = targetVal ? targetVal - fact : null;
@@ -1178,7 +1303,7 @@ const AUTH = {
                             <td>${targetVal && targetVal !== plan ? '<span style="font-size:9px;color:#6e6e73">Ціль: ' + formatFull(targetVal) + '</span>' : '—'}</td>
                         </tr>
                         <tr class="sm-fact-row">
-                            <td>Факт${sub ? `<span class="sm-sub">${sub}</span>` : ''}</td>
+                            <td>Факт${sub ? `<span class="sm-sub">${sub}</span>` : ''}${dayAdd ? `<span class="sm-sub" style="color:#34c759">+${formatFull(dayAdd)} день</span>` : ''}</td>
                             <td>${fV(fact)}</td>
                             <td>${badge(pctFact)}</td>
                             <td>${restStr}</td>
@@ -1200,9 +1325,10 @@ const AUTH = {
             </div>`;
         }
 
-        const grpTo   = group('sm-group-to',   '💰', 'ТО',      toPlan,   toFact,   null, toPrognTempo,   toPrognPlan,   null, null);
-        const grpServ = group('sm-group-serv', '🛠', 'Послуги', servPlan, servFact, null, servPrognTempo, servPrognPlan, null, servDola ? 'Доля: ' + fDola(servDola) : null);
-        const grpAcc  = group('sm-group-acc',  '🎧', 'АСС',     accPlan,  accFact,  null, accPrognTempo,  accPrognPlan,  null, accDola  ? 'Доля: ' + fDola(accDola)  : null);
+        const dayLabel = smMode === 'day' && dailyDelta ? ' <span style="font-size:9px;font-weight:600;color:#34c759">(+день)</span>' : '';
+        const grpTo   = group('sm-group-to',   '💰', 'ТО' + dayLabel,      toPlan,   toFactFinal,   null, toPrognTempo,   toPrognPlan,   null, null,                                               (smMode==='day'&&dailyDelta&&dailyDelta.to)   ? dailyDelta.to   : null);
+        const grpServ = group('sm-group-serv', '🛠', 'Послуги' + dayLabel, servPlan, servFactFinal, null, servPrognTempo, servPrognPlan, null, servDola ? 'Доля: ' + fDola(servDola) : null,      (smMode==='day'&&dailyDelta&&dailyDelta.serv) ? dailyDelta.serv : null);
+        const grpAcc  = group('sm-group-acc',  '🎧', 'АСС' + dayLabel,     accPlan,  accFactFinal,  null, accPrognTempo,  accPrognPlan,  null, accDola  ? 'Доля: ' + fDola(accDola)  : null,      (smMode==='day'&&dailyDelta&&dailyDelta.acc)  ? dailyDelta.acc  : null);
         const isMobile = window.innerWidth <= 768;
         const activeGroup = { to: grpTo, serv: grpServ, acc: grpAcc }[smMetric];
         const html = `<div class="store-metrics-groups">${isMobile ? activeGroup : grpTo + grpServ + grpAcc}</div>`;
