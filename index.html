@@ -452,6 +452,51 @@
         }
         .sm-day-loading { font-size: 11px; color: var(--color-text-secondary); padding: 4px 8px; }
         .sm-day-error   { font-size: 11px; color: #ff3b30; padding: 4px 8px; }
+
+        /* --- ПРАВИЛЬНИЙ ЧЕК BLOCK --- */
+        .pcheck-body { padding: 16px 18px 20px; }
+        .pcheck-top { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; margin-bottom: 20px; }
+        .pcheck-cluster {
+            background: #f5f5f7; border-radius: 14px; padding: 10px 8px 8px;
+            text-align: center; border: 1.5px solid transparent;
+            transition: border-color 0.18s, background 0.18s;
+        }
+        .pcheck-cluster-label { font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--color-text-secondary); letter-spacing: 0.04em; }
+        .pcheck-cluster-num { font-size: 11px; font-weight: 700; color: var(--color-text-secondary); margin: 1px 0 2px; }
+        .pcheck-cluster-val { font-size: 22px; font-weight: 700; color: var(--color-text); line-height: 1.1; }
+        .pcheck-cluster-unit { font-size: 9px; color: var(--color-text-secondary); margin-top: 1px; }
+
+        .pcheck-divider { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); margin-bottom: 10px; }
+        .pcheck-variants { display: flex; flex-direction: column; gap: 8px; }
+
+        .pcheck-variant {
+            background: #f5f5f7; border-radius: 14px; padding: 11px 14px;
+            display: flex; align-items: flex-start; gap: 10px;
+        }
+        .pcheck-v-num {
+            flex-shrink: 0; width: 28px; height: 20px; border-radius: 6px;
+            background: #e8e8ed; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 700; color: #6e6e73;
+        }
+        .pcheck-v-body { flex: 1; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+        .pcheck-chip {
+            display: inline-flex; align-items: center; gap: 3px;
+            font-size: 11px; font-weight: 600; border-radius: 7px; padding: 3px 8px; white-space: nowrap;
+        }
+        .chip-main    { background: #d9f5e7; color: #166534; }
+        .chip-service { background: #ffe8d9; color: #993c1d; }
+        .chip-acc     { background: #fef3c7; color: #854d0e; }
+        .chip-sda     { background: #dbeafe; color: #1e40af; }
+        .chip-ac      { background: #fce7f3; color: #9d174d; }
+        .pcheck-plus  { font-size: 12px; color: var(--color-text-secondary); font-weight: 600; }
+
+        .pcheck-footnotes { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--color-border); }
+        .pcheck-footnotes p { font-size: 11px; color: var(--color-text-secondary); line-height: 1.6; }
+
+        @media (max-width: 600px) {
+            .pcheck-top { grid-template-columns: repeat(3, 1fr); }
+            .pcheck-cluster-val { font-size: 18px; }
+        }
     </style>
     <script>
 // ============================================================
@@ -613,6 +658,127 @@ const AUTH = {
                     <div class="gsheet-loading">
                         <div class="gsheet-loading-spinner"></div>
                         Завантаження...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- БЛОК ПРАВИЛЬНИЙ ЧЕК -->
+        <div class="gsheet-block collapsed" id="pcheck-block">
+            <div class="gsheet-block-header">
+                <div class="gsheet-block-title">
+                    <span>🧾</span>
+                    <span>ПРАВИЛЬНИЙ ЧЕК</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                    <button class="gsheet-expand-btn" onclick="togglePCheck()">
+                        <span id="pcheck-expand-label">Розгорнути</span>
+                        <i class="gsheet-expand-arrow">▼</i>
+                    </button>
+                </div>
+            </div>
+            <div class="gsheet-body">
+                <div class="pcheck-body">
+                    <!-- Таргети по кластерах -->
+                    <div class="pcheck-divider">Ціль — кількість правильних чеків на місяць (шт.)</div>
+                    <div class="pcheck-top">
+                        <div class="pcheck-cluster"><div class="pcheck-cluster-label">Кластер</div><div class="pcheck-cluster-num">0</div><div class="pcheck-cluster-val">28</div><div class="pcheck-cluster-unit">шт.</div></div>
+                        <div class="pcheck-cluster"><div class="pcheck-cluster-label">Кластер</div><div class="pcheck-cluster-num">1</div><div class="pcheck-cluster-val">28</div><div class="pcheck-cluster-unit">шт.</div></div>
+                        <div class="pcheck-cluster"><div class="pcheck-cluster-label">Кластер</div><div class="pcheck-cluster-num">2</div><div class="pcheck-cluster-val">26</div><div class="pcheck-cluster-unit">шт.</div></div>
+                        <div class="pcheck-cluster"><div class="pcheck-cluster-label">Кластер</div><div class="pcheck-cluster-num">3</div><div class="pcheck-cluster-val">25</div><div class="pcheck-cluster-unit">шт.</div></div>
+                        <div class="pcheck-cluster"><div class="pcheck-cluster-label">Кластер</div><div class="pcheck-cluster-num">4</div><div class="pcheck-cluster-val">23</div><div class="pcheck-cluster-unit">шт.</div></div>
+                        <div class="pcheck-cluster"><div class="pcheck-cluster-label">Кластер</div><div class="pcheck-cluster-num">5</div><div class="pcheck-cluster-val">22</div><div class="pcheck-cluster-unit">шт.</div></div>
+                        <div class="pcheck-cluster"><div class="pcheck-cluster-label">Кластер</div><div class="pcheck-cluster-num">6</div><div class="pcheck-cluster-val">19</div><div class="pcheck-cluster-unit">шт.</div></div>
+                        <div class="pcheck-cluster"><div class="pcheck-cluster-label">Кластер</div><div class="pcheck-cluster-num">7</div><div class="pcheck-cluster-val">18</div><div class="pcheck-cluster-unit">шт.</div></div>
+                        <div class="pcheck-cluster"><div class="pcheck-cluster-label">Кластер</div><div class="pcheck-cluster-num">8</div><div class="pcheck-cluster-val">15</div><div class="pcheck-cluster-unit">шт.</div></div>
+                    </div>
+
+                    <!-- Варіанти складу -->
+                    <div class="pcheck-divider" style="margin-top:4px">Варіанти складу «Правильного чека»</div>
+                    <div class="pcheck-variants">
+
+                        <div class="pcheck-variant">
+                            <div class="pcheck-v-num">1.1</div>
+                            <div class="pcheck-v-body">
+                                <span class="pcheck-chip chip-main">Основний товар</span>
+                                <span class="pcheck-plus">+</span>
+                                <span class="pcheck-chip chip-service">≥ 2 послуги¹</span>
+                            </div>
+                        </div>
+
+                        <div class="pcheck-variant">
+                            <div class="pcheck-v-num">1.2</div>
+                            <div class="pcheck-v-body">
+                                <span class="pcheck-chip chip-main">Основний товар</span>
+                                <span class="pcheck-plus">+</span>
+                                <span class="pcheck-chip chip-service">≥ 1 послуга¹</span>
+                                <span class="pcheck-plus">+</span>
+                                <span class="pcheck-chip chip-acc">≥ 2 асс²</span>
+                            </div>
+                        </div>
+
+                        <div class="pcheck-variant">
+                            <div class="pcheck-v-num">1.3</div>
+                            <div class="pcheck-v-body">
+                                <span class="pcheck-chip chip-main">Основний товар</span>
+                                <span class="pcheck-plus">+</span>
+                                <span class="pcheck-chip chip-service">≥ 1 послуга¹</span>
+                                <span class="pcheck-plus">+</span>
+                                <span class="pcheck-chip chip-acc">≥ 1 асс²</span>
+                                <span class="pcheck-plus">+</span>
+                                <span class="pcheck-chip chip-sda">≥ 1 SDA</span>
+                            </div>
+                        </div>
+
+                        <div class="pcheck-variant">
+                            <div class="pcheck-v-num">1.4</div>
+                            <div class="pcheck-v-body">
+                                <span class="pcheck-chip chip-main">Основний товар</span>
+                                <span class="pcheck-plus">+</span>
+                                <span class="pcheck-chip chip-service">≥ 1 послуга¹</span>
+                                <span class="pcheck-plus">+</span>
+                                <span class="pcheck-chip chip-sda">≥ 2 SDA</span>
+                            </div>
+                        </div>
+
+                        <div class="pcheck-variant">
+                            <div class="pcheck-v-num">1.5</div>
+                            <div class="pcheck-v-body">
+                                <span class="pcheck-chip chip-service">≥ 1 послуга¹</span>
+                                <span class="pcheck-plus">+</span>
+                                <span class="pcheck-chip chip-acc">≥ 2 асс²</span>
+                                <span class="pcheck-plus">+</span>
+                                <span class="pcheck-chip chip-sda">≥ 1 SDA</span>
+                            </div>
+                        </div>
+
+                        <div class="pcheck-variant">
+                            <div class="pcheck-v-num">1.6</div>
+                            <div class="pcheck-v-body">
+                                <span class="pcheck-chip chip-service">≥ 1 послуга¹</span>
+                                <span class="pcheck-plus">+</span>
+                                <span class="pcheck-chip chip-acc">≥ 1 асс²</span>
+                                <span class="pcheck-plus">+</span>
+                                <span class="pcheck-chip chip-sda">≥ 2 SDA</span>
+                            </div>
+                        </div>
+
+                        <div class="pcheck-variant">
+                            <div class="pcheck-v-num">1.7</div>
+                            <div class="pcheck-v-body">
+                                <span class="pcheck-chip chip-ac">Кондиціонер</span>
+                                <span class="pcheck-plus">+</span>
+                                <span class="pcheck-chip chip-service">«Старт-Мастер» для кондиціонера</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Виноски -->
+                    <div class="pcheck-footnotes">
+                        <p>¹ Тільки послуги, вказані у Додатку 1</p>
+                        <p>² Асс вартістю ≥ 90 грн кожен (підсумкова вартість після застосування акцій)</p>
+                        <p>³ Бонус = сума продажів послуг + асс + SDA − повернення</p>
                     </div>
                 </div>
             </div>
@@ -784,6 +950,13 @@ const AUTH = {
 
     // --- ПОСИЛЕННЯ ---
     const GSHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTd9BXXff9qHAx0Hp0MEgb-rzsHOgsnBUoqus8vf5zSCzmDfNbe0Js9pcY_2YMkZT6lLZp7vmTEbwM6/pub?output=csv';
+
+    function togglePCheck() {
+        const block = document.getElementById('pcheck-block');
+        const label = document.getElementById('pcheck-expand-label');
+        block.classList.toggle('collapsed');
+        label.textContent = block.classList.contains('collapsed') ? 'Розгорнути' : 'Згорнути';
+    }
 
     function toggleGSheet() {
         const block = document.getElementById('gsheet-block');
