@@ -498,6 +498,10 @@
         .pcheck-footnotes { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--color-border); }
         .pcheck-footnotes p { font-size: 11px; color: var(--color-text-secondary); line-height: 1.6; }
 
+        /* Скорочений текст чіпів — керується медіазапитом */
+        .chip-text-short { display: none; }
+        .chip-text-full  { display: inline; }
+
         /* --- МОБІЛЬНИЙ вигляд --- */
         @media (max-width: 600px) {
             /* Кластери — горизонтальний скрол в один рядок */
@@ -533,6 +537,13 @@
                 border-radius: 8px;
             }
             .pcheck-plus { font-size: 10px; }
+
+            /* Рядок з 4 чіпами — ще компактніше */
+            .pcheck-variant-4 .pcheck-chip { padding: 4px 5px; font-size: 10px; }
+            .pcheck-variant-4 .pcheck-plus { font-size: 9px; }
+            .pcheck-variant-4 .pcheck-v-body { gap: 2px; }
+            .chip-text-short { display: inline; }
+            .chip-text-full  { display: none; }
         }
     </style>
     <script>
@@ -754,16 +765,16 @@ const AUTH = {
                             </div>
                         </div>
 
-                        <div class="pcheck-variant">
+                        <div class="pcheck-variant pcheck-variant-4">
                             <div class="pcheck-v-num">1.3</div>
                             <div class="pcheck-v-body">
-                                <span class="pcheck-chip chip-main">Основний товар</span>
+                                <span class="pcheck-chip chip-main"><span class="chip-text-full">Основний товар</span><span class="chip-text-short">Осн. товар</span></span>
                                 <span class="pcheck-plus">+</span>
-                                <span class="pcheck-chip chip-service">≥ 1 послуга¹</span>
+                                <span class="pcheck-chip chip-service">≥&thinsp;1 посл¹</span>
                                 <span class="pcheck-plus">+</span>
-                                <span class="pcheck-chip chip-acc">≥ 1 асс²</span>
+                                <span class="pcheck-chip chip-acc">≥&thinsp;1 асс²</span>
                                 <span class="pcheck-plus">+</span>
-                                <span class="pcheck-chip chip-sda">≥ 1 SDA</span>
+                                <span class="pcheck-chip chip-sda">≥&thinsp;1 SDA</span>
                             </div>
                         </div>
 
