@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>План-Факт</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #f0f2f5;
@@ -24,6 +24,8 @@
             --acc-bg: rgba(217,119,6,0.09);
             --chk:   #7c3aed;
             --chk-bg: rgba(124,58,237,0.09);
+            --rchk:   #0891b2;
+            --rchk-bg: rgba(8,145,178,0.09);
 
             --plan-bg: rgba(107,114,128,0.09);
             --plan-text: #6b7280;
@@ -35,7 +37,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Manrope', sans-serif;
+            font-family: 'Inter', sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
@@ -93,20 +95,20 @@
         /* ── VIEW TOGGLE ── */
         .view-toggle {
             display: flex;
-            gap: 3px;
-            background: var(--border);
-            border-radius: 11px;
+            gap: 2px;
+            background: #e5e5ea;
+            border-radius: 12px;
             padding: 3px;
         }
         .view-btn {
             border: none;
             background: transparent;
             padding: 6px 14px;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 12px;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
-            color: var(--text2);
+            color: #6e6e73;
             font-family: inherit;
             transition: all .2s;
             display: flex;
@@ -115,8 +117,8 @@
             white-space: nowrap;
         }
         .view-btn.active {
-            background: var(--surface);
-            color: var(--text);
+            background: white;
+            color: #1d1d1f;
             box-shadow: 0 1px 4px rgba(0,0,0,.12);
         }
 
@@ -237,6 +239,8 @@
         .b-serv   { background: var(--serv-bg); color: var(--serv); }
         .b-acc    { background: var(--acc-bg);  color: var(--acc); }
         .b-checks { background: var(--chk-bg);  color: var(--chk); }
+        .b-rchk   { background: var(--rchk-bg); color: var(--rchk); }
+        .g-rchk   { color: var(--rchk); }
 
         /* Special rows */
         .total-row td {
@@ -286,37 +290,36 @@
             padding: 7px 10px 10px;
         }
         .mpill {
-            border: 1.5px solid transparent;
-            background: var(--surface2);
-            padding: 5px 13px;
-            border-radius: 20px;
+            border: none;
+            background: #e5e5ea;
+            padding: 5px 14px;
+            border-radius: 10px;
             font-size: 12px;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
             font-family: inherit;
-            color: var(--text2);
+            color: #6e6e73;
             transition: all .15s;
             white-space: nowrap;
         }
-        .mpill:hover { background: var(--border); color: var(--text); }
+        .mpill:hover { background: #d8d8dd; color: #1d1d1f; }
         .mpill.active {
             color: white;
-            border-color: transparent;
+            box-shadow: 0 1px 4px rgba(0,0,0,.15);
         }
 
-        /* Rank cards — base */
+        /* Rank cards — Apple style */
         .ranking-grid { display: flex; flex-direction: column; gap: 8px; }
 
-        /* PODIUM — top 3 special styling */
         .rank-card {
             background: var(--surface);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,.05), 0 1px 3px rgba(0,0,0,.04);
             border: 1px solid var(--border);
-            padding: 12px 14px;
+            padding: 13px 16px;
             display: flex;
             flex-direction: column;
-            gap: 7px;
+            gap: 8px;
             position: relative;
             overflow: hidden;
             transition: transform .15s, box-shadow .15s;
@@ -324,45 +327,45 @@
         }
         .rank-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 24px rgba(0,0,0,.1);
+            box-shadow: 0 6px 28px rgba(0,0,0,.1);
         }
 
         /* Gold */
         .rank-card.podium-1 {
-            border-color: rgba(245,158,11,.45);
-            background: linear-gradient(135deg, #fffbeb 0%, #ffffff 60%);
-            box-shadow: 0 2px 12px rgba(245,158,11,.18), 0 1px 4px rgba(0,0,0,.06);
-            padding: 14px 16px;
+            border-color: rgba(245,158,11,.4);
+            background: linear-gradient(135deg, #fffbeb 0%, #ffffff 55%);
+            box-shadow: 0 4px 20px rgba(245,158,11,.15), 0 1px 4px rgba(0,0,0,.06);
+            padding: 16px 18px;
         }
         .rank-card.podium-1 .rank-name-text { font-size: 15px; }
-        .rank-card.podium-1 .rank-val-main  { font-size: 18px; }
+        .rank-card.podium-1 .rank-val-main  { font-size: 19px; }
 
         /* Silver */
         .rank-card.podium-2 {
-            border-color: rgba(156,163,175,.5);
-            background: linear-gradient(135deg, #f9fafb 0%, #ffffff 60%);
-            box-shadow: 0 2px 10px rgba(0,0,0,.09);
-            padding: 13px 15px;
+            border-color: rgba(156,163,175,.45);
+            background: linear-gradient(135deg, #f9fafb 0%, #ffffff 55%);
+            box-shadow: 0 3px 16px rgba(0,0,0,.08);
+            padding: 14px 17px;
         }
         .rank-card.podium-2 .rank-name-text { font-size: 14px; }
-        .rank-card.podium-2 .rank-val-main  { font-size: 16px; }
+        .rank-card.podium-2 .rank-val-main  { font-size: 17px; }
 
         /* Bronze */
         .rank-card.podium-3 {
-            border-color: rgba(180,120,60,.35);
-            background: linear-gradient(135deg, #fdf8f3 0%, #ffffff 60%);
-            box-shadow: 0 2px 8px rgba(180,120,60,.14);
-            padding: 13px 15px;
+            border-color: rgba(180,120,60,.3);
+            background: linear-gradient(135deg, #fdf8f3 0%, #ffffff 55%);
+            box-shadow: 0 2px 10px rgba(180,120,60,.12);
+            padding: 14px 17px;
         }
         .rank-card.podium-3 .rank-name-text { font-size: 14px; }
-        .rank-card.podium-3 .rank-val-main  { font-size: 16px; }
+        .rank-card.podium-3 .rank-val-main  { font-size: 17px; }
 
-        /* Podium medal badge */
+        /* Podium crown label */
         .podium-crown {
             font-size: 9px;
             font-weight: 800;
-            opacity: .4;
-            letter-spacing: .06em;
+            opacity: .35;
+            letter-spacing: .07em;
             text-transform: uppercase;
             text-align: right;
             color: var(--text3);
@@ -375,17 +378,17 @@
 
         .rank-bg {
             position: absolute; left: 0; top: 0;
-            height: 100%; opacity: .05;
-            border-radius: var(--radius);
+            height: 100%; opacity: .04;
+            border-radius: 16px;
             pointer-events: none;
             transition: width .6s ease;
         }
-        .podium-1 .rank-bg { opacity: .08; }
+        .podium-1 .rank-bg { opacity: .07; }
 
-        .rank-top { display: flex; align-items: center; gap: 11px; }
+        .rank-top { display: flex; align-items: center; gap: 12px; }
 
         .rank-pos {
-            font-size: 22px;
+            font-size: 24px;
             min-width: 34px;
             text-align: center;
             line-height: 1;
@@ -393,12 +396,12 @@
         }
         .rank-pos.rest {
             font-size: 13px;
-            font-weight: 800;
-            color: var(--text3);
-            background: var(--surface2);
-            border-radius: 7px;
-            width: 28px;
-            height: 28px;
+            font-weight: 700;
+            color: #86868b;
+            background: #f5f5f7;
+            border-radius: 8px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -415,7 +418,7 @@
         }
         .rank-sub {
             font-size: 11px;
-            color: var(--text2);
+            color: #86868b;
             margin-top: 3px;
             display: flex;
             align-items: center;
@@ -429,28 +432,29 @@
             font-size: 11px;
             font-weight: 700;
         }
-        .pct-pill.good  { background: rgba(22,163,74,.12); color: #16a34a; }
-        .pct-pill.warn  { background: rgba(245,158,11,.12); color: #d97706; }
-        .pct-pill.bad   { background: rgba(239,68,68,.12);  color: #dc2626; }
+        .pct-pill.good  { background: rgba(52,199,89,.12);  color: #1a7f37; }
+        .pct-pill.warn  { background: rgba(255,149,0,.12);  color: #b45309; }
+        .pct-pill.bad   { background: rgba(255,59,48,.10);  color: #c0392b; }
 
         .rank-val { text-align: right; flex-shrink: 0; }
         .rank-val-main {
             font-size: 15px;
             font-weight: 800;
             line-height: 1.1;
+            letter-spacing: -.3px;
         }
         .rank-val-sub {
             font-size: 10.5px;
-            color: var(--text3);
+            color: #86868b;
             margin-top: 2px;
         }
 
         .rank-bar-bg {
-            height: 5px;
-            background: var(--border);
+            height: 4px;
+            background: #e5e5ea;
             border-radius: 4px;
             overflow: hidden;
-            margin-left: 45px;
+            margin-left: 46px;
         }
         .podium-1 .rank-bar-bg { height: 6px; }
         .rank-bar-fill {
@@ -555,6 +559,11 @@ const GROUPS = [
         { label:'Факт',  idx:13, type:'fact',  b:'b-checks' },
         { label:'%',     idx:14, type:'pct'                  },
     ]},
+    { name:'Правильні чеки', cls:'g-rchk', cols:[
+        { label:'План',  idx:15, type:'plan',  b:'b-plan' },
+        { label:'Факт',  idx:16, type:'fact',  b:'b-rchk' },
+        { label:'%',     idx:17, type:'pct'                },
+    ]},
 ];
 
 // ======= HELPERS =======
@@ -601,7 +610,7 @@ function buildTable(dataRows) {
     const W = getWidths();
     const tbl = document.getElementById('tbl');
     tbl.style.display = '';
-    const totalW = W.name + 3*W.c3 + 4*W.c4 + 4*W.c4 + 3*W.c4;
+    const totalW = W.name + 3*W.c3 + 4*W.c4 + 4*W.c4 + 3*W.c4 + 3*W.c3;
     tbl.style.width = totalW + 'px';
 
     const cg = document.createElement('colgroup');
@@ -760,7 +769,8 @@ const RATING_METRICS = [
     { key:'to_fact',   label:'ТО',          idx:2,  color:'#2563eb', planIdx:1,  pctIdx:3,  fmt:'int' },
     { key:'serv_fact', label:'Послуги',      idx:5,  color:'#16a34a', planIdx:4,  pctIdx:7,  fmt:'int' },
     { key:'acc_fact',  label:'Аксесуари',    idx:9,  color:'#d97706', planIdx:8,  pctIdx:11, fmt:'int' },
-    { key:'chk_fact',  label:'Чеки',         idx:13, color:'#7c3aed', planIdx:12, pctIdx:14, fmt:'int' },
+    { key:'chk_fact',  label:'Чеки',            idx:13, color:'#7c3aed', planIdx:12, pctIdx:14, fmt:'int' },
+    { key:'rchk_fact', label:'Правильні чеки',   idx:16, color:'#0891b2', planIdx:15, pctIdx:17, fmt:'int' },
     { key:'serv_shr',  label:'Частка посл.', idx:6,  color:'#16a34a', fmt:'share' },
     { key:'acc_shr',   label:'Частка ACC',   idx:10, color:'#d97706', fmt:'share' },
 ];
