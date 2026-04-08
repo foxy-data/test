@@ -777,10 +777,12 @@ const RATING_METRICS = [
 let allRatingRows = [];
 let activeMetricKey = 'to_fact';
 
-function fmtRatingVal(v, fmt) {
+function fmtRatingVal(v, fmt, key) {
     if (v===null||v===undefined||isNaN(Number(v))) return '—';
     const n = Number(v);
     if (fmt==='share') return n.toFixed(2)+'%';
+    // Чеки і правильні чеки — завжди цілі без скорочень
+    if (key==='chk_fact'||key==='rchk_fact') return Math.round(n).toLocaleString('uk-UA');
     if (Math.abs(n)>=1000000) return (n/1000000).toFixed(2)+'М';
     if (Math.abs(n)>=1000) return (n/1000).toFixed(0)+'К';
     return Math.round(n).toLocaleString('uk-UA');
@@ -870,8 +872,8 @@ function renderRankingCards() {
                     ${pctVal!=null ? `<div class="rank-sub">Виконання: ${pctHtml}</div>` : ''}
                 </div>
                 <div class="rank-val">
-                    <div class="rank-val-main" style="color:${m.color}">${fmtRatingVal(item.val,m.fmt)}</div>
-                    ${item.plan ? `<div class="rank-val-sub">план: ${fmtRatingVal(item.plan,m.fmt)}</div>` : ''}
+                    <div class="rank-val-main" style="color:${m.color}">${fmtRatingVal(item.val,m.fmt,m.key)}</div>
+                    ${item.plan ? `<div class="rank-val-sub">план: ${fmtRatingVal(item.plan,m.fmt,m.key)}</div>` : ''}
                 </div>
             </div>
             <div class="rank-bar-bg">
@@ -917,7 +919,55 @@ async function load() {
     const URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTOUXHhUpCkh6tgvNpJzY-w5tVrhPkvEeC0W0ZWuy2YxPayuO3pvahfeKYmMZ1DwHnILTpsJFNtXLsH/pub?output=csv";
     try {
         const res = await fetch(URL + '&t=' + Date.now());
-        const rows = parseCSV(await res.text()).slice(1);
+        const allRows = parseCSV(await res.text());
+        // Оновлюємо індекси GROUPS і RATING_METRICS по заголовках CSV
+        if (allRows.length) {
+            const hdr = allRows[0].map(h => h.trim());
+            // Маппінг заголовків → індекси для груп
+            const colMap = {};
+            hdr.forEach((h, i) => { colMap[h.toLowerCase()] = i; });
+            // Оновлюємо GROUPS по заголовках якщо знаходимо відповідність
+            const tryIdx = (patterns) => {
+                for (const p of patterns) {
+                    const found = hdr.findIndex(h => new RegExp(p,'i').test(h.trim()));
+                    if (found >= 0) return found;
+                }
+                return -1;
+            };
+            // ТО
+            GROUPS[0].cols[0].idx = tryIdx(['^то\\s*план$','то план']);
+            GROUPS[0].cols[1].idx = tryIdx(['^то\\s*факт$','то факт','^то$']);
+            GROUPS[0].cols[2].idx = tryIdx(['^то\\s*%$','^% то$','^то.*%']);
+            // Послуги
+            GROUPS[1].cols[0].idx = tryIdx(['посл.*план','послуги план']);
+            GROUPS[1].cols[1].idx = tryIdx(['^посл.*факт$','послуги факт','^послуги$','^посл\\.?$']);
+            GROUPS[1].cols[2].idx = tryIdx(['доля посл','частка посл','посл.*доля']);
+            GROUPS[1].cols[3].idx = tryIdx(['посл.*%$','% посл']);
+            // Аксесуари
+            GROUPS[2].cols[0].idx = tryIdx(['ас[сc].*план','acc.*план','аксес.*план']);
+            GROUPS[2].cols[1].idx = tryIdx(['^ас[сc].*факт$','^acc.*факт$','^аксес.*факт$','^acc$','^ас[сc]$']);
+            GROUPS[2].cols[2].idx = tryIdx(['доля acc','доля ас[сc]','% доля acc']);
+            GROUPS[2].cols[3].idx = tryIdx(['ас[сc].*%$','acc.*%$','% ас[сc]']);
+            // Чеки
+            GROUPS[3].cols[0].idx = tryIdx(['^чеки\\s*план$']);
+            GROUPS[3].cols[1].idx = tryIdx(['^чеки\\s*факт$','^чеки$']);
+            GROUPS[3].cols[2].idx = tryIdx(['^чеки\\s*%$','% чеки$']);
+            // Правильні чеки
+            GROUPS[4].cols[0].idx = tryIdx(['прав.*чек.*план','пч\\s*план']);
+            GROUPS[4].cols[1].idx = tryIdx(['^прав.*чек.*факт$','^пч\\s*факт$','^пч$','^прав.*чек$']);
+            GROUPS[4].cols[2].idx = tryIdx(['прав.*чек.*%$','пч\\s*%$','% пч$','% прав.*чек']);
+            // Оновлюємо RATING_METRICS з оновлених GROUPS
+            const gTO   = GROUPS[0].cols, gServ = GROUPS[1].cols, gAcc = GROUPS[2].cols;
+            const gChk  = GROUPS[3].cols, gRChk = GROUPS[4].cols;
+            RATING_METRICS[0].planIdx = gTO[0].idx;   RATING_METRICS[0].idx = gTO[1].idx;   RATING_METRICS[0].pctIdx = gTO[2].idx;
+            RATING_METRICS[1].planIdx = gServ[0].idx; RATING_METRICS[1].idx = gServ[1].idx; RATING_METRICS[1].pctIdx = gServ[3].idx;
+            RATING_METRICS[2].planIdx = gAcc[0].idx;  RATING_METRICS[2].idx = gAcc[1].idx;  RATING_METRICS[2].pctIdx = gAcc[3].idx;
+            RATING_METRICS[3].planIdx = gChk[0].idx;  RATING_METRICS[3].idx = gChk[1].idx;  RATING_METRICS[3].pctIdx = gChk[2].idx;
+            RATING_METRICS[4].planIdx = gRChk[0].idx; RATING_METRICS[4].idx = gRChk[1].idx; RATING_METRICS[4].pctIdx = gRChk[2].idx;
+            RATING_METRICS[5].idx = GROUPS[1].cols[2].idx; // Частка послуг
+            RATING_METRICS[6].idx = GROUPS[2].cols[2].idx; // Частка ACC
+        }
+        const rows = allRows.slice(1);
         allRatingRows = rows;
         document.getElementById('loader').style.display = 'none';
         buildTable(rows);

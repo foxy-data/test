@@ -1224,14 +1224,28 @@ const AUTH = {
             const rows = parseCSV(text);
             if (!rows.length) return;
             const hdr = rows[0].map(h => h.trim());
-            const iTO = hdr.findIndex(h => h === 'ТО план');
-            const iACC = hdr.findIndex(h => h === 'АСС план');
+            const iTO   = hdr.findIndex(h => h === 'ТО план');
+            const iACC  = hdr.findIndex(h => h === 'АСС план');
             const iServ = hdr.findIndex(h => h === 'ПОСЛУГИ план');
+            // Чеки і правильні чеки — шукаємо по кількох можливих назвах
+            const iChk  = hdr.findIndex(h => /^чеки\s*план$/i.test(h) || /^чеки$/i.test(h) || h === 'Чеки план');
+            const iRChk = hdr.findIndex(h => /прав.*чек.*план/i.test(h) || /^пч\s*план$/i.test(h) || h === 'Прав.Чеки план' || h === 'ПЧ план');
+            // Факт чеків і правильних чеків
+            const iChkF  = hdr.findIndex(h => /^чеки\s*факт$/i.test(h) || (h === 'Чеки' && iChk !== hdr.indexOf(h)));
+            const iRChkF = hdr.findIndex(h => /прав.*чек.*факт/i.test(h) || /^пч\s*факт$/i.test(h));
             rows.slice(1).forEach(row => {
                 const name = (row[0] || '').trim();
                 if (!name) return;
                 const num = s => parseFloat((s||'0').replace(/[\s\u00a0]/g,'').replace(',','.')) || 0;
-                planData[name] = { to: num(row[iTO]), acc: num(row[iACC]), serv: num(row[iServ]) };
+                planData[name] = {
+                    to:   num(row[iTO]),
+                    acc:  num(row[iACC]),
+                    serv: num(row[iServ]),
+                    chk:  iChk  >= 0 ? num(row[iChk])  : 0,
+                    rchk: iRChk >= 0 ? num(row[iRChk]) : 0,
+                    chkF:  iChkF  >= 0 ? num(row[iChkF])  : 0,
+                    rchkF: iRChkF >= 0 ? num(row[iRChkF]) : 0,
+                };
                 if (/тотал|total|загалом/i.test(name)) planData['Показники магазину'] = planData[name];
             });
         } catch(e) { console.warn('Plan error:', e); }
@@ -1799,18 +1813,19 @@ const AUTH = {
                 </div>
                 ${(function(){
                     const pl = getPlan(person.name);
-                    if (!pl || (!pl.to && !pl.acc && !pl.serv)) return '';
-                    const tF = to.value;
-                    const aF = (person.metrics['ACC']||{value:0}).value;
-                    const sF = (person.metrics['Послуги грн']||{value:0}).value;
-                    return '<div class="plan-metrics">' +
-                        '<div class="plan-metrics-title">План / Факт / Залишок</div>' +
-                        '<div class="plan-row">' +
-                            '<div class="plan-item"><div class="plan-item-label">ТО</div><div class="plan-item-val">' + formatNumber(pl.to) + '</div>' + fmtPct(tF,pl.to) + '<div style="font-size:10px;color:var(--color-text-secondary)">' + fmtRest(tF,pl.to) + '</div></div>' +
-                            '<div class="plan-item"><div class="plan-item-label">АСС</div><div class="plan-item-val">' + formatNumber(pl.acc) + '</div>' + fmtPct(aF,pl.acc) + '<div style="font-size:10px;color:var(--color-text-secondary)">' + fmtRest(aF,pl.acc) + '</div></div>' +
-                            '<div class="plan-item"><div class="plan-item-label">Послуги</div><div class="plan-item-val">' + formatNumber(pl.serv) + '</div>' + fmtPct(sF,pl.serv) + '<div style="font-size:10px;color:var(--color-text-secondary)">' + fmtRest(sF,pl.serv) + '</div></div>' +
-                        '</div>' +
-                    '</div>';
+                    if (!pl || (!pl.to && !pl.acc && !pl.serv && !pl.chk && !pl.rchk)) return '';
+                    const tF  = to.value;
+                    const aF  = (person.metrics['ACC']||{value:0}).value;
+                    const sF  = (person.metrics['Послуги грн']||{value:0}).value;
+                    const cF  = (person.metrics['Чеки']||{value:0}).value;
+                    const rF  = (person.metrics['ПЧ']||{value:0}).value;
+                    let items = '';
+                    if (pl.to)   items += '<div class="plan-item"><div class="plan-item-label">ТО</div><div class="plan-item-val">' + formatNumber(pl.to) + '</div>' + fmtPct(tF,pl.to) + '<div style="font-size:10px;color:var(--color-text-secondary)">' + fmtRest(tF,pl.to) + '</div></div>';
+                    if (pl.acc)  items += '<div class="plan-item"><div class="plan-item-label">АСС</div><div class="plan-item-val">' + formatNumber(pl.acc) + '</div>' + fmtPct(aF,pl.acc) + '<div style="font-size:10px;color:var(--color-text-secondary)">' + fmtRest(aF,pl.acc) + '</div></div>';
+                    if (pl.serv) items += '<div class="plan-item"><div class="plan-item-label">Послуги</div><div class="plan-item-val">' + formatNumber(pl.serv) + '</div>' + fmtPct(sF,pl.serv) + '<div style="font-size:10px;color:var(--color-text-secondary)">' + fmtRest(sF,pl.serv) + '</div></div>';
+                    if (pl.chk)  items += '<div class="plan-item"><div class="plan-item-label">Чеки</div><div class="plan-item-val">' + formatNumber(pl.chk) + '</div>' + fmtPct(cF,pl.chk) + '<div style="font-size:10px;color:var(--color-text-secondary)">' + fmtRest(cF,pl.chk) + '</div></div>';
+                    if (pl.rchk) items += '<div class="plan-item"><div class="plan-item-label">Прав. чеки</div><div class="plan-item-val">' + formatNumber(pl.rchk) + '</div>' + fmtPct(rF,pl.rchk) + '<div style="font-size:10px;color:var(--color-text-secondary)">' + fmtRest(rF,pl.rchk) + '</div></div>';
+                    return '<div class="plan-metrics"><div class="plan-metrics-title">План / Факт / Залишок</div><div class="plan-row">' + items + '</div></div>';
                 })()}`;
             cardsGrid.appendChild(card);
         });
