@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>План-Факт</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #f0f2f5;
@@ -24,8 +24,6 @@
             --acc-bg: rgba(217,119,6,0.09);
             --chk:   #7c3aed;
             --chk-bg: rgba(124,58,237,0.09);
-            --rchk:   #0891b2;
-            --rchk-bg: rgba(8,145,178,0.09);
 
             --plan-bg: rgba(107,114,128,0.09);
             --plan-text: #6b7280;
@@ -37,7 +35,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Manrope', sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
@@ -95,20 +93,20 @@
         /* ── VIEW TOGGLE ── */
         .view-toggle {
             display: flex;
-            gap: 2px;
-            background: #e5e5ea;
-            border-radius: 12px;
+            gap: 3px;
+            background: var(--border);
+            border-radius: 11px;
             padding: 3px;
         }
         .view-btn {
             border: none;
             background: transparent;
             padding: 6px 14px;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            color: #6e6e73;
+            color: var(--text2);
             font-family: inherit;
             transition: all .2s;
             display: flex;
@@ -117,8 +115,8 @@
             white-space: nowrap;
         }
         .view-btn.active {
-            background: white;
-            color: #1d1d1f;
+            background: var(--surface);
+            color: var(--text);
             box-shadow: 0 1px 4px rgba(0,0,0,.12);
         }
 
@@ -239,8 +237,6 @@
         .b-serv   { background: var(--serv-bg); color: var(--serv); }
         .b-acc    { background: var(--acc-bg);  color: var(--acc); }
         .b-checks { background: var(--chk-bg);  color: var(--chk); }
-        .b-rchk   { background: var(--rchk-bg); color: var(--rchk); }
-        .g-rchk   { color: var(--rchk); }
 
         /* Special rows */
         .total-row td {
@@ -290,36 +286,37 @@
             padding: 7px 10px 10px;
         }
         .mpill {
-            border: none;
-            background: #e5e5ea;
-            padding: 5px 14px;
-            border-radius: 10px;
+            border: 1.5px solid transparent;
+            background: var(--surface2);
+            padding: 5px 13px;
+            border-radius: 20px;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             font-family: inherit;
-            color: #6e6e73;
+            color: var(--text2);
             transition: all .15s;
             white-space: nowrap;
         }
-        .mpill:hover { background: #d8d8dd; color: #1d1d1f; }
+        .mpill:hover { background: var(--border); color: var(--text); }
         .mpill.active {
             color: white;
-            box-shadow: 0 1px 4px rgba(0,0,0,.15);
+            border-color: transparent;
         }
 
-        /* Rank cards — Apple style */
+        /* Rank cards — base */
         .ranking-grid { display: flex; flex-direction: column; gap: 8px; }
 
+        /* PODIUM — top 3 special styling */
         .rank-card {
             background: var(--surface);
-            border-radius: 16px;
-            box-shadow: 0 2px 12px rgba(0,0,0,.05), 0 1px 3px rgba(0,0,0,.04);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
             border: 1px solid var(--border);
-            padding: 13px 16px;
+            padding: 12px 14px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 7px;
             position: relative;
             overflow: hidden;
             transition: transform .15s, box-shadow .15s;
@@ -327,45 +324,45 @@
         }
         .rank-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 28px rgba(0,0,0,.1);
+            box-shadow: 0 4px 24px rgba(0,0,0,.1);
         }
 
         /* Gold */
         .rank-card.podium-1 {
-            border-color: rgba(245,158,11,.4);
-            background: linear-gradient(135deg, #fffbeb 0%, #ffffff 55%);
-            box-shadow: 0 4px 20px rgba(245,158,11,.15), 0 1px 4px rgba(0,0,0,.06);
-            padding: 16px 18px;
+            border-color: rgba(245,158,11,.45);
+            background: linear-gradient(135deg, #fffbeb 0%, #ffffff 60%);
+            box-shadow: 0 2px 12px rgba(245,158,11,.18), 0 1px 4px rgba(0,0,0,.06);
+            padding: 14px 16px;
         }
         .rank-card.podium-1 .rank-name-text { font-size: 15px; }
-        .rank-card.podium-1 .rank-val-main  { font-size: 19px; }
+        .rank-card.podium-1 .rank-val-main  { font-size: 18px; }
 
         /* Silver */
         .rank-card.podium-2 {
-            border-color: rgba(156,163,175,.45);
-            background: linear-gradient(135deg, #f9fafb 0%, #ffffff 55%);
-            box-shadow: 0 3px 16px rgba(0,0,0,.08);
-            padding: 14px 17px;
+            border-color: rgba(156,163,175,.5);
+            background: linear-gradient(135deg, #f9fafb 0%, #ffffff 60%);
+            box-shadow: 0 2px 10px rgba(0,0,0,.09);
+            padding: 13px 15px;
         }
         .rank-card.podium-2 .rank-name-text { font-size: 14px; }
-        .rank-card.podium-2 .rank-val-main  { font-size: 17px; }
+        .rank-card.podium-2 .rank-val-main  { font-size: 16px; }
 
         /* Bronze */
         .rank-card.podium-3 {
-            border-color: rgba(180,120,60,.3);
-            background: linear-gradient(135deg, #fdf8f3 0%, #ffffff 55%);
-            box-shadow: 0 2px 10px rgba(180,120,60,.12);
-            padding: 14px 17px;
+            border-color: rgba(180,120,60,.35);
+            background: linear-gradient(135deg, #fdf8f3 0%, #ffffff 60%);
+            box-shadow: 0 2px 8px rgba(180,120,60,.14);
+            padding: 13px 15px;
         }
         .rank-card.podium-3 .rank-name-text { font-size: 14px; }
-        .rank-card.podium-3 .rank-val-main  { font-size: 17px; }
+        .rank-card.podium-3 .rank-val-main  { font-size: 16px; }
 
-        /* Podium crown label */
+        /* Podium medal badge */
         .podium-crown {
             font-size: 9px;
             font-weight: 800;
-            opacity: .35;
-            letter-spacing: .07em;
+            opacity: .4;
+            letter-spacing: .06em;
             text-transform: uppercase;
             text-align: right;
             color: var(--text3);
@@ -378,17 +375,17 @@
 
         .rank-bg {
             position: absolute; left: 0; top: 0;
-            height: 100%; opacity: .04;
-            border-radius: 16px;
+            height: 100%; opacity: .05;
+            border-radius: var(--radius);
             pointer-events: none;
             transition: width .6s ease;
         }
-        .podium-1 .rank-bg { opacity: .07; }
+        .podium-1 .rank-bg { opacity: .08; }
 
-        .rank-top { display: flex; align-items: center; gap: 12px; }
+        .rank-top { display: flex; align-items: center; gap: 11px; }
 
         .rank-pos {
-            font-size: 24px;
+            font-size: 22px;
             min-width: 34px;
             text-align: center;
             line-height: 1;
@@ -396,12 +393,12 @@
         }
         .rank-pos.rest {
             font-size: 13px;
-            font-weight: 700;
-            color: #86868b;
-            background: #f5f5f7;
-            border-radius: 8px;
-            width: 30px;
-            height: 30px;
+            font-weight: 800;
+            color: var(--text3);
+            background: var(--surface2);
+            border-radius: 7px;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -418,7 +415,7 @@
         }
         .rank-sub {
             font-size: 11px;
-            color: #86868b;
+            color: var(--text2);
             margin-top: 3px;
             display: flex;
             align-items: center;
@@ -432,29 +429,28 @@
             font-size: 11px;
             font-weight: 700;
         }
-        .pct-pill.good  { background: rgba(52,199,89,.12);  color: #1a7f37; }
-        .pct-pill.warn  { background: rgba(255,149,0,.12);  color: #b45309; }
-        .pct-pill.bad   { background: rgba(255,59,48,.10);  color: #c0392b; }
+        .pct-pill.good  { background: rgba(22,163,74,.12); color: #16a34a; }
+        .pct-pill.warn  { background: rgba(245,158,11,.12); color: #d97706; }
+        .pct-pill.bad   { background: rgba(239,68,68,.12);  color: #dc2626; }
 
         .rank-val { text-align: right; flex-shrink: 0; }
         .rank-val-main {
             font-size: 15px;
             font-weight: 800;
             line-height: 1.1;
-            letter-spacing: -.3px;
         }
         .rank-val-sub {
             font-size: 10.5px;
-            color: #86868b;
+            color: var(--text3);
             margin-top: 2px;
         }
 
         .rank-bar-bg {
-            height: 4px;
-            background: #e5e5ea;
+            height: 5px;
+            background: var(--border);
             border-radius: 4px;
             overflow: hidden;
-            margin-left: 46px;
+            margin-left: 45px;
         }
         .podium-1 .rank-bar-bg { height: 6px; }
         .rank-bar-fill {
@@ -536,124 +532,30 @@
 
 <script>
 // ======= CONFIG =======
-// Групи визначаються динамічно по заголовках CSV
-// Порядок і назви груп задані тут, індекси підставляються автоматично
-const GROUP_DEFS = [
-    { name:'Товарообіг',      cls:'g-to',     b:'b-to',     planKey:/план.*то|то.*план/i,   factKey:/факт.*то|^то$|товарообіг|ТО/i,     pctKey:/%.*то|то.*%|виконання.*то|вик.*то/i },
-    { name:'Послуги',         cls:'g-serv',   b:'b-serv',   planKey:/план.*посл/i,          factKey:/факт.*посл|^послуги$/i,             pctKey:/%.*посл|посл.*%|виконання.*посл/i,  shareKey:/доля.*посл|частка.*посл/i },
-    { name:'Аксесуари',       cls:'g-acc',    b:'b-acc',    planKey:/план.*ас|план.*acc/i,  factKey:/факт.*ас|факт.*acc|^acc$|^аксес/i, pctKey:/%.*ас|ас.*%|виконання.*ас/i,        shareKey:/доля.*ас|частка.*ас/i },
-    { name:'Чеки',            cls:'g-checks', b:'b-checks', planKey:/план.*чек(?!и\sпр)/i,  factKey:/факт.*чек(?!и\sпр)|^чеки$/i,       pctKey:/%.*чек(?!и\sпр)|виконання.*чек(?!и\sпр)/i },
-    { name:'Правильні чеки',  cls:'g-rchk',   b:'b-rchk',   planKey:/план.*пч|план.*прав.*чек/i, factKey:/факт.*пч|факт.*прав.*чек|^пч$|правильн/i, pctKey:/%.*пч|пч.*%|виконання.*пч/i },
+const GROUPS = [
+    { name:'Товарообіг', cls:'g-to', cols:[
+        { label:'План',  idx:1,  type:'plan',  b:'b-plan' },
+        { label:'Факт',  idx:2,  type:'fact',  b:'b-to'   },
+        { label:'%',     idx:3,  type:'pct'                },
+    ]},
+    { name:'Послуги', cls:'g-serv', cols:[
+        { label:'План',  idx:4,  type:'plan',  b:'b-plan' },
+        { label:'Факт',  idx:5,  type:'fact',  b:'b-serv' },
+        { label:'Доля',  idx:6,  type:'share', b:'b-serv' },
+        { label:'%',     idx:7,  type:'pct'                },
+    ]},
+    { name:'Аксесуари', cls:'g-acc', cols:[
+        { label:'План',  idx:8,  type:'plan',  b:'b-plan' },
+        { label:'Факт',  idx:9,  type:'fact',  b:'b-acc'  },
+        { label:'Доля',  idx:10, type:'share', b:'b-acc'  },
+        { label:'%',     idx:11, type:'pct'                },
+    ]},
+    { name:'Чеки', cls:'g-checks', cols:[
+        { label:'План',  idx:12, type:'plan',  b:'b-plan'   },
+        { label:'Факт',  idx:13, type:'fact',  b:'b-checks' },
+        { label:'%',     idx:14, type:'pct'                  },
+    ]},
 ];
-
-let GROUPS = []; // заповнюється після завантаження CSV
-
-function buildGroupsFromHeaders(headers) {
-    // Нормалізуємо заголовки
-    const norm = headers.map(h => (h||'').trim());
-
-    // Допоміжна функція — знайти перший індекс що відповідає regex, серед невикористаних
-    const used = new Set([0]); // 0 — ім'я
-    function findIdx(rx, exclude) {
-        for (let i = 1; i < norm.length; i++) {
-            if (used.has(i)) continue;
-            if (exclude && exclude.has(i)) continue;
-            if (rx.test(norm[i])) return i;
-        }
-        // Якщо не знайдено — ніяких жорстких індексів, шукаємо по частковому співпадінню
-        return -1;
-    }
-
-    // Якщо у заголовках немає явних міток — використовуємо позиційний fallback
-    const hasLabels = norm.some(h => /план|факт|%|доля/i.test(h));
-
-    if (!hasLabels) {
-        // Позиційний fallback (оригінальна логіка)
-        return [
-            { name:'Товарообіг',      cls:'g-to',     cols:[ {label:'План',idx:1,type:'plan',b:'b-plan'},{label:'Факт',idx:2,type:'fact',b:'b-to'},{label:'%',idx:3,type:'pct'} ] },
-            { name:'Послуги',         cls:'g-serv',   cols:[ {label:'План',idx:4,type:'plan',b:'b-plan'},{label:'Факт',idx:5,type:'fact',b:'b-serv'},{label:'Доля',idx:6,type:'share',b:'b-serv'},{label:'%',idx:7,type:'pct'} ] },
-            { name:'Аксесуари',       cls:'g-acc',    cols:[ {label:'План',idx:8,type:'plan',b:'b-plan'},{label:'Факт',idx:9,type:'fact',b:'b-acc'},{label:'Доля',idx:10,type:'share',b:'b-acc'},{label:'%',idx:11,type:'pct'} ] },
-            { name:'Чеки',            cls:'g-checks', cols:[ {label:'План',idx:12,type:'plan',b:'b-plan'},{label:'Факт',idx:13,type:'fact',b:'b-checks'},{label:'%',idx:14,type:'pct'} ] },
-            { name:'Правильні чеки',  cls:'g-rchk',   cols:[ {label:'План',idx:15,type:'plan',b:'b-plan'},{label:'Факт',idx:16,type:'fact',b:'b-rchk'},{label:'%',idx:17,type:'pct'} ] },
-        ];
-    }
-
-    const groups = [];
-    GROUP_DEFS.forEach(gd => {
-        const planIdx  = findIdx(gd.planKey);
-        const factIdx  = findIdx(gd.factKey);
-        const pctIdx   = findIdx(gd.pctKey);
-        const shareIdx = gd.shareKey ? findIdx(gd.shareKey) : -1;
-
-        if (planIdx > 0) used.add(planIdx);
-        if (factIdx > 0) used.add(factIdx);
-        if (pctIdx  > 0) used.add(pctIdx);
-        if (shareIdx > 0) used.add(shareIdx);
-
-        const cols = [];
-        if (planIdx  > 0) cols.push({label:'План', idx:planIdx,  type:'plan',  b:'b-plan'});
-        if (factIdx  > 0) cols.push({label:'Факт', idx:factIdx,  type:'fact',  b:gd.b});
-        if (shareIdx > 0) cols.push({label:'Доля', idx:shareIdx, type:'share', b:gd.b});
-        if (pctIdx   > 0) cols.push({label:'%',    idx:pctIdx,   type:'pct'});
-
-        if (cols.length > 0) {
-            groups.push({ name:gd.name, cls:gd.cls, cols });
-        }
-    });
-
-    // Якщо динамічний пошук нічого не знайшов для Правильних чеків — додамо позиційний fallback
-    const hasRchk = groups.some(g => g.name === 'Правильні чеки');
-    if (!hasRchk && norm.length > 15) {
-        groups.push({ name:'Правильні чеки', cls:'g-rchk', cols:[
-            {label:'План',idx:15,type:'plan',b:'b-plan'},
-            {label:'Факт',idx:16,type:'fact',b:'b-rchk'},
-            {label:'%',   idx:17,type:'pct'},
-        ]});
-    }
-
-    return groups.length > 0 ? groups : buildGroupsFromHeaders.fallback();
-}
-
-// Також оновлюємо RATING_METRICS динамічно після parсингу заголовків
-function buildRatingMetrics() {
-    const metrics = [];
-    GROUPS.forEach(g => {
-        const factCol  = g.cols.find(c => c.type === 'fact');
-        const planCol  = g.cols.find(c => c.type === 'plan');
-        const pctCol   = g.cols.find(c => c.type === 'pct');
-        const shareCol = g.cols.find(c => c.type === 'share');
-        if (!factCol) return;
-
-        const colorMap = {
-            'g-to': '#2563eb', 'g-serv': '#16a34a', 'g-acc': '#d97706',
-            'g-checks': '#7c3aed', 'g-rchk': '#0891b2',
-        };
-        const color = colorMap[g.cls] || '#6b7280';
-
-        metrics.push({
-            key: g.cls + '_fact',
-            label: g.name,
-            idx: factCol.idx,
-            color,
-            planIdx: planCol ? planCol.idx : null,
-            pctIdx:  pctCol  ? pctCol.idx  : null,
-            fmt: 'int',
-        });
-
-        if (shareCol) {
-            metrics.push({
-                key: g.cls + '_shr',
-                label: 'Частка ' + g.name.split(' ')[0].toLowerCase(),
-                idx: shareCol.idx,
-                color,
-                fmt: 'share',
-            });
-        }
-    });
-    return metrics;
-}
-
-let RATING_METRICS = [];
 
 // ======= HELPERS =======
 function parseCSV(text) {
@@ -699,8 +601,7 @@ function buildTable(dataRows) {
     const W = getWidths();
     const tbl = document.getElementById('tbl');
     tbl.style.display = '';
-    // Динамічна ширина: залежить від кількості колонок у кожній групі
-    const totalW = W.name + GROUPS.reduce((sum, g) => sum + (g.cols.length <= 3 ? W.c3 : W.c4) * g.cols.length, 0);
+    const totalW = W.name + 3*W.c3 + 4*W.c4 + 4*W.c4 + 3*W.c4;
     tbl.style.width = totalW + 'px';
 
     const cg = document.createElement('colgroup');
@@ -854,8 +755,17 @@ function buildTable(dataRows) {
     }
 }
 
+// ======= RATING =======
+const RATING_METRICS = [
+    { key:'to_fact',   label:'ТО',          idx:2,  color:'#2563eb', planIdx:1,  pctIdx:3,  fmt:'int' },
+    { key:'serv_fact', label:'Послуги',      idx:5,  color:'#16a34a', planIdx:4,  pctIdx:7,  fmt:'int' },
+    { key:'acc_fact',  label:'Аксесуари',    idx:9,  color:'#d97706', planIdx:8,  pctIdx:11, fmt:'int' },
+    { key:'chk_fact',  label:'Чеки',         idx:13, color:'#7c3aed', planIdx:12, pctIdx:14, fmt:'int' },
+    { key:'serv_shr',  label:'Частка посл.', idx:6,  color:'#16a34a', fmt:'share' },
+    { key:'acc_shr',   label:'Частка ACC',   idx:10, color:'#d97706', fmt:'share' },
+];
 let allRatingRows = [];
-let activeMetricKey = '';
+let activeMetricKey = 'to_fact';
 
 function fmtRatingVal(v, fmt) {
     if (v===null||v===undefined||isNaN(Number(v))) return '—';
@@ -997,20 +907,7 @@ async function load() {
     const URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTOUXHhUpCkh6tgvNpJzY-w5tVrhPkvEeC0W0ZWuy2YxPayuO3pvahfeKYmMZ1DwHnILTpsJFNtXLsH/pub?output=csv";
     try {
         const res = await fetch(URL + '&t=' + Date.now());
-        const allRows = parseCSV(await res.text());
-        if (!allRows.length) throw new Error('Порожній файл');
-
-        // Перший рядок — заголовки
-        const headers = allRows[0].map(h => (h||'').trim());
-        const rows = allRows.slice(1);
-
-        // Динамічно визначаємо групи по заголовках
-        GROUPS = buildGroupsFromHeaders(headers);
-
-        // Будуємо метрики рейтингу на основі знайдених груп
-        RATING_METRICS = buildRatingMetrics();
-        activeMetricKey = RATING_METRICS.length ? RATING_METRICS[0].key : '';
-
+        const rows = parseCSV(await res.text()).slice(1);
         allRatingRows = rows;
         document.getElementById('loader').style.display = 'none';
         buildTable(rows);
