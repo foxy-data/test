@@ -1649,7 +1649,7 @@ const AUTH = {
 
             // --- Розраховуємо "Показники магазину" (ALL) так само як Python-скрипт ---
             const storeTotals = {
-                id: 0,
+                id: 'store-totals',
                 name: 'Показники магазину',
                 position: 'Всі продавці',
                 initials: 'ALL',
@@ -1777,6 +1777,9 @@ const AUTH = {
         cardsGrid.className = 'cards-grid';
 
         data.forEach(person => {
+            // Показники магазину — пропускаємо, вони в окремому блоці
+            if (person.id === 'store-totals') return;
+
             const to       = person.metrics['ТО']          || {value: 0, unit: 'грн'};
             const acc      = person.metrics['% Доля ACC']  || {value: 0, unit: '%'};
             const services = person.metrics['Доля Послуг'] || {value: 0, unit: '%'};
