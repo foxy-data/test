@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
@@ -31,563 +32,441 @@
             overflow-x: hidden;
         }
 
-        @keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
-        @keyframes fadeInUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-        .skel{background:linear-gradient(90deg,#eaeaed 25%,#f5f5f7 50%,#eaeaed 75%);background-size:600px 100%;animation:shimmer 1.4s ease-in-out infinite;border-radius:7px;}
-        .rank-card-skel{background:var(--card);border-radius:16px;border:1px solid var(--border);padding:12px 16px;display:flex;flex-direction:column;gap:9px;margin-bottom:6px}
-        .rank-card-skel-top{display:flex;align-items:center;gap:12px}
-        .rank-card-skel-pos{width:28px;height:28px;border-radius:8px;flex-shrink:0}
-        .rank-card-skel-body{flex:1;display:flex;flex-direction:column;gap:7px}
-        .rank-card-skel-line{height:12px;border-radius:6px}
-        .rank-card-skel-sub{height:9px;width:50%;border-radius:5px}
-        .rank-card-skel-val{width:60px;height:18px;border-radius:7px;flex-shrink:0}
-        .rank-card-skel-bar{height:4px;border-radius:2px;margin-top:2px}
-        .rank-card.appear{animation:fadeInUp .25s ease both}
-        .tbl-row-skel{display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid #f2f2f4}
-        .tbl-row-skel-cell{height:11px;border-radius:5px;flex:1}
-        .tbl-row-skel-cell.wide{flex:2.5}
+```
+    @keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .skel{background:linear-gradient(90deg,#eaeaed 25%,#f5f5f7 50%,#eaeaed 75%);background-size:600px 100%;animation:shimmer 1.4s ease-in-out infinite;border-radius:7px;}
+    .rank-card-skel{background:var(--card);border-radius:16px;border:1px solid var(--border);padding:12px 16px;display:flex;flex-direction:column;gap:9px;margin-bottom:6px}
+    .rank-card-skel-top{display:flex;align-items:center;gap:12px}
+    .rank-card-skel-pos{width:28px;height:28px;border-radius:8px;flex-shrink:0}
+    .rank-card-skel-body{flex:1;display:flex;flex-direction:column;gap:7px}
+    .rank-card-skel-line{height:12px;border-radius:6px}
+    .rank-card-skel-sub{height:9px;width:50%;border-radius:5px}
+    .rank-card-skel-val{width:60px;height:18px;border-radius:7px;flex-shrink:0}
+    .rank-card-skel-bar{height:4px;border-radius:2px;margin-top:2px}
+    .rank-card.appear{animation:fadeInUp .25s ease both}
+    .tbl-row-skel{display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid #f2f2f4}
+    .tbl-row-skel-cell{height:11px;border-radius:5px;flex:1}
+    .tbl-row-skel-cell.wide{flex:2.5}
 
-        .page-header {
-            background: var(--header-bg);
-            border-bottom: none;
-            padding: 12px 16px 0;
-            position: fixed; top: 0; left: 0; right: 0; z-index: 500;
-            box-shadow: 0 2px 16px rgba(0,0,0,0.18);
-            height: var(--header-height);
-        }
-        .header-top {
-            display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
-        }
-        .back-link {
-            display: flex; align-items: center; justify-content: center;
-            width: 32px; height: 32px; border-radius: 10px;
-            background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85);
-            text-decoration: none; font-size: 16px; flex-shrink: 0;
-            transition: background .15s;
-        }
-        .back-link:hover { background: rgba(255,255,255,0.2); }
-        .page-title { font-size: 18px; font-weight: 700; flex: 1; color: #fff; }
-        .compact-toggle {
-            display: flex; align-items: center; gap: 6px;
-            background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 10px; padding: 5px 11px;
-            font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.85);
-            cursor: pointer; font-family: inherit; transition: all .15s;
-            white-space: nowrap;
-        }
-        .compact-toggle.on { background: rgba(0,113,227,0.5); color: #fff; border-color: rgba(0,113,227,0.6); }
+    .page-header {
+        background: var(--header-bg);
+        border-bottom: none;
+        padding: 12px 16px 0;
+        position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+        height: var(--header-height);
+    }
+    .header-top {
+        display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+    }
+    .back-link {
+        display: flex; align-items: center; justify-content: center;
+        width: 32px; height: 32px; border-radius: 10px;
+        background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85);
+        text-decoration: none; font-size: 16px; flex-shrink: 0;
+        transition: background .15s;
+    }
+    .back-link:hover { background: rgba(255,255,255,0.2); }
+    .page-title { font-size: 18px; font-weight: 700; flex: 1; color: #fff; }
+    .compact-toggle {
+        display: flex; align-items: center; gap: 6px;
+        background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 10px; padding: 5px 11px;
+        font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.85);
+        cursor: pointer; font-family: inherit; transition: all .15s;
+        white-space: nowrap;
+    }
+    .compact-toggle.on { background: rgba(0,113,227,0.5); color: #fff; border-color: rgba(0,113,227,0.6); }
 
-        .tab-bar {
-            display: flex; gap: 0;
-            border-bottom: none;
-        }
-        .tab-btn {
-            flex: 1; padding: 9px 4px 10px;
-            border: none; background: transparent;
-            font-family: inherit; font-size: 12px; font-weight: 600;
-            color: rgba(255,255,255,0.55); cursor: pointer;
-            border-bottom: 2px solid transparent;
-            transition: all .15s; white-space: nowrap;
-            display: flex; align-items: center; justify-content: center; gap: 5px;
-        }
-        .tab-btn.active { color: #fff; border-bottom-color: #4d9fff; }
-        .tab-icon { font-size: 14px; }
+    .tab-bar {
+        display: flex; gap: 0;
+        border-bottom: none;
+    }
+    .tab-btn {
+        flex: 1; padding: 9px 4px 10px;
+        border: none; background: transparent;
+        font-family: inherit; font-size: 12px; font-weight: 600;
+        color: rgba(255,255,255,0.55); cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: all .15s; white-space: nowrap;
+        display: flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .tab-btn.active { color: #fff; border-bottom-color: #4d9fff; }
+    .tab-icon { font-size: 14px; }
 
-        .panel { 
-            display: none; 
-            padding: 14px; 
-            animation: fadeIn .2s ease;
-            padding-top: 0;
+    .panel { 
+        display: none; 
+        padding: 14px; 
+        animation: fadeIn .2s ease;
+        padding-top: 0;
+    }
+    .panel.visible { display: block; }
+    
+    #panelRating, #panelInsights {
+        padding-top: 14px;
+        padding-bottom: 20px;
+    }
+
+    .table-card {
+        background: var(--card); 
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
+        scroll-behavior: smooth;
+    }
+    table { 
+        border-collapse: collapse; 
+        table-layout: fixed; 
+        width: max-content;
+        min-width: 100%;
+    }
+
+    th.group-header {
+        text-align: center; font-size: 10px; font-weight: 800;
+        text-transform: uppercase; letter-spacing: 0.6px;
+        padding: 9px 4px; border-bottom: 1px solid rgba(255,255,255,0.15);
+        color: #fff; height: 24px;
+    }
+    th.group-header.g-to     { background: #1a50b8; }
+    th.group-header.g-serv   { background: #1a7f37; }
+    th.group-header.g-acc    { background: #b85000; }
+    th.group-header.g-checks { background: #6d28d9; }
+    th.group-header.g-none   { background: #4b5563; }
+
+    th {
+        text-align: center; padding: 7px 5px; color: rgba(255,255,255,0.9);
+        font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+        background: var(--header-bg);
+        border-bottom: 2px solid rgba(0,0,0,0.2);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    th.g-to     { background: #1e55c4; color: #fff; }
+    th.g-serv   { background: #1c8a3c; color: #fff; }
+    th.g-acc    { background: #c45a00; color: #fff; }
+    th.g-checks { background: #7030d0; color: #fff; }
+
+    td {
+        padding: 6px 5px; border-bottom: 1px solid #ededf2;
+        font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        text-align: right;
+    }
+    .grp-start { border-left: 2px solid rgba(0,0,0,0.07) !important; }
+
+    thead th { position: sticky; z-index: 10; background: var(--header-bg); }
+    thead tr:first-child th  { top: 0; z-index: 15; }
+    thead tr:nth-child(2) th { top: 24px; z-index: 12; }
+
+    th:first-child, td.name-cell {
+        position: sticky; 
+        left: 0; 
+        z-index: 20;
+        white-space: normal; 
+        word-break: break-word;
+        text-align: left; 
+        line-height: 1.35;
+        box-shadow: 4px 0 12px -3px rgba(0,0,0,0.2);
+        border-right: 2px solid rgba(0,0,0,0.15);
+    }
+    th:first-child {
+        background: var(--header-bg); 
+        color: rgba(255,255,255,0.9);
+        font-size: 10px; 
+        font-weight: 700; 
+        z-index: 25;
+    }
+    td.name-cell {
+        background: var(--card) !important; 
+        color: var(--text);
+        font-weight: 600; 
+        font-size: 12px; 
+        z-index: 18;
+        min-width: 140px;
+    }
+
+    .cell-badge {
+        display: block; border-radius: 5px; font-size: 11px; font-weight: 700;
+        text-align: center; padding: 3px 5px; white-space: nowrap;
+    }
+    .badge-plan        { background: rgba(100,100,110,0.09); color: #5a5a6a; font-weight: 500; font-size: 10px; }
+    .badge-fact-to     { background: rgba(26,80,184,0.10);   color: #1a40a8; }
+    .badge-fact-serv   { background: rgba(28,138,60,0.11);   color: #16692a; }
+    .badge-fact-acc    { background: rgba(196,90,0,0.10);    color: #993f00; }
+    .badge-fact-checks { background: rgba(112,48,208,0.10);  color: #5c1fa8; }
+    .badge-fact-none   { background: rgba(100,100,110,0.07); color: #3d3d4f; }
+
+    .time-row td           { background: #f2f3f7 !important; font-weight: 700; color: #4a4a5a; font-size: 10.5px; }
+    .time-row td.name-cell { background: #e8eaf0 !important; color: #3a3a4a !important; }
+    .summary-row td           { background: #dde9ff !important; font-weight: 700; color: #1a2a5a !important; border-top: 2px solid #a8bce8; }
+    .summary-row td.name-cell { background: #cdd9ff !important; color: #1a2a5a !important; }
+    tr.summary-row td.name-cell { background: #cdd9ff !important; }
+    tr.time-row    td.name-cell { background: #e8eaf0 !important; }
+
+    .loading { padding: 40px; text-align: center; color: #86868b; }
+    .error   { padding: 40px; text-align: center; color: #ff3b30; }
+
+    @media (max-width: 767px) {
+        :root { --header-height: 104px; }
+        body { padding-top: var(--header-height); }
+        
+        .table-card { 
+            scroll-snap-type: none;
+            scroll-padding-left: 0;
+            border-radius: 12px;
         }
-        .panel.visible { display: block; }
+        .name-cell, th:first-child { 
+            width: 110px; 
+            min-width: 110px; 
+            max-width: 110px; 
+            font-size: 11px; 
+            padding: 6px 8px; 
+            background-clip: padding-box; 
+        }
+        td { font-size: 11.5px; padding: 6px 4px; }
+        th { font-size: 9px; padding: 6px 4px; }
+        th.group-header { font-size: 9.5px; padding: 7px 4px; }
+        .cell-badge { font-size: 10.5px; padding: 3px 4px; }
         
         #panelRating, #panelInsights {
-            padding-top: 14px;
-            padding-bottom: 20px;
+            padding: 10px 12px 80px;
         }
+    }
 
-        .table-card {
-            background: var(--card); 
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            overflow-x: auto;
-            overflow-y: visible;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior-x: contain;
-            scroll-behavior: smooth;
+    @media (min-width: 768px) {
+        .name-cell, th:first-child {
+            width: 160px;
+            min-width: 160px;
+            max-width: 200px;
+            font-size: 12px;
+            padding: 8px 10px;
         }
-        table { 
-            border-collapse: collapse; 
-            table-layout: fixed; 
-            width: max-content;
-            min-width: 100%;
-        }
+        td { font-size: 13px; padding: 8px 6px; }
+        th { font-size: 10px; padding: 8px 6px; }
+        .table-card { border-radius: 20px; }
+    }
 
-        th.group-header {
-            text-align: center; font-size: 10px; font-weight: 800;
-            text-transform: uppercase; letter-spacing: 0.6px;
-            padding: 9px 4px; border-bottom: 1px solid rgba(255,255,255,0.15);
-            color: #fff; height: 24px;
-        }
-        th.group-header.g-to     { background: #1a50b8; }
-        th.group-header.g-serv   { background: #1a7f37; }
-        th.group-header.g-acc    { background: #b85000; }
-        th.group-header.g-checks { background: #6d28d9; }
-        th.group-header.g-none   { background: #4b5563; }
+    .metric-scroll {
+        display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px;
+        margin-bottom: 14px; scrollbar-width: none;
+        padding: 2px 2px 8px;
+        margin: 0 -4px 14px;
+    }
+    .metric-scroll::-webkit-scrollbar { display: none; }
+    .mpill {
+        flex-shrink: 0;
+        border: 1.5px solid var(--border); background: var(--card);
+        padding: 7px 16px; border-radius: 22px;
+        font-size: 12px; font-weight: 600; cursor: pointer;
+        font-family: inherit; color: var(--text-sec);
+        transition: all .15s; white-space: nowrap;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .mpill:hover { border-color: #b0b0ba; color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .mpill.active { color: white; border-color: transparent; box-shadow: 0 3px 12px rgba(0,0,0,0.18); }
 
-        th {
-            text-align: center; padding: 7px 5px; color: rgba(255,255,255,0.9);
-            font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
-            background: var(--header-bg);
-            border-bottom: 2px solid rgba(0,0,0,0.2);
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        th.g-to     { background: #1e55c4; color: #fff; }
-        th.g-serv   { background: #1c8a3c; color: #fff; }
-        th.g-acc    { background: #c45a00; color: #fff; }
-        th.g-checks { background: #7030d0; color: #fff; }
+    .store-banner {
+        background: var(--card); border-radius: 16px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        padding: 14px 18px; margin-bottom: 14px;
+        display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+        border-left: 4px solid var(--accent);
+    }
+    .store-banner-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #a0a0ab; flex: 0 0 auto; }
+    .store-stats { display: flex; gap: 20px; flex: 1; flex-wrap: wrap; align-items: center; }
+    .store-stat { display: flex; flex-direction: column; align-items: center; min-width: 70px; }
+    .store-stat-label { font-size: 9px; color: #a0a0ab; font-weight: 600; text-transform: uppercase; }
+    .store-stat-val { font-size: 16px; font-weight: 800; color: var(--text); line-height: 1.2; }
+    .store-stat-pct { font-size: 18px; font-weight: 800; line-height: 1.2; }
 
-        td {
-            padding: 6px 5px; border-bottom: 1px solid #ededf2;
-            font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            text-align: right;
-        }
-        .grp-start { border-left: 2px solid rgba(0,0,0,0.07) !important; }
+    .ranking-grid { display: flex; flex-direction: column; gap: 0; }
+    .rank-card.appear { animation: fadeInUp .25s ease both; }
 
-        thead th { position: sticky; z-index: 10; background: var(--header-bg); }
-        thead tr:first-child th  { top: 0; z-index: 15; }
-        thead tr:nth-child(2) th { top: 24px; z-index: 12; }
+    .totem-badge {
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        animation: pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .totem-badge svg { width: 24px; height: 24px; }
+    .totem-folk { background: var(--folk-bg); }
+    .totem-cyber { background: var(--cyber-bg); filter: drop-shadow(0 0 4px #00ffff); }
+    .totem-min { background: var(--min-bg); }
+    @keyframes pop { 0% { transform: scale(0) rotate(-20deg); } 100% { transform: scale(1) rotate(0); } }
 
-        th:first-child, td.name-cell {
-            position: sticky; 
-            left: 0; 
-            z-index: 20;
-            white-space: normal; 
-            word-break: break-word;
-            text-align: left; 
-            line-height: 1.35;
-            box-shadow: 4px 0 12px -3px rgba(0,0,0,0.2);
-            border-right: 2px solid rgba(0,0,0,0.15);
-        }
-        th:first-child {
-            background: var(--header-bg); 
-            color: rgba(255,255,255,0.9);
-            font-size: 10px; 
-            font-weight: 700; 
-            z-index: 25;
-        }
-        td.name-cell {
-            background: var(--card) !important; 
-            color: var(--text);
-            font-weight: 600; 
-            font-size: 12px; 
-            z-index: 18;
-            min-width: 140px;
-        }
+    /* === VIEW SWITCHER === */
+    .view-switcher {
+        display: flex; gap: 5px;
+        background: var(--bg); border-radius: 12px; padding: 3px;
+        margin-bottom: 14px; border: 1px solid var(--border);
+    }
+    .vs-btn {
+        flex: 1; padding: 7px 10px; border: none; border-radius: 9px;
+        background: transparent; font-family: inherit; font-size: 12px;
+        font-weight: 600; cursor: pointer; color: var(--text-sec);
+        transition: all .18s; display: flex; align-items: center;
+        justify-content: center; gap: 5px; white-space: nowrap;
+    }
+    .vs-btn.on {
+        background: var(--card); color: var(--text);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
 
-        .cell-badge {
-            display: block; border-radius: 5px; font-size: 11px; font-weight: 700;
-            text-align: center; padding: 3px 5px; white-space: nowrap;
-        }
-        .badge-plan        { background: rgba(100,100,110,0.09); color: #5a5a6a; font-weight: 500; font-size: 10px; }
-        .badge-fact-to     { background: rgba(26,80,184,0.10);   color: #1a40a8; }
-        .badge-fact-serv   { background: rgba(28,138,60,0.11);   color: #16692a; }
-        .badge-fact-acc    { background: rgba(196,90,0,0.10);    color: #993f00; }
-        .badge-fact-checks { background: rgba(112,48,208,0.10);  color: #5c1fa8; }
-        .badge-fact-none   { background: rgba(100,100,110,0.07); color: #3d3d4f; }
+    /* === PODIUM === */
+    .podium-wrap { display: grid; grid-template-columns: 1fr 1.12fr 1fr; gap: 6px; align-items: end; height: 140px; margin-bottom: 14px; }
+    .pod {
+        display: flex; flex-direction: column; align-items: center;
+        justify-content: flex-end; border-radius: 12px 12px 0 0;
+        padding: 10px 6px 10px; cursor: pointer; position: relative;
+        transition: transform .2s, box-shadow .2s; user-select: none;
+    }
+    .pod:hover { transform: translateY(-4px); }
+    .pod:active { transform: translateY(-2px) scale(.98); }
+    .pod-1 { background: linear-gradient(170deg,#fffbeb,#fde68a); border: 2px solid #f59e0b; height: 100%; box-shadow: 0 4px 18px rgba(245,158,11,.25); }
+    .pod-2 { background: linear-gradient(170deg,#f8fafc,#e2e8f0); border: 2px solid #94a3b8; height: 80%; box-shadow: 0 3px 12px rgba(148,163,184,.2); }
+    .pod-3 { background: linear-gradient(170deg,#fff7ed,#fed7aa); border: 2px solid #f97316; height: 64%; box-shadow: 0 3px 12px rgba(249,115,22,.2); }
+    .pod-medal { font-size: 22px; margin-bottom: 5px; }
+    .pod-name { font-size: 10px; font-weight: 700; text-align: center; line-height: 1.25; color: #1e293b; max-width: 100%; }
+    .pod-val { font-size: 10px; font-weight: 800; color: #0f172a; margin-top: 3px; text-align: center; }
+    .pod-pct { font-size: 9px; font-weight: 700; margin-top: 2px; }
+    .pod-1 .pod-pct { color: #b45309; }
+    .pod-2 .pod-pct { color: #64748b; }
+    .pod-3 .pod-pct { color: #9a3412; }
+    /* rest list bars */
+    .hbar-list { display: flex; flex-direction: column; gap: 5px; }
+    .hbar {
+        display: flex; align-items: center; gap: 8px;
+        padding: 8px 12px; background: var(--card);
+        border: 1px solid var(--border); border-radius: 10px;
+        cursor: pointer; transition: transform .15s, box-shadow .15s;
+        position: relative; overflow: hidden;
+    }
+    .hbar:hover { transform: translateX(3px); box-shadow: 0 3px 12px rgba(0,0,0,.09); }
+    .hbar-bg { position: absolute; left:0; top:0; height:100%; opacity:.07; pointer-events:none; border-radius:0 6px 6px 0; transition: width .6s ease; }
+    .hb-pos { font-size: 12px; font-weight: 800; min-width: 18px; text-align: center; color: var(--text-sec); position: relative; z-index:1; }
+    .hb-name { font-size: 12px; font-weight: 600; flex: 1; color: var(--text); position: relative; z-index:1; }
+    .hb-track { height: 5px; background: #ebebef; border-radius: 3px; width: 70px; overflow: hidden; position: relative; z-index:1; flex-shrink:0; }
+    .hb-fill { height: 100%; border-radius: 3px; transition: width .6s ease; }
+    .hb-val { font-size: 11px; font-weight: 700; min-width: 52px; text-align: right; color: var(--text); position: relative; z-index:1; }
+    .hb-pct { font-size: 10px; font-weight: 600; min-width: 36px; text-align: right; position: relative; z-index:1; }
 
-        .time-row td           { background: #f2f3f7 !important; font-weight: 700; color: #4a4a5a; font-size: 10.5px; }
-        .time-row td.name-cell { background: #e8eaf0 !important; color: #3a3a4a !important; }
-        .summary-row td           { background: #dde9ff !important; font-weight: 700; color: #1a2a5a !important; border-top: 2px solid #a8bce8; }
-        .summary-row td.name-cell { background: #cdd9ff !important; color: #1a2a5a !important; }
-        tr.summary-row td.name-cell { background: #cdd9ff !important; }
-        tr.time-row    td.name-cell { background: #e8eaf0 !important; }
+    /* === LEADERBOARD === */
+    .lb-hero {
+        border-radius: 16px; padding: 16px 18px; margin-bottom: 10px;
+        position: relative; overflow: hidden; cursor: pointer;
+        transition: transform .2s, box-shadow .2s;
+    }
+    .lb-hero:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,.22); }
+    .lb-hero-glow { position: absolute; top: -40px; right: -40px; width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,.08); pointer-events: none; }
+    .lb-hero-glow2 { position: absolute; bottom: -30px; left: -20px; width: 90px; height: 90px; border-radius: 50%; background: rgba(255,255,255,.05); pointer-events: none; }
+    .lb-hero-crown { position: absolute; top: 12px; right: 16px; font-size: 26px; opacity: .9; }
+    .lb-hero-pos { font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.6); margin-bottom: 3px; }
+    .lb-hero-name { font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 10px; line-height: 1.2; }
+    .lb-hero-stats { display: flex; gap: 14px; flex-wrap: wrap; }
+    .lb-hero-stat { display: flex; flex-direction: column; }
+    .lb-hero-stat-val { font-size: 17px; font-weight: 800; color: #fff; line-height: 1.1; }
+    .lb-hero-stat-lbl { font-size: 9px; color: rgba(255,255,255,.55); margin-top: 2px; text-transform: uppercase; letter-spacing: .04em; }
+    .lb-hero-prog { height: 3px; background: rgba(255,255,255,.2); border-radius: 2px; margin-top: 12px; overflow: hidden; }
+    .lb-hero-prog-fill { height: 100%; border-radius: 2px; background: rgba(255,255,255,.75); transition: width .8s ease; }
 
-        .loading { padding: 40px; text-align: center; color: #86868b; }
-        .error   { padding: 40px; text-align: center; color: #ff3b30; }
+    .lb-list { display: flex; flex-direction: column; gap: 5px; }
+    .lb-row {
+        display: flex; align-items: center; gap: 8px;
+        padding: 10px 12px; background: var(--card);
+        border: 1px solid var(--border); border-radius: 11px;
+        cursor: pointer; transition: transform .15s, box-shadow .15s;
+        position: relative; overflow: hidden;
+    }
+    .lb-row:hover { transform: translateX(3px); box-shadow: 0 3px 14px rgba(0,0,0,.09); }
+    .lb-row-bg { position: absolute; left:0; top:0; height:100%; opacity:.07; pointer-events:none; border-radius:0 6px 6px 0; transition: width .6s ease; }
+    .lb-row-num { font-size: 13px; font-weight: 800; min-width: 20px; text-align: center; color: var(--text-sec); position:relative; z-index:1; }
+    .lb-row-num.s { color: #9b9b9b; }
+    .lb-row-num.b { color: #c47a3a; }
+    .lb-row-name { font-size: 12px; font-weight: 700; flex: 1; color: var(--text); position:relative; z-index:1; }
+    .lb-row-val { font-size: 12px; font-weight: 800; color: var(--text); position:relative; z-index:1; min-width: 52px; text-align:right; }
+    .lb-row-pct { font-size: 10px; font-weight: 600; min-width: 36px; text-align:right; position:relative; z-index:1; }
+    .delta {
+        font-size: 10px; font-weight: 700; padding: 2px 6px;
+        border-radius: 5px; margin-left: 2px; flex-shrink: 0; position:relative; z-index:1;
+    }
+    .d-hi  { background: rgba(52,199,89,.15);  color: #1e7e34; }
+    .d-mid { background: rgba(255,149,0,.12);  color: #b86e00; }
+    .d-lo  { background: rgba(255,59,48,.12);  color: #c0392b; }
 
-        @media (max-width: 767px) {
-            :root { --header-height: 104px; }
-            body { padding-top: var(--header-height); }
-            
-            .table-card { 
-                scroll-snap-type: none;
-                scroll-padding-left: 0;
-                border-radius: 12px;
-            }
-            .name-cell, th:first-child { 
-                width: 110px; 
-                min-width: 110px; 
-                max-width: 110px; 
-                font-size: 11px; 
-                padding: 6px 8px; 
-                background-clip: padding-box; 
-            }
-            td { font-size: 11.5px; padding: 6px 4px; }
-            th { font-size: 9px; padding: 6px 4px; }
-            th.group-header { font-size: 9.5px; padding: 7px 4px; }
-            .cell-badge { font-size: 10.5px; padding: 3px 4px; }
-            
-            #panelRating, #panelInsights {
-                padding: 10px 12px 80px;
-            }
-        }
+    /* === EXPANDED DETAIL === */
+    .rank-detail {
+        display: none; padding: 10px 12px 8px;
+        border-top: 1px dashed var(--border);
+        animation: fadeInUp .2s ease;
+    }
+    .rank-detail.open { display: flex; gap: 16px; flex-wrap: wrap; }
+    .rd-stat { display: flex; flex-direction: column; min-width: 60px; }
+    .rd-stat-lbl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-sec); }
+    .rd-stat-val { font-size: 14px; font-weight: 800; margin-top: 2px; }
 
-        @media (min-width: 768px) {
-            .name-cell, th:first-child {
-                width: 160px;
-                min-width: 160px;
-                max-width: 200px;
-                font-size: 12px;
-                padding: 8px 10px;
-            }
-            td { font-size: 13px; padding: 8px 6px; }
-            th { font-size: 10px; padding: 8px 6px; }
-            .table-card { border-radius: 20px; }
-        }
+    .reward-badge {
+        display: flex; align-items: center; gap: 8px;
+        margin-top: 8px; padding: 7px 12px;
+        border-radius: 10px; font-size: 12px; font-weight: 700;
+        border-top: 1px dashed var(--border);
+        padding-top: 10px; margin-top: 6px;
+    }
+    .reward-badge .reward-icon { font-size: 18px; flex-shrink:0; }
+    .reward-badge .reward-text { color: var(--text-sec); line-height:1.3; }
+    .reward-badge .reward-title { color: var(--text); font-weight: 800; font-size: 11.5px; display:block; }
 
-        .metric-scroll {
-            display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px;
-            margin-bottom: 14px; scrollbar-width: none;
-            padding: 2px 2px 8px;
-            margin: 0 -4px 14px;
-        }
-        .metric-scroll::-webkit-scrollbar { display: none; }
-        .mpill {
-            flex-shrink: 0;
-            border: 1.5px solid var(--border); background: var(--card);
-            padding: 7px 16px; border-radius: 22px;
-            font-size: 12px; font-weight: 600; cursor: pointer;
-            font-family: inherit; color: var(--text-sec);
-            transition: all .15s; white-space: nowrap;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-        }
-        .mpill:hover { border-color: #b0b0ba; color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .mpill.active { color: white; border-color: transparent; box-shadow: 0 3px 12px rgba(0,0,0,0.18); }
+    @keyframes insightFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    .insights-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    .insight-card {
+        background: var(--card); border-radius: 16px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        padding: 14px 16px;
+        display: flex; align-items: center; gap: 14px;
+        position: relative; overflow: hidden;
+        animation: insightFadeIn .3s ease both;
+        min-height: 76px;
+        transition: transform .15s, box-shadow .15s;
+        border-left: 4px solid transparent;
+    }
+    .insight-card:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.12); }
+    .insight-card-accent {
+        position: absolute; left: 0; top: 0; width: 4px; height: 100%; border-radius: 0 3px 3px 0;
+    }
+    .insight-icon {
+        font-size: 22px; flex-shrink: 0; width: 46px; height: 46px;
+        border-radius: 14px; display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .insight-body { flex: 1; min-width: 0; }
+    .insight-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #a0a0ab; margin-bottom: 3px; }
+    .insight-name { font-size: 14px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.35; }
+    .insight-value { font-size: 13px; font-weight: 700; margin-top: 2px; }
+    .insight-medal { font-size: 20px; flex-shrink: 0; }
 
-        .store-banner {
-            background: var(--card); border-radius: 16px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            padding: 14px 18px; margin-bottom: 14px;
-            display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-            border-left: 4px solid var(--accent);
+    .insights-skel-card{background:var(--card);border-radius:16px;border:1px solid var(--border);padding:13px 15px;display:flex;gap:12px;align-items:center;min-height:70px}
+    .insights-skel-icon{width:42px;height:42px;border-radius:12px;flex-shrink:0}
+    .insights-skel-body{flex:1;display:flex;flex-direction:column;gap:7px}
+    .insights-skel-line{height:11px;border-radius:5px}
+    .insights-skel-sub{height:9px;width:55%;border-radius:4px}
+    
+    @media (max-width: 767px) {
+        .page-header { position: fixed; }
+        #panelRating, #panelInsights {
+            padding-top: 10px;
+            padding-bottom: 90px;
         }
-        .store-banner-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #a0a0ab; flex: 0 0 auto; }
-        .store-stats { display: flex; gap: 20px; flex: 1; flex-wrap: wrap; align-items: center; }
-        .store-stat { display: flex; flex-direction: column; align-items: center; min-width: 70px; }
-        .store-stat-label { font-size: 9px; color: #a0a0ab; font-weight: 600; text-transform: uppercase; }
-        .store-stat-val { font-size: 16px; font-weight: 800; color: var(--text); line-height: 1.2; }
-        .store-stat-pct { font-size: 18px; font-weight: 800; line-height: 1.2; }
+    }
+</style>
+```
 
-        .ranking-grid { display: flex; flex-direction: column; gap: 8px; }
-        
-        .rank-card {
-            background: var(--card); 
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
-            padding: 12px 16px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 8px;
-            position: relative; 
-            overflow: hidden; 
-            transition: transform .15s, box-shadow .15s, border-color .15s;
-        }
-        .rank-card:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 6px 24px rgba(0,0,0,0.14); 
-        }
-        
-        .rank-card.top-1 { 
-            border: 2px solid #f0a500; 
-            background: linear-gradient(135deg, rgba(240,165,0,0.08), var(--card));
-            box-shadow: 0 4px 20px rgba(240,165,0,0.2);
-        }
-        .rank-card.top-2 { 
-            border: 2px solid #9b9b9b; 
-            background: linear-gradient(135deg, rgba(155,155,155,0.06), var(--card));
-        }
-        .rank-card.top-3 { 
-            border: 2px solid #c47a3a; 
-            background: linear-gradient(135deg, rgba(196,122,58,0.06), var(--card));
-        }
-        
-        .rank-bg { 
-            position: absolute; 
-            left: 0; 
-            top: 0; 
-            height: 100%; 
-            opacity: .08; 
-            pointer-events: none; 
-            transition: width .5s ease; 
-            border-radius: 0 8px 8px 0;
-        }
-        
-        .rank-top { 
-            display: flex; 
-            align-items: flex-start; 
-            gap: 12px; 
-            position: relative;
-            z-index: 2;
-        }
-        
-        .rank-pos { 
-            font-size: 18px; 
-            font-weight: 800; 
-            min-width: 34px; 
-            text-align: center; 
-            line-height: 1; 
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 34px;
-            border-radius: 10px;
-            background: rgba(0,0,0,0.04);
-        }
-        .rank-pos.gold{color:#f0a500;background:rgba(240,165,0,0.15);box-shadow:0 0 0 2px rgba(240,165,0,0.2)}
-        .rank-pos.silver{color:#9b9b9b;background:rgba(155,155,155,0.15);box-shadow:0 0 0 2px rgba(155,155,155,0.2)}
-        .rank-pos.bronze{color:#c47a3a;background:rgba(196,122,58,0.15);box-shadow:0 0 0 2px rgba(196,122,58,0.2)}
-        .rank-pos.rest{color:#86868b;font-size:14px;padding-top:1px;background:rgba(134,134,139,0.08)}
-        
-        .rank-name { flex: 1; min-width: 0; }
-        .rank-name-text { 
-            font-size: 13px; 
-            font-weight: 700; 
-            white-space: normal; 
-            word-break: break-word; 
-            line-height: 1.35; 
-        }
-        .rank-sub { 
-            font-size: 11px; 
-            color: var(--text-sec); 
-            margin-top: 3px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .rank-sub::before {
-            content: "📊";
-            font-size: 10px;
-        }
-        
-        .rank-val { 
-            text-align: right; 
-            flex-shrink: 0; 
-            min-width: 70px;
-        }
-        .rank-val-main { 
-            font-size: 16px; 
-            font-weight: 800; 
-            line-height: 1.2; 
-        }
-        .rank-val-sub { 
-            font-size: 10px; 
-            color: var(--text-sec);
-            margin-top: 2px;
-        }
-        
-        .rank-bar-bg { 
-            height: 5px; 
-            background: linear-gradient(90deg, #ebebef, #f5f5f7); 
-            border-radius: 3px; 
-            overflow: hidden; 
-            margin-left: 46px;
-            position: relative;
-        }
-        .rank-bar-fill { 
-            height: 100%; 
-            border-radius: 3px; 
-            transition: width .6s ease;
-            background: linear-gradient(90deg, var(--accent), var(--accent));
-            position: relative;
-        }
-        .rank-bar-fill::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            animation: shimmer 2s infinite;
-        }
-
-        .totem-badge {
-            width: 36px; height: 36px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-            animation: pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .totem-badge svg { width: 24px; height: 24px; }
-        .totem-folk { background: var(--folk-bg); }
-        .totem-cyber { background: var(--cyber-bg); filter: drop-shadow(0 0 4px #00ffff); }
-        .totem-min { background: var(--min-bg); }
-        @keyframes pop { 0% { transform: scale(0) rotate(-20deg); } 100% { transform: scale(1) rotate(0); } }
-
-        .meme-card {
-            margin-top: 16px;
-            background: var(--card);
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-            position: relative;
-        }
-        .meme-image-container {
-            position: relative;
-            width: 100%;
-            min-height: 200px;
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        .meme-image {
-            width: 100%;
-            height: auto;
-            display: block;
-            transition: transform 0.3s;
-            opacity: 0;
-        }
-        .meme-image.loaded {
-            opacity: 1;
-        }
-        .meme-image:hover {
-            transform: scale(1.02);
-        }
-        .meme-loading {
-            color: white;
-            font-size: 14px;
-            text-align: center;
-            padding: 40px 20px;
-        }
-        .meme-loading::before {
-            content: '🇺🇦';
-            font-size: 48px;
-            display: block;
-            margin-bottom: 12px;
-            animation: bounce 1s infinite;
-        }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        .meme-footer {
-            padding: 12px 14px;
-            background: var(--card);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-        }
-        .meme-title {
-            font-size: 0.9em;
-            font-weight: 600;
-            color: var(--text);
-            flex: 1;
-            line-height: 1.3;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-        .btn-meme {
-            background: var(--accent);
-            border: none;
-            color: white;
-            padding: 8px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.85em;
-            font-family: inherit;
-            font-weight: 600;
-            transition: all .15s;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-        .btn-meme:hover { 
-            background: #005bb5; 
-            transform: translateY(-1px);
-            box-shadow: 0 3px 8px rgba(0,113,227,0.3);
-        }
-        .btn-meme:active {
-            transform: translateY(0);
-        }
-        .meme-error {
-            color: var(--text-sec);
-            font-size: 0.85em;
-            text-align: center;
-            padding: 30px 20px;
-        }
-        .meme-error::before {
-            content: '😅';
-            font-size: 36px;
-            display: block;
-            margin-bottom: 8px;
-        }
-
-
-
-        .reward-badge {
-            display: flex; align-items: center; gap: 8px;
-            margin-top: 8px; padding: 7px 12px;
-            border-radius: 10px; font-size: 12px; font-weight: 700;
-            border-top: 1px dashed var(--border);
-            padding-top: 10px; margin-top: 6px;
-        }
-        .reward-badge .reward-icon { font-size: 18px; flex-shrink:0; }
-        .reward-badge .reward-text { color: var(--text-sec); line-height:1.3; }
-        .reward-badge .reward-title { color: var(--text); font-weight: 800; font-size: 11.5px; display:block; }
-
-        @keyframes insightFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-        .insights-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-        .insight-card {
-            background: var(--card); border-radius: 16px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            padding: 14px 16px;
-            display: flex; align-items: center; gap: 14px;
-            position: relative; overflow: hidden;
-            animation: insightFadeIn .3s ease both;
-            min-height: 76px;
-            transition: transform .15s, box-shadow .15s;
-            border-left: 4px solid transparent;
-        }
-        .insight-card:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.12); }
-        .insight-card-accent {
-            position: absolute; left: 0; top: 0; width: 4px; height: 100%; border-radius: 0 3px 3px 0;
-        }
-        .insight-icon {
-            font-size: 22px; flex-shrink: 0; width: 46px; height: 46px;
-            border-radius: 14px; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        .insight-body { flex: 1; min-width: 0; }
-        .insight-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #a0a0ab; margin-bottom: 3px; }
-        .insight-name { font-size: 14px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.35; }
-        .insight-value { font-size: 13px; font-weight: 700; margin-top: 2px; }
-        .insight-medal { font-size: 20px; flex-shrink: 0; }
-
-        .insights-skel-card{background:var(--card);border-radius:16px;border:1px solid var(--border);padding:13px 15px;display:flex;gap:12px;align-items:center;min-height:70px}
-        .insights-skel-icon{width:42px;height:42px;border-radius:12px;flex-shrink:0}
-        .insights-skel-body{flex:1;display:flex;flex-direction:column;gap:7px}
-        .insights-skel-line{height:11px;border-radius:5px}
-        .insights-skel-sub{height:9px;width:55%;border-radius:4px}
-        
-        @media (max-width: 767px) {
-            .page-header { position: fixed; }
-            #panelRating, #panelInsights {
-                padding-top: 10px;
-                padding-bottom: 90px;
-            }
-        }
-    </style>
 </head>
 <body>
 
@@ -624,18 +503,12 @@
 <div class="panel" id="panelRating">
     <div class="metric-scroll" id="metricPills"></div>
     <div id="storeBanner"></div>
-    <div class="ranking-grid" id="rankingGrid"></div>
-    
-    <div class="meme-card">
-        <div class="meme-image-container" id="memeContainer">
-            <div class="meme-loading">Завантаження українського мему...</div>
-        </div>
-        <div class="meme-footer">
-            <div class="meme-title" id="memeTitle">Мем завантажується...</div>
-            <button class="btn-meme" onclick="loadRandomMeme()">🔄 Інший мем</button>
-        </div>
+    <div class="view-switcher" id="viewSwitcher">
+        <button class="vs-btn on" id="vsBtnPodium" onclick="setRatingView('podium')">🏆 Подіум</button>
+        <button class="vs-btn" id="vsBtnLeader" onclick="setRatingView('leader')">👑 Leaderboard</button>
     </div>
-    
+    <div id="rankingGrid"></div>
+
 </div>
 
 <div class="panel" id="panelInsights">
@@ -746,191 +619,14 @@ const TOTEMS = [
     { id: "folk_flower", name: "Квітка Життя", style: "folk", target: 5, svg: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="20" fill="none" stroke="#fbbf24" stroke-width="3"/><circle cx="50" cy="20" r="20" fill="none" stroke="#d97706" stroke-width="3"/><circle cx="50" cy="80" r="20" fill="none" stroke="#d97706" stroke-width="3"/><circle cx="20" cy="50" r="20" fill="none" stroke="#d97706" stroke-width="3"/><circle cx="80" cy="50" r="20" fill="none" stroke="#d97706" stroke-width="3"/></svg>` }
 ];
 
-// ===== УКРАЇНСЬКІ МЕМИ через Claude AI =====
-// ===== БАНК УКРАЇНСЬКИХ МЕМІВ (локальний, без зовнішніх запитів) =====
-const MEME_BANK = [
-    // --- КЛІЄНТИ ---
-    { top: 'КЛІЄНТ ЗА ГОДИНУ ДО ЗАКРИТТЯ', bottom: 'Я ЩЕ ПОДУМАЮ', emoji: '🤔💀', title: 'Найстрашніші слова в роздробі' },
-    { top: 'КЛІЄНТ: МНЕ ПРОСТО ПОДИВИТИСЬ', bottom: 'ЧЕРЕЗ 40 ХВ: БЕРУ ВСЕ', emoji: '👀🛒', title: 'Просто подивитись' },
-    { top: 'КЛІЄНТ КАЖЕ: ДОРОГО', bottom: 'Я: ДОЗВОЛЬТЕ ПОЯСНИТИ ЦІННІСТЬ', emoji: '🎩💬', title: 'Мистецтво заперечень' },
-    { top: 'КЛІЄНТ ПРОСИТЬ ЗНИЖКУ', bottom: 'Я ВИТРИМУЮ ПАУЗУ', emoji: '🎭🤫', title: 'Пауза коштує грошей' },
-    { top: 'КЛІЄНТ: НЕ ДЗВОНІТЬ МЕНІ', bottom: 'ТОЙ ЖЕ КЛІЄНТ ЧЕРЕЗ ТИЖДЕНЬ', emoji: '📞😅', title: 'Вони завжди повертаються' },
-    { top: 'КЛІЄНТ КАЖЕ ЩО ЗНАЙШОВ ДЕШЕВШЕ', bottom: 'ПОСИЛАННЯ НЕ НАДАЄ', emoji: '🔗😏', title: 'Класика жанру' },
-    { top: 'КЛІЄНТ ПРИЙШОВ З ВІДГУКОМ З ІНТЕРНЕТУ', bottom: 'ЩО НАПИСАВ ЙОГО КОНКУРЕНТ', emoji: '🌐🤦', title: 'Довіряй але перевіряй' },
-    { top: 'КЛІЄНТ: ЦЕ ОСТАННІЙ РАЗ ЩО Я ТУТ', bottom: 'КЛІЄНТ ЧЕРЕЗ МІСЯЦЬ', emoji: '🔄😁', title: 'До побачення = до зустрічі' },
-    { top: 'КЛІЄНТ ТОРГУЄТЬСЯ ЗА 50 ГРИВЕНЬ', bottom: 'НА ПОКУПЦІ В 50 000', emoji: '🤏💸', title: 'Принципові люди' },
-    { top: 'ПОЯСНЮЄШ УМОВИ КРЕДИТУ', bottom: 'КЛІЄНТ: А МОЖНА ПРОСТІШЕ?', emoji: '📋🙃', title: 'Простіше нікуди' },
-    { top: 'КЛІЄНТ КУПИВ І ЗАДОВОЛЕНИЙ', bottom: 'КЛІЄНТ ПРОЧИТАВ ВІДГУКИ', emoji: '😊😨', title: 'Незнання — щастя' },
-    { top: 'КЛІЄНТ ПИТАЄ ЧОМУ ТАК ДОРОГО', bottom: 'Я ПИТАЮ ЧОМУ ВАШ БЮДЖЕТ ТАК МАЛИЙ', emoji: '💭🤺', title: 'Зустрічне питання' },
-    { top: 'КЛІЄНТ: Я ПОДУМАЮ ДО ПЯТНИЦІ', bottom: 'ПЯТНИЦЯ. СУБОТА. НЕДІЛЯ...', emoji: '📅🌀', title: 'Відносність часу' },
-    { top: 'КЛІЄНТ ХОЧЕ ВСЕ І ОДРАЗУ', bottom: 'І ЩОБ БЕЗКОШТОВНО', emoji: '🎁😶', title: 'Новорічні побажання' },
-    { top: 'ПРИЙШОВ БЕЗ ГРОШЕЙ', bottom: 'ПІШОВ З КРЕДИТОМ І ПОСМІШКОЮ', emoji: '😊💳', title: 'Магія фінансових рішень' },
-    // --- ПЛАН І ВИКОНАННЯ ---
-    { top: 'ПЛАН НА МІСЯЦЬ', bottom: 'ВИКОНАВ ЗА 3 ДНІ', emoji: '🚀🔥', title: 'Коли ракета, а не продавець' },
-    { top: 'ПЛАН: 100%', bottom: 'ФАКТ: 150% ЩЕ ДО ПЯТНИЦІ', emoji: '📉📈', title: 'Коли план занижений' },
-    { top: 'ПЛАН ЗБІЛЬШИЛИ НА 20%', bottom: 'ПІСЛЯ РЕКОРДНОГО МІСЯЦЯ', emoji: '📈😤', title: 'Логіка керівництва' },
-    { top: 'ПЛАН НА ЗАВТРА', bottom: 'ВИКОНАВ СЬОГОДНІ О 11:00', emoji: '⏰✅', title: 'Ефективність на максимумі' },
-    { top: 'КІНЕЦЬ МІСЯЦЯ. 98% ПЛАНУ', bottom: 'ОСТАННІЙ КЛІЄНТ НЕ БЕРЕ', emoji: '😰💔', title: '2% що змінюють все' },
-    { top: 'ВИКОНАВ ПЛАН ЗА 2 ТИЖНІ', bottom: 'ХОДЖУ ГЕРОЄМ ДО КІНЦЯ МІСЯЦЯ', emoji: '🦸🎉', title: 'Законний відпочинок' },
-    { top: 'ЗАКРИВ МІСЯЦЬ ДОСТРОКОВО', bottom: 'ПЛАН НА 1-ГЕ ВЖЕ ЧЕКАЄ', emoji: '🏆😮', title: 'Хибне відчуття безпеки' },
-    { top: 'КІНЕЦЬ МІСЯЦЯ', bottom: 'КОЖЕН ДЗВІНОК — ЗОЛОТИЙ', emoji: '⏳🏆', title: 'Остання миля' },
-    { top: '1-ГЕ ЧИСЛО МІСЯЦЯ', bottom: 'ЗНОВУ З НУЛЯ', emoji: '🔄😮', title: 'Сізіф роздрібу' },
-    { top: 'ЗРОБИВ ПЛАН ЗА ДЕНЬ', bottom: 'КЕРІВНИК: МОЛОДЕЦЬ, ЗАВТРА БІЛЬШЕ', emoji: '😑📊', title: 'Покарання за успіх' },
-    { top: 'ЖОВТЕНЬ. ПЛАНИ НА РІК', bottom: 'ГРУДЕНЬ. ПЛАНИ ПЕРЕГЛЯНУТО', emoji: '📆🙄', title: 'Живий документ' },
-    // --- CRM І ТЕХНОЛОГІЇ ---
-    { top: 'CRM У ПЯТНИЦЮ О 17:55', bottom: 'СЕРВЕР НЕ ВІДПОВІДАЄ', emoji: '💻😭', title: 'Технічна підтримка вихідних' },
-    { top: 'НАПИСАВ ЗВІТ В CRM', bottom: 'СИСТЕМА ЗАВИСЛА', emoji: '💾😡', title: 'Цифрова трагедія' },
-    { top: 'ТЕЛЕФОН СІВ ПІД ЧАС', bottom: 'НАЙВАЖЛИВІШОГО ДЗВІНКА', emoji: '📵🔋', title: 'Зарядка — святе' },
-    { top: 'ОНОВЛЕННЯ CRM ВИЙШЛО', bottom: 'ВСЯ ЛОГІКА ЗМІНИЛАСЬ', emoji: '🔄🤯', title: 'Еволюція системи' },
-    { top: 'ЗАБУВ ВВЕСТИ ДАНІ В CRM', bottom: 'ЗГАДАВ О 23:00', emoji: '🌙😰', title: 'Вечірній обовязок' },
-    { top: 'ПРИНТЕР ЗЛАМАВСЯ', bottom: 'КЛІЄНТ ЧЕКАЄ ДОГОВІР', emoji: '🖨️😬', title: 'Аналогові проблеми' },
-    { top: 'EXCEL ВИЛЕТІВ', bottom: 'БЕЗ ЗБЕРЕЖЕННЯ', emoji: '📊💀', title: 'Ctrl+S — це молитва' },
-    { top: 'WIFI ЗНИК', bottom: 'ЯКРАЗ КОЛИ ТРЕБА ОФОРМИТИ КРЕДИТ', emoji: '📶🚫', title: 'Інтернет-залежність' },
-    // --- КОЛЕГИ ---
-    { top: 'КОЛЕГА ЗАКРИВ МІСЯЦЬ', bottom: 'Я: ТРИМАЙ МОЮ КАВУ', emoji: '☕💪', title: 'Натхнення від колеги' },
-    { top: 'КОЛЕГА ВЗЯВ МІЙ КЛІЄНТ', bottom: 'ВИПАДКОВО ЗВІСНО', emoji: '😤🤝', title: 'Командна робота' },
-    { top: 'НОВЕНЬКИЙ ПРОДАВ БІЛЬШЕ ЗА МЕНЕ', bottom: 'ПЕРШИЙ ТИЖДЕНЬ', emoji: '🆕😳', title: 'Початківці небезпечні' },
-    { top: 'КОЛЕГА ПІШОВ НА ЛІКАРНЯНИЙ', bottom: 'ЯКРАЗ В КІНЦІ МІСЯЦЯ', emoji: '🤒📅', title: 'Збіг обставин' },
-    { top: 'ВЕСЬ ВІДДІЛ ВИКОНАВ ПЛАН', bottom: 'КРІМ ОДНОГО', emoji: '🎉😶', title: 'Той самий один' },
-    { top: 'КОЛЕГА: ПОМОЖИ З КЛІЄНТОМ', bottom: 'КЛІЄНТ КУПИВ У МЕНЕ', emoji: '😇💰', title: 'Несподіваний результат' },
-    { top: 'ТОП ПРОДАВЕЦЬ НА ВІДПУСТЦІ', bottom: 'МИ: ВПОРАЄМОСЬ', emoji: '😅🔥', title: 'Оптимізм команди' },
-    // --- КЕРІВНИЦТВО ---
-    { top: 'КЕРІВНИК: ТРЕБА БІЛЬШЕ ДЗВІНКІВ', bottom: 'Я: ТРЕБА ЯКІСНІШИХ КЛІЄНТІВ', emoji: '📞🤨', title: 'Різні KPI' },
-    { top: 'НАРАДА О 9:00 В ПОНЕДІЛОК', bottom: 'ПРО ТЕ ЩО МОЖНА ЛИСТОМ', emoji: '📧😴', title: 'Ефективні комунікації' },
-    { top: 'КЕРІВНИК: ПОЯСНИ ВІДСТАВАННЯ', bottom: 'Я: ПЛАН НЕРЕАЛЬНИЙ', emoji: '📉🗣️', title: 'Конструктивний діалог' },
-    { top: 'ЗВІТ ДО КІНЦЯ ДНЯ', bottom: 'ПОВІДОМЛЕННЯ О 17:58', emoji: '⏱️😤', title: 'Своєчасна постановка задач' },
-    { top: 'ПЛАН НА НАСТУПНИЙ РІК', bottom: 'ПЛЮС 30% ДО ЦЬОГОРІЧНОГО', emoji: '📆🙃', title: 'Амбітні цілі' },
-    { top: 'КЕРІВНИК: ТИ МІЙ КРАЩИЙ', bottom: 'ПІСЛЯ ВИКОНАННЯ 200% ПЛАНУ', emoji: '⭐😒', title: 'Умовна любов' },
-    // --- ПРОДАЖІ ЗАГАЛЬНО ---
-    { top: 'ТРИ ВІДМОВИ ПОСПІЛЬ', bottom: 'ЧЕТВЕРТИЙ БЕЗ ПИТАНЬ КУПИВ', emoji: '🎲🏅', title: 'Гра чисел' },
-    { top: 'ПІСЛЯ ВІДМОВИ КЛІЄНТА', bottom: 'ВІН ПОВЕРНУВСЯ І КУПИВ', emoji: '😏💰', title: 'Терпіння — це навик' },
-    { top: 'ПООБІДАТИ АБО', bottom: 'ДОТИСНУТИ КЛІЄНТА', emoji: '🍕🤝', title: 'Важкий вибір продавця' },
-    { top: 'ВИХОДИШ НА ОБІД', bottom: 'ДЗВОНИТЬ НАЙВАЖЛИВІШИЙ КЛІЄНТ', emoji: '🥗📞', title: 'Закон підлості' },
-    { top: 'ЗНОВУ ПИТАЮТЬ:', bottom: 'ЦЕ ВЖЕ ОСТАННЯ ЦІНА?', emoji: '😤💰', title: 'Питання на мільйон' },
-    { top: 'ДОЛЯ АСС 100%', bottom: 'ПРОДАВ ТІЛЬКИ ОДИН ТОВАР', emoji: '🎯😅', title: 'Математика продавця' },
-    { top: 'ПОСЛУГИ ПРОДАНО', bottom: 'КЛІЄНТ НЕ ВСТИГ ЗЛЯКАТИСЬ', emoji: '💨💼', title: 'Швидше за сумнів' },
-    { top: 'ЧЕКИ: НОВИЙ РЕКОРД', bottom: 'СЕРЕДНІЙ ЧЕК: ТЕЖ РЕКОРД', emoji: '🧾🔥', title: 'Подвійний удар' },
-    { top: 'НОВА АКЦІЯ З ПОНЕДІЛКА', bottom: 'КЛІЄНТ ПРИЙШОВ У НЕДІЛЮ', emoji: '📅😬', title: 'Завжди не вчасно' },
-    { top: 'КАМЯНЕ ОБЛИЧЧЯ', bottom: 'КОЛИ ЧУЄШ «ЩЕ ПОДУМАЮ» №7', emoji: '😐🧘', title: 'Внутрішній спокій продавця' },
-    { top: 'АСС: 0% ВІД ПЛАНУ', bottom: 'ВЧОРА ЦЕ БУВ Я', emoji: '😂📦', title: 'Чесність — сила' },
-    { top: 'МІЙ СЕРЕДНІЙ ЧЕК СЬОГОДНІ', bottom: 'КОЛЕГИ В ШОЦІ', emoji: '📊🤯', title: 'Рекордний день' },
-    { top: 'ПРОДАВЕЦЬ НА ПОЧАТКУ ДНЯ', bottom: 'ПІСЛЯ ВИКОНАННЯ ПЛАНУ', emoji: '😴🦁', title: 'Трансформація' },
-    { top: 'КЛІЄНТ КЛІЄНТУ', bottom: 'ПОРАДИВ МОЙ МАГАЗИН', emoji: '🗣️❤️', title: 'Краща реклама' },
-    { top: 'ПРОДАВ ГАРАНТІЮ НА 3 РОКИ', bottom: 'КЛІЄНТ ЩАСЛИВИЙ. Я ТЕЖ', emoji: '🛡️😄', title: 'Взаємна вигода' },
-    // --- РЕЙТИНГ І ЛІДЕРСТВО ---
-    { top: 'ТОП-1 ПО ТО ТРИ ДНІ ПОСПІЛЬ', bottom: 'НАМАГАЮСЬ ВИГЛЯДАТИ СКРОМНО', emoji: '👑😌', title: 'Скромний лідер' },
-    { top: 'ПОНЕДІЛОК 9:00', bottom: 'ПЕРШИЙ ДЗВІНОК УЖЕ КУПУЄ', emoji: '🌅💥', title: 'Понеділок для сильних' },
-    { top: 'ДИВ. НА РЕЙТИНГ', bottom: 'МОЄ ІМЯ ЗВЕРХУ', emoji: '👆😎', title: 'Приємний момент' },
-    { top: 'ХТО ТОП-1 СЬОГОДНІ', bottom: 'ЦЕ РИТОРИЧНЕ ПИТАННЯ', emoji: '🏆😏', title: 'Скромність прикраса' },
-    { top: 'МІЙ РЕЗУЛЬТАТ СЬОГОДНІ', bottom: 'МОЙ РЕЗУЛЬТАТ ВЧОРА', emoji: '📈🔝', title: 'Щодня краще' },
-    // --- ПОЧАТОК ДНЯ ---
-    { top: 'РАНОК. ПЕРША КАВА', bottom: 'ВПЕРЕД ЗАКРИВАТИ УГОДИ', emoji: '☕⚡', title: 'Ритуал продавця' },
-    { top: 'БУДИЛЬНИК О 7:00', bottom: 'КЛІЄНТ УЖЕ ПИШЕ', emoji: '⏰📱', title: 'Вони не сплять' },
-    { top: 'ПОНЕДІЛОК — ВАЖКИЙ ДЕНЬ', bottom: 'ДЛЯ ТИХ ХТО НЕ ПРОДАВЕЦЬ', emoji: '📅💪', title: 'Перезавантаження' },
-    { top: 'ВІДКРИВ ЗМІНУ', bottom: 'ПЕРШИЙ ЧЕК ЗА 5 ХВИЛИН', emoji: '🎬💨', title: 'Швидкий старт' },
-    // --- КІНЕЦЬ ДНЯ ---
-    { top: 'ПЯТНИЦЯ 17:59', bottom: 'КЛІЄНТ ЗАХОДИТЬ В МАГАЗИН', emoji: '🚪😩', title: 'Останній гість' },
-    { top: 'ПІДБИВАЄМО ПІДСУМКИ ДНЯ', bottom: 'ПІДСУМКИ МЕНІ ПОДОБАЮТЬСЯ', emoji: '📋😊', title: 'Приємна арифметика' },
-    { top: 'КІНЕЦЬ ЗМІНИ', bottom: 'НОГИ ГУДУТЬ. РЕЗУЛЬТАТ КАЙФ', emoji: '🦶🏆', title: 'Приємна втома' },
-    { top: 'ЗРОБИВ ЗВІТ ЗА ДЕНЬ', bottom: 'САМ ВРАЖЕНИЙ ЦИФРАМИ', emoji: '😲📊', title: 'Приємний сюрприз' },
-    // --- МОТИВАЦІЯ ---
-    { top: 'ПРОДАВЕЦЬ НЕ ВТОМЛЮЄТЬСЯ', bottom: 'ПРОДАВЕЦЬ ПЕРЕЗАВАНТАЖУЄТЬСЯ', emoji: '🔋⚡', title: 'Нескінченна енергія' },
-    { top: 'ВІДМОВА — ЦЕ НЕ КІНЕЦЬ', bottom: 'ЦЕ НАСТУПНИЙ КРОК', emoji: '🚶➡️', title: 'Правильний погляд' },
-    { top: 'ПОГАНИЙ ДЕНЬ?', bottom: 'ЗАВТРА РЕВАНШ', emoji: '😤🌅', title: 'Бойовий дух' },
-    { top: 'СКІЛЬКИ ВІДМОВ СЬОГОДНІ', bottom: 'СТІЛЬКИ КРОКІВ ДО УГОДИ', emoji: '🔢🎯', title: 'Позитивна математика' },
-    { top: 'ВАЖКИЙ ТИЖДЕНЬ?', bottom: 'ЛЕГКІ НЕ РОБЛЯТЬ ЧЕМПІОНІВ', emoji: '🏋️🥊', title: 'Загартування' },
-    { top: 'ДИВИСЬ НА ТОП-1', bottom: 'І РОБИ ЯК ВІН', emoji: '👁️📈', title: 'Просте правило' },
-    // --- СПЕЦИФІКА РОЗДРОБУ ---
-    { top: 'АКЦІЯ ЗАКІНЧИЛАСЬ ВЧОРА', bottom: 'КЛІЄНТ ПРИЙШОВ СЬОГОДНІ', emoji: '🏷️😬', title: 'Вічна класика' },
-    { top: 'ТОВАР ЗАКІНЧИВСЯ', bottom: 'КЛІЄНТ ХОТІВ САМЕ ЙОГО', emoji: '📦❌', title: 'Нема — значить треба' },
-    { top: 'ДОСТАВКА 3-5 ДНІВ', bottom: 'КЛІЄНТ: МЕНІ ТРЕБА СЬОГОДНІ', emoji: '🚚⚡', title: 'Нетерплячі покупці' },
-    { top: 'ГАРАНТІЯ 1 РІК', bottom: 'ЗЛАМАЛОСЬ ЧЕРЕЗ РІК І МІСЯЦЬ', emoji: '🛡️😅', title: 'Точність інженерів' },
-    { top: 'КЛІЄНТ КУПИВ ОНЛАЙН ДЕШЕВШЕ', bottom: 'ПРИЙШОВ ДО НАС РЕМОНТУВАТИ', emoji: '🌐🔧', title: 'Повний цикл' },
-    { top: 'ЧОРНА ПЯТНИЦЯ', bottom: 'МИ ДО НЕЇ ГОТУВАЛИСЬ РІК', emoji: '🖤🛍️', title: 'День Х' },
-    { top: 'НОВОРІЧНІ ПРОДАЖІ', bottom: 'СПИНА СКАЖЕ СПАСИБІ В ЛЮТОМУ', emoji: '🎄💪', title: 'Сезонний марафон' },
-    { top: 'КОМПЛЕКТ ЧИ ОКРЕМО', bottom: 'ЗВІСНО КОМПЛЕКТ', emoji: '📦✨', title: 'Правильна відповідь' },
-    { top: 'КЛІЄНТ: НЕ ПОТРІБНА СТРАХОВКА', bottom: 'КЛІЄНТ ЧЕРЕЗ 2 МІСЯЦІ', emoji: '🔨😬', title: 'Передбачливість' },
-    { top: 'РОЗПРОДАЖ ЗАЛИШКІВ', bottom: 'ЧЕРГА З РАНКУ', emoji: '🏃🏷️', title: 'Магія знижок' },
-];
 
-const MEME_BG_PALETTES = [
-    { bg: '#1e3a8a', accent: '#60a5fa' },
-    { bg: '#14532d', accent: '#4ade80' },
-    { bg: '#4c1d95', accent: '#c084fc' },
-    { bg: '#7c2d12', accent: '#fb923c' },
-    { bg: '#134e4a', accent: '#2dd4bf' },
-    { bg: '#1c1917', accent: '#fbbf24' },
-    { bg: '#1e1b4b', accent: '#a5b4fc' },
-    { bg: '#450a0a', accent: '#f87171' },
-    { bg: '#052e16', accent: '#86efac' },
-    { bg: '#3b0764', accent: '#f0abfc' },
-    { bg: '#0c4a6e', accent: '#38bdf8' },
-    { bg: '#422006', accent: '#fdba74' },
-    { bg: '#1a2e05', accent: '#bef264' },
-    { bg: '#2d1b69', accent: '#818cf8' },
-    { bg: '#0f172a', accent: '#94a3b8' },
-];
+let activeRatingView = 'podium';
 
-let lastMemeIdx = -1;
-
-function loadRandomMeme() {
-    const container = document.getElementById('memeContainer');
-    const titleEl = document.getElementById('memeTitle');
-    const btn = document.querySelector('.btn-meme');
-    if (!container || !titleEl) return;
-
-    if (btn) btn.disabled = true;
-
-    let idx;
-    do { idx = Math.floor(Math.random() * MEME_BANK.length); }
-    while (idx === lastMemeIdx && MEME_BANK.length > 1);
-    lastMemeIdx = idx;
-
-    const meme = MEME_BANK[idx];
-    const palette = MEME_BG_PALETTES[Math.floor(Math.random() * MEME_BG_PALETTES.length)];
-    renderMemeCard(container, titleEl, meme, palette);
-
-    setTimeout(() => { if (btn) btn.disabled = false; }, 300);
-}
-
-function renderMemeCard(container, titleEl, meme, palette) {
-    const bg = palette.bg;
-    const accent = palette.accent;
-    const emoji = meme.emoji || '😄';
-
-    container.innerHTML = `
-        <div style="
-            width:100%; min-height:230px;
-            background: linear-gradient(145deg, ${bg} 0%, ${bg}ee 100%);
-            display:flex; flex-direction:column;
-            align-items:center; justify-content:space-between;
-            padding:24px 20px; box-sizing:border-box;
-            font-family:'Inter',sans-serif;
-            position:relative; overflow:hidden;
-        ">
-            <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:${accent}25;pointer-events:none;"></div>
-            <div style="position:absolute;bottom:-30px;left:-30px;width:120px;height:120px;border-radius:50%;background:${accent}18;pointer-events:none;"></div>
-            <div style="
-                color:#fff; font-size:clamp(14px,4vw,18px); font-weight:900;
-                text-align:center; text-transform:uppercase; letter-spacing:0.05em;
-                text-shadow:0 2px 8px rgba(0,0,0,0.7);
-                position:relative; z-index:1; line-height:1.3;
-                max-width:92%;
-                border-bottom:2px solid ${accent}99; padding-bottom:14px;
-            ">${meme.top}</div>
-            <div style="font-size:clamp(56px,15vw,76px); line-height:1; position:relative; z-index:1;
-                filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5)); margin:6px 0;">${emoji}</div>
-            <div style="
-                color:#fff; font-size:clamp(14px,4vw,18px); font-weight:900;
-                text-align:center; text-transform:uppercase; letter-spacing:0.05em;
-                text-shadow:0 2px 8px rgba(0,0,0,0.7);
-                position:relative; z-index:1; line-height:1.3;
-                max-width:92%;
-                border-top:2px solid ${accent}99; padding-top:14px;
-            ">${meme.bottom}</div>
-        </div>`;
-
-    titleEl.textContent = meme.title;
+function setRatingView(v) {
+    activeRatingView = v;
+    document.getElementById('vsBtnPodium').classList.toggle('on', v === 'podium');
+    document.getElementById('vsBtnLeader').classList.toggle('on', v === 'leader');
+    renderRankingCards();
 }
 
 function renderTable(headers, rows, compact) {
@@ -1131,7 +827,6 @@ function setView(mode) {
             grid.innerHTML = ''; 
             renderRankingCards(); 
         }, 180);
-        loadRandomMeme();
     } else if (mode === 'insights') {
         const grid = document.getElementById('insightsGrid');
         showInsightsSkeleton(grid);
@@ -1286,7 +981,6 @@ function renderRankingCards() {
         const sFact = toNum(storeRow[factIdx]);
         const sPlan = planIdx >= 0 ? toNum(storeRow[planIdx]) : null;
         const sPctRaw = pctIdx >= 0 ? storeRow[pctIdx] : null;
-
         let sPctNum = null;
         if (['serv','acc'].includes(def.gFilter) && sFact && sPlan) {
             sPctNum = (sFact / sPlan) * 100;
@@ -1301,7 +995,6 @@ function renderRankingCards() {
             if (['income','avgcheck'].includes(def.gFilter)) return Math.round(v).toLocaleString('uk-UA') + ' грн';
             return Math.round(v).toLocaleString('uk-UA');
         };
-
         const banner = document.createElement('div');
         banner.className = 'store-banner';
         banner.style.borderLeftColor = def.color;
@@ -1317,7 +1010,6 @@ function renderRankingCards() {
     }
 
     const excluded = ['разом','сума','total','тотал','підсумок','всього','итого','відставання','відхилення','виконання','залишок'];
-
     const items = savedRows
         .filter(r => {
             const name = (r[0]||'').trim();
@@ -1335,105 +1027,224 @@ function renderRankingCards() {
         .filter(x => x.val > 0);
 
     items.sort((a, b) => b.val - a.val);
-    const maxVal = items.length ? items[0].val : 1;
+    if (!items.length) {
+        grid.innerHTML = '<div style="padding:40px;text-align:center;color:#86868b">Немає даних</div>';
+        return;
+    }
 
-    items.forEach((item, i) => {
-        const pos = i + 1;
-        const barPct = Math.round(item.val / maxVal * 100);
+    const maxVal = items[0].val;
 
-        let pctStr = null;
+    const valFmt = v => {
+        if (!v) return '—';
+        const n = Number(v);
+        if (isNaN(n)) return String(v);
+        if (def.tFilter === 'share') return n.toLocaleString('uk-UA', {minimumFractionDigits:2, maximumFractionDigits:2});
+        if (['income','avgcheck'].includes(def.gFilter)) return Math.round(n).toLocaleString('uk-UA') + ' грн';
+        return Number.isInteger(n) ? n.toLocaleString('uk-UA') : n.toLocaleString('uk-UA', {minimumFractionDigits:2, maximumFractionDigits:2});
+    };
+
+    const getPctStr = item => {
         if (['serv','acc'].includes(def.gFilter) && item.val && item.plan) {
-            pctStr = ((item.val / item.plan) * 100).toFixed(1) + '%';
+            return ((item.val / item.plan) * 100).toFixed(1) + '%';
         } else if (item.pct != null) {
             let n = toNum(item.pct);
             if (!String(item.pct).includes('%') && n > 0 && n < 2) n *= 100;
-            pctStr = n.toFixed(1) + '%';
+            return n.toFixed(1) + '%';
         }
+        return null;
+    };
 
-        const valFmt = v => {
-            if (!v) return '—';
-            const n = Number(v);
-            if (isNaN(n)) return String(v);
-            if (def.tFilter === 'share') return n.toLocaleString('uk-UA', {minimumFractionDigits:2, maximumFractionDigits:2});
-            if (['income','avgcheck'].includes(def.gFilter)) return Math.round(n).toLocaleString('uk-UA') + ' грн';
-            return Number.isInteger(n) ? n.toLocaleString('uk-UA') : n.toLocaleString('uk-UA', {minimumFractionDigits:2, maximumFractionDigits:2});
-        };
+    const getPctNum = item => {
+        const s = getPctStr(item);
+        return s ? parseFloat(s) : null;
+    };
 
-const TOP_REWARDS = [
-    { icon: '🦅', title: 'Орел продажів', desc: 'Найвищий результат дня' },
-    { icon: '🔥', title: 'Вогонь дня', desc: 'Палить конкурентів результатом' },
-    { icon: '⚡', title: 'Блискавка', desc: 'Швидко, точно, без промахів' },
-    { icon: '🎯', title: 'Снайпер', desc: 'Влучає в кожну угоду' },
-    { icon: '💎', title: 'Діамантовий продавець', desc: 'Рідкісний результат' },
-    { icon: '🚀', title: 'Ракета', desc: 'Злетів вище всіх' },
-    { icon: '🦁', title: 'Лев торгового залу', desc: 'Тримає ринг' },
-    { icon: '🏋️', title: 'Важковаговик', desc: 'Тягне найбільше' },
-    { icon: '🌟', title: 'Зірка зміни', desc: 'Всі рівняються на нього' },
-    { icon: '🐉', title: 'Дракон виторгу', desc: 'Ніхто не переплюне' },
-    { icon: '🎖️', title: 'Ветеран результату', desc: 'Стабільний бійець' },
-    { icon: '🧲', title: 'Магніт клієнтів', desc: 'До нього самі йдуть' },
-    { icon: '🦊', title: 'Хитрий лис', desc: 'Знає як закрити угоду' },
-    { icon: '⚔️', title: 'Козак продажів', desc: 'Воює за кожну гривню' },
-    { icon: '🌊', title: 'Хвиля успіху', desc: 'Змітає всі рекорди' },
-];
+    const pctClass = p => {
+        if (!p) return '';
+        if (p >= 100) return 'd-hi';
+        if (p >= 80) return 'd-mid';
+        return 'd-lo';
+    };
 
-const SILVER_REWARDS = [
-    { icon: '🥈', title: 'Срібло', desc: 'Крок від вершини' },
-    { icon: '🐺', title: 'Сірий вовк', desc: 'Наздоганяє лідера' },
-    { icon: '💪', title: 'Боєць', desc: 'Сильний результат' },
-    { icon: '🎸', title: 'Рок-зірка дня', desc: 'Виступив гідно' },
-    { icon: '🛡️', title: 'Надійний щит', desc: 'Тримає планку' },
-];
-
-const BRONZE_REWARDS = [
-    { icon: '🥉', title: 'Бронза', desc: 'Тримається в трійці' },
-    { icon: '🐯', title: 'Тигреня', desc: 'Підростає до топу' },
-    { icon: '🌱', title: 'Молодий ріст', desc: 'Є куди рости' },
-    { icon: '🔑', title: 'Відкриває двері', desc: 'Знайшов свій ключ' },
-    { icon: '⭐', title: 'Зірка в підйомі', desc: 'Слід стежити' },
-];
-
-function pickReward(pos) {
-    const pool = pos === 1 ? TOP_REWARDS : pos === 2 ? SILVER_REWARDS : BRONZE_REWARDS;
-    return pool[Math.floor(Math.random() * pool.length)];
+    // toggle between two views
+    if (activeRatingView === 'podium') {
+        renderPodiumView(grid, items, maxVal, def, valFmt, getPctStr, getPctNum);
+    } else {
+        renderLeaderboardView(grid, items, maxVal, def, valFmt, getPctStr, getPctNum, pctClass);
+    }
 }
 
-        const card = document.createElement('div');
-        card.className = 'rank-card';
-        if (pos === 1) card.classList.add('top-1');
-        else if (pos === 2) card.classList.add('top-2');
-        else if (pos === 3) card.classList.add('top-3');
-        
-        const posClass = pos===1?'gold':pos===2?'silver':pos===3?'bronze':'rest';
-        const medal = pos<=3 ? ['🥇','','🥉'][pos-1] : pos;
-        const reward = pos <= 3 ? pickReward(pos) : null;
+function toggleDetail(el) {
+    const detail = el.nextElementSibling;
+    if (!detail || !detail.classList.contains('rank-detail')) return;
+    const isOpen = detail.classList.contains('open');
+    detail.classList.toggle('open', !isOpen);
+    el.style.borderRadius = isOpen ? '' : '11px 11px 0 0';
+}
 
-        card.innerHTML = `
-            <div class="rank-bg" style="background:${def.color};width:${barPct}%"></div>
-            <div class="rank-top">
-                <div class="rank-pos ${posClass}">${medal}</div>
-                <div class="rank-name">
-                    <div class="rank-name-text">${item.name}</div>
-                    ${pctStr ? `<div class="rank-sub">${pctStr}</div>` : ''}
-                </div>
-                <div class="rank-val">
-                    <div class="rank-val-main" style="color:${def.color}">${valFmt(item.val)}</div>
-                    ${item.plan ? `<div class="rank-val-sub">план: ${valFmt(item.plan)}</div>` : ''}
-                </div>
-            </div>
-            <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${barPct}%;background:${def.color}"></div></div>
-            ${reward ? `<div class="reward-badge">
-                <span class="reward-icon">${reward.icon}</span>
-                <span class="reward-text"><span class="reward-title">${reward.title}</span>${reward.desc}</span>
-            </div>` : ''}`;
-        grid.appendChild(card);
+function renderPodiumView(grid, items, maxVal, def, valFmt, getPctStr, getPctNum) {
+    const top3 = items.slice(0, 3);
+    const rest = items.slice(3);
+
+    // Podium
+    const podWrap = document.createElement('div');
+    podWrap.className = 'podium-wrap';
+    // order: 2nd, 1st, 3rd
+    const podOrder = top3.length >= 2 ? [top3[1], top3[0], top3[2]].filter(Boolean) : top3;
+    const podClasses = top3.length >= 2 ? ['pod-2','pod-1','pod-3'] : ['pod-1','pod-2','pod-3'];
+    const podMedals = top3.length >= 2 ? ['🥈','🥇','🥉'] : ['🥇','🥈','🥉'];
+
+    podOrder.forEach((item, idx) => {
+        const pctStr = getPctStr(item);
+        const pctNum = getPctNum(item);
+        const pod = document.createElement('div');
+        pod.className = 'pod ' + podClasses[idx];
+        pod.style.animationDelay = (idx * 0.08) + 's';
+        pod.innerHTML = `
+            <div class="pod-medal">${podMedals[idx]}</div>
+            <div class="pod-name">${item.name}</div>
+            <div class="pod-val">${valFmt(item.val)}</div>
+            ${pctStr ? `<div class="pod-pct">${pctStr}</div>` : ''}`;
+        pod.onclick = () => {
+            const planStr = item.plan ? valFmt(item.plan) : null;
+            const details = [
+                planStr ? `📋 План: ${planStr}` : null,
+                pctStr ? `📊 Виконання: ${pctStr}` : null
+            ].filter(Boolean).join(' · ') || 'Додаткових даних немає';
+            pod.title = details;
+            pod.style.transform = 'scale(1.06) translateY(-6px)';
+            setTimeout(() => { pod.style.transform = ''; }, 300);
+        };
+        podWrap.appendChild(pod);
     });
+    grid.appendChild(podWrap);
 
-    if (!items.length) {
-        grid.innerHTML = '<div style="padding:40px;text-align:center;color:#86868b">Немає даних</div>';
-    } else {
-        grid.querySelectorAll('.rank-card').forEach((c,i)=>{c.classList.add('appear');c.style.animationDelay=(i*0.055)+'s';});
+    // Rest as horizontal bars
+    if (rest.length) {
+        const listWrap = document.createElement('div');
+        listWrap.className = 'hbar-list';
+        rest.forEach((item, i) => {
+            const pos = i + 4;
+            const barPct = Math.round(item.val / maxVal * 100);
+            const pctStr = getPctStr(item);
+            const pctNum = getPctNum(item);
+            const pClass = pctNum ? (pctNum >= 100 ? 'd-hi' : pctNum >= 80 ? 'd-mid' : 'd-lo') : '';
+
+            const row = document.createElement('div');
+            row.style.animationDelay = ((i + 3) * 0.055) + 's';
+            row.className = 'hbar appear';
+            row.innerHTML = `
+                <div class="hbar-bg" style="background:${def.color};width:${barPct}%"></div>
+                <span class="hb-pos">${pos}</span>
+                <span class="hb-name">${item.name}</span>
+                <div class="hb-track"><div class="hb-fill" style="width:${barPct}%;background:${def.color}"></div></div>
+                ${pctStr ? `<span class="hb-pct"><span class="delta ${pClass}">${pctStr}</span></span>` : ''}
+                <span class="hb-val">${valFmt(item.val)}</span>`;
+            // detail expand
+            const detail = document.createElement('div');
+            detail.className = 'rank-detail';
+            if (item.plan) {
+                detail.innerHTML = `
+                    <div class="rd-stat"><span class="rd-stat-lbl">Факт</span><span class="rd-stat-val" style="color:${def.color}">${valFmt(item.val)}</span></div>
+                    <div class="rd-stat"><span class="rd-stat-lbl">План</span><span class="rd-stat-val">${valFmt(item.plan)}</span></div>
+                    ${pctStr ? `<div class="rd-stat"><span class="rd-stat-lbl">Виконання</span><span class="rd-stat-val">${pctStr}</span></div>` : ''}`;
+            }
+            row.onclick = () => {
+                if (!item.plan && !pctStr) return;
+                detail.classList.toggle('open');
+            };
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'display:flex;flex-direction:column;';
+            wrapper.appendChild(row);
+            if (item.plan || pctStr) wrapper.appendChild(detail);
+            listWrap.appendChild(wrapper);
+        });
+        grid.appendChild(listWrap);
     }
+}
+
+function renderLeaderboardView(grid, items, maxVal, def, valFmt, getPctStr, getPctNum, pctClass) {
+    if (!items.length) return;
+    const leader = items[0];
+    const rest = items.slice(1);
+    const pctStr0 = getPctStr(leader);
+    const pctNum0 = getPctNum(leader);
+    const progPct = pctNum0 ? Math.min(100, pctNum0) : Math.round(leader.val / maxVal * 100);
+
+    // Hero card (1st place)
+    const heroBg = def.color;
+    const hero = document.createElement('div');
+    hero.className = 'lb-hero appear';
+    hero.style.cssText = `background: linear-gradient(135deg, ${heroBg}dd, ${heroBg}99); animation-delay: 0s;`;
+    hero.innerHTML = `
+        <div class="lb-hero-glow"></div><div class="lb-hero-glow2"></div>
+        <div class="lb-hero-crown">👑</div>
+        <div class="lb-hero-pos">1 місце · Лідер дня</div>
+        <div class="lb-hero-name">${leader.name}</div>
+        <div class="lb-hero-stats">
+            <div class="lb-hero-stat">
+                <span class="lb-hero-stat-val">${valFmt(leader.val)}</span>
+                <span class="lb-hero-stat-lbl">${def.label}</span>
+            </div>
+            ${leader.plan ? `<div class="lb-hero-stat">
+                <span class="lb-hero-stat-val">${valFmt(leader.plan)}</span>
+                <span class="lb-hero-stat-lbl">План</span>
+            </div>` : ''}
+            ${pctStr0 ? `<div class="lb-hero-stat">
+                <span class="lb-hero-stat-val">${pctStr0}</span>
+                <span class="lb-hero-stat-lbl">Виконання</span>
+            </div>` : ''}
+        </div>
+        <div class="lb-hero-prog"><div class="lb-hero-prog-fill" style="width:${progPct}%"></div></div>`;
+    hero.onclick = () => {
+        hero.style.transform = hero.style.transform ? '' : 'scale(1.015)';
+        setTimeout(() => { hero.style.transform = ''; }, 300);
+    };
+    grid.appendChild(hero);
+
+    // Rest rows
+    const listWrap = document.createElement('div');
+    listWrap.className = 'lb-list';
+    rest.forEach((item, i) => {
+        const pos = i + 2;
+        const barPct = Math.round(item.val / maxVal * 100);
+        const pctStr = getPctStr(item);
+        const pctNum = getPctNum(item);
+        const pc = pctClass(pctNum);
+        const numClass = pos === 2 ? 's' : pos === 3 ? 'b' : '';
+        const numLabel = pos === 2 ? '🥈' : pos === 3 ? '🥉' : pos;
+
+        const row = document.createElement('div');
+        row.className = 'lb-row appear';
+        row.style.animationDelay = ((i + 1) * 0.06) + 's';
+        row.innerHTML = `
+            <div class="lb-row-bg" style="background:${def.color};width:${barPct}%"></div>
+            <span class="lb-row-num ${numClass}">${numLabel}</span>
+            <span class="lb-row-name">${item.name}</span>
+            ${pctStr ? `<span class="delta ${pc}">${pctStr}</span>` : ''}
+            <span class="lb-row-val">${valFmt(item.val)}</span>`;
+
+        const detail = document.createElement('div');
+        detail.className = 'rank-detail';
+        if (item.plan || pctStr) {
+            detail.innerHTML = `
+                <div class="rd-stat"><span class="rd-stat-lbl">Факт</span><span class="rd-stat-val" style="color:${def.color}">${valFmt(item.val)}</span></div>
+                ${item.plan ? `<div class="rd-stat"><span class="rd-stat-lbl">План</span><span class="rd-stat-val">${valFmt(item.plan)}</span></div>` : ''}
+                ${pctStr ? `<div class="rd-stat"><span class="rd-stat-lbl">Виконання</span><span class="rd-stat-val">${pctStr}</span></div>` : ''}`;
+        }
+        row.onclick = () => {
+            if (!item.plan && !pctStr) return;
+            const isOpen = detail.classList.contains('open');
+            detail.classList.toggle('open', !isOpen);
+            row.style.borderRadius = isOpen ? '' : '11px 11px 0 0';
+        };
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'display:flex;flex-direction:column;';
+        wrapper.appendChild(row);
+        if (item.plan || pctStr) wrapper.appendChild(detail);
+        listWrap.appendChild(wrapper);
+    });
+    grid.appendChild(listWrap);
 }
 
 function showRatingSkeleton(grid, count=7){
@@ -1514,5 +1325,6 @@ window.addEventListener('scroll', function() {
     }
 }, { passive: true });
 </script>
+
 </body>
 </html>
