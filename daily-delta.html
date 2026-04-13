@@ -92,9 +92,11 @@ return true;
 </script>
 
 <script>
-// page-guard.js — підключи до КОЖНОЇ захищеної сторінки
-// Додай у <head> ПІСЛЯ auth.js:
-//   <script src="auth.js">
+(function() {
+  if (typeof AUTH !== 'undefined' && !AUTH.guardPage()) {
+    document.documentElement.style.visibility = 'hidden';
+  }
+})();
 </script>
 
 <title>Дельта щоденна</title>
@@ -1507,7 +1509,14 @@ else renderChart();
 async function init() {
 showSkel();
 try {
-const res = await fetch(CSV_URL + ‘&t=’ + Date.now());
+const controller = new AbortController();
+const timer = setTimeout(() => controller.abort(), 15000);
+let res;
+try {
+res = await fetch(CSV_URL + ‘&t=’ + Date.now(), { signal: controller.signal });
+} finally {
+clearTimeout(timer);
+}
 if (!res.ok) throw new Error(’HTTP ’ + res.status);
 const text = await res.text();
 const rows = parseCSV(text);
@@ -1517,7 +1526,8 @@ if (!stores.length) throw new Error(‘Не знайдено магазини у
 renderFilters();
 render();
 } catch (e) {
-document.getElementById(‘tabContent’).innerHTML = ’<div class="table-card"><div class="status-box error">❌ ’ + e.message + ‘</div></div>’;
+const msg = e.name === ‘AbortError’ ? ‘Timeout — сервер не відповів за 15 сек’ : e.message;
+document.getElementById(‘tabContent’).innerHTML = ’<div class="table-card"><div class="status-box error">❌ ’ + msg + ‘<br><small style="color:#999">Спробуйте оновити сторінку</small></div></div>’;
 console.error(e);
 }
 }
