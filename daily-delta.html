@@ -1,3 +1,9 @@
+<!DOCTYPE html>
+
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <script>
 // ============================================================
 //  auth.js  —  GORODOK Dashboard · Role-based auth
@@ -6,106 +12,91 @@
 // ============================================================
 
 const AUTH = {
-  // --- Паролі (змінюй тут) ---
-  passwords: {
-    admin:  "gteam-admin",   // пароль для адміна
-    viewer: "gteam"          // пароль для viewer (старий пароль — тепер viewer)
-  },
+// — Паролі (змінюй тут) —
+passwords: {
+admin:  “gteam-admin”,   // пароль для адміна
+viewer: “gteam”          // пароль для viewer (старий пароль — тепер viewer)
+},
 
-  // --- Захищені сторінки (тільки admin) ---
-  adminOnly: [
-    "dynamics.html",
-    "competitor-delta.html",
-    "daily-delta.html"
-  ],
+// — Захищені сторінки (тільки admin) —
+adminOnly: [
+“dynamics.html”,
+“competitor-delta.html”,
+“daily-delta.html”
+],
 
-  EXPIRY_DAYS: 30,
+EXPIRY_DAYS: 30,
 
-  // --- Зберегти сесію ---
-  save(role) {
-    localStorage.setItem("auth_role",    role);
-    localStorage.setItem("auth_date",    Date.now());
-    localStorage.setItem("isAuthorized", "true");
-  },
+// — Зберегти сесію —
+save(role) {
+localStorage.setItem(“auth_role”,    role);
+localStorage.setItem(“auth_date”,    Date.now());
+localStorage.setItem(“isAuthorized”, “true”);
+},
 
-  // --- Очистити сесію ---
-  clear() {
-    localStorage.removeItem("auth_role");
-    localStorage.removeItem("auth_date");
-    localStorage.removeItem("isAuthorized");
-  },
+// — Очистити сесію —
+clear() {
+localStorage.removeItem(“auth_role”);
+localStorage.removeItem(“auth_date”);
+localStorage.removeItem(“isAuthorized”);
+},
 
-  // --- Перевірити чи сесія ще діє ---
-  isValid() {
-    const saved = localStorage.getItem("isAuthorized");
-    const date  = parseInt(localStorage.getItem("auth_date") || "0");
-    if (saved !== "true") return false;
-    const expired = (Date.now() - date) > this.EXPIRY_DAYS * 864e5;
-    if (expired) { this.clear(); return false; }
-    return true;
-  },
+// — Перевірити чи сесія ще діє —
+isValid() {
+const saved = localStorage.getItem(“isAuthorized”);
+const date  = parseInt(localStorage.getItem(“auth_date”) || “0”);
+if (saved !== “true”) return false;
+const expired = (Date.now() - date) > this.EXPIRY_DAYS * 864e5;
+if (expired) { this.clear(); return false; }
+return true;
+},
 
-  // --- Поточна роль ---
-  getRole() {
-    return localStorage.getItem("auth_role") || null;
-  },
+// — Поточна роль —
+getRole() {
+return localStorage.getItem(“auth_role”) || null;
+},
 
-  // --- Перевірити пароль і повернути роль (або null) ---
-  checkPassword(input) {
-    if (input === this.passwords.admin)  return "admin";
-    if (input === this.passwords.viewer) return "viewer";
-    return null;
-  },
+// — Перевірити пароль і повернути роль (або null) —
+checkPassword(input) {
+if (input === this.passwords.admin)  return “admin”;
+if (input === this.passwords.viewer) return “viewer”;
+return null;
+},
 
-  // --- Чи має поточний юзер доступ до сторінки ---
-  canAccess(filename) {
-    if (!this.isValid()) return false;
-    if (this.adminOnly.includes(filename) && this.getRole() !== "admin") return false;
-    return true;
-  },
+// — Чи має поточний юзер доступ до сторінки —
+canAccess(filename) {
+if (!this.isValid()) return false;
+if (this.adminOnly.includes(filename) && this.getRole() !== “admin”) return false;
+return true;
+},
 
-  // --- Ім'я поточної html-сторінки ---
-  currentPage() {
-    return window.location.pathname.split("/").pop() || "index.html";
-  },
+// — Ім’я поточної html-сторінки —
+currentPage() {
+return window.location.pathname.split(”/”).pop() || “index.html”;
+},
 
-  // --- Викликати на захищених сторінках ---
-  guardPage() {
-    if (!this.isValid()) {
-      window.location.href = "index.html";
-      return false;
-    }
-    const page = this.currentPage();
-    if (this.adminOnly.includes(page) && this.getRole() !== "admin") {
-      window.location.href = "index.html?access=denied";
-      return false;
-    }
-    return true;
-  }
+// — Викликати на захищених сторінках —
+guardPage() {
+if (!this.isValid()) {
+window.location.href = “index.html”;
+return false;
+}
+const page = this.currentPage();
+if (this.adminOnly.includes(page) && this.getRole() !== “admin”) {
+window.location.href = “index.html?access=denied”;
+return false;
+}
+return true;
+}
 };
-
 </script>
 
 <script>
 // page-guard.js — підключи до КОЖНОЇ захищеної сторінки
 // Додай у <head> ПІСЛЯ auth.js:
-//   <script src="auth.js"></script>
-
-//   <script src="page-guard.js"></script>
-
-(function() {
-if (!AUTH.guardPage()) {
-// guardPage() сам зробить редирект — просто зупиняємо завантаження
-document.documentElement.style.visibility = ‘hidden’;
-}
-})();
-
+//   <script src="auth.js">
 </script>
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+
 <title>Дельта щоденна</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
