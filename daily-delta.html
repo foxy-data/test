@@ -301,6 +301,30 @@ th, td { font-size: 10px; padding: 3px 5px; }
 .chart-wrap canvas { transition: opacity 0.2s ease; }
 #btnTooltip.active { background: #1d1d1f !important; color: white !important; }
 #btnTooltip:not(.active) { background: #ef4444 !important; color: white !important; }
+
+/* ✅ СТИЛІ ДЛЯ ВИБОРУ ТИЖНІВ */
+#weekSelect {
+  flex: 1;
+  min-width: 100px;
+  max-width: 200px;
+  padding: 4px 8px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-family: inherit;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+#weekSelect:focus {
+  outline: 2px solid var(--accent);
+  border-color: var(--accent);
+}
+#weekSelect option {
+  padding: 4px;
+  background: var(--card);
+  color: var(--text);
+}
 </style>
 </head>
 <body>
@@ -327,6 +351,10 @@ th, td { font-size: 10px; padding: 3px 5px; }
 <div id="storePills" style="display:flex;gap:3px"></div>
 </div>
 <div class="filter-row">
+<span class="filter-label">Тиждень</span>
+<select id="weekSelect" multiple title="Утримуйте Ctrl/Cmd для вибору кількох тижнів"></select>
+</div>
+<div class="filter-row">
 <span class="filter-label">ДНІ</span>
 <div id="segmentPills" style="display:flex;gap:3px"></div>
 </div>
@@ -346,8 +374,8 @@ const STORE_BG = ['#eff6ff','#ecfeff','#faf5ff','#fdf2f8','#ecfdf5','#fffbeb','#
 // ──────────────────────────────────────────────
 // СТАН
 // ──────────────────────────────────────────────
-let stores = [], dataRows = [], allYearMonths = [];
-let selYearMonths = new Set(), selStores = new Set();
+let stores = [], dataRows = [], allYearMonths = [], allWeeks = [];
+let selYearMonths = new Set(), selStores = new Set(), selWeeks = new Set();
 let selSegments = new Set(['wd','we']);
 let activeTab = 'table', chartInstance = null;
 let selChartMode = 'store', selChartStore = '', selChartPeriod = 'day', selChartMetric = 'delta';
@@ -457,6 +485,7 @@ stores = stores.filter(s => s.name && s.name.trim() && s.cols.length > 0);
 const dataStart = subRow + 1;
 dataRows = [];
 const ymSet = new Set();
+const weekSet = new Set();
 for (let ri = dataStart; ri < rows.length; ri++) {
 const row = rows[ri];
 if (!row.some(c => c)) continue;
@@ -494,9 +523,12 @@ const isWE = dowNum >= 5 || (dowNum === 0 && isWeekend(dowName));
 const yearMonthKey = year + '_' + String(mo).padStart(2, '0');
 dataRows.push({ year, month: mo, week, dowName, dowNum, date: dateStr, storeVals, isWE, yearMonth: yearMonthKey });
 ymSet.add(yearMonthKey);
+if (week) weekSet.add(week);
 }
 allYearMonths = [...ymSet].sort();
+allWeeks = [...weekSet].sort((a,b) => a - b);
 selYearMonths = new Set(allYearMonths);
+selWeeks = new Set(allWeeks);
 selStores = new Set(stores.map(s => s.name));
 
 stores = stores.filter(st => {
@@ -510,6 +542,7 @@ selStores = new Set(stores.map(s => s.name));
 function activeData() {
 return dataRows.filter(r => {
 if (!selYearMonths.has(r.yearMonth)) return false;
+if (r.week && !selWeeks.has(r.week)) return false;
 const sts = activeStores();
 return sts.some(st => {
 const v = r.storeVals[st.name] || {};
@@ -530,6 +563,42 @@ b.textContent = text;
 b.onclick = onclick;
 if (active) { b.style.background = '#1d1d1f'; b.style.color = '#fff'; }
 return b;
+}
+function renderWeekFilter() {
+  const sel = document.getElementById('weekSelect');
+  if (!sel) return;
+  sel.innerHTML = '';
+  
+  const allOpt = document.createElement('option');
+  allOpt.value = 'all';
+  allOpt.textContent = '✓ Всі тижні';
+  allOpt.selected = true;
+  sel.appendChild(allOpt);
+  
+  allWeeks.forEach(w => {
+    const opt = document.createElement('option');
+    opt.value = w;
+    opt.textContent = 'T' + w;
+    opt.selected = true;
+    sel.appendChild(opt);
+  });
+  
+  sel.onchange = () => {
+    const values = Array.from(sel.selectedOptions).map(o => o.value);
+    selWeeks.clear();
+    
+    if (values.includes('all')) {
+      allWeeks.forEach(w => selWeeks.add(w));
+      Array.from(sel.options).forEach(o => o.selected = true);
+    } else if (values.length > 0) {
+      values.forEach(v => { if (v !== 'all') selWeeks.add(Number(v)); });
+      sel.options[0].selected = false;
+    } else {
+      allWeeks.forEach(w => selWeeks.add(w));
+      Array.from(sel.options).forEach(o => o.selected = true);
+    }
+    render();
+  };
 }
 function renderFilters() {
 const ymp = document.getElementById('yearMonthPills'); ymp.innerHTML = '';
@@ -616,6 +685,7 @@ renderFilters(); render();
 if (a) { b.style.background = '#1d1d1f'; b.style.color = '#fff'; }
 segp.appendChild(b);
 });
+renderWeekFilter();
 document.getElementById('filtersWrap').style.display = '';
 }
 // ──────────────────────────────────────────────
@@ -1200,14 +1270,14 @@ datalabels: customDataLabelsConfig
 dataset.originalColor = color;
 datasets.push(dataset);
 } else {
-// ✅ ВИПРАВЛЕНО: додано "data:" перед vals
+// ✅ ВИПРАВЛЕНО: додано "" перед vals
 sts.forEach((st, i) => {
 const color = CHART_COLORS[i % CHART_COLORS.length];
 const vals = filteredKeys.map(k => getVal(gMap.get(k), st.name));
 const dataset = {
 type: 'line',
 label: st.name.split(' ').slice(1,3).join(' '),
-data: vals,  // ← Ось що було пропущено!
+ vals,  // ← Ось що було пропущено!
 borderColor: color,
 backgroundColor: color + '22',
 borderWidth: 2.5,
@@ -1247,7 +1317,7 @@ const ctx = canvas.getContext('2d');
 
 chartInstance = new Chart(ctx, {
 plugins: [ChartDataLabels, window.ChartZoom],
-data: { labels, datasets },
+ { labels, datasets },
 options: {
 responsive: true,
 maintainAspectRatio: false,
