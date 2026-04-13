@@ -1,103 +1,13 @@
+<script src="auth.js"></script>
+
+<script src="page-guard.js"></script>
+
 <!DOCTYPE html>
 
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-<script>
-// ============================================================
-//  auth.js  —  GORODOK Dashboard · Role-based auth
-//  Ролі: admin (повний доступ) | viewer (без захищених сторінок)
-//  Захищені сторінки: dynamics.html, competitor-delta.html, daily-delta.html
-// ============================================================
-
-const AUTH = {
-// — Паролі (змінюй тут) —
-passwords: {
-admin:  “gteam-admin”,   // пароль для адміна
-viewer: “gteam”          // пароль для viewer (старий пароль — тепер viewer)
-},
-
-// — Захищені сторінки (тільки admin) —
-adminOnly: [
-“dynamics.html”,
-“competitor-delta.html”,
-“daily-delta.html”
-],
-
-EXPIRY_DAYS: 30,
-
-// — Зберегти сесію —
-save(role) {
-localStorage.setItem(“auth_role”,    role);
-localStorage.setItem(“auth_date”,    Date.now());
-localStorage.setItem(“isAuthorized”, “true”);
-},
-
-// — Очистити сесію —
-clear() {
-localStorage.removeItem(“auth_role”);
-localStorage.removeItem(“auth_date”);
-localStorage.removeItem(“isAuthorized”);
-},
-
-// — Перевірити чи сесія ще діє —
-isValid() {
-const saved = localStorage.getItem(“isAuthorized”);
-const date  = parseInt(localStorage.getItem(“auth_date”) || “0”);
-if (saved !== “true”) return false;
-const expired = (Date.now() - date) > this.EXPIRY_DAYS * 864e5;
-if (expired) { this.clear(); return false; }
-return true;
-},
-
-// — Поточна роль —
-getRole() {
-return localStorage.getItem(“auth_role”) || null;
-},
-
-// — Перевірити пароль і повернути роль (або null) —
-checkPassword(input) {
-if (input === this.passwords.admin)  return “admin”;
-if (input === this.passwords.viewer) return “viewer”;
-return null;
-},
-
-// — Чи має поточний юзер доступ до сторінки —
-canAccess(filename) {
-if (!this.isValid()) return false;
-if (this.adminOnly.includes(filename) && this.getRole() !== “admin”) return false;
-return true;
-},
-
-// — Ім’я поточної html-сторінки —
-currentPage() {
-return window.location.pathname.split(”/”).pop() || “index.html”;
-},
-
-// — Викликати на захищених сторінках —
-guardPage() {
-if (!this.isValid()) {
-window.location.href = “index.html”;
-return false;
-}
-const page = this.currentPage();
-if (this.adminOnly.includes(page) && this.getRole() !== “admin”) {
-window.location.href = “index.html?access=denied”;
-return false;
-}
-return true;
-}
-};
-
-</script>
-<script>
-(function() {
-  if (typeof AUTH !== 'undefined' && !AUTH.guardPage()) {
-    window.location.href = 'index.html';
-  }
-})();
-</script>
 <title>Дельта щоденна</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -722,30 +632,33 @@ document.getElementById(‘filtersWrap’).style.display = ‘’;
 renderWeekPills();
 }
 function renderWeekPills() {
-const monthData = dataRows.filter(r => selYearMonths.has(r.yearMonth) && r.week);
-const weekMap = new Map();
-monthData.forEach(r => { if (!weekMap.has(r.week)) weekMap.set(r.week, r.date); });
-const weeks = […weekMap.entries()].sort((a,b) => a[0]-b[0]);
+const wm = new Map();
+dataRows.filter(r => selYearMonths.has(r.yearMonth) && r.week).forEach(r => {
+if (!wm.has(r.week)) wm.set(r.week, r.date);
+});
+const weeks = […wm.entries()].sort((a,b) => a[0]-b[0]);
 const row = document.getElementById(‘weekFilterRow’);
 const cont = document.getElementById(‘weekPills’);
 cont.innerHTML = ‘’;
 if (weeks.length <= 1) { row.style.display = ‘none’; return; }
 row.style.display = ‘’;
-const allActive = selWeeks.size === 0;
 const ba = document.createElement(‘button’);
-ba.className = ‘pill pill-all’ + (allActive ? ’ active’ : ‘’);
+ba.className = ‘pill pill-all’ + (selWeeks.size === 0 ? ’ active’ : ‘’);
 ba.textContent = ‘Всі’;
-if (allActive) { ba.style.background = ‘#374151’; ba.style.color = ‘#fff’; }
+if (selWeeks.size === 0) { ba.style.background = ‘#374151’; ba.style.color = ‘#fff’; }
 ba.onclick = () => { selWeeks.clear(); renderWeekPills(); render(); };
 cont.appendChild(ba);
 weeks.forEach(([wNum, firstDate]) => {
 const active = selWeeks.has(wNum);
 const b = document.createElement(‘button’);
 b.className = ‘pill’ + (active ? ’ active’ : ‘’);
-b.textContent = ‘Тиж ’ + wNum;
-b.title = ‘Тиждень ’ + wNum + (firstDate ? ’ від ’ + fmtDate(firstDate) : ‘’);
+b.textContent = ‘Тиж ’ + wNum;
+b.title = firstDate ? ‘від ’ + fmtDate(firstDate) : ‘’;
 if (active) { b.style.background = ‘#1d1d1f’; b.style.color = ‘#fff’; }
-b.onclick = () => { if (active) selWeeks.delete(wNum); else selWeeks.add(wNum); renderWeekPills(); render(); };
+b.onclick = () => {
+if (active) selWeeks.delete(wNum); else selWeeks.add(wNum);
+renderWeekPills(); render();
+};
 cont.appendChild(b);
 });
 }
