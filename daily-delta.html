@@ -304,66 +304,6 @@ max-height: none !important;
 .chart-wrap canvas { transition: opacity 0.2s ease; }
 #btnTooltip.active { background: #1d1d1f !important; color: white !important; }
 #btnTooltip:not(.active) { background: #ef4444 !important; color: white !important; }
-
-/* ── WEEK DROPDOWN ── */
-.week-dropdown-wrap { position: relative; flex-shrink: 0; }
-.week-dropdown-btn {
-display: flex; align-items: center; gap: 5px;
-border: 1px solid #d2d2d7; background: #fff;
-border-radius: 8px; padding: 3px 9px 3px 8px;
-font-size: 11px; font-weight: 600; cursor: pointer;
-font-family: inherit; color: #1d1d1f;
-transition: border-color .15s, box-shadow .15s;
-white-space: nowrap; user-select: none;
-}
-.week-dropdown-btn:hover { border-color: #0071e3; }
-.week-dropdown-btn.open { border-color: #0071e3; box-shadow: 0 0 0 3px rgba(0,113,227,.12); }
-.week-dropdown-badge {
-background: #0071e3; color: #fff;
-border-radius: 10px; font-size: 10px; font-weight: 700;
-padding: 0 5px; min-width: 16px; text-align: center; line-height: 16px;
-}
-.week-dropdown-arrow { font-size: 9px; color: #6e6e73; transition: transform .2s; }
-.week-dropdown-btn.open .week-dropdown-arrow { transform: rotate(180deg); }
-
-.week-dropdown-panel {
-display: none; position: absolute; top: calc(100% + 5px); left: 0;
-background: #fff; border: 1px solid #d2d2d7;
-border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.12);
-z-index: 200; min-width: 160px; max-width: 220px;
-overflow: hidden;
-}
-.week-dropdown-panel.open { display: block; }
-.week-dp-header {
-display: flex; align-items: center; justify-content: space-between;
-padding: 7px 10px 5px;
-border-bottom: 1px solid #f0f0f2;
-}
-.week-dp-title { font-size: 10px; font-weight: 700; color: #6e6e73; text-transform: uppercase; letter-spacing: .05em; }
-.week-dp-actions { display: flex; gap: 6px; }
-.week-dp-act {
-font-size: 10px; font-weight: 600; color: #0071e3;
-cursor: pointer; border: none; background: none;
-font-family: inherit; padding: 0;
-}
-.week-dp-act:hover { text-decoration: underline; }
-.week-dp-list {
-max-height: 220px; overflow-y: auto; padding: 4px 0;
-scrollbar-width: thin;
-}
-.week-dp-list::-webkit-scrollbar { width: 4px; }
-.week-dp-list::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 2px; }
-.week-dp-item {
-display: flex; align-items: center; gap: 8px;
-padding: 5px 12px; cursor: pointer;
-transition: background .1s; font-size: 12px; font-weight: 600;
-color: #1d1d1f;
-}
-.week-dp-item:hover { background: #f5f5f7; }
-.week-dp-item input[type=checkbox] {
-width: 14px; height: 14px; cursor: pointer;
-accent-color: #0071e3; flex-shrink: 0;
-}
 </style>
 
 </head>
@@ -387,28 +327,12 @@ accent-color: #0071e3; flex-shrink: 0;
 <div id="yearMonthPills" style="display:flex;gap:3px"></div>
 </div>
 <div class="filter-row">
-<span class="filter-label">Тиждень</span>
-<div class="week-dropdown-wrap" id="weekDropdownWrap">
-  <button class="week-dropdown-btn" id="weekDropdownBtn" onclick="toggleWeekDropdown()">
-    <span id="weekDropdownLabel">Всі тижні</span>
-    <span class="week-dropdown-badge" id="weekDropdownBadge" style="display:none">0</span>
-    <span class="week-dropdown-arrow">▼</span>
-  </button>
-  <div class="week-dropdown-panel" id="weekDropdownPanel">
-    <div class="week-dp-header">
-      <span class="week-dp-title">Тижні</span>
-      <div class="week-dp-actions">
-        <button class="week-dp-act" onclick="weekSelectAll()">Всі</button>
-        <button class="week-dp-act" onclick="weekClearAll()">Жодного</button>
-      </div>
-    </div>
-    <div class="week-dp-list" id="weekDpList"></div>
-  </div>
-</div>
-</div>
-<div class="filter-row">
 <span class="filter-label">Магазин</span>
 <div id="storePills" style="display:flex;gap:3px"></div>
+</div>
+<div class="filter-row" id="weekFilterRow" style="display:none">
+<span class="filter-label">ТИЖДЕНЬ</span>
+<div id="weekPills" style="display:flex;gap:3px;flex-wrap:wrap"></div>
 </div>
 <div class="filter-row">
 <span class="filter-label">ДНІ</span>
@@ -433,8 +357,7 @@ const STORE_BG = ['#eff6ff','#ecfeff','#faf5ff','#fdf2f8','#ecfdf5','#fffbeb','#
 let stores = [], dataRows = [], allYearMonths = [];
 let selYearMonths = new Set(), selStores = new Set();
 let selSegments = new Set(['wd','we']);
-let allWeeks = []; // всі тижні у форматі 'YYYY_WNN'
-let selWeeks = new Set(); // вибрані тижні (порожній = всі)
+let selWeeks = new Set(); // порожньо = всі тижні
 let activeTab = 'table', chartInstance = null;
 let selChartMode = 'store', selChartStore = '', selChartPeriod = 'day', selChartMetric = 'delta';
 // ──────────────────────────────────────────────
@@ -585,12 +508,6 @@ allYearMonths = […ymSet].sort();
 selYearMonths = new Set(allYearMonths);
 selStores = new Set(stores.map(s => s.name));
 
-// Збираємо всі тижні
-const wkSet = new Set();
-dataRows.forEach(r => { if (r.week) wkSet.add(r.year + ‘_W’ + String(r.week).padStart(2,‘0’)); });
-allWeeks = […wkSet].sort();
-selWeeks = new Set(); // порожній = всі тижні
-
 stores = stores.filter(st => {
 return dataRows.some(r => {
 const v = r.storeVals[st.name] || {};
@@ -602,11 +519,7 @@ selStores = new Set(stores.map(s => s.name));
 function activeData() {
 return dataRows.filter(r => {
 if (!selYearMonths.has(r.yearMonth)) return false;
-// Фільтр тижнів: якщо selWeeks не порожній — перевіряємо
-if (selWeeks.size > 0 && r.week) {
-const wk = r.year + ‘_W’ + String(r.week).padStart(2,‘0’);
-if (!selWeeks.has(wk)) return false;
-}
+if (selWeeks.size > 0 && !selWeeks.has(r.week)) return false;
 const sts = activeStores();
 return sts.some(st => {
 const v = r.storeVals[st.name] || {};
@@ -634,6 +547,7 @@ const allYMA = allYearMonths.every(ym => selYearMonths.has(ym));
 const baYM = mkPill(‘Всі’, allYMA, ‘pill-all’, () => {
 if (allYMA) allYearMonths.forEach(ym => selYearMonths.delete(ym));
 else allYearMonths.forEach(ym => selYearMonths.add(ym));
+selWeeks.clear();
 renderFilters(); render();
 });
 if (allYMA) baYM.style.background = ‘#374151’;
@@ -662,6 +576,7 @@ const a = selYearMonths.has(ym.key);
 const b = mkPill(MONTHS_UK[ym.month-1].slice(0,3), a, ‘’, () => {
 if (a) { if (selYearMonths.size > 1) selYearMonths.delete(ym.key); }
 else selYearMonths.add(ym.key);
+selWeeks.clear();
 renderFilters(); render();
 });
 if (a) { b.style.background = ‘#1d1d1f’; b.style.color = ‘#fff’; }
@@ -714,92 +629,51 @@ if (a) { b.style.background = ‘#1d1d1f’; b.style.color = ‘#fff’; }
 segp.appendChild(b);
 });
 document.getElementById(‘filtersWrap’).style.display = ‘’;
-renderWeekDropdown();
+renderWeekPills();
 }
 
-// ──────────────────────────────────────────────
-// ТИЖДЕНЬ DROPDOWN
-// ──────────────────────────────────────────────
-function renderWeekDropdown() {
-const list = document.getElementById(‘weekDpList’);
-list.innerHTML = ‘’;
-allWeeks.forEach(wk => {
-const checked = selWeeks.size === 0 || selWeeks.has(wk);
-// Красивий лейбл: YYYY W## → “Тиж.## (YYYY)”
-const parts = wk.split(’_W’);
-const label = ’Тиж. ’ + parts[1] + (parts[0] ? ’  · ’ + parts[0] : ‘’);
-const item = document.createElement(‘label’);
-item.className = ‘week-dp-item’;
-item.innerHTML = `<input type="checkbox" ${checked ? 'checked' : ''} data-wk="${wk}"> ${label}`;
-item.querySelector(‘input’).onchange = e => {
-if (e.target.checked) {
-// Якщо були “всі” (порожній), спочатку заповнюємо всіма крім поточного
-if (selWeeks.size === 0) allWeeks.forEach(w => { if (w !== wk) selWeeks.add(w); });
-selWeeks.add(wk);
-} else {
-if (selWeeks.size === 0) allWeeks.forEach(w => selWeeks.add(w));
-selWeeks.delete(wk);
+function renderWeekPills() {
+// Збираємо тижні з поточних відфільтрованих даних (за місяцем)
+const monthData = dataRows.filter(r => selYearMonths.has(r.yearMonth) && r.week);
+const weekSet = new Map();
+monthData.forEach(r => {
+const k = r.week;
+if (!weekSet.has(k)) {
+// Беремо першу дату тижня для лейбла
+weekSet.set(k, r.date);
 }
-// Якщо обрані всі — скидаємо на “всі” (порожній)
-if (selWeeks.size === allWeeks.length) selWeeks = new Set();
-updateWeekBtn();
-render();
+});
+const weeks = […weekSet.entries()].sort((a,b) => a[0]-b[0]);
+const row = document.getElementById(‘weekFilterRow’);
+const cont = document.getElementById(‘weekPills’);
+cont.innerHTML = ‘’;
+if (weeks.length <= 1) { row.style.display = ‘none’; return; }
+row.style.display = ‘’;
+// Кнопка “Всі”
+const allActive = selWeeks.size === 0;
+const baW = document.createElement(‘button’);
+baW.className = ‘pill pill-all’ + (allActive ? ’ active’ : ‘’);
+baW.textContent = ‘Всі’;
+if (allActive) { baW.style.background = ‘#374151’; baW.style.color = ‘#fff’; }
+baW.onclick = () => { selWeeks.clear(); renderWeekPills(); render(); };
+cont.appendChild(baW);
+weeks.forEach(([wNum, firstDate]) => {
+const active = selWeeks.has(wNum);
+const b = document.createElement(‘button’);
+b.className = ‘pill’ + (active ? ’ active’ : ‘’);
+// Лейбл: “Тиж N” + дата початку
+const label = ‘Тиж ’ + wNum;
+b.textContent = label;
+b.title = ‘Тиждень ’ + wNum + (firstDate ? ’ (від ’ + fmtDate(firstDate) + ‘)’ : ‘’);
+if (active) { b.style.background = ‘#1d1d1f’; b.style.color = ‘#fff’; }
+b.onclick = () => {
+if (active) selWeeks.delete(wNum);
+else selWeeks.add(wNum);
+renderWeekPills(); render();
 };
-list.appendChild(item);
-});
-updateWeekBtn();
-}
-
-function updateWeekBtn() {
-const btn = document.getElementById(‘weekDropdownBtn’);
-const badge = document.getElementById(‘weekDropdownBadge’);
-const label = document.getElementById(‘weekDropdownLabel’);
-if (selWeeks.size === 0 || selWeeks.size === allWeeks.length) {
-label.textContent = ‘Всі тижні’;
-badge.style.display = ‘none’;
-} else {
-label.textContent = ‘Тижні’;
-badge.textContent = selWeeks.size;
-badge.style.display = ‘’;
-}
-// Оновлюємо чекбокси
-document.querySelectorAll(’#weekDpList input[type=checkbox]’).forEach(cb => {
-const wk = cb.dataset.wk;
-cb.checked = selWeeks.size === 0 || selWeeks.has(wk);
+cont.appendChild(b);
 });
 }
-
-function toggleWeekDropdown() {
-const btn = document.getElementById(‘weekDropdownBtn’);
-const panel = document.getElementById(‘weekDropdownPanel’);
-const isOpen = panel.classList.contains(‘open’);
-if (isOpen) { panel.classList.remove(‘open’); btn.classList.remove(‘open’); }
-else { panel.classList.add(‘open’); btn.classList.add(‘open’); }
-}
-
-function weekSelectAll() {
-selWeeks = new Set();
-updateWeekBtn();
-render();
-}
-
-function weekClearAll() {
-// Залишаємо хоча б один тиждень
-if (allWeeks.length) {
-selWeeks = new Set([allWeeks[allWeeks.length - 1]]);
-}
-updateWeekBtn();
-render();
-}
-
-// Закриваємо дропдаун при кліку поза ним
-document.addEventListener(‘click’, e => {
-const wrap = document.getElementById(‘weekDropdownWrap’);
-if (wrap && !wrap.contains(e.target)) {
-document.getElementById(‘weekDropdownPanel’).classList.remove(‘open’);
-document.getElementById(‘weekDropdownBtn’).classList.remove(‘open’);
-}
-});
 // ──────────────────────────────────────────────
 // ДОПОМІЖНІ ФУНКЦІЇ ДЛЯ ТАБЛИЦЬ
 // ──────────────────────────────────────────────
