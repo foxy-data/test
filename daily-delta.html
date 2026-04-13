@@ -89,22 +89,21 @@ return false;
 return true;
 }
 };
-</script>
 
+</script>
 <script>
 (function() {
   if (typeof AUTH !== 'undefined' && !AUTH.guardPage()) {
-    document.documentElement.style.visibility = 'hidden';
+    window.location.href = 'index.html';
   }
 })();
 </script>
-
 <title>Дельта щоденна</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <style>
 :root {
 --bg: #f5f5f7;
@@ -448,7 +447,7 @@ const STORE_BG = ['#eff6ff','#ecfeff','#faf5ff','#fdf2f8','#ecfdf5','#fffbeb','#
 let stores = [], dataRows = [], allYearMonths = [];
 let selYearMonths = new Set(), selStores = new Set();
 let selSegments = new Set(['wd','we']);
-let selWeeks = new Set(); // порожньо = всі тижні
+let selWeeks = new Set();
 let activeTab = 'table', chartInstance = null;
 let selChartMode = 'store', selChartStore = '', selChartPeriod = 'day', selChartMetric = 'delta';
 // ──────────────────────────────────────────────
@@ -688,7 +687,7 @@ if (allSA) baS.style.background = ‘#374151’;
 sp.appendChild(baS);
 stores.filter(s => s.name && s.name.trim()).forEach(s => {
 const a = selStores.has(s.name);
-const displayName = s.name.split(’ ‘).slice(1,4).join(’ ’);
+const displayName = s.name.split(’ ‘).slice(1,4).join(’ ‘);
 if (!displayName) return;
 const b = mkPill(displayName, a, ‘’, () => {
 if (a) { if (selStores.size > 1) selStores.delete(s.name); }
@@ -722,46 +721,31 @@ segp.appendChild(b);
 document.getElementById(‘filtersWrap’).style.display = ‘’;
 renderWeekPills();
 }
-
 function renderWeekPills() {
-// Збираємо тижні з поточних відфільтрованих даних (за місяцем)
 const monthData = dataRows.filter(r => selYearMonths.has(r.yearMonth) && r.week);
-const weekSet = new Map();
-monthData.forEach(r => {
-const k = r.week;
-if (!weekSet.has(k)) {
-// Беремо першу дату тижня для лейбла
-weekSet.set(k, r.date);
-}
-});
-const weeks = […weekSet.entries()].sort((a,b) => a[0]-b[0]);
+const weekMap = new Map();
+monthData.forEach(r => { if (!weekMap.has(r.week)) weekMap.set(r.week, r.date); });
+const weeks = […weekMap.entries()].sort((a,b) => a[0]-b[0]);
 const row = document.getElementById(‘weekFilterRow’);
 const cont = document.getElementById(‘weekPills’);
 cont.innerHTML = ‘’;
 if (weeks.length <= 1) { row.style.display = ‘none’; return; }
 row.style.display = ‘’;
-// Кнопка “Всі”
 const allActive = selWeeks.size === 0;
-const baW = document.createElement(‘button’);
-baW.className = ‘pill pill-all’ + (allActive ? ’ active’ : ‘’);
-baW.textContent = ‘Всі’;
-if (allActive) { baW.style.background = ‘#374151’; baW.style.color = ‘#fff’; }
-baW.onclick = () => { selWeeks.clear(); renderWeekPills(); render(); };
-cont.appendChild(baW);
+const ba = document.createElement(‘button’);
+ba.className = ‘pill pill-all’ + (allActive ? ’ active’ : ‘’);
+ba.textContent = ‘Всі’;
+if (allActive) { ba.style.background = ‘#374151’; ba.style.color = ‘#fff’; }
+ba.onclick = () => { selWeeks.clear(); renderWeekPills(); render(); };
+cont.appendChild(ba);
 weeks.forEach(([wNum, firstDate]) => {
 const active = selWeeks.has(wNum);
 const b = document.createElement(‘button’);
 b.className = ‘pill’ + (active ? ’ active’ : ‘’);
-// Лейбл: “Тиж N” + дата початку
-const label = ‘Тиж ’ + wNum;
-b.textContent = label;
-b.title = ‘Тиждень ’ + wNum + (firstDate ? ’ (від ’ + fmtDate(firstDate) + ‘)’ : ‘’);
+b.textContent = ‘Тиж ’ + wNum;
+b.title = ‘Тиждень ’ + wNum + (firstDate ? ’ від ’ + fmtDate(firstDate) : ‘’);
 if (active) { b.style.background = ‘#1d1d1f’; b.style.color = ‘#fff’; }
-b.onclick = () => {
-if (active) selWeeks.delete(wNum);
-else selWeeks.add(wNum);
-renderWeekPills(); render();
-};
+b.onclick = () => { if (active) selWeeks.delete(wNum); else selWeeks.add(wNum); renderWeekPills(); render(); };
 cont.appendChild(b);
 });
 }
@@ -1509,14 +1493,7 @@ else renderChart();
 async function init() {
 showSkel();
 try {
-const controller = new AbortController();
-const timer = setTimeout(() => controller.abort(), 15000);
-let res;
-try {
-res = await fetch(CSV_URL + ‘&t=’ + Date.now(), { signal: controller.signal });
-} finally {
-clearTimeout(timer);
-}
+const res = await fetch(CSV_URL + ‘&t=’ + Date.now());
 if (!res.ok) throw new Error(’HTTP ’ + res.status);
 const text = await res.text();
 const rows = parseCSV(text);
@@ -1526,20 +1503,11 @@ if (!stores.length) throw new Error(‘Не знайдено магазини у
 renderFilters();
 render();
 } catch (e) {
-const msg = e.name === ‘AbortError’ ? ‘Timeout — сервер не відповів за 15 сек’ : e.message;
-document.getElementById(‘tabContent’).innerHTML = ’<div class="table-card"><div class="status-box error">❌ ’ + msg + ‘<br><small style="color:#999">Спробуйте оновити сторінку</small></div></div>’;
+document.getElementById(‘tabContent’).innerHTML = ’<div class="table-card"><div class="status-box error">❌ ’ + e.message + ‘</div></div>’;
 console.error(e);
 }
 }
-window.addEventListener(‘DOMContentLoaded’, function() {
-// Чекаємо Chart.js (defer) максимум 3 сек, потім запускаємо без графіків
-let waited = 0;
-const tryInit = () => {
-if (typeof Chart !== ‘undefined’ || waited >= 3000) { init(); }
-else { waited += 100; setTimeout(tryInit, 100); }
-};
-tryInit();
-});
+init();
 </script>
 
 </body>
