@@ -303,17 +303,16 @@
 
     /* === VIEW SWITCHER === */
     .view-switcher {
-        display: flex; gap: 4px;
+        display: flex; gap: 5px;
         background: var(--bg); border-radius: 12px; padding: 3px;
         margin-bottom: 14px; border: 1px solid var(--border);
-        flex-wrap: wrap;
     }
     .vs-btn {
-        flex: 1; min-width: 60px; padding: 7px 8px; border: none; border-radius: 9px;
-        background: transparent; font-family: inherit; font-size: 11px;
+        flex: 1; padding: 7px 10px; border: none; border-radius: 9px;
+        background: transparent; font-family: inherit; font-size: 12px;
         font-weight: 600; cursor: pointer; color: var(--text-sec);
         transition: all .18s; display: flex; align-items: center;
-        justify-content: center; gap: 4px; white-space: nowrap;
+        justify-content: center; gap: 5px; white-space: nowrap;
     }
     .vs-btn.on {
         background: var(--card); color: var(--text);
@@ -465,79 +464,6 @@
             padding-bottom: 90px;
         }
     }
-
-    /* === BARCHART VIEW === */
-    .barchart-wrap { display: flex; flex-direction: column; gap: 6px; }
-    .bc-row {
-        display: flex; align-items: center; gap: 10px;
-        padding: 10px 14px; background: var(--card);
-        border: 1px solid var(--border); border-radius: 12px;
-        position: relative; overflow: hidden;
-        animation: fadeInUp .25s ease both;
-        transition: transform .15s, box-shadow .15s;
-        cursor: pointer;
-    }
-    .bc-row:hover { transform: translateX(3px); box-shadow: 0 3px 14px rgba(0,0,0,.09); }
-    .bc-fill-bg {
-        position: absolute; left: 0; top: 0; height: 100%;
-        opacity: .09; pointer-events: none;
-        border-radius: 0 8px 8px 0;
-        transition: width 1s cubic-bezier(.25,.8,.25,1);
-    }
-    .bc-pos { font-size: 13px; font-weight: 800; min-width: 22px; text-align: center; color: var(--text-sec); position: relative; z-index: 1; flex-shrink: 0; }
-    .bc-pos.p1 { color: #f59e0b; }
-    .bc-pos.p2 { color: #94a3b8; }
-    .bc-pos.p3 { color: #c47a3a; }
-    .bc-name { font-size: 12px; font-weight: 700; flex: 1; color: var(--text); position: relative; z-index: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .bc-bar-wrap { display: flex; flex-direction: column; gap: 3px; width: 100px; flex-shrink: 0; position: relative; z-index: 1; }
-    .bc-bar-track { height: 8px; background: #ebebef; border-radius: 4px; overflow: hidden; }
-    .bc-bar-fill { height: 100%; border-radius: 4px; transition: width 1s cubic-bezier(.25,.8,.25,1); }
-    .bc-bar-pct { font-size: 9px; color: var(--text-sec); font-weight: 600; text-align: right; }
-    .bc-val { font-size: 12px; font-weight: 800; min-width: 60px; text-align: right; color: var(--text); position: relative; z-index: 1; flex-shrink: 0; }
-    .bc-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 5px; flex-shrink: 0; position: relative; z-index: 1; }
-
-    .bc-stats-row {
-        display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;
-    }
-    .bc-stat-chip {
-        background: var(--card); border: 1px solid var(--border);
-        border-radius: 10px; padding: 8px 12px;
-        display: flex; flex-direction: column; flex: 1; min-width: 70px;
-        box-shadow: 0 1px 4px rgba(0,0,0,.05);
-    }
-    .bc-stat-chip-lbl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #a0a0ab; }
-    .bc-stat-chip-val { font-size: 14px; font-weight: 800; margin-top: 2px; }
-    .bc-stat-chip-name { font-size: 9px; color: var(--text-sec); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    /* === GAUGE VIEW === */
-    .gauge-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    @media (min-width: 480px) { .gauge-grid { grid-template-columns: repeat(3, 1fr); } }
-    @media (min-width: 768px) { .gauge-grid { grid-template-columns: repeat(4, 1fr); } }
-    .gauge-card {
-        background: var(--card); border: 1px solid var(--border);
-        border-radius: 16px; padding: 12px 10px;
-        display: flex; flex-direction: column; align-items: center; gap: 6px;
-        animation: fadeInUp .3s ease both;
-        box-shadow: var(--shadow);
-        cursor: pointer;
-        transition: transform .18s, box-shadow .18s;
-        position: relative; overflow: hidden;
-    }
-    .gauge-card:hover { transform: translateY(-3px); box-shadow: 0 6px 22px rgba(0,0,0,.12); }
-    .gauge-card.gc-1st { border-color: #f59e0b; box-shadow: 0 4px 18px rgba(245,158,11,.18); }
-    .gauge-card.gc-2nd { border-color: #94a3b8; }
-    .gauge-card.gc-3rd { border-color: #f97316; }
-    .gauge-card-rank { position: absolute; top: 8px; left: 10px; font-size: 14px; line-height: 1; }
-    .gauge-svg-wrap { width: 72px; height: 48px; position: relative; flex-shrink: 0; }
-    .gauge-svg-wrap svg { width: 100%; height: 100%; overflow: visible; }
-    .gauge-name { font-size: 11px; font-weight: 700; color: var(--text); text-align: center; line-height: 1.25; max-width: 100%; word-break: break-word; }
-    .gauge-val { font-size: 12px; font-weight: 800; text-align: center; }
-    .gauge-pct-text { font-size: 13px; font-weight: 900; text-anchor: middle; }
-    .gauge-no-plan {
-        background: var(--card); border: 1px solid var(--border);
-        border-radius: 16px; padding: 16px; grid-column: 1 / -1;
-        text-align: center; color: var(--text-sec); font-size: 12px; font-weight: 600;
-    }
 </style>
 ```
 
@@ -579,9 +505,7 @@
     <div id="storeBanner"></div>
     <div class="view-switcher" id="viewSwitcher">
         <button class="vs-btn on" id="vsBtnPodium" onclick="setRatingView('podium')">🏆 Подіум</button>
-        <button class="vs-btn" id="vsBtnLeader" onclick="setRatingView('leader')">👑 Лідер</button>
-        <button class="vs-btn" id="vsBtnBar" onclick="setRatingView('bar')">📊 Бари</button>
-        <button class="vs-btn" id="vsBtnGauge" onclick="setRatingView('gauge')">🎯 Gauge</button>
+        <button class="vs-btn" id="vsBtnLeader" onclick="setRatingView('leader')">👑 Leaderboard</button>
     </div>
     <div id="rankingGrid"></div>
 
@@ -702,8 +626,6 @@ function setRatingView(v) {
     activeRatingView = v;
     document.getElementById('vsBtnPodium').classList.toggle('on', v === 'podium');
     document.getElementById('vsBtnLeader').classList.toggle('on', v === 'leader');
-    document.getElementById('vsBtnBar').classList.toggle('on', v === 'bar');
-    document.getElementById('vsBtnGauge').classList.toggle('on', v === 'gauge');
     renderRankingCards();
 }
 
@@ -1144,13 +1066,9 @@ function renderRankingCards() {
         return 'd-lo';
     };
 
-    // toggle between views
+    // toggle between two views
     if (activeRatingView === 'podium') {
         renderPodiumView(grid, items, maxVal, def, valFmt, getPctStr, getPctNum);
-    } else if (activeRatingView === 'bar') {
-        renderBarChartView(grid, items, maxVal, def, valFmt, getPctStr, getPctNum, pctClass);
-    } else if (activeRatingView === 'gauge') {
-        renderGaugeView(grid, items, def, valFmt, getPctStr, getPctNum);
     } else {
         renderLeaderboardView(grid, items, maxVal, def, valFmt, getPctStr, getPctNum, pctClass);
     }
@@ -1329,163 +1247,7 @@ function renderLeaderboardView(grid, items, maxVal, def, valFmt, getPctStr, getP
     grid.appendChild(listWrap);
 }
 
-function renderBarChartView(grid, items, maxVal, def, valFmt, getPctStr, getPctNum, pctClass) {
-    if (!items.length) return;
-
-    // Stats chips: max, avg, min
-    const vals = items.map(x => x.val);
-    const avg = vals.reduce((s, v) => s + v, 0) / vals.length;
-    const statsRow = document.createElement('div');
-    statsRow.className = 'bc-stats-row';
-    const chips = [
-        { lbl: '🥇 Макс', val: valFmt(items[0].val), name: items[0].name, color: def.color },
-        { lbl: '⊘ Середня', val: valFmt(avg), name: '', color: '#86868b' },
-        { lbl: '↓ Мін', val: valFmt(items[items.length-1].val), name: items[items.length-1].name, color: '#a0a0ab' },
-    ];
-    chips.forEach(c => {
-        const chip = document.createElement('div');
-        chip.className = 'bc-stat-chip';
-        chip.innerHTML = `<span class="bc-stat-chip-lbl">${c.lbl}</span><span class="bc-stat-chip-val" style="color:${c.color}">${c.val}</span>${c.name ? `<span class="bc-stat-chip-name">${c.name}</span>` : ''}`;
-        statsRow.appendChild(chip);
-    });
-    grid.appendChild(statsRow);
-
-    const wrap = document.createElement('div');
-    wrap.className = 'barchart-wrap';
-
-    items.forEach((item, i) => {
-        const pos = i + 1;
-        const barPct = Math.round(item.val / maxVal * 100);
-        const pctStr = getPctStr(item);
-        const pctNum = getPctNum(item);
-        const pc = pctClass(pctNum);
-        const posClass = pos === 1 ? 'p1' : pos === 2 ? 'p2' : pos === 3 ? 'p3' : '';
-        const medal = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : pos;
-
-        const row = document.createElement('div');
-        row.className = 'bc-row appear';
-        row.style.animationDelay = (i * 0.05) + 's';
-
-        const planPct = item.plan ? Math.min(100, Math.round(item.val / item.plan * 100)) : null;
-
-        row.innerHTML = `
-            <div class="bc-fill-bg" style="background:${def.color};width:${barPct}%"></div>
-            <span class="bc-pos ${posClass}">${medal}</span>
-            <span class="bc-name">${item.name}</span>
-            <div class="bc-bar-wrap">
-                <div class="bc-bar-track"><div class="bc-bar-fill" data-w="${barPct}" style="width:0%;background:${def.color}"></div></div>
-                <div class="bc-bar-pct">${barPct}% від макс.</div>
-            </div>
-            ${pctStr ? `<span class="bc-badge delta ${pc}">${pctStr}</span>` : ''}
-            <span class="bc-val">${valFmt(item.val)}</span>`;
-
-        // expand detail
-        const detail = document.createElement('div');
-        detail.className = 'rank-detail';
-        if (item.plan || pctStr) {
-            detail.innerHTML = `
-                <div class="rd-stat"><span class="rd-stat-lbl">Факт</span><span class="rd-stat-val" style="color:${def.color}">${valFmt(item.val)}</span></div>
-                ${item.plan ? `<div class="rd-stat"><span class="rd-stat-lbl">План</span><span class="rd-stat-val">${valFmt(item.plan)}</span></div>` : ''}
-                ${pctStr ? `<div class="rd-stat"><span class="rd-stat-lbl">Виконання</span><span class="rd-stat-val">${pctStr}</span></div>` : ''}`;
-        }
-        row.onclick = () => {
-            if (!item.plan && !pctStr) return;
-            detail.classList.toggle('open');
-        };
-        const wrapper = document.createElement('div');
-        wrapper.style.cssText = 'display:flex;flex-direction:column;';
-        wrapper.appendChild(row);
-        if (item.plan || pctStr) wrapper.appendChild(detail);
-        wrap.appendChild(wrapper);
-    });
-    grid.appendChild(wrap);
-
-    // animate bars after paint
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            grid.querySelectorAll('.bc-bar-fill[data-w]').forEach(el => {
-                el.style.width = el.dataset.w + '%';
-            });
-        });
-    });
-}
-
-function renderGaugeView(grid, items, def, valFmt, getPctStr, getPctNum) {
-    if (!items.length) return;
-
-    const hasPlan = items.some(x => x.plan || getPctStr(x));
-    if (!hasPlan) {
-        const msg = document.createElement('div');
-        msg.className = 'gauge-no-plan';
-        msg.textContent = 'Для цієї метрики немає даних плану — gauge недоступний. Спробуйте Бари або Подіум.';
-        grid.appendChild(msg);
-        return;
-    }
-
-    const gGrid = document.createElement('div');
-    gGrid.className = 'gauge-grid';
-
-    const rankMedals = ['🥇','🥈','🥉'];
-
-    items.forEach((item, i) => {
-        const pctStr = getPctStr(item);
-        const pctNum = getPctNum(item);
-        if (!pctNum && !pctStr) return; // skip if no plan data
-
-        const pct = pctNum || 0;
-        const clampedPct = Math.min(pct, 150);
-        // semicircle: 0% = -180deg sweep, 100% = 0deg, capped at 150%
-        const sweep = Math.min(clampedPct / 150, 1); // 0..1
-        const R = 30, cx = 36, cy = 38;
-        const startAngle = Math.PI; // left
-        const endAngle = startAngle + sweep * Math.PI;
-        const x1 = cx + R * Math.cos(Math.PI + sweep * Math.PI);
-        const y1 = cy + R * Math.sin(Math.PI + sweep * Math.PI);
-        const largeArc = sweep > 0.5 ? 1 : 0;
-
-        const trackColor = '#ebebef';
-        const fillColor = pct >= 100 ? '#34c759' : pct >= 80 ? '#ff9500' : '#ff3b30';
-
-        const card = document.createElement('div');
-        card.className = 'gauge-card appear' + (i === 0 ? ' gc-1st' : i === 1 ? ' gc-2nd' : i === 2 ? ' gc-3rd' : '');
-        card.style.animationDelay = (i * 0.06) + 's';
-
-        const svgArc = (sa, ea) => {
-            const sx = cx + R * Math.cos(sa), sy = cy + R * Math.sin(sa);
-            const ex = cx + R * Math.cos(ea), ey = cy + R * Math.sin(ea);
-            const la = (ea - sa) > Math.PI ? 1 : 0;
-            return `M ${sx} ${sy} A ${R} ${R} 0 ${la} 1 ${ex} ${ey}`;
-        };
-
-        const trackPath = svgArc(Math.PI, 2 * Math.PI);
-        const fillPath = sweep > 0 ? svgArc(Math.PI, Math.PI + sweep * Math.PI) : '';
-
-        const pctLabel = pct.toFixed(1) + '%';
-        const medalStr = i < 3 ? rankMedals[i] : (i + 1);
-
-        card.innerHTML = `
-            <div class="gauge-card-rank">${medalStr}</div>
-            <div class="gauge-svg-wrap">
-                <svg viewBox="0 0 72 42">
-                    <path d="${trackPath}" fill="none" stroke="${trackColor}" stroke-width="7" stroke-linecap="round"/>
-                    ${fillPath ? `<path d="${fillPath}" fill="none" stroke="${fillColor}" stroke-width="7" stroke-linecap="round" class="gauge-arc-fill" data-sweep="${sweep}"/>` : ''}
-                    <text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="10" font-weight="900" fill="${fillColor}" font-family="Inter,sans-serif">${pctLabel}</text>
-                </svg>
-            </div>
-            <div class="gauge-name">${item.name}</div>
-            <div class="gauge-val" style="color:${def.color}">${valFmt(item.val)}</div>`;
-
-        card.onclick = () => {
-            card.style.transform = card.style.transform ? '' : 'scale(1.04) translateY(-4px)';
-            setTimeout(() => { card.style.transform = ''; }, 350);
-        };
-        gGrid.appendChild(card);
-    });
-
-    grid.appendChild(gGrid);
-}
-
-
+function showRatingSkeleton(grid, count=7){
     grid.innerHTML='';
     for(let i=0;i<count;i++){
         const card=document.createElement('div');card.className='rank-card-skel';
@@ -1503,7 +1265,6 @@ function renderGaugeView(grid, items, def, valFmt, getPctStr, getPctNum) {
         grid.appendChild(card);
     }
 }
-    
 
 async function load() {
     const tableCard = document.getElementById('tableCard');
