@@ -127,36 +127,16 @@ flex-shrink: 0;
 /* ── ФІЛЬТР ТИЖНІВ ── */
 .week-filter-wrap {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
   flex: 1;
   min-width: 0;
 }
-#weekAllBtn {
-  flex-shrink: 0;
-  border: 1px solid #d2d2d7;
-  background: transparent;
-  padding: 3px 9px;
-  border-radius: 7px;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  color: #555;
-  transition: all .15s;
-  white-space: nowrap;
-}
-#weekAllBtn:hover { background: #f2f2f7; }
-#weekAllBtn.active {
-  background: #374151;
-  border-color: #374151;
-  color: #fff;
-}
 #weekSelect {
   flex: 1;
-  min-width: 120px;
-  max-width: 220px;
-  padding: 3px 8px;
+  min-width: 100px;
+  max-width: 180px;
+  padding: 2px 6px;
   border-radius: 8px;
   border: 1px solid var(--border);
   font-size: 11px;
@@ -175,13 +155,23 @@ flex-shrink: 0;
   background: #fff;
 }
 #weekSelect option {
-  padding: 3px 6px;
+  padding: 2px 5px;
   font-size: 11px;
   font-family: inherit;
+  line-height: 1.3;
 }
 #weekSelect option:checked {
   background: #374151;
   color: #fff;
+}
+#weekSelect option.opt-all {
+  font-weight: 700;
+  background: #f0f0f5;
+  color: #374151;
+}
+#weekSelect option.opt-current {
+  font-weight: 700;
+  color: #0071e3;
 }
 
 .table-card {
@@ -354,7 +344,7 @@ th, td { font-size: 10px; padding: 3px 5px; }
 }
 .zoom-hint { font-size: 9px; margin-top: 6px; }
 .table-wrap { max-height: 60vh; }
-#weekSelect { max-width: 160px; }
+#weekSelect { max-width: 160px; font-size: 10px; }
 }
 
 .pill { transition: all 0.15s ease; }
@@ -389,7 +379,6 @@ th, td { font-size: 10px; padding: 3px 5px; }
 <div class="filter-row">
 <span class="filter-label">Тиждень</span>
 <div class="week-filter-wrap">
-  <button id="weekAllBtn" class="active" onclick="toggleAllWeeks()">Всі</button>
   <select id="weekSelect" multiple title="Ctrl/Cmd — кілька тижнів"></select>
 </div>
 </div>
@@ -602,65 +591,59 @@ if (active) { b.style.background = '#1d1d1f'; b.style.color = '#fff'; }
 return b;
 }
 
-function updateWeekAllBtn() {
-  const btn = document.getElementById('weekAllBtn');
-  if (!btn) return;
-  const allSelected = allWeeks.length > 0 && allWeeks.every(w => selWeeks.has(w));
-  if (allSelected) {
-    btn.classList.add('active');
-    btn.style.background = '#374151';
-    btn.style.borderColor = '#374151';
-    btn.style.color = '#fff';
-  } else {
-    btn.classList.remove('active');
-    btn.style.background = '';
-    btn.style.borderColor = '#d2d2d7';
-    btn.style.color = '#555';
-  }
-}
-
-function toggleAllWeeks() {
-  const sel = document.getElementById('weekSelect');
-  if (!sel) return;
-  const allSelected = allWeeks.length > 0 && allWeeks.every(w => selWeeks.has(w));
-  if (allSelected) {
-    // Знімаємо всі — залишаємо тільки перший щоб не спустошити
-    selWeeks = new Set(allWeeks.length ? [allWeeks[0]] : []);
-    Array.from(sel.options).forEach(o => {
-      o.selected = allWeeks.length > 0 && Number(o.value) === allWeeks[0];
-    });
-  } else {
-    selWeeks = new Set(allWeeks);
-    Array.from(sel.options).forEach(o => { o.selected = true; });
-  }
-  updateWeekAllBtn();
-  render();
+function getCurrentWeek() {
+  // ISO week number for today
+  const now = new Date();
+  const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 }
 
 function renderWeekFilter() {
   const sel = document.getElementById('weekSelect');
   if (!sel) return;
   sel.innerHTML = '';
+  const currentWeek = getCurrentWeek();
+
+  // "Всі" as first option
+  const allOpt = document.createElement('option');
+  allOpt.value = '__all__';
+  allOpt.textContent = '— Всі тижні —';
+  allOpt.className = 'opt-all';
+  const allSelected = allWeeks.length > 0 && allWeeks.every(w => selWeeks.has(w));
+  allOpt.selected = allSelected;
+  sel.appendChild(allOpt);
+
   allWeeks.forEach(w => {
     const opt = document.createElement('option');
     opt.value = w;
-    opt.textContent = 'T' + w;
+    const isCurrent = w === currentWeek;
+    opt.textContent = 'T' + w + (isCurrent ? ' ◀ поточний' : '');
     opt.selected = selWeeks.has(w);
+    if (isCurrent) opt.className = 'opt-current';
     sel.appendChild(opt);
   });
-  // Висота: показуємо до 6 тижнів одразу
-  sel.size = Math.min(allWeeks.length, 6);
-  updateWeekAllBtn();
+
+  // Compact height: show up to 5 week rows + 1 for "Всі"
+  sel.size = Math.min(allWeeks.length + 1, 6);
+
   sel.onchange = () => {
-    const selected = Array.from(sel.selectedOptions).map(o => Number(o.value));
-    if (selected.length === 0) {
-      // Якщо зняли все — повертаємо всі
+    const selected = Array.from(sel.selectedOptions).map(o => o.value);
+    if (selected.includes('__all__')) {
+      // Selected "Всі" — select all weeks
+      selWeeks = new Set(allWeeks);
+      Array.from(sel.options).forEach(o => { o.selected = true; });
+    } else if (selected.length === 0) {
       selWeeks = new Set(allWeeks);
       Array.from(sel.options).forEach(o => { o.selected = true; });
     } else {
-      selWeeks = new Set(selected);
+      selWeeks = new Set(selected.filter(v => v !== '__all__').map(Number));
+      // Update "Всі" option selected state
+      const allSel = allWeeks.every(w => selWeeks.has(w));
+      sel.options[0].selected = allSel;
     }
-    updateWeekAllBtn();
     render();
   };
 }
