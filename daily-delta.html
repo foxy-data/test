@@ -551,7 +551,7 @@ selStores = new Set(stores.map(s => s.name));
 function activeData() {
 return dataRows.filter(r => {
 if (!selYearMonths.has(r.yearMonth)) return false;
-if (r.week && !selWeeks.has(r.week)) return false;
+if (selWeeks.size > 0 && r.week && !selWeeks.has(r.week)) return false;
 const sts = activeStores();
 return sts.some(st => {
 const v = r.storeVals[st.name] || {};
@@ -593,7 +593,7 @@ function renderWeekFilter() {
   if (!wrap) return;
   wrap.innerHTML = '';
   const currentWeek = getCurrentWeek();
-  const allSel = allWeeks.length > 0 && allWeeks.every(w => selWeeks.has(w));
+  const allSel = allWeeks.length > 0 && selWeeks.size > 0 && allWeeks.every(w => selWeeks.has(w));
 
   function makeWPill(label, isActive, isCurrent, onClick) {
     const btn = document.createElement('button');
@@ -612,7 +612,6 @@ function renderWeekFilter() {
     } else {
       selWeeks = new Set(allWeeks);
     }
-    if (selWeeks.size === 0) selWeeks = new Set(allWeeks);
     renderWeekFilter();
     render();
   });
