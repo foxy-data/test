@@ -127,52 +127,37 @@ flex-shrink: 0;
 /* ── ФІЛЬТР ТИЖНІВ ── */
 .week-filter-wrap {
   display: flex;
-  align-items: flex-start;
-  gap: 6px;
+  align-items: center;
+  gap: 4px;
   flex: 1;
   min-width: 0;
-}
-#weekSelect {
-  flex: 1;
-  min-width: 100px;
-  max-width: 180px;
-  padding: 2px 6px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  font-size: 11px;
-  font-family: inherit;
-  font-weight: 500;
-  background: #fafafa;
-  color: var(--text);
-  cursor: pointer;
-  outline: none;
-  transition: border-color .15s, box-shadow .15s;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
+  padding-bottom: 2px;
 }
-#weekSelect:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(0,113,227,.15);
-  background: #fff;
-}
-#weekSelect option {
-  padding: 2px 5px;
+.week-filter-wrap::-webkit-scrollbar { height: 3px; }
+.week-filter-wrap::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 2px; }
+.wpill {
+  flex-shrink: 0;
+  border: 1px solid #d2d2d7;
+  background: transparent;
+  padding: 3px 8px;
+  border-radius: 7px;
   font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
   font-family: inherit;
-  line-height: 1.3;
+  color: #555;
+  transition: all .15s;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
-#weekSelect option:checked {
-  background: #374151;
-  color: #fff;
-}
-#weekSelect option.opt-all {
-  font-weight: 700;
-  background: #f0f0f5;
-  color: #374151;
-}
-#weekSelect option.opt-current {
-  font-weight: 700;
-  color: #0071e3;
-}
+.wpill:hover { background: #f2f2f7; }
+.wpill.active { background: #374151; border-color: #374151; color: #fff; }
+.wpill.current { border-color: #0071e3; color: #0071e3; }
+.wpill.current.active { background: #0071e3; border-color: #0071e3; color: #fff; }
 
 .table-card {
 background: var(--card);
@@ -344,7 +329,7 @@ th, td { font-size: 10px; padding: 3px 5px; }
 }
 .zoom-hint { font-size: 9px; margin-top: 6px; }
 .table-wrap { max-height: 60vh; }
-#weekSelect { max-width: 160px; font-size: 10px; }
+
 }
 
 .pill { transition: all 0.15s ease; }
@@ -378,9 +363,7 @@ th, td { font-size: 10px; padding: 3px 5px; }
 </div>
 <div class="filter-row">
 <span class="filter-label">Тиждень</span>
-<div class="week-filter-wrap">
-  <select id="weekSelect" multiple title="Ctrl/Cmd — кілька тижнів"></select>
-</div>
+<div class="week-filter-wrap" id="weekPills"></div>
 </div>
 <div class="filter-row">
 <span class="filter-label">ДНІ</span>
@@ -587,12 +570,16 @@ const b = document.createElement('button');
 b.className = 'pill' + (active ? ' active' : '') + (cls ? ' ' + cls : '');
 b.textContent = text;
 b.onclick = onclick;
-if (active) { b.style.background = '#1d1d1f'; b.style.color = '#fff'; }
+// Не перебиваємо inline-стилем — CSS-клас .pill.active і .pill-all.active
+// вже задають потрібний колір. Inline тільки для non-all активних.
+if (active && !cls.includes('pill-all')) {
+  b.style.background = '#1d1d1f';
+  b.style.color = '#fff';
+}
 return b;
 }
 
 function getCurrentWeek() {
-  // ISO week number for today
   const now = new Date();
   const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
   const dayNum = d.getUTCDay() || 7;
@@ -602,77 +589,51 @@ function getCurrentWeek() {
 }
 
 function renderWeekFilter() {
-  const sel = document.getElementById('weekSelect');
-  if (!sel) return;
-  sel.innerHTML = '';
+  const wrap = document.getElementById('weekPills');
+  if (!wrap) return;
+  wrap.innerHTML = '';
   const currentWeek = getCurrentWeek();
+  const allSel = allWeeks.length > 0 && allWeeks.every(w => selWeeks.has(w));
 
-  // "Всі" as first option
-  const allOpt = document.createElement('option');
-  allOpt.value = '__all__';
-  allOpt.textContent = '— Всі тижні —';
-  allOpt.className = 'opt-all';
-  const allSelected = allWeeks.length > 0 && allWeeks.every(w => selWeeks.has(w));
-  allOpt.selected = allSelected;
-  sel.appendChild(allOpt);
-
-  allWeeks.forEach(w => {
-    const opt = document.createElement('option');
-    opt.value = w;
-    const isCurrent = w === currentWeek;
-    opt.textContent = 'T' + w + (isCurrent ? ' ◀ поточний' : '');
-    opt.selected = selWeeks.has(w);
-    if (isCurrent) opt.className = 'opt-current';
-    sel.appendChild(opt);
-  });
-
-  // Compact height: show up to 5 week rows + 1 for "Всі"
-  sel.size = Math.min(allWeeks.length + 1, 6);
-
-  // Перехоплюємо mousedown/touchstart щоб надійно Toggle на мобільному
-  function handleWeekToggle(e) {
-    e.preventDefault();
-    const opt = e.target.closest ? e.target.closest('option') : e.target;
-    if (!opt || opt.tagName !== 'OPTION') return;
-
-    if (opt.value === '__all__') {
-      const allSel = allWeeks.every(w => selWeeks.has(w));
-      if (allSel) {
-        selWeeks = new Set();
-        Array.from(sel.options).forEach(o => { o.selected = false; });
-      } else {
-        selWeeks = new Set(allWeeks);
-        Array.from(sel.options).forEach(o => { o.selected = true; });
-      }
-    } else {
-      const w = Number(opt.value);
-      if (selWeeks.has(w)) { selWeeks.delete(w); opt.selected = false; }
-      else { selWeeks.add(w); opt.selected = true; }
-      const allSel = allWeeks.every(w => selWeeks.has(w));
-      sel.options[0].selected = allSel;
-    }
-
-    if (selWeeks.size === 0) {
-      selWeeks = new Set(allWeeks);
-      Array.from(sel.options).forEach(o => { o.selected = true; });
-    }
-    render();
+  function makeWPill(label, isActive, isCurrent, onClick) {
+    const btn = document.createElement('button');
+    btn.className = 'wpill' + (isActive ? ' active' : '') + (isCurrent ? ' current' : '');
+    btn.textContent = label;
+    btn.type = 'button';
+    // Єдиний надійний обробник і для мишки і для тачу
+    btn.addEventListener('click', onClick);
+    return btn;
   }
 
-  sel.addEventListener('mousedown', handleWeekToggle);
-  sel.addEventListener('touchstart', handleWeekToggle, { passive: false });
-  sel.onchange = () => {
-    const selected = Array.from(sel.selectedOptions).map(o => o.value).filter(v => v !== '__all__');
-    if (selected.length === 0) {
-      selWeeks = new Set(allWeeks);
-      Array.from(sel.options).forEach(o => { o.selected = true; });
+  // Кнопка "Всі"
+  const allBtn = makeWPill('Всі', allSel, false, () => {
+    if (allWeeks.every(w => selWeeks.has(w))) {
+      selWeeks = new Set();
     } else {
-      selWeeks = new Set(selected.map(Number));
-      const allSel = allWeeks.every(w => selWeeks.has(w));
-      sel.options[0].selected = allSel;
+      selWeeks = new Set(allWeeks);
     }
+    if (selWeeks.size === 0) selWeeks = new Set(allWeeks);
+    renderWeekFilter();
     render();
-  };
+  });
+  wrap.appendChild(allBtn);
+
+  // Кнопки для кожного тижня
+  allWeeks.forEach(w => {
+    const isCur = w === currentWeek;
+    const isAct = selWeeks.has(w);
+    const label = 'T' + w + (isCur ? ' ★' : '');
+    const btn = makeWPill(label, isAct, isCur, () => {
+      if (selWeeks.has(w)) {
+        if (selWeeks.size > 1) selWeeks.delete(w);
+      } else {
+        selWeeks.add(w);
+      }
+      renderWeekFilter();
+      render();
+    });
+    wrap.appendChild(btn);
+  });
 }
 
 function renderFilters() {
@@ -683,7 +644,6 @@ if (allYMA) allYearMonths.forEach(ym => selYearMonths.delete(ym));
 else allYearMonths.forEach(ym => selYearMonths.add(ym));
 renderFilters(); render();
 });
-if (allYMA) baYM.style.background = '#374151';
 ymp.appendChild(baYM);
 
 const yearsGrouped = {};
@@ -723,7 +683,6 @@ if (allSA) stores.forEach(s => selStores.delete(s.name));
 else stores.forEach(s => selStores.add(s.name));
 renderFilters(); render();
 });
-if (allSA) baS.style.background = '#374151';
 sp.appendChild(baS);
 stores.filter(s => s.name && s.name.trim()).forEach(s => {
 const a = selStores.has(s.name);
@@ -747,7 +706,6 @@ if (allSeg) segDefs.forEach(s => selSegments.delete(s.key));
 else segDefs.forEach(s => selSegments.add(s.key));
 renderFilters(); render();
 });
-if (allSeg) baSeg.style.background = '#374151';
 segp.appendChild(baSeg);
 segDefs.forEach(s => {
 const a = selSegments.has(s.key);
