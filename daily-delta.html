@@ -629,18 +629,45 @@ function renderWeekFilter() {
   // Compact height: show up to 5 week rows + 1 for "Всі"
   sel.size = Math.min(allWeeks.length + 1, 6);
 
-  sel.onchange = () => {
-    const selected = Array.from(sel.selectedOptions).map(o => o.value);
-    if (selected.includes('__all__')) {
-      // Selected "Всі" — select all weeks
+  // Перехоплюємо mousedown/touchstart щоб надійно Toggle на мобільному
+  function handleWeekToggle(e) {
+    e.preventDefault();
+    const opt = e.target.closest ? e.target.closest('option') : e.target;
+    if (!opt || opt.tagName !== 'OPTION') return;
+
+    if (opt.value === '__all__') {
+      const allSel = allWeeks.every(w => selWeeks.has(w));
+      if (allSel) {
+        selWeeks = new Set();
+        Array.from(sel.options).forEach(o => { o.selected = false; });
+      } else {
+        selWeeks = new Set(allWeeks);
+        Array.from(sel.options).forEach(o => { o.selected = true; });
+      }
+    } else {
+      const w = Number(opt.value);
+      if (selWeeks.has(w)) { selWeeks.delete(w); opt.selected = false; }
+      else { selWeeks.add(w); opt.selected = true; }
+      const allSel = allWeeks.every(w => selWeeks.has(w));
+      sel.options[0].selected = allSel;
+    }
+
+    if (selWeeks.size === 0) {
       selWeeks = new Set(allWeeks);
       Array.from(sel.options).forEach(o => { o.selected = true; });
-    } else if (selected.length === 0) {
+    }
+    render();
+  }
+
+  sel.addEventListener('mousedown', handleWeekToggle);
+  sel.addEventListener('touchstart', handleWeekToggle, { passive: false });
+  sel.onchange = () => {
+    const selected = Array.from(sel.selectedOptions).map(o => o.value).filter(v => v !== '__all__');
+    if (selected.length === 0) {
       selWeeks = new Set(allWeeks);
       Array.from(sel.options).forEach(o => { o.selected = true; });
     } else {
-      selWeeks = new Set(selected.filter(v => v !== '__all__').map(Number));
-      // Update "Всі" option selected state
+      selWeeks = new Set(selected.map(Number));
       const allSel = allWeeks.every(w => selWeeks.has(w));
       sel.options[0].selected = allSel;
     }
