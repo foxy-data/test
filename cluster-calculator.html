@@ -470,7 +470,8 @@ function renderMobileTable(){
   const mob=document.getElementById('tableMobile');
   mob.innerHTML='';
   const quarters=[{q:1,idx:[0,1,2],qc:'q1',ql:'1 квартал'},{q:2,idx:[3,4,5],qc:'q2',ql:'2 квартал'},{q:3,idx:[6,7,8],qc:'q3',ql:'3 квартал'},{q:4,idx:[9,10,11],qc:'q4',ql:'4 квартал'}];
-  const qColors={'q1':'#93c5fd','q2':'#6ee7b7','q3':'#fcd34d','q4':'#fca5a5'};
+  const isLight=document.documentElement.classList.contains('light');
+  const qColors=isLight?{'q1':'#1d4ed8','q2':'#047857','q3':'#b45309','q4':'#b91c1c'}:{'q1':'#93c5fd','q2':'#6ee7b7','q3':'#fcd34d','q4':'#fca5a5'};
   const qBg={'q1':'rgba(59,130,246,.18)','q2':'rgba(16,185,129,.18)','q3':'rgba(245,158,11,.18)','q4':'rgba(239,68,68,.18)'};
 
   quarters.forEach(qt=>{
