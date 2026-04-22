@@ -143,26 +143,40 @@ html:not(.light) .q4-label{color:#fca5a5}
 /* MOBILE TABLE CARDS */
 @media(max-width:640px){
   .table-desktop{display:none}
-  .table-mobile{display:block}
-  .mob-quarter{font-family:'Unbounded',sans-serif;font-size:9px;font-weight:600;letter-spacing:.06em;padding:10px 14px 6px;border-bottom:1px solid var(--border)}
-  .mob-row{border-bottom:1px solid rgba(37,45,61,.3);padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}
-  .mob-row:last-child{border-bottom:none}
-  .mob-month{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-  .mob-month-name{font-size:12px;font-weight:500;color:var(--text)}
-  .mob-ksez{font-family:'Unbounded',sans-serif;font-size:10px;font-weight:600;color:var(--text2)}
-  .mob-cell{display:flex;flex-direction:column;gap:2px}
-  .mob-cell .mob-lbl{font-size:8.5px;font-family:'Unbounded',sans-serif;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
-  .mob-cell .mob-val{font-size:11.5px;font-weight:500;color:var(--text)}
-  .mob-cell .mob-val.accent{color:var(--accent);font-weight:700;font-family:'Unbounded',sans-serif}
-  .mob-cell .mob-val.muted{color:var(--text2);font-weight:700;font-family:'Unbounded',sans-serif}
+  .table-mobile{display:flex;flex-direction:column;gap:10px;padding:12px}
+
+  /* Quarter block — card */
+  .mob-quarter-block{border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+  .mob-quarter{font-family:'Unbounded',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;padding:9px 14px;display:flex;align-items:center;gap:8px}
+  .mob-ql{font-family:'Unbounded',sans-serif;font-size:8px;font-weight:700;letter-spacing:.06em;padding:3px 9px;border-radius:5px;display:inline-block}
+
+  /* Month rows inside quarter */
+  .mob-row{padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;border-top:1px solid rgba(37,45,61,.35)}
+  html.light .mob-row{border-top-color:rgba(208,218,234,.6)}
+
+  .mob-month{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+  .mob-month-name{font-size:12.5px;font-weight:600;color:var(--text);font-family:'Unbounded',sans-serif;font-stretch:normal;line-height:1.3}
+  .mob-ksez{font-family:'Unbounded',sans-serif;font-size:10px;font-weight:600;color:var(--text2);line-height:1.3}
+
+  .mob-cell{display:flex;flex-direction:column;gap:3px}
+  .mob-cell .mob-lbl{font-size:8px;font-family:'Unbounded',sans-serif;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;line-height:1.2;font-stretch:normal}
+  .mob-cell .mob-val{font-size:12px;font-weight:500;color:var(--text);line-height:1.3;font-stretch:normal}
+  .mob-cell .mob-val.accent{color:var(--accent);font-weight:700;font-family:'Unbounded',sans-serif;font-stretch:normal;line-height:1.3}
+  .mob-cell .mob-val.muted{color:var(--accent3);font-weight:700;font-family:'Unbounded',sans-serif;font-stretch:normal;line-height:1.3}
+
   .mob-fact-wrap{grid-column:1/-1}
-  .mob-fact-wrap .mob-lbl{margin-bottom:4px}
-  .mob-fact-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-family:'Geologica',sans-serif;font-size:13px;text-align:right;outline:none;transition:border-color .2s}
-  .mob-fact-input:focus{border-color:var(--accent)}
-  .mob-zto{font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;color:#34d399}
+  .mob-fact-wrap .mob-lbl{margin-bottom:5px}
+  .mob-fact-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'Geologica',sans-serif;font-size:14px;text-align:right;outline:none;transition:border-color .2s,box-shadow .2s}
+  .mob-fact-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(59,130,246,.15)}
+
+  /* Залік острівець */
+  .mob-zalik{grid-column:1/-1;margin-top:4px;display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:9px;overflow:hidden;border:1px solid var(--border)}
+  .mob-zalik-cell{padding:9px 12px;display:flex;flex-direction:column;gap:3px;background:var(--surface2)}
+  .mob-zalik-cell:first-child{border-right:1px solid var(--border)}
+  .mob-zalik-cell .mob-lbl{font-size:8px;font-family:'Unbounded',sans-serif;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;line-height:1.2}
+  .mob-zto{font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;color:#34d399;line-height:1.3;font-stretch:normal}
   .mob-zto.em{color:var(--text3)}
-  .mob-zck{font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;color:var(--accent3)}
-  .mob-ql{font-family:'Unbounded',sans-serif;font-size:8px;font-weight:600;letter-spacing:.05em;padding:2px 7px;border-radius:4px;display:inline-block}
+  .mob-zck{font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;color:var(--accent3);line-height:1.3;font-stretch:normal}
 }
 @media(min-width:641px){
   .table-desktop{display:block}
@@ -531,11 +545,15 @@ function renderMobileTable(){
     const zto=calcZTO(facts,ks,plansC);
     const zk=calcZK(zto);
 
+    const qBlock=document.createElement('div');
+    qBlock.className='mob-quarter-block';
+
     const qHead=document.createElement('div');
     qHead.className='mob-quarter';
     qHead.style.cssText=`color:${qColors[qt.qc]};background:${qBg[qt.qc]}`;
     qHead.innerHTML=`<span class="mob-ql" style="background:${qBg[qt.qc]};color:${qColors[qt.qc]}">${qt.ql}</span>`;
-    mob.appendChild(qHead);
+    qBlock.appendChild(qHead);
+    mob.appendChild(qBlock);
 
     qt.idx.forEach((mi,qmi)=>{
       const ks_m=getKSez(mi);
@@ -577,10 +595,18 @@ function renderMobileTable(){
       row.className='mob-row';
       row.style.background=`var(--${qt.qc})`;
 
-      let ztoHtml='', zkHtml='';
+      let zalikHtml='';
       if(isLastOfQ){
-        ztoHtml=`<div class="mob-cell"><div class="mob-lbl">Залік ТО</div><div class="mob-val"><span class="mob-zto ${zto!==null?'':'em'}">${zto!==null?fmt(zto):'—'}</span></div></div>`;
-        zkHtml=`<div class="mob-cell"><div class="mob-lbl">Залік К обігу</div><div class="mob-val"><span class="mob-zck">${zk!==null?'×'+zk:'—'}</span></div></div>`;
+        zalikHtml=`<div class="mob-zalik">
+          <div class="mob-zalik-cell">
+            <div class="mob-lbl">Залік ТО</div>
+            <span class="mob-zto ${zto!==null?'':'em'}">${zto!==null?fmt(zto):'—'}</span>
+          </div>
+          <div class="mob-zalik-cell">
+            <div class="mob-lbl">К обігу</div>
+            <span class="mob-zck">${zk!==null?'×'+zk:'—'}</span>
+          </div>
+        </div>`;
       }
 
       row.innerHTML=`
@@ -594,8 +620,8 @@ function renderMobileTable(){
         </div>
         <div class="mob-cell"><div class="mob-lbl">План підняття</div><div class="mob-val accent">${pR!==null?fmt(pR):'—'}</div></div>
         <div class="mob-cell"><div class="mob-lbl">План підтвердж.</div><div class="mob-val muted">${fmt(pC)}</div></div>
-        ${ztoHtml}${zkHtml}`;
-      mob.appendChild(row);
+        ${zalikHtml}`;
+      qBlock.appendChild(row);
     });
   });
 }
