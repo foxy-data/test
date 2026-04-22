@@ -127,8 +127,8 @@ flex-shrink: 0;
 /* ── ФІЛЬТР ТИЖНІВ ── */
 .week-filter-wrap {
   display: flex;
-  align-items: center;
-  gap: 4px;
+  align-items: flex-end;
+  gap: 0;
   flex: 1;
   min-width: 0;
   overflow-x: auto;
@@ -352,6 +352,10 @@ th, td { font-size: 10px; padding: 3px 5px; }
 <button class="tab" onclick="switchTab('monthly')">🗓 По місяцях</button>
 <button class="tab" onclick="switchTab('chart')">📈 Динаміка</button>
 </div>
+
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+  <button id="btnDiffToggle" class="pill active" onclick="showDiff=!showDiff;updateDiffToggleBtn();render();" style="background:#374151;color:#fff;border:none;padding:4px 12px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">↕ Відхилення: ON</button>
+</div>
 <div class="filters-wrap" id="filtersWrap" style="display:none">
 <div class="filter-row">
 <span class="filter-label">Рік-Місяць</span>
@@ -387,8 +391,10 @@ const STORE_BG = ['#eff6ff','#ecfeff','#faf5ff','#fdf2f8','#ecfdf5','#fffbeb','#
 // ──────────────────────────────────────────────
 let stores = [], dataRows = [], allYearMonths = [], allWeeks = [];
 let selYearMonths = new Set(), selStores = new Set(), selWeeks = new Set();
+let showTotal = false;
 let selSegments = new Set(['wd','we']);
 let activeTab = 'table', chartInstance = null;
+let showDiff = true;
 let selChartMode = 'store', selChartStore = '', selChartPeriod = 'day', selChartMetric = 'delta';
 // ──────────────────────────────────────────────
 // УТИЛІТИ
@@ -593,45 +599,103 @@ function renderWeekFilter() {
   if (!wrap) return;
   wrap.innerHTML = '';
   const currentWeek = getCurrentWeek();
-  const allSel = allWeeks.length > 0 && selWeeks.size > 0 && allWeeks.every(w => selWeeks.has(w));
+  const allSel = allWeeks.length > 0 && allWeeks.every(w => selWeeks.has(w));
 
-  function makeWPill(label, isActive, isCurrent, onClick) {
+  function makeWPill(label, isActive, isCurrent, onClick, extraStyle) {
     const btn = document.createElement('button');
     btn.className = 'wpill' + (isActive ? ' active' : '') + (isCurrent ? ' current' : '');
     btn.textContent = label;
     btn.type = 'button';
-    // Єдиний надійний обробник і для мишки і для тачу
+    if (extraStyle) Object.assign(btn.style, extraStyle);
     btn.addEventListener('click', onClick);
     return btn;
   }
 
-  // Кнопка "Всі"
-  const allBtn = makeWPill('Всі', allSel, false, () => {
-    if (allWeeks.every(w => selWeeks.has(w))) {
-      selWeeks = new Set();
-    } else {
-      selWeeks = new Set(allWeeks);
-    }
-    renderWeekFilter();
-    render();
-  });
-  wrap.appendChild(allBtn);
+  // ── Кнопки Всі / Остання / +3 ──
+  const ctrlDiv = document.createElement('div');
+  ctrlDiv.style.cssText = 'display:flex;gap:3px;align-items:center;flex-shrink:0;margin-right:6px;border-right:1px solid #e0e0e6;padding-right:6px;';
 
-  // Кнопки для кожного тижня
+  ctrlDiv.appendChild(makeWPill('Всі', allSel, false, () => {
+    if (allWeeks.every(w => selWeeks.has(w))) selWeeks = new Set();
+    else selWeeks = new Set(allWeeks);
+    renderWeekFilter(); render();
+  }));
+
+  // Кнопка "Поточний тиждень"
+  ctrlDiv.appendChild(makeWPill('★ Зараз', selWeeks.size === 1 && selWeeks.has(currentWeek), true, () => {
+    selWeeks = new Set([currentWeek]);
+    renderWeekFilter(); render();
+  }));
+
+  // Кнопка "Останні 4 тижні"
+  const last4 = allWeeks.slice(-4);
+  const last4sel = last4.length > 0 && last4.every(w => selWeeks.has(w)) && selWeeks.size === last4.length;
+  ctrlDiv.appendChild(makeWPill('4 тижні', last4sel, false, () => {
+    selWeeks = new Set(last4);
+    renderWeekFilter(); render();
+  }, {fontSize:'10px'}));
+
+  wrap.appendChild(ctrlDiv);
+
+  // ── Групування по місяцях ──
+  // Для кожного тижня знаходимо місяць з dataRows
+  const weekMonthMap = new Map();
+  dataRows.forEach(r => {
+    if (r.week && r.month) {
+      if (!weekMonthMap.has(r.week)) weekMonthMap.set(r.week, new Map());
+      const cnt = weekMonthMap.get(r.week);
+      cnt.set(r.month, (cnt.get(r.month)||0) + 1);
+    }
+  });
+  function weekMainMonth(w) {
+    const m = weekMonthMap.get(w);
+    if (!m) return 0;
+    let best = 0, bestCnt = 0;
+    m.forEach((cnt, mo) => { if (cnt > bestCnt) { bestCnt = cnt; best = mo; } });
+    return best;
+  }
+
+  // Групуємо тижні по місяцях
+  const monthGroups = new Map();
   allWeeks.forEach(w => {
-    const isCur = w === currentWeek;
-    const isAct = selWeeks.has(w);
-    const label = 'T' + w + (isCur ? ' ★' : '');
-    const btn = makeWPill(label, isAct, isCur, () => {
-      if (selWeeks.has(w)) {
-        if (selWeeks.size > 1) selWeeks.delete(w);
-      } else {
-        selWeeks.add(w);
-      }
-      renderWeekFilter();
-      render();
+    const mo = weekMainMonth(w);
+    if (!monthGroups.has(mo)) monthGroups.set(mo, []);
+    monthGroups.get(mo).push(w);
+  });
+
+  const sortedMonths = [...monthGroups.keys()].sort((a,b) => a - b);
+  sortedMonths.forEach(mo => {
+    const weeks = monthGroups.get(mo);
+    const grpDiv = document.createElement('div');
+    grpDiv.style.cssText = 'display:flex;flex-direction:column;gap:2px;flex-shrink:0;margin-right:4px;';
+
+    const moLabel = document.createElement('div');
+    moLabel.style.cssText = 'font-size:9px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.04em;padding:0 2px;cursor:pointer;';
+    moLabel.textContent = (MONTHS_UK[mo-1]||'?').slice(0,3);
+    // Клік по назві місяця — вибрати всі тижні цього місяця
+    moLabel.title = 'Вибрати всі тижні ' + (MONTHS_UK[mo-1]||'');
+    moLabel.addEventListener('click', () => {
+      const allMonthSel = weeks.every(w => selWeeks.has(w));
+      if (allMonthSel) weeks.forEach(w => { if (selWeeks.size > 1) selWeeks.delete(w); });
+      else weeks.forEach(w => selWeeks.add(w));
+      renderWeekFilter(); render();
     });
-    wrap.appendChild(btn);
+    grpDiv.appendChild(moLabel);
+
+    const pillsDiv = document.createElement('div');
+    pillsDiv.style.cssText = 'display:flex;gap:2px;';
+    weeks.forEach(w => {
+      const isCur = w === currentWeek;
+      const isAct = selWeeks.has(w);
+      const btn = makeWPill('T' + w, isAct, isCur, () => {
+        if (selWeeks.has(w)) { if (selWeeks.size > 1) selWeeks.delete(w); }
+        else selWeeks.add(w);
+        renderWeekFilter(); render();
+      });
+      pillsDiv.appendChild(btn);
+    });
+    grpDiv.appendChild(pillsDiv);
+    wrap.appendChild(grpDiv);
   });
 }
 
@@ -677,12 +741,24 @@ ymp.appendChild(yearDiv);
 
 const sp = document.getElementById('storePills'); sp.innerHTML = '';
 const allSA = stores.every(s => selStores.has(s.name));
-const baS = mkPill('\u0412\u0441\u0456', allSA, 'pill-all', () => {
+const baS = mkPill('Всі', allSA, 'pill-all', () => {
 if (allSA) stores.forEach(s => selStores.delete(s.name));
 else stores.forEach(s => selStores.add(s.name));
 renderFilters(); render();
 });
 sp.appendChild(baS);
+
+// Пілюля "Тотал"
+const bTotal = document.createElement('button');
+bTotal.className = 'pill' + (showTotal ? ' active' : '');
+bTotal.textContent = '∑ Тотал';
+bTotal.title = 'Показати загальну колонку по всіх магазинах';
+bTotal.style.cssText = showTotal
+  ? 'background:#0071e3;color:#fff;border:1px solid #0071e3;'
+  : 'border:1px dashed #0071e3;color:#0071e3;background:transparent;';
+bTotal.onclick = () => { showTotal = !showTotal; renderFilters(); render(); };
+sp.appendChild(bTotal);
+
 stores.filter(s => s.name && s.name.trim()).forEach(s => {
 const a = selStores.has(s.name);
 const displayName = s.name.split(' ').slice(1,4).join(' ');
@@ -773,21 +849,39 @@ if (i > 0) th.style.borderLeft = '2px solid rgba(255,255,255,0.2)';
 th.colSpan = 3; th.title = st.name;
 trG.appendChild(th);
 });
+if (showTotal) {
+  const th = mkTh('∑ ТОТАЛ', 'grp', {background:'#374151'});
+  th.style.borderLeft = '3px solid rgba(255,255,255,0.4)';
+  th.colSpan = 3;
+  trG.appendChild(th);
+}
 thead.appendChild(trG);
 const trH = document.createElement('tr');
 sts.forEach((st, i) => {
 const c = STORE_HDR[i % STORE_HDR.length];
-['\u0424\u043e\u043a\u0441','\u041a\u043e\u043c\u0444\u0456','\u0394'].forEach((l, j) => {
+['Фокс','Комфі','Δ'].forEach((l, j) => {
 const th = mkTh(l, 'sub', {background:c});
 if (j === 0 && i > 0) th.style.borderLeft = '2px solid rgba(255,255,255,0.2)';
 trH.appendChild(th);
 });
 });
+if (showTotal) {
+  ['Фокс','Комфі','Δ'].forEach((l, j) => {
+    const th = mkTh(l, 'sub', {background:'#374151'});
+    if (j === 0) th.style.borderLeft = '3px solid rgba(255,255,255,0.4)';
+    trH.appendChild(th);
+  });
+}
 thead.appendChild(trH);
 tbl.appendChild(thead);
 const tbody = document.createElement('tbody');
 let prevWeek = null;
-data.forEach(r => {
+// Build a date-indexed map for diff calculations
+const dateMap = new Map();
+data.forEach(r => dateMap.set(r.date, r));
+const sortedData = [...data].sort((a, b) => a.date < b.date ? -1 : 1);
+const allSortedGlobal = [...dataRows].sort((a, b) => a.date < b.date ? -1 : 1);
+data.forEach((r, ri) => {
 const tr = document.createElement('tr');
 if (r.isWE) tr.classList.add('weekend');
 if (r.week && r.week !== prevWeek) { tr.classList.add('wk-sep'); prevWeek = r.week; }
@@ -803,7 +897,57 @@ tr.appendChild(mkTd(fmt(f), '', {background:bg, borderLeft: i > 0 ? '2px solid #
 tr.appendChild(mkTd(fmt(k), '', {background:bg}));
 tr.appendChild(mkTd(d != null ? d.toFixed(2) : null, deltaClass(d), {background:bg}));
 });
+if (showTotal) {
+  let tf = 0, tk = 0;
+  sts.forEach(st => { const v = r.storeVals[st.name] || {}; if (v.foks != null) tf += v.foks; if (v.komf != null) tk += v.komf; });
+  const td2 = tf > 0 ? tk / tf : null;
+  tr.appendChild(mkTd(fmt(tf), '', {background:'#f0f4ff', borderLeft:'3px solid #b0c0e0', fontWeight:'600'}));
+  tr.appendChild(mkTd(fmt(tk), '', {background:'#f0f4ff', fontWeight:'600'}));
+  tr.appendChild(mkTd(td2 != null ? td2.toFixed(2) : null, deltaClass(td2), {background:'#f0f4ff', fontWeight:'600'}));
+}
 tbody.appendChild(tr);
+
+if (showDiff) {
+  const idx = sortedData.findIndex(x => x.date === r.date);
+  const prevDay = idx > 0 ? sortedData[idx - 1] : null;
+  const allIdx = allSortedGlobal.findIndex(x => x.date === r.date);
+  let prevWeekDay = null;
+  for (let pi = allIdx - 1; pi >= 0; pi--) {
+    if (allSortedGlobal[pi].dowNum === r.dowNum && allSortedGlobal[pi].dowNum !== 0) { prevWeekDay = allSortedGlobal[pi]; break; }
+  }
+  const buildDiffTr = (refRow, label) => {
+    const diffTr = document.createElement('tr'); diffTr.className = 'diff-row';
+    diffTr.appendChild(mkTd(label, 'c-l1', {textAlign:'left', paddingLeft:'4px', color:'#6b21a8', fontWeight:'600', fontSize:'9px'}));
+    diffTr.appendChild(mkTd('', 'c-l2'));
+    sts.forEach((st, i) => {
+      const bg = STORE_BG[i % STORE_BG.length];
+      const cv = r.storeVals[st.name] || {};
+      const pv = refRow.storeVals[st.name] || {};
+      const cf = cv.foks ?? 0, ck = cv.komf ?? 0;
+      const pf = pv.foks ?? 0, pk = pv.komf ?? 0;
+      const df = cf - pf, dk = ck - pk;
+      const cd = cf > 0 ? ck / cf : null, pd = pf > 0 ? pk / pf : null;
+      const dd = cd != null && pd != null ? cd - pd : null;
+      const bl = i > 0 ? '2px solid #d0d0da' : '';
+      diffTr.appendChild(mkTd((df >= 0 ? '+' : '') + fmt(Math.abs(df)) + (df >= 0 ? ' ↑' : ' ↓'), df >= 0 ? 'diff-pos' : 'diff-neg', {background:bg, borderLeft:bl, fontSize:'9px'}));
+      diffTr.appendChild(mkTd((dk >= 0 ? '+' : '') + fmt(Math.abs(dk)) + (dk >= 0 ? ' ↑' : ' ↓'), dk >= 0 ? 'diff-pos' : 'diff-neg', {background:bg, fontSize:'9px'}));
+      diffTr.appendChild(mkTd(dd != null ? (dd >= 0 ? '+' : '') + dd.toFixed(2) : null, dd == null ? '' : (dd <= 0 ? 'diff-pos' : 'diff-neg'), {background:bg, fontSize:'9px'}));
+    });
+    if (showTotal) {
+      let cf = 0, ck = 0, pf = 0, pk = 0;
+      sts.forEach(st => { const cv = r.storeVals[st.name]||{}; const pv = refRow.storeVals[st.name]||{}; if(cv.foks!=null)cf+=cv.foks; if(cv.komf!=null)ck+=cv.komf; if(pv.foks!=null)pf+=pv.foks; if(pv.komf!=null)pk+=pv.komf; });
+      const df = cf-pf, dk = ck-pk;
+      const cd = cf>0?ck/cf:null, pd = pf>0?pk/pf:null;
+      const dd = cd!=null&&pd!=null?cd-pd:null;
+      diffTr.appendChild(mkTd((df>=0?'+':'')+fmt(Math.abs(df))+(df>=0?' ↑':' ↓'), df>=0?'diff-pos':'diff-neg', {background:'#f0f4ff', borderLeft:'3px solid #b0c0e0', fontSize:'9px', fontWeight:'600'}));
+      diffTr.appendChild(mkTd((dk>=0?'+':'')+fmt(Math.abs(dk))+(dk>=0?' ↑':' ↓'), dk>=0?'diff-pos':'diff-neg', {background:'#f0f4ff', fontSize:'9px', fontWeight:'600'}));
+      diffTr.appendChild(mkTd(dd!=null?(dd>=0?'+':'')+dd.toFixed(2):null, dd==null?'':(dd<=0?'diff-pos':'diff-neg'), {background:'#f0f4ff', fontSize:'9px', fontWeight:'600'}));
+    }
+    return diffTr;
+  };
+  if (prevDay) tbody.appendChild(buildDiffTr(prevDay, '↕ вчора'));
+  if (prevWeekDay) tbody.appendChild(buildDiffTr(prevWeekDay, '↕ -7д'));
+}
 });
 const trTot = document.createElement('tr'); trTot.className = 'tot';
 trTot.appendChild(mkTd('\u0420\u0410\u0417\u041e\u041c', 'c-l1'));
@@ -821,6 +965,14 @@ trTot.appendChild(mkTd(fmt(sf), '', {background:bg, borderLeft: i > 0 ? '2px sol
 trTot.appendChild(mkTd(fmt(sk), '', {background:bg, fontWeight:'700'}));
 trTot.appendChild(mkTd(sd != null ? sd.toFixed(2) : null, deltaClass(sd), {background:bg, fontWeight:'700'}));
 });
+if (showTotal) {
+  let tf = 0, tk = 0;
+  data.forEach(r => { sts.forEach(st => { const v = r.storeVals[st.name]||{}; if(v.foks!=null)tf+=v.foks; if(v.komf!=null)tk+=v.komf; }); });
+  const td2 = tf > 0 ? tk / tf : null;
+  trTot.appendChild(mkTd(fmt(tf), '', {background:'#e0e8ff', borderLeft:'3px solid #b0c0e0', fontWeight:'800'}));
+  trTot.appendChild(mkTd(fmt(tk), '', {background:'#e0e8ff', fontWeight:'800'}));
+  trTot.appendChild(mkTd(td2 != null ? td2.toFixed(2) : null, deltaClass(td2), {background:'#e0e8ff', fontWeight:'800'}));
+}
 tbody.appendChild(trTot);
 tbl.appendChild(tbody);
 wrap.appendChild(tbl);
@@ -923,7 +1075,7 @@ tr.appendChild(mkTd(d != null ? d.toFixed(2) : null, deltaClass(d), {background:
 });
 });
 tbody.appendChild(tr);
-if (idx > 0) {
+if (showDiff && idx > 0) {
 const prevK = keys[idx - 1];
 const prev = wMap.get(prevK);
 const diffTr = document.createElement('tr'); diffTr.className = 'diff-row';
@@ -1016,16 +1168,29 @@ if (i > 0) th.style.borderLeft = '2px solid rgba(255,255,255,0.2)';
 th.colSpan = 3; th.title = st.name;
 trG.appendChild(th);
 });
+if (showTotal) {
+  const th = mkTh('∑ ТОТАЛ', 'grp', {background:'#374151'});
+  th.style.borderLeft = '3px solid rgba(255,255,255,0.4)';
+  th.colSpan = 3;
+  trG.appendChild(th);
+}
 thead.appendChild(trG);
 const trH = document.createElement('tr');
 sts.forEach((st, i) => {
 const c = STORE_HDR[i % STORE_HDR.length];
-['\u0424\u043e\u043a\u0441','\u041a\u043e\u043c\u0444\u0456','\u0394'].forEach((l, j) => {
+['Фокс','Комфі','Δ'].forEach((l, j) => {
 const th = mkTh(l, 'sub', {background: c});
 if (j === 0 && i > 0) th.style.borderLeft = '2px solid rgba(255,255,255,0.2)';
 trH.appendChild(th);
 });
 });
+if (showTotal) {
+  ['Фокс','Комфі','Δ'].forEach((l, j) => {
+    const th = mkTh(l, 'sub', {background:'#374151'});
+    if (j === 0) th.style.borderLeft = '3px solid rgba(255,255,255,0.4)';
+    trH.appendChild(th);
+  });
+}
 thead.appendChild(trH);
 tbl.appendChild(thead);
 const tbody = document.createElement('tbody');
@@ -1043,11 +1208,19 @@ tr.appendChild(mkTd(fmt(f), '', {background: bg, borderLeft: i > 0 ? '2px solid 
 tr.appendChild(mkTd(fmt(kv), '', {background: bg}));
 tr.appendChild(mkTd(d != null ? d.toFixed(2) : null, deltaClass(d), {background: bg}));
 });
+if (showTotal) {
+  let tf = 0, tk = 0;
+  sts.forEach(st => { const a = agg[st.name]||{f:0,k:0}; tf += a.f||0; tk += a.k||0; });
+  const td2 = tf > 0 ? tk / tf : null;
+  tr.appendChild(mkTd(fmt(tf), '', {background:'#f0f4ff', borderLeft:'3px solid #b0c0e0', fontWeight:'700'}));
+  tr.appendChild(mkTd(fmt(tk), '', {background:'#f0f4ff', fontWeight:'700'}));
+  tr.appendChild(mkTd(td2 != null ? td2.toFixed(2) : null, deltaClass(td2), {background:'#f0f4ff', fontWeight:'700'}));
+}
 tbody.appendChild(tr);
-if (prevKey && groupMap.has(prevKey)) {
+if (showDiff && prevKey && groupMap.has(prevKey)) {
 const prevAgg = aggRows(groupMap.get(prevKey).rows, sts);
 const diffTr = document.createElement('tr'); diffTr.className = 'diff-row';
-diffTr.appendChild(mkTd('\u2194 vs \u043f\u043e\u043f\u0435\u0440.', 'c-l1', {textAlign: 'left', paddingLeft: '4px', color: '#92400e', fontWeight: '600'}));
+diffTr.appendChild(mkTd('↕ vs попер.', 'c-l1', {textAlign: 'left', paddingLeft: '4px', color: '#92400e', fontWeight: '600'}));
 diffTr.appendChild(mkTd('', 'c-l2'));
 sts.forEach((st, i) => {
 const bg = STORE_BG[i % STORE_BG.length];
@@ -1055,10 +1228,19 @@ const pf = prevAgg[st.name]?.f || 0, pk = prevAgg[st.name]?.k || 0;
 const cf = agg[st.name]?.f || 0, ck = agg[st.name]?.k || 0;
 const df = cf - pf, dk = ck - pk;
 const dd = (pf > 0 && cf > 0) ? (ck / cf) - (pk / pf) : null;
-diffTr.appendChild(mkTd((df >= 0 ? '+' : '') + fmt(Math.abs(df)) + (df >= 0 ? ' \u2191' : ' \u2193'), df >= 0 ? 'diff-pos' : 'diff-neg', {background: bg, borderLeft: i > 0 ? '2px solid #d0d0da' : '', fontSize: '10px'}));
-diffTr.appendChild(mkTd((dk >= 0 ? '+' : '') + fmt(Math.abs(dk)) + (dk >= 0 ? ' \u2191' : ' \u2193'), dk >= 0 ? 'diff-pos' : 'diff-neg', {background: bg, fontSize: '10px'}));
+diffTr.appendChild(mkTd((df >= 0 ? '+' : '') + fmt(Math.abs(df)) + (df >= 0 ? ' ↑' : ' ↓'), df >= 0 ? 'diff-pos' : 'diff-neg', {background: bg, borderLeft: i > 0 ? '2px solid #d0d0da' : '', fontSize: '10px'}));
+diffTr.appendChild(mkTd((dk >= 0 ? '+' : '') + fmt(Math.abs(dk)) + (dk >= 0 ? ' ↑' : ' ↓'), dk >= 0 ? 'diff-pos' : 'diff-neg', {background: bg, fontSize: '10px'}));
 diffTr.appendChild(mkTd(dd != null ? (dd >= 0 ? '+' : '') + dd.toFixed(2) : null, dd == null ? '' : (dd <= 0 ? 'diff-pos' : 'diff-neg'), {background: bg, fontSize: '10px'}));
 });
+if (showTotal) {
+  let cf = 0, ck = 0, pf = 0, pk = 0;
+  sts.forEach(st => { cf += agg[st.name]?.f||0; ck += agg[st.name]?.k||0; pf += prevAgg[st.name]?.f||0; pk += prevAgg[st.name]?.k||0; });
+  const df = cf-pf, dk = ck-pk;
+  const dd = (pf>0&&cf>0) ? (ck/cf)-(pk/pf) : null;
+  diffTr.appendChild(mkTd((df>=0?'+':'')+fmt(Math.abs(df))+(df>=0?' ↑':' ↓'), df>=0?'diff-pos':'diff-neg', {background:'#f0f4ff', borderLeft:'3px solid #b0c0e0', fontSize:'10px', fontWeight:'700'}));
+  diffTr.appendChild(mkTd((dk>=0?'+':'')+fmt(Math.abs(dk))+(dk>=0?' ↑':' ↓'), dk>=0?'diff-pos':'diff-neg', {background:'#f0f4ff', fontSize:'10px', fontWeight:'700'}));
+  diffTr.appendChild(mkTd(dd!=null?(dd>=0?'+':'')+dd.toFixed(2):null, dd==null?'':(dd<=0?'diff-pos':'diff-neg'), {background:'#f0f4ff', fontSize:'10px', fontWeight:'700'}));
+}
 tbody.appendChild(diffTr);
 }
 });
@@ -1368,6 +1550,12 @@ ticks: { font: { size: isMobile ? 9 : 10 }, color: '#6b7280', callback: v => sel
 // ──────────────────────────────────────────────
 // ПЕРЕМИКАННЯ ТАБІВ
 // ──────────────────────────────────────────────
+function updateDiffToggleBtn() {
+  const btn = document.getElementById('btnDiffToggle');
+  if (!btn) return;
+  btn.textContent = showDiff ? '↕ Відхилення: ON' : '↕ Відхилення: OFF';
+  btn.style.background = showDiff ? '#374151' : '#9ca3af';
+}
 function switchTab(tab) {
 activeTab = tab;
 document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
