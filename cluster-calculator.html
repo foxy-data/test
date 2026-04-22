@@ -135,6 +135,35 @@ td:first-child,td:nth-child(2),td:nth-child(3){text-align:left}
 .sc .ss{font-size:10.5px;color:var(--text2);line-height:1.5}
 
 @media(max-width:768px){.ic2 input{width:95px;font-size:11px}table{font-size:11px}td,th{padding:6px 7px}.cc2{height:190px}}
+
+/* MOBILE TABLE CARDS */
+@media(max-width:640px){
+  .table-desktop{display:none}
+  .table-mobile{display:block}
+  .mob-quarter{font-family:'Unbounded',sans-serif;font-size:9px;font-weight:600;letter-spacing:.06em;padding:10px 14px 6px;border-bottom:1px solid var(--border)}
+  .mob-row{border-bottom:1px solid rgba(37,45,61,.3);padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}
+  .mob-row:last-child{border-bottom:none}
+  .mob-month{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+  .mob-month-name{font-size:12px;font-weight:500;color:var(--text)}
+  .mob-ksez{font-family:'Unbounded',sans-serif;font-size:10px;font-weight:600;color:var(--text2)}
+  .mob-cell{display:flex;flex-direction:column;gap:2px}
+  .mob-cell .mob-lbl{font-size:8.5px;font-family:'Unbounded',sans-serif;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+  .mob-cell .mob-val{font-size:11.5px;font-weight:500;color:var(--text)}
+  .mob-cell .mob-val.accent{color:var(--accent)}
+  .mob-cell .mob-val.muted{color:var(--text2)}
+  .mob-fact-wrap{grid-column:1/-1}
+  .mob-fact-wrap .mob-lbl{margin-bottom:4px}
+  .mob-fact-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-family:'Geologica',sans-serif;font-size:13px;text-align:right;outline:none;transition:border-color .2s}
+  .mob-fact-input:focus{border-color:var(--accent)}
+  .mob-zto{font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;color:#34d399}
+  .mob-zto.em{color:var(--text3)}
+  .mob-zck{font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;color:var(--accent3)}
+  .mob-ql{font-family:'Unbounded',sans-serif;font-size:8px;font-weight:600;letter-spacing:.05em;padding:2px 7px;border-radius:4px;display:inline-block}
+}
+@media(min-width:641px){
+  .table-desktop{display:block}
+  .table-mobile{display:none}
+}
 </style>
 </head>
 <body>
@@ -188,7 +217,7 @@ td:first-child,td:nth-child(2),td:nth-child(3){text-align:left}
       <div class="li"><div class="ld" style="background:#ef4444"></div>4 кв.</div>
     </div>
   </div>
-  <div style="overflow-x:auto">
+  <div class="table-desktop" style="overflow-x:auto">
     <table>
       <thead>
         <tr>
@@ -205,6 +234,7 @@ td:first-child,td:nth-child(2),td:nth-child(3){text-align:left}
       <tbody id="tableBody"></tbody>
     </table>
   </div>
+  <div class="table-mobile" id="tableMobile"></div>
 </div>
 
 <div class="cw">
@@ -428,6 +458,63 @@ function renderTable(){
   });
   renderSummary(cntZTO>0?sumZTO:null,lastZK,cc,nc);
   renderChart();
+  renderMobileTable();
+}
+
+function renderMobileTable(){
+  const cc=CLUSTERS[curCl()],nc=nextCl()!==null?CLUSTERS[nextCl()]:null;
+  const mob=document.getElementById('tableMobile');
+  mob.innerHTML='';
+  const quarters=[{q:1,idx:[0,1,2],qc:'q1',ql:'1 квартал'},{q:2,idx:[3,4,5],qc:'q2',ql:'2 квартал'},{q:3,idx:[6,7,8],qc:'q3',ql:'3 квартал'},{q:4,idx:[9,10,11],qc:'q4',ql:'4 квартал'}];
+  const qColors={'q1':'#93c5fd','q2':'#6ee7b7','q3':'#fcd34d','q4':'#fca5a5'};
+  const qBg={'q1':'rgba(59,130,246,.18)','q2':'rgba(16,185,129,.18)','q3':'rgba(245,158,11,.18)','q4':'rgba(239,68,68,.18)'};
+
+  quarters.forEach(qt=>{
+    const facts=qt.idx.map(i=>factSales[i]);
+    const ks=qt.idx.map(i=>getKSez(i));
+    const plansC=qt.idx.map(i=>cc.toMin*getKSez(i));
+    const zto=calcZTO(facts,ks,plansC);
+    const zk=calcZK(zto);
+
+    const qHead=document.createElement('div');
+    qHead.className='mob-quarter';
+    qHead.style.cssText=`color:${qColors[qt.qc]};background:${qBg[qt.qc]}`;
+    qHead.innerHTML=`<span class="mob-ql" style="background:${qBg[qt.qc]};color:${qColors[qt.qc]}">${qt.ql}</span>`;
+    mob.appendChild(qHead);
+
+    qt.idx.forEach((mi,qmi)=>{
+      const ks_m=getKSez(mi);
+      const fact=factSales[mi];
+      const pR=nc?nc.toMin*ks_m:null;
+      const pC=cc.toMin*ks_m;
+      const factVal=fact!==null?Math.round(fact).toLocaleString('uk-UA'):'';
+      const isLastOfQ=qmi===2;
+
+      const row=document.createElement('div');
+      row.className='mob-row';
+      row.style.background=`var(--${qt.qc})`;
+
+      let ztoHtml='', zkHtml='';
+      if(isLastOfQ){
+        ztoHtml=`<div class="mob-cell"><div class="mob-lbl">Залік ТО</div><div class="mob-val"><span class="mob-zto ${zto!==null?'':'em'}">${zto!==null?fmt(zto):'—'}</span></div></div>`;
+        zkHtml=`<div class="mob-cell"><div class="mob-lbl">Залік К обігу</div><div class="mob-val"><span class="mob-zck">${zk!==null?'×'+zk:'—'}</span></div></div>`;
+      }
+
+      row.innerHTML=`
+        <div class="mob-month">
+          <span class="mob-month-name">${MONTHS[mi].n}</span>
+          <span class="mob-ksez">${fmtP(ks_m)}</span>
+        </div>
+        <div class="mob-fact-wrap mob-cell">
+          <div class="mob-lbl">Факт. ТО</div>
+          <input class="mob-fact-input" type="text" id="mob_fact_${mi}" placeholder="—" value="${factVal}" onchange="onFact(${mi},this.value)" onfocus="this.select()">
+        </div>
+        <div class="mob-cell"><div class="mob-lbl">План підняття</div><div class="mob-val accent">${pR!==null?fmt(pR):'—'}</div></div>
+        <div class="mob-cell"><div class="mob-lbl">План підтвердж.</div><div class="mob-val muted">${fmt(pC)}</div></div>
+        ${ztoHtml}${zkHtml}`;
+      mob.appendChild(row);
+    });
+  });
 }
 
 function renderSummary(zto,zk,cc,nc){
