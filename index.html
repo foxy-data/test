@@ -137,6 +137,7 @@
         .banner-sellers     { background: linear-gradient(145deg, #fff4ee 0%, #ffe8d9 100%); }
         .banner-motivation  { background: linear-gradient(145deg, #eef2ff 0%, #edfaf3 100%); }
         .banner-dynamics    { background: linear-gradient(145deg, #f0eeff 0%, #e4deff 100%); }
+        .banner-cluster     { background: linear-gradient(145deg, #edfcff 0%, #d6f4ff 100%); }
 
         .banner-top { display: flex; align-items: flex-start; gap: 12px; }
         .banner-icon {
@@ -1764,6 +1765,7 @@ const AUTH = {
         carouselWrapper.appendChild(createBanner('Дельта щоденна',    'По днях і тижнях',         {bg:'rgba(0,179,136,0.10)', img:'📅'}, 'daily-delta', 'daily-delta.html'));
         carouselWrapper.appendChild(createBanner('Звіт по продавцях','Рейтинг та деталі',       {bg:'rgba(255,149,0,0.12)', img:'👤'}, 'sellers',     'sellers-report.html'));
         carouselWrapper.appendChild(createBanner('Мотивація продавців','Бренди та винагороди',  {bg:'rgba(88,86,214,0.10)', img:'🏅'}, 'motivation',  'motivation.html'));
+        carouselWrapper.appendChild(createBanner('Кластер ТО',         'Калькулятор кластеру',  {bg:'rgba(0,199,219,0.10)', img:'🧮'}, 'cluster',     'cluster-calculator.html'));
 
         carouselContainer.appendChild(carouselWrapper);
         container.appendChild(carouselContainer);
