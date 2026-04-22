@@ -1,7 +1,3 @@
-<script src="auth.js"></script>
-
-<script src="page-guard.js"></script>
-
 <!DOCTYPE html>
 
 <html lang="uk">
@@ -379,17 +375,17 @@ max-height: none !important;
 <div class="table-card"><div class="status-box">Завантаження…</div></div>
 </div>
 <script>
-// ──────────────────────────────────────────────
+// -
 // КОНСТАНТИ
-// ──────────────────────────────────────────────
+// -
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRnVyY9d_BjUGvXWa3VUFsdMoBwZH-MINuS8b91-lgNqeNMx-6UsE5oRJ66x6XVmK_JhXcGTbSK9Emx/pub?output=csv';
 const MONTHS_UK = ['\u0421\u0456\u0447\u0435\u043d\u044c','\u041b\u044e\u0442\u0438\u0439','\u0411\u0435\u0440\u0435\u0437\u0435\u043d\u044c','\u041a\u0432\u0456\u0442\u0435\u043d\u044c','\u0422\u0440\u0430\u0432\u0435\u043d\u044c','\u0427\u0435\u0440\u0432\u0435\u043d\u044c','\u041b\u0438\u043f\u0435\u043d\u044c','\u0421\u0435\u0440\u043f\u0435\u043d\u044c','\u0412\u0435\u0440\u0435\u0441\u0435\u043d\u044c','\u0416\u043e\u0432\u0442\u0435\u043d\u044c','\u041b\u0438\u0441\u0442\u043e\u043f\u0430\u0434','\u0413\u0440\u0443\u0434\u0435\u043d\u044c'];
 const DOW_WE = ["\u043f\u0442","\u0441\u0431","\u043d\u0434","\u0441\u0443\u0431\u043e\u0442\u0430","\u043d\u0435\u0434\u0456\u043b\u044f","friday","saturday","sunday","\u043f\u044f\u0442\u043d\u0438\u0446\u044f"];
 const STORE_HDR = ['#1a56db','#0e7490','#6b21a8','#9d174d','#065f46','#92400e','#1e40af','#7c3aed'];
 const STORE_BG = ['#eff6ff','#ecfeff','#faf5ff','#fdf2f8','#ecfdf5','#fffbeb','#eff6ff','#f5f3ff'];
-// ──────────────────────────────────────────────
+// -
 // СТАН
-// ──────────────────────────────────────────────
+// -
 let stores = [], dataRows = [], allYearMonths = [], allWeeks = [];
 let selYearMonths = new Set(), selStores = new Set(), selWeeks = new Set();
 let selSegments = new Set(['wd','we']);
@@ -400,15 +396,15 @@ function toggleDiff() {
   showDiff = !showDiff;
   const btn = document.getElementById('btnShowDiff');
   if (btn) {
-    btn.textContent = showDiff ? '↕ Відхилення: ВКЛ' : '↕ Відхилення: ВИКЛ';
+    btn.textContent = showDiff ? '\u2195 Відхилення: ВКЛ' : '\u2195 Відхилення: ВИКЛ';
     btn.style.background = showDiff ? '#374151' : '#e5e5ea';
     btn.style.color = showDiff ? '#fff' : '#6e6e73';
   }
   render();
 }
-// ──────────────────────────────────────────────
+// -
 // УТИЛІТИ
-// ──────────────────────────────────────────────
+// -
 function parseCSV(text) {
 const res = []; let row = [], col = '', inQ = false;
 for (let i = 0; i < text.length; i++) {
@@ -452,9 +448,9 @@ return d;
 function isWeekend(dow) {
 return DOW_WE.some(w => String(dow).toLowerCase().trim() === w || String(dow).toLowerCase().includes(w));
 }
-// ──────────────────────────────────────────────
+// -
 // SKELETON
-// ──────────────────────────────────────────────
+// -
 function showSkel() {
 const cont = document.getElementById('tabContent');
 const card = document.createElement('div'); card.className = 'table-card';
@@ -473,9 +469,9 @@ card.appendChild(wrap);
 cont.innerHTML = '';
 cont.appendChild(card);
 }
-// ──────────────────────────────────────────────
+// -
 // ПАРСИНГ
-// ──────────────────────────────────────────────
+// -
 function detect(rows) {
 let subRow = -1, storeRow = -1;
 for (let i = 0; i < Math.min(10, rows.length); i++) {
@@ -578,15 +574,15 @@ return v.foks != null || v.komf != null;
 function activeStores() {
 return stores.filter(s => selStores.has(s.name));
 }
-// ──────────────────────────────────────────────
+// -
 // ФІЛЬТРИ
-// ──────────────────────────────────────────────
+// -
 function mkPill(text, active, cls, onclick) {
 const b = document.createElement(‘button’);
 b.className = ‘pill’ + (active ? ’ active’ : ‘’) + (cls ? ’ ’ + cls : ‘’);
 b.textContent = text;
 b.onclick = onclick;
-// Не перебиваємо inline-стилем — CSS-клас .pill.active і .pill-all.active
+// Не перебиваємо inline-стилем - CSS-клас .pill.active і .pill-all.active
 // вже задають потрібний колір. Inline тільки для non-all активних.
 if (active && !cls.includes(‘pill-all’)) {
 b.style.background = ‘#1d1d1f’;
@@ -646,7 +642,7 @@ sep.style.cssText = ‘color:#d2d2d7;font-size:14px;padding:0 2px;align-self:cen
 sep.textContent = ‘|’;
 wrap.appendChild(sep);
 
-// Кнопки для кожного тижня — групуємо по кварталах
+// Кнопки для кожного тижня - групуємо по кварталах
 const quarters = {};
 allWeeks.forEach(w => {
 const q = Math.ceil(w / 13);
@@ -664,7 +660,7 @@ wrap.appendChild(qsep);
 quarters[q].forEach(w => {
 const isCur = w === currentWeek;
 const isAct = selWeeks.has(w);
-const label = ‘T’ + w + (isCur ? ‘★’ : ‘’);
+const label = ‘T’ + w + (isCur ? ‘\u2605’ : ‘’);
 const btn = makeWPill(label, isAct, isCur, () => {
 if (selWeeks.has(w)) { if (selWeeks.size > 1) selWeeks.delete(w); }
 else selWeeks.add(w);
@@ -771,9 +767,9 @@ segp.appendChild(b);
 renderWeekFilter();
 document.getElementById(‘filtersWrap’).style.display = ‘’;
 }
-// ──────────────────────────────────────────────
+// -
 // ДОПОМІЖНІ ДЛЯ ТАБЛИЦЬ
-// ──────────────────────────────────────────────
+// -
 function mkTh(text, cls, sty) {
 const t = document.createElement(‘th’);
 t.textContent = text;
@@ -796,9 +792,9 @@ if (d <= 1.05) return ‘d3’;
 if (d <= 1.25) return ‘d2’;
 return ‘d1’;
 }
-// ──────────────────────────────────────────────
+// -
 // ТАБЛИЦЯ
-// ──────────────────────────────────────────────
+// -
 function renderTable() {
 const cont = document.getElementById(‘tabContent’);
 const data = activeData();
@@ -860,7 +856,7 @@ if (showDiff && idx > 0) {
 // відхилення до попереднього дня
 const prev = data[idx - 1];
 const diffTr = document.createElement(‘tr’); diffTr.className = ‘diff-row’;
-diffTr.appendChild(mkTd(‘↕ вчора’, ‘c-l1’, {paddingLeft:‘4px’,color:’#92400e’,fontWeight:‘600’}));
+diffTr.appendChild(mkTd(’\u2195 вчора’, ‘c-l1’, {paddingLeft:‘4px’,color:’#92400e’,fontWeight:‘600’}));
 diffTr.appendChild(mkTd(’’, ‘c-l2’));
 sts.forEach((st, i) => {
 const bg = STORE_BG[i % STORE_BG.length];
@@ -873,8 +869,8 @@ const dk = (ck != null && pk != null) ? ck - pk : null;
 const cd = (cf != null && cf > 0) ? ck / cf : null;
 const pd = (pf != null && pf > 0) ? pk / pf : null;
 const dd = (cd != null && pd != null) ? cd - pd : null;
-const fmtDiff = (v) => v == null ? ‘—’ : (v >= 0 ? ‘+’ : ‘’) + fmt(Math.abs(v)) + (v >= 0 ? ’ ↑’ : ’ ↓’);
-const fmtDd = (v) => v == null ? ‘—’ : (v >= 0 ? ‘+’ : ‘’) + v.toFixed(2);
+const fmtDiff = (v) => v == null ? ‘-’ : (v >= 0 ? ‘+’ : ‘’) + fmt(Math.abs(v)) + (v >= 0 ? ’ \u2191’ : ’ \u2193’);
+const fmtDd = (v) => v == null ? ‘-’ : (v >= 0 ? ‘+’ : ‘’) + v.toFixed(2);
 diffTr.appendChild(mkTd(fmtDiff(df), df == null ? ‘’ : (df >= 0 ? ‘diff-pos’ : ‘diff-neg’), {background:bg, borderLeft: i > 0 ? ‘2px solid #d0d0da’ : ‘’, fontSize:‘10px’}));
 diffTr.appendChild(mkTd(fmtDiff(dk), dk == null ? ‘’ : (dk >= 0 ? ‘diff-pos’ : ‘diff-neg’), {background:bg, fontSize:‘10px’}));
 diffTr.appendChild(mkTd(fmtDd(dd), dd == null ? ‘’ : (dd <= 0 ? ‘diff-pos’ : ‘diff-neg’), {background:bg, fontSize:‘10px’}));
@@ -886,7 +882,7 @@ const sameWkPrev = idx >= 7 ? data[idx - 7] : null;
 if (sameWkPrev && sameWkPrev.dowNum === r.dowNum) {
 const wkTr = document.createElement(‘tr’); wkTr.className = ‘diff-row’;
 wkTr.style.cssText = ‘background:#f0f9ff!important;’;
-wkTr.appendChild(mkTd(‘↕ -7 днів’, ‘c-l1’, {paddingLeft:‘4px’,color:’#0369a1’,fontWeight:‘600’}));
+wkTr.appendChild(mkTd(’\u2195 -7 днів’, ‘c-l1’, {paddingLeft:‘4px’,color:’#0369a1’,fontWeight:‘600’}));
 wkTr.appendChild(mkTd(’’, ‘c-l2’));
 sts.forEach((st, i) => {
 const bg = STORE_BG[i % STORE_BG.length];
@@ -899,8 +895,8 @@ const dk = (ck != null && wk != null) ? ck - wk : null;
 const cd = (cf != null && cf > 0) ? ck / cf : null;
 const wd2 = (wf != null && wf > 0) ? wk / wf : null;
 const dd = (cd != null && wd2 != null) ? cd - wd2 : null;
-const fmtDiff = (v) => v == null ? ‘—’ : (v >= 0 ? ‘+’ : ‘’) + fmt(Math.abs(v)) + (v >= 0 ? ’ ↑’ : ’ ↓’);
-const fmtDd = (v) => v == null ? ‘—’ : (v >= 0 ? ‘+’ : ‘’) + v.toFixed(2);
+const fmtDiff = (v) => v == null ? ‘-’ : (v >= 0 ? ‘+’ : ‘’) + fmt(Math.abs(v)) + (v >= 0 ? ’ \u2191’ : ’ \u2193’);
+const fmtDd = (v) => v == null ? ‘-’ : (v >= 0 ? ‘+’ : ‘’) + v.toFixed(2);
 wkTr.appendChild(mkTd(fmtDiff(df), df == null ? ‘’ : (df >= 0 ? ‘diff-pos’ : ‘diff-neg’), {background: STORE_BG[i % STORE_BG.length] + ‘cc’, borderLeft: i > 0 ? ‘2px solid #d0d0da’ : ‘’, fontSize:‘10px’}));
 wkTr.appendChild(mkTd(fmtDiff(dk), dk == null ? ‘’ : (dk >= 0 ? ‘diff-pos’ : ‘diff-neg’), {background: STORE_BG[i % STORE_BG.length] + ‘cc’, fontSize:‘10px’}));
 wkTr.appendChild(mkTd(fmtDd(dd), dd == null ? ‘’ : (dd <= 0 ? ‘diff-pos’ : ‘diff-neg’), {background: STORE_BG[i % STORE_BG.length] + ‘cc’, fontSize:‘10px’}));
@@ -932,9 +928,9 @@ card.appendChild(wrap);
 cont.innerHTML = ‘’;
 cont.appendChild(card);
 }
-// ──────────────────────────────────────────────
-// Пн–Чт / Пт–Нд
-// ──────────────────────────────────────────────
+// -
+// Пн-Чт / Пт-Нд
+// -
 function renderWeekday() {
 const cont = document.getElementById(‘tabContent’);
 const data = activeData();
@@ -1059,9 +1055,9 @@ card.appendChild(wrap);
 cont.innerHTML = ‘’;
 cont.appendChild(card);
 }
-// ──────────────────────────────────────────────
+// -
 // ПО ТИЖНЯХ
-// ──────────────────────────────────────────────
+// -
 function renderWeekly() {
 const cont = document.getElementById(‘tabContent’);
 const data = activeData();
@@ -1081,9 +1077,9 @@ gMap.get(k).rows.push(r);
 keys.sort().forEach((k, i) => { gMap.get(k).prevKey = i > 0 ? keys[i-1] : null; });
 buildAggTable(cont, gMap, sts, ‘\u0420\u0456\u043a’, ‘\u0422\u0438\u0436\u0434\u0435\u043d\u044c’, l => ‘T’ + (l.split(’*W’)[1] || ‘’));
 }
-// ──────────────────────────────────────────────
+// -
 // ПО МІСЯЦЯХ
-// ──────────────────────────────────────────────
+// -
 function renderMonthly() {
 const cont = document.getElementById(‘tabContent’);
 const data = activeData();
@@ -1187,9 +1183,9 @@ r[st.name] = { f, k, d: f > 0 ? k / f : null };
 });
 return r;
 }
-// ──────────────────────────────────────────────
+// -
 // ГРАФІК
-// ──────────────────────────────────────────────
+// -
 function renderChart() {
 const cont = document.getElementById(‘tabContent’);
 const data = activeData();
@@ -1471,9 +1467,9 @@ ticks: { font: { size: isMobile ? 9 : 10 }, color: ‘#6b7280’, callback: v =>
 }
 });
 }
-// ──────────────────────────────────────────────
+// -
 // ПЕРЕМИКАННЯ ТАБІВ
-// ──────────────────────────────────────────────
+// -
 function switchTab(tab) {
 activeTab = tab;
 document.querySelectorAll(’.tab’).forEach(b => b.classList.remove(‘active’));
@@ -1489,9 +1485,9 @@ else if (activeTab === ‘weekly’) renderWeekly();
 else if (activeTab === ‘monthly’) renderMonthly();
 else renderChart();
 }
-// ──────────────────────────────────────────────
+// -
 // INIT
-// ──────────────────────────────────────────────
+// -
 async function init() {
 showSkel();
 try {
@@ -1516,12 +1512,16 @@ if (!stores.length) throw new Error(‘Не знайдено магазини у
 renderFilters();
 render();
 } catch (e) {
-document.getElementById(‘tabContent’).innerHTML = ‘<div class="table-card"><div class="status-box error">❌ ’ + e.message + ‘</div></div>’;
+document.getElementById(‘tabContent’).innerHTML = ‘<div class="table-card"><div class="status-box error">\u274c ’ + e.message + ‘</div></div>’;
 console.error(’[daily-delta] init error:’, e);
 }
 }
 init();
 </script>
+
+<script src="auth.js"></script>
+
+<script src="page-guard.js"></script>
 
 </body>
 </html>
