@@ -359,14 +359,14 @@ function curCl(){return parseInt(document.getElementById('clusterSelect').value)
 function nextCl(){const c=curCl();return c>0?c-1:null}
 function getKSez(i){const c=cityData();return c.m?c.m[i]:BASE[i]}
 
-// Залік ТО — IF(f2>0): (f0/k0+f1/k1+f2/k2)/3; IF(f1>0): (f0/k0+f1/k1+planC2)/3; IF(f0>0): (f0/k0+planC1+planC2)/3
+// Залік ТО — IF(f2>0): (f0/k0+f1/k1+f2/k2)/3; IF(f1>0): (f0/k0+f1/k1+p2/k2)/3; IF(f0>0): (f0/k0+p1/k1+p2/k2)/3
 function calcZTO(facts,ks,plansC){
   const[f0,f1,f2]=[facts[0],facts[1],facts[2]];
   const[k0,k1,k2]=ks;
   const[p0,p1,p2]=plansC;
   if(f2>0) return((f0||0)/k0+(f1||0)/k1+f2/k2)/3;
-  if(f1>0) return((f0||0)/k0+f1/k1+p2)/3;
-  if(f0>0) return(f0/k0+p1+p2)/3;
+  if(f1>0) return((f0||0)/k0+f1/k1+p2/k2)/3;
+  if(f0>0) return(f0/k0+p1/k1+p2/k2)/3;
   return null;
 }
 
@@ -440,8 +440,58 @@ function renderTable(){
     qt.idx.forEach((mi,qmi)=>{
       const ks_m=getKSez(mi);
       const fact=factSales[mi];
-      const pR=nc?nc.toMin*ks_m:null;
-      const pC=cc.toMin*ks_m;
+      const [k0,k1,k2]=[getKSez(qt.idx[0]),getKSez(qt.idx[1]),getKSez(qt.idx[2])];
+      const [f0,f1,f2]=[factSales[qt.idx[0]],factSales[qt.idx[1]],factSales[qt.idx[2]]];
+
+      // Ціль кварталу = toMin (середнє ТО/Ксез за квартал повинне = toMin)
+      // Квартальна сума = toMin*k0 + toMin*k1 + toMin*k2 = toMin*(k0+k1+k2)
+      // Але формула в гугл-таблиці: (f0/k0 + f1/k1 + f2/k2)/3 >= toMin
+      // => f0/k0 + f1/k1 + f2/k2 >= toMin*3
+      // Plan для місяця N = (toMin*3 - вже_набрано_нормалізовано) * kN_місяця / кількість_залишившихся
+
+      // Plan підтвердження (pC)
+      const calcPlan=(toMin,k0,k1,k2,f0,f1,f2,qmi)=>{
+        const target=toMin*3; // ціль суми нормалізованих факт/ксез * ксез місяця
+        if(qmi===0){
+          // Місяць 1: якщо ще немає факту — базовий план; якщо є — показуємо факт (або залишок)
+          if(f2>0||f1>0){
+            // Весь квартал вже відомий частково, але план 1-го — базовий
+            return toMin*k0;
+          }
+          return toMin*k0;
+        } else if(qmi===1){
+          // Місяць 2:
+          if(f2>0){
+            // 3-й місяць вже є — показуємо базовий план
+            return toMin*k1;
+          } else if(f0>0){
+            // Є тільки перший факт: треба щоб (f0/k0 + plan1/k1 + plan2/k2)/3 = toMin
+            // plan1/k1 + plan2/k2 = target - f0/k0
+            // Розподіляємо порівну нормалізовано: plan1/k1 = plan2/k2 = (target - f0/k0)/2
+            const remaining=(target - (f0||0)/k0);
+            return Math.max(0, (remaining/2)*k1);
+          } else {
+            return toMin*k1;
+          }
+        } else {
+          // Місяць 3 (qmi===2):
+          if(f2>0){
+            return toMin*k2;
+          } else if(f1>0){
+            // Є факти 1 і 2: plan3 = (target - f0/k0 - f1/k1)*k2
+            return Math.max(0, (target - (f0||0)/k0 - f1/k1)*k2);
+          } else if(f0>0){
+            // Є тільки перший факт: plan2 і plan3 рівні нормалізовано
+            const remaining=(target - f0/k0);
+            return Math.max(0, (remaining/2)*k2);
+          } else {
+            return toMin*k2;
+          }
+        }
+      };
+
+      const pC=calcPlan(cc.toMin,k0,k1,k2,f0,f1,f2,qmi);
+      const pR=nc?calcPlan(nc.toMin,k0,k1,k2,f0,f1,f2,qmi):null;
       const tr=document.createElement('tr');
       tr.className=qc+'-row';
       const qLabel=qmi===0?`<span class="ql ${qc}-label">${QL[qi]}</span>`:'';
@@ -490,8 +540,36 @@ function renderMobileTable(){
     qt.idx.forEach((mi,qmi)=>{
       const ks_m=getKSez(mi);
       const fact=factSales[mi];
-      const pR=nc?nc.toMin*ks_m:null;
-      const pC=cc.toMin*ks_m;
+      const [k0,k1,k2]=[getKSez(qt.idx[0]),getKSez(qt.idx[1]),getKSez(qt.idx[2])];
+      const [f0,f1,f2]=[factSales[qt.idx[0]],factSales[qt.idx[1]],factSales[qt.idx[2]]];
+      const calcPlan=(toMin,k0,k1,k2,f0,f1,f2,qmi)=>{
+        const target=toMin*3;
+        if(qmi===0){
+          return toMin*k0;
+        } else if(qmi===1){
+          if(f2>0){
+            return toMin*k1;
+          } else if(f0>0){
+            const remaining=(target - (f0||0)/k0);
+            return Math.max(0, (remaining/2)*k1);
+          } else {
+            return toMin*k1;
+          }
+        } else {
+          if(f2>0){
+            return toMin*k2;
+          } else if(f1>0){
+            return Math.max(0, (target - (f0||0)/k0 - f1/k1)*k2);
+          } else if(f0>0){
+            const remaining=(target - f0/k0);
+            return Math.max(0, (remaining/2)*k2);
+          } else {
+            return toMin*k2;
+          }
+        }
+      };
+      const pC=calcPlan(cc.toMin,k0,k1,k2,f0,f1,f2,qmi);
+      const pR=nc?calcPlan(nc.toMin,k0,k1,k2,f0,f1,f2,qmi):null;
       const factVal=fact!==null?Math.round(fact).toLocaleString('uk-UA'):'';
       const isLastOfQ=qmi===2;
 
