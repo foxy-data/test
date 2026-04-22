@@ -299,33 +299,54 @@
             white-space: nowrap;
         }
         .mpill:hover { background: var(--border); color: var(--text); }
-        .mpill.active {
-            color: white;
-            border-color: transparent;
+        .mpill.active { color: white; border-color: transparent; }
+
+        /* ── VIEW SWITCHER ── */
+        .view-switcher {
+            display: flex; gap: 4px;
+            background: var(--surface2); border-radius: 12px; padding: 3px;
+            margin-bottom: 12px; border: 1px solid var(--border);
+            flex-wrap: wrap;
         }
+        .vs-btn {
+            flex: 1; min-width: 60px; padding: 7px 8px; border: none; border-radius: 9px;
+            background: transparent; font-family: inherit; font-size: 11px;
+            font-weight: 600; cursor: pointer; color: var(--text2);
+            transition: all .18s; display: flex; align-items: center;
+            justify-content: center; gap: 4px; white-space: nowrap;
+        }
+        .vs-btn.on { background: var(--surface); color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+
+        /* ── STORE BANNER ── */
+        .store-banner {
+            background: var(--surface); border-radius: var(--radius);
+            border: 1px solid var(--border); box-shadow: var(--shadow);
+            padding: 12px 16px; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+            border-left: 4px solid var(--to);
+        }
+        .store-banner-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text3); flex: 0 0 auto; }
+        .store-stats { display: flex; gap: 18px; flex: 1; flex-wrap: wrap; align-items: center; }
+        .store-stat { display: flex; flex-direction: column; align-items: center; min-width: 64px; }
+        .store-stat-label { font-size: 9px; color: var(--text3); font-weight: 600; text-transform: uppercase; }
+        .store-stat-val { font-size: 15px; font-weight: 800; color: var(--text); line-height: 1.2; }
+        .store-stat-pct { font-size: 17px; font-weight: 800; line-height: 1.2; }
 
         /* Rank cards — base */
         .ranking-grid { display: flex; flex-direction: column; gap: 8px; }
 
-        /* PODIUM — top 3 special styling */
         .rank-card {
             background: var(--surface);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
             padding: 12px 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
-            position: relative;
-            overflow: hidden;
+            display: flex; flex-direction: column; gap: 7px;
+            position: relative; overflow: hidden;
             transition: transform .15s, box-shadow .15s;
             animation: fadeUp .3s ease both;
         }
-        .rank-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 24px rgba(0,0,0,.1);
-        }
+        .rank-card:hover { transform: translateY(-2px); box-shadow: 0 4px 24px rgba(0,0,0,.1); }
 
         /* Gold */
         .rank-card.podium-1 {
@@ -336,38 +357,28 @@
         }
         .rank-card.podium-1 .rank-name-text { font-size: 15px; }
         .rank-card.podium-1 .rank-val-main  { font-size: 18px; }
-
         /* Silver */
         .rank-card.podium-2 {
             border-color: rgba(156,163,175,.5);
             background: linear-gradient(135deg, #f9fafb 0%, #ffffff 60%);
-            box-shadow: 0 2px 10px rgba(0,0,0,.09);
-            padding: 13px 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.09); padding: 13px 15px;
         }
         .rank-card.podium-2 .rank-name-text { font-size: 14px; }
         .rank-card.podium-2 .rank-val-main  { font-size: 16px; }
-
         /* Bronze */
         .rank-card.podium-3 {
             border-color: rgba(180,120,60,.35);
             background: linear-gradient(135deg, #fdf8f3 0%, #ffffff 60%);
-            box-shadow: 0 2px 8px rgba(180,120,60,.14);
-            padding: 13px 15px;
+            box-shadow: 0 2px 8px rgba(180,120,60,.14); padding: 13px 15px;
         }
         .rank-card.podium-3 .rank-name-text { font-size: 14px; }
         .rank-card.podium-3 .rank-val-main  { font-size: 16px; }
 
-        /* Podium medal badge */
         .podium-crown {
-            font-size: 9px;
-            font-weight: 800;
-            opacity: .4;
-            letter-spacing: .06em;
-            text-transform: uppercase;
-            text-align: right;
-            color: var(--text3);
-            margin-left: 45px;
-            margin-top: -2px;
+            font-size: 9px; font-weight: 800; opacity: .4;
+            letter-spacing: .06em; text-transform: uppercase;
+            text-align: right; color: var(--text3);
+            margin-left: 45px; margin-top: -2px;
         }
         .podium-1 .podium-crown { color: #b45309; }
         .podium-2 .podium-crown { color: #6b7280; }
@@ -376,73 +387,33 @@
         .rank-bg {
             position: absolute; left: 0; top: 0;
             height: 100%; opacity: .05;
-            border-radius: var(--radius);
-            pointer-events: none;
-            transition: width .6s ease;
+            border-radius: var(--radius); pointer-events: none; transition: width .6s ease;
         }
         .podium-1 .rank-bg { opacity: .08; }
 
         .rank-top { display: flex; align-items: center; gap: 11px; }
 
         .rank-pos {
-            font-size: 22px;
-            min-width: 34px;
-            text-align: center;
-            line-height: 1;
-            flex-shrink: 0;
+            font-size: 22px; min-width: 34px; text-align: center; line-height: 1; flex-shrink: 0;
         }
         .rank-pos.rest {
-            font-size: 13px;
-            font-weight: 800;
-            color: var(--text3);
-            background: var(--surface2);
-            border-radius: 7px;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 13px; font-weight: 800; color: var(--text3);
+            background: var(--surface2); border-radius: 7px;
+            width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
         }
 
         .rank-name { flex: 1; min-width: 0; }
-        .rank-name-text {
-            font-size: 13px;
-            font-weight: 700;
-            white-space: normal;
-            word-break: break-word;
-            line-height: 1.3;
-            color: var(--text);
-        }
-        .rank-sub {
-            font-size: 11px;
-            color: var(--text2);
-            margin-top: 3px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
+        .rank-name-text { font-size: 13px; font-weight: 700; white-space: normal; word-break: break-word; line-height: 1.3; color: var(--text); }
+        .rank-sub { font-size: 11px; color: var(--text2); margin-top: 3px; display: flex; align-items: center; gap: 5px; }
 
-        .pct-pill {
-            display: inline-block;
-            border-radius: 20px;
-            padding: 1px 8px;
-            font-size: 11px;
-            font-weight: 700;
-        }
-        .pct-pill.good  { background: rgba(22,163,74,.12); color: #16a34a; }
-        .pct-pill.warn  { background: rgba(245,158,11,.12); color: #d97706; }
-        .pct-pill.bad   { background: rgba(239,68,68,.12);  color: #dc2626; }
+        .pct-pill { display: inline-block; border-radius: 20px; padding: 1px 8px; font-size: 11px; font-weight: 700; }
+        .pct-pill.good { background: rgba(22,163,74,.12); color: #16a34a; }
+        .pct-pill.warn { background: rgba(245,158,11,.12); color: #d97706; }
+        .pct-pill.bad  { background: rgba(239,68,68,.12);  color: #dc2626; }
 
         .rank-val { text-align: right; flex-shrink: 0; }
-        .rank-val-main {
-            font-size: 15px;
-            font-weight: 800;
-            line-height: 1.1;
-        }
-        .rank-val-sub {
-            font-size: 10.5px;
-            color: var(--text3);
-            margin-top: 2px;
+        .rank-val-main { font-size: 15px; font-weight: 800; line-height: 1.1; }
+        .rank-val-sub { font-size: 10.5px; color: var(--text3); margin-top: 2px;
         }
 
         .rank-bar-bg {
@@ -458,6 +429,71 @@
             border-radius: 4px;
             animation: barGrow .6s ease both;
         }
+
+        /* ── PODIUM WRAP ── */
+        .podium-wrap { display: grid; grid-template-columns: 1fr 1.12fr 1fr; gap: 6px; align-items: end; height: 140px; margin-bottom: 12px; }
+        .pod {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: flex-end; border-radius: 12px 12px 0 0;
+            padding: 10px 6px 10px; cursor: pointer; position: relative;
+            transition: transform .2s, box-shadow .2s; user-select: none;
+        }
+        .pod:hover { transform: translateY(-4px); }
+        .pod-1 { background: linear-gradient(170deg,#fffbeb,#fde68a); border: 2px solid #f59e0b; height: 100%; box-shadow: 0 4px 18px rgba(245,158,11,.25); }
+        .pod-2 { background: linear-gradient(170deg,#f8fafc,#e2e8f0); border: 2px solid #94a3b8; height: 80%; box-shadow: 0 3px 12px rgba(148,163,184,.2); }
+        .pod-3 { background: linear-gradient(170deg,#fff7ed,#fed7aa); border: 2px solid #f97316; height: 64%; box-shadow: 0 3px 12px rgba(249,115,22,.2); }
+        .pod-medal { font-size: 22px; margin-bottom: 5px; }
+        .pod-name { font-size: 10px; font-weight: 700; text-align: center; line-height: 1.25; color: #1e293b; max-width: 100%; }
+        .pod-val { font-size: 10px; font-weight: 800; color: #0f172a; margin-top: 3px; text-align: center; }
+        .pod-pct { font-size: 9px; font-weight: 700; margin-top: 2px; }
+        .pod-1 .pod-pct { color: #b45309; }
+        .pod-2 .pod-pct { color: #64748b; }
+        .pod-3 .pod-pct { color: #9a3412; }
+
+        /* ── HBAR LIST ── */
+        .hbar-list { display: flex; flex-direction: column; gap: 5px; }
+        .hbar { display: flex; align-items: center; gap: 8px; background: var(--surface); border-radius: 10px; border: 1px solid var(--border); padding: 8px 12px; animation: fadeUp .25s ease both; }
+        .hbar-pos { font-size: 12px; font-weight: 800; color: var(--text3); width: 22px; text-align: center; flex-shrink: 0; }
+        .hbar-name { flex: 1; font-size: 12px; font-weight: 600; color: var(--text); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .hbar-track { flex: 2; height: 7px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+        .hbar-fill { height: 100%; border-radius: 4px; animation: barGrow .7s ease both; }
+        .hbar-val { font-size: 12px; font-weight: 800; text-align: right; flex-shrink: 0; min-width: 60px; }
+        .hbar-pct { font-size: 10px; color: var(--text3); text-align: right; }
+
+        /* ── LEADERBOARD ── */
+        .leader-card {
+            background: var(--surface); border-radius: var(--radius);
+            border: 1px solid var(--border); box-shadow: var(--shadow);
+            padding: 12px 14px; display: flex; align-items: center; gap: 12px;
+            animation: fadeUp .25s ease both;
+        }
+        .leader-card.l-gold   { border-color: rgba(245,158,11,.5); background: linear-gradient(90deg,#fffbeb,#fff); }
+        .leader-card.l-silver { border-color: rgba(148,163,184,.5); background: linear-gradient(90deg,#f8fafc,#fff); }
+        .leader-card.l-bronze { border-color: rgba(249,115,22,.35); background: linear-gradient(90deg,#fff7ed,#fff); }
+        .leader-badge { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .l-gold   .leader-badge { background: linear-gradient(135deg,#fef3c7,#fde68a); box-shadow: 0 2px 8px rgba(245,158,11,.3); }
+        .l-silver .leader-badge { background: linear-gradient(135deg,#f1f5f9,#e2e8f0); box-shadow: 0 2px 6px rgba(148,163,184,.25); }
+        .l-bronze .leader-badge { background: linear-gradient(135deg,#fff7ed,#fed7aa); box-shadow: 0 2px 6px rgba(249,115,22,.25); }
+        .leader-rest-badge { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: var(--text3); background: var(--surface2); flex-shrink: 0; }
+        .leader-info { flex: 1; min-width: 0; }
+        .leader-name { font-size: 14px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .leader-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+        .leader-val { text-align: right; flex-shrink: 0; }
+        .leader-val-main { font-size: 16px; font-weight: 800; }
+        .leader-val-plan { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+        /* ── GAUGE / CYBER ── */
+        .gauge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+        .cyber-card {
+            background: #0f1420; border-radius: 14px; border: 1px solid #1e2a45;
+            padding: 12px 10px 10px; display: flex; flex-direction: column;
+            align-items: center; gap: 6px; cursor: pointer; position: relative;
+            overflow: hidden; transition: transform .2s, box-shadow .2s;
+            animation: fadeUp .3s ease both;
+        }
+        .cyber-card:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(0,0,0,.4); }
+        .cyber-name { font-size: 11px; font-weight: 700; color: #e0e6f0; text-align: center; line-height: 1.3; }
+        .cyber-val { font-size: 12px; font-weight: 900; text-align: center; }
 
         /* Skeleton cards */
         .rank-card-skel {
@@ -527,7 +563,14 @@
         <div class="metric-section-label">Метрика</div>
         <div class="metric-pills" id="metricPills"></div>
     </div>
-    <div class="ranking-grid" id="rankingGrid"></div>
+    <div id="storeBanner"></div>
+    <div class="view-switcher" id="viewSwitcher">
+        <button class="vs-btn on" id="vsBtnPodium" onclick="setRatingView('podium')">🏆 Подіум</button>
+        <button class="vs-btn" id="vsBtnLeader" onclick="setRatingView('leader')">👑 Лідер</button>
+        <button class="vs-btn" id="vsBtnBar" onclick="setRatingView('bar')">📊 Бари</button>
+        <button class="vs-btn" id="vsBtnGauge" onclick="setRatingView('gauge')">🎯 Gauge</button>
+    </div>
+    <div id="rankingGrid"></div>
 </div>
 
 <script>
@@ -757,15 +800,16 @@ function buildTable(dataRows) {
 
 // ======= RATING =======
 const RATING_METRICS = [
-    { key:'to_fact',   label:'ТО',          idx:2,  color:'#2563eb', planIdx:1,  pctIdx:3,  fmt:'int' },
-    { key:'serv_fact', label:'Послуги',      idx:5,  color:'#16a34a', planIdx:4,  pctIdx:7,  fmt:'int' },
-    { key:'acc_fact',  label:'Аксесуари',    idx:9,  color:'#d97706', planIdx:8,  pctIdx:11, fmt:'int' },
-    { key:'chk_fact',  label:'Чеки',         idx:13, color:'#7c3aed', planIdx:12, pctIdx:14, fmt:'int' },
-    { key:'serv_shr',  label:'Частка посл.', idx:6,  color:'#16a34a', fmt:'share' },
-    { key:'acc_shr',   label:'Частка ACC',   idx:10, color:'#d97706', fmt:'share' },
+    { key:'to_fact',   label:'ТО',           idx:2,  color:'#2563eb', planIdx:1,  pctIdx:3,  fmt:'int' },
+    { key:'serv_fact', label:'Послуги',       idx:5,  color:'#16a34a', planIdx:4,  pctIdx:7,  fmt:'int' },
+    { key:'acc_fact',  label:'Аксесуари',     idx:9,  color:'#d97706', planIdx:8,  pctIdx:11, fmt:'int' },
+    { key:'chk_fact',  label:'Чеки',          idx:13, color:'#7c3aed', planIdx:12, pctIdx:14, fmt:'int' },
+    { key:'serv_shr',  label:'Частка посл.',  idx:6,  color:'#16a34a', fmt:'share' },
+    { key:'acc_shr',   label:'Частка ACC',    idx:10, color:'#d97706', fmt:'share' },
 ];
 let allRatingRows = [];
 let activeMetricKey = 'to_fact';
+let activeRatingView = 'podium';
 
 function fmtRatingVal(v, fmt) {
     if (v===null||v===undefined||isNaN(Number(v))) return '—';
@@ -774,6 +818,15 @@ function fmtRatingVal(v, fmt) {
     if (Math.abs(n)>=1000000) return (n/1000000).toFixed(2)+'М';
     if (Math.abs(n)>=1000) return (n/1000).toFixed(0)+'К';
     return Math.round(n).toLocaleString('uk-UA');
+}
+
+function setRatingView(v) {
+    activeRatingView = v;
+    document.getElementById('vsBtnPodium').classList.toggle('on', v==='podium');
+    document.getElementById('vsBtnLeader').classList.toggle('on', v==='leader');
+    document.getElementById('vsBtnBar').classList.toggle('on', v==='bar');
+    document.getElementById('vsBtnGauge').classList.toggle('on', v==='gauge');
+    renderRankingCards();
 }
 
 function setView(mode) {
@@ -792,9 +845,7 @@ function buildMetricPills() {
         const btn = document.createElement('button');
         btn.className = 'mpill' + (m.key===activeMetricKey?' active':'');
         btn.textContent = m.label;
-        if (m.key===activeMetricKey) {
-            btn.style.background = m.color;
-        }
+        if (m.key===activeMetricKey) btn.style.background = m.color;
         btn.onclick = () => { activeMetricKey=m.key; buildMetricPills(); renderRankingCards(); };
         c.appendChild(btn);
     });
@@ -817,63 +868,198 @@ function renderRankingCards() {
         plan: m.planIdx!=null ? toNum(r[m.planIdx]||'0') : null,
         pct:  m.pctIdx!=null  ? toNum(r[m.pctIdx]||'0')  : null,
     })).filter(x=>x.name && x.val>0);
-
     items.sort((a,b)=>b.val-a.val);
-    const maxVal = items.length ? items[0].val : 1;
-
-    items.forEach((item, i) => {
-        const pos = i+1;
-        const barPct = maxVal>0 ? Math.round(item.val/maxVal*100) : 0;
-
-        let pctVal = null;
-        if (item.pct!=null) {
-            let n = item.pct;
-            if (!String(item.pct).includes('%')&&n>0&&n<2) n*=100;
-            pctVal = n;
-        }
-
-        const card = document.createElement('div');
-        card.className = 'rank-card' + (pos<=3 ? ` podium-${pos}` : '');
-        card.style.animationDelay = (i*0.045)+'s';
-
-        let posHtml;
-        if (pos===1) posHtml = `<div class="rank-pos">🥇</div>`;
-        else if (pos===2) posHtml = `<div class="rank-pos">🥈</div>`;
-        else if (pos===3) posHtml = `<div class="rank-pos">🥉</div>`;
-        else posHtml = `<div class="rank-pos rest">${pos}</div>`;
-
-        const crownLabels = ['1 місце','2 місце','3 місце'];
-        const crownHtml = pos<=3 ? `<div class="podium-crown">${crownLabels[pos-1]}</div>` : '';
-
-        let pctHtml = '';
-        if (pctVal!=null) {
-            const cls = pctVal>=100 ? 'good' : pctVal>=80 ? 'warn' : 'bad';
-            pctHtml = `<span class="pct-pill ${cls}">${pctVal.toFixed(1)}%</span>`;
-        }
-
-        card.innerHTML = `
-            <div class="rank-bg" style="background:${m.color};width:${barPct}%"></div>
-            <div class="rank-top">
-                ${posHtml}
-                <div class="rank-name">
-                    <div class="rank-name-text">${item.name}</div>
-                    ${pctVal!=null ? `<div class="rank-sub">Виконання: ${pctHtml}</div>` : ''}
-                </div>
-                <div class="rank-val">
-                    <div class="rank-val-main" style="color:${m.color}">${fmtRatingVal(item.val,m.fmt)}</div>
-                    ${item.plan ? `<div class="rank-val-sub">план: ${fmtRatingVal(item.plan,m.fmt)}</div>` : ''}
-                </div>
-            </div>
-            <div class="rank-bar-bg">
-                <div class="rank-bar-fill" style="width:${barPct}%;background:${m.color};animation-delay:${i*0.045}s"></div>
-            </div>
-            ${crownHtml}`;
-        grid.appendChild(card);
-    });
-
     if (!items.length) {
         grid.innerHTML = '<div style="padding:48px;text-align:center;color:var(--text3);font-size:14px">Немає даних</div>';
+        return;
     }
+
+    // ── Store banner ──
+    const sumRow = allRatingRows.find(r => {
+        const nl=(r[0]||'').toLowerCase().trim();
+        return ['разом','сума','total','тотал','підсумок','всього','итого'].some(k=>nl.includes(k));
+    });
+    const bannerEl = document.getElementById('storeBanner');
+    bannerEl.innerHTML = '';
+    if (sumRow) {
+        const sFact = toNum(sumRow[m.idx]||'0');
+        const sPlan = m.planIdx!=null ? toNum(sumRow[m.planIdx]||'0') : null;
+        const sPctRaw = m.pctIdx!=null ? toNum(sumRow[m.pctIdx]||'0') : null;
+        let sPctNum = sPctRaw;
+        if (sPctRaw && sPctRaw > 0 && sPctRaw < 2) sPctNum = sPctRaw * 100;
+        const pc = !sPctNum ? '#6b7280' : sPctNum<80 ? '#dc2626' : sPctNum<100 ? '#d97706' : '#16a34a';
+        const div = document.createElement('div');
+        div.className = 'store-banner';
+        div.style.borderLeftColor = m.color;
+        div.innerHTML = `
+            <div class="store-banner-label">🏪 Магазин</div>
+            <div class="store-stats">
+                ${sPlan ? `<div class="store-stat"><span class="store-stat-label">План</span><span class="store-stat-val">${fmtRatingVal(sPlan,m.fmt)}</span></div>` : ''}
+                <div class="store-stat"><span class="store-stat-label">Факт</span><span class="store-stat-val" style="color:${m.color}">${fmtRatingVal(sFact,m.fmt)}</span></div>
+                ${sPctNum ? `<div class="store-stat"><span class="store-stat-label">Виконання</span><span class="store-stat-pct" style="color:${pc}">${sPctNum.toFixed(1)}%</span></div>` : ''}
+            </div>`;
+        bannerEl.appendChild(div);
+    }
+
+    const maxVal = items[0].val;
+
+    const getPctNum = item => {
+        if (item.pct==null) return null;
+        let n = item.pct;
+        if (n > 0 && n < 2) n *= 100;
+        return n;
+    };
+    const getPctStr = item => {
+        const n = getPctNum(item);
+        return n!=null ? n.toFixed(1)+'%' : null;
+    };
+    const pctClass = p => !p ? '' : p>=100 ? 'd-hi' : p>=80 ? 'd-mid' : 'd-lo';
+
+    if (activeRatingView === 'podium') {
+        renderPodiumView(grid, items, maxVal, m);
+    } else if (activeRatingView === 'bar') {
+        renderBarView(grid, items, maxVal, m, getPctStr, getPctNum);
+    } else if (activeRatingView === 'gauge') {
+        renderGaugeView(grid, items, m, getPctStr, getPctNum);
+    } else {
+        renderLeaderView(grid, items, maxVal, m, getPctStr, getPctNum);
+    }
+}
+
+function renderPodiumView(grid, items, maxVal, m) {
+    const top3 = items.slice(0, 3);
+    const rest  = items.slice(3);
+
+    // Podium
+    const podWrap = document.createElement('div');
+    podWrap.className = 'podium-wrap';
+    const ORDER = [1, 0, 2];
+    const MEDALS = ['🥇','🥈','🥉'];
+    const POD_CLS = ['pod-1','pod-2','pod-3'];
+    ORDER.forEach(oi => {
+        const item = top3[oi];
+        const pod = document.createElement('div');
+        pod.className = 'pod ' + (POD_CLS[oi]||'');
+        if (!item) { pod.style.opacity='0'; podWrap.appendChild(pod); return; }
+        let pctStr = null;
+        if (item.pct!=null) { let n=item.pct; if(n>0&&n<2) n*=100; pctStr=n.toFixed(1)+'%'; }
+        pod.innerHTML = `
+            <div class="pod-medal">${MEDALS[oi]}</div>
+            <div class="pod-name">${item.name}</div>
+            <div class="pod-val" style="color:${m.color}">${fmtRatingVal(item.val,m.fmt)}</div>
+            ${pctStr ? `<div class="pod-pct">${pctStr}</div>` : ''}`;
+        podWrap.appendChild(pod);
+    });
+    grid.appendChild(podWrap);
+
+    // Rest as hbar
+    if (rest.length) {
+        const list = document.createElement('div');
+        list.className = 'hbar-list';
+        rest.forEach((item, i) => {
+            const barPct = maxVal>0 ? Math.round(item.val/maxVal*100) : 0;
+            let pctStr=null; if(item.pct!=null){let n=item.pct; if(n>0&&n<2)n*=100; pctStr=n.toFixed(1)+'%';}
+            const hbar = document.createElement('div');
+            hbar.className = 'hbar';
+            hbar.style.animationDelay = (i*0.04)+'s';
+            hbar.innerHTML = `
+                <div class="hbar-pos">${i+4}</div>
+                <div class="hbar-name">${item.name}</div>
+                <div class="hbar-track"><div class="hbar-fill" style="width:${barPct}%;background:${m.color};animation-delay:${i*0.04}s"></div></div>
+                <div class="hbar-val"><span style="color:${m.color}">${fmtRatingVal(item.val,m.fmt)}</span>${pctStr?`<div class="hbar-pct">${pctStr}</div>`:''}</div>`;
+            list.appendChild(hbar);
+        });
+        grid.appendChild(list);
+    }
+}
+
+function renderLeaderView(grid, items, maxVal, m, getPctStr) {
+    const LCLS = ['l-gold','l-silver','l-bronze'];
+    const MEDALS = ['🥇','🥈','🥉'];
+    items.forEach((item, i) => {
+        const pos = i+1;
+        const card = document.createElement('div');
+        card.className = 'leader-card ' + (LCLS[i]||'');
+        card.style.animationDelay = (i*0.04)+'s';
+        const pctStr = getPctStr(item);
+        const pctCls = pctStr ? (parseFloat(pctStr)>=100?'good':parseFloat(pctStr)>=80?'warn':'bad') : '';
+        const badgeHTML = pos<=3
+            ? `<div class="leader-badge">${MEDALS[i]}</div>`
+            : `<div class="leader-rest-badge">${pos}</div>`;
+        card.innerHTML = `
+            ${badgeHTML}
+            <div class="leader-info">
+                <div class="leader-name">${item.name}</div>
+                ${pctStr ? `<div class="leader-sub">Виконання: <span class="pct-pill ${pctCls}">${pctStr}</span></div>` : ''}
+            </div>
+            <div class="leader-val">
+                <div class="leader-val-main" style="color:${m.color}">${fmtRatingVal(item.val,m.fmt)}</div>
+                ${item.plan ? `<div class="leader-val-plan">план: ${fmtRatingVal(item.plan,m.fmt)}</div>` : ''}
+            </div>`;
+        grid.appendChild(card);
+    });
+}
+
+function renderBarView(grid, items, maxVal, m, getPctStr, getPctNum) {
+    const list = document.createElement('div');
+    list.className = 'hbar-list';
+    items.forEach((item, i) => {
+        const barPct = maxVal>0 ? Math.round(item.val/maxVal*100) : 0;
+        const pctStr = getPctStr(item);
+        const pctCls = pctStr ? (parseFloat(pctStr)>=100?'good':parseFloat(pctStr)>=80?'warn':'bad') : '';
+        const hbar = document.createElement('div');
+        hbar.className = 'hbar';
+        hbar.style.animationDelay = (i*0.04)+'s';
+        hbar.innerHTML = `
+            <div class="hbar-pos">${i+1}</div>
+            <div class="hbar-name">${item.name}</div>
+            <div class="hbar-track"><div class="hbar-fill" style="width:${barPct}%;background:${m.color};animation-delay:${i*0.04}s"></div></div>
+            <div class="hbar-val">
+                <span style="color:${m.color}">${fmtRatingVal(item.val,m.fmt)}</span>
+                ${pctStr ? `<div class="hbar-pct"><span class="pct-pill ${pctCls}">${pctStr}</span></div>` : ''}
+            </div>`;
+        list.appendChild(hbar);
+    });
+    grid.appendChild(list);
+}
+
+function renderGaugeView(grid, items, m, getPctStr, getPctNum) {
+    const gGrid = document.createElement('div');
+    gGrid.className = 'gauge-grid';
+    items.forEach((item, i) => {
+        const pctNum = getPctNum(item);
+        const pctStr = pctNum!=null ? pctNum.toFixed(1)+'%' : null;
+        const fillColor = !pctNum ? '#4b5563' : pctNum>=100 ? '#22c55e' : pctNum>=80 ? '#f59e0b' : '#ef4444';
+        const cx=50, cy=62, r=38;
+        const startA = -Math.PI*0.75, endA = Math.PI*0.75;
+        const clamp = pctNum!=null ? Math.min(Math.max(pctNum/100,0),1) : 0;
+        const fillEnd = startA + (endA-startA)*clamp;
+        const toXY = (a,rr) => [cx+rr*Math.cos(a), cy+rr*Math.sin(a)];
+        const [tx,ty] = toXY(startA,r), [te,tf] = toXY(endA,r);
+        const trackPath = `M${tx.toFixed(1)},${ty.toFixed(1)} A${r},${r} 0 1 1 ${te.toFixed(1)},${tf.toFixed(1)}`;
+        let fillPath = null;
+        if (clamp > 0) {
+            const [fx,fy] = toXY(startA,r), [fe,ff] = toXY(fillEnd,r);
+            const la = (fillEnd-startA) > Math.PI ? 1 : 0;
+            fillPath = `M${fx.toFixed(1)},${fy.toFixed(1)} A${r},${r} 0 ${la} 1 ${fe.toFixed(1)},${ff.toFixed(1)}`;
+        }
+        const isTop = i===0;
+        const card = document.createElement('div');
+        card.className = 'cyber-card';
+        card.style.animationDelay = (i*0.05)+'s';
+        if (isTop) card.style.boxShadow = `0 0 18px ${fillColor}55`;
+        card.innerHTML = `
+            <svg viewBox="0 0 100 80" width="100%" style="display:block">
+                <path d="${trackPath}" fill="none" stroke="#1e2330" stroke-width="9" stroke-linecap="round"/>
+                ${fillPath ? `<path d="${fillPath}" fill="none" stroke="${fillColor}" stroke-width="9" stroke-linecap="round"/>` : ''}
+                <text x="${cx}" y="${cy-2}" text-anchor="middle" font-size="9" font-weight="900" fill="${fillColor}" font-family="monospace">${pctStr||'—'}</text>
+                <text x="${cx}" y="${cy+7}" text-anchor="middle" font-size="6" font-weight="700" fill="#6e7a99" font-family="monospace">ПЛАН</text>
+            </svg>
+            <div class="cyber-name">${item.name}</div>
+            <div class="cyber-val" style="color:${fillColor}">${fmtRatingVal(item.val,m.fmt)}</div>`;
+        gGrid.appendChild(card);
+    });
+    grid.appendChild(gGrid);
 }
 
 function showRatingSkeleton(grid, count=7) {
