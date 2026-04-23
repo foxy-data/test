@@ -331,6 +331,10 @@ th, td { font-size: 10px; padding: 3px 5px; }
 }
 
 .pill { transition: all 0.15s ease; }
+tr.current-day td { background: #fffbeb !important; }
+tr.current-day td.c-l1, tr.current-day td.c-l2 { background: #fef3c7 !important; }
+tr.current-day td.c-l1 { font-weight: 800 !important; color: #92400e !important; }
+tr.current-week-first td { border-top: 3px solid #0071e3 !important; }
 .diff-btn { border: 1px solid #d2d2d7; font-size:11px; font-weight:600; padding:3px 9px; border-radius:7px; cursor:pointer; background:transparent; color:#6e6e73; font-family:inherit; white-space:nowrap; transition:all .15s; }
 .diff-btn:hover { background:#f2f2f7; color:#1d1d1f; }
 .diff-btn-active { background:#374151 !important; color:#fff !important; border-color:#374151 !important; }
@@ -396,6 +400,49 @@ let selChartMode = 'store', selChartStore = '', selChartPeriod = 'day', selChart
 let showDiffYday = true;   // відхилення від вчора
 let showDiffWeek = true;   // відхилення від попереднього тижня
 
+// ── Поточна дата ──
+const _today = new Date();
+const TODAY_STR = String(_today.getDate()).padStart(2,'0') + '.' + String(_today.getMonth()+1).padStart(2,'0');
+const CURRENT_WEEK = getCurrentWeekNum();
+const CURRENT_MONTH = _today.getMonth() + 1;
+const CURRENT_YEAR = _today.getFullYear();
+
+function getCurrentWeekNum() {
+  const now = new Date();
+  const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+// ── Збереження скролу при ре-рендері ──
+let _savedScrollTop = null;
+let _savedAnchorDate = null;  // дата рядка що був у viewport
+
+function saveScrollAnchor() {
+  const wrap = document.querySelector('.table-wrap');
+  if (!wrap) return;
+  _savedScrollTop = wrap.scrollTop;
+  // знаходимо рядок що зараз у зоні видимості
+  const rows = wrap.querySelectorAll('tr[data-date]');
+  const wrapTop = wrap.getBoundingClientRect().top;
+  for (const row of rows) {
+    const rt = row.getBoundingClientRect().top - wrapTop;
+    if (rt >= 0 && rt < 80) { _savedAnchorDate = row.dataset.date; break; }
+  }
+}
+
+function restoreScrollAnchor() {
+  const wrap = document.querySelector('.table-wrap');
+  if (!wrap) return;
+  if (_savedAnchorDate) {
+    const target = wrap.querySelector(`tr[data-date="${_savedAnchorDate}"]`);
+    if (target) { target.scrollIntoView({block:'start'}); _savedAnchorDate = null; return; }
+  }
+  if (_savedScrollTop !== null) { wrap.scrollTop = _savedScrollTop; _savedScrollTop = null; }
+}
+
 function updateDiffButtons() {
   const both = showDiffYday && showDiffWeek;
   const none = !showDiffYday && !showDiffWeek;
@@ -418,7 +465,9 @@ function setDiffMode(yday, week) {
   showDiffYday = yday;
   showDiffWeek = week;
   updateDiffButtons();
+  saveScrollAnchor();
   render();
+  requestAnimationFrame(() => restoreScrollAnchor());
 }
 // -
 // УТИЛІТИ
@@ -609,20 +658,11 @@ if (active && !cls.includes('pill-all')) {
 return b;
 }
 
-function getCurrentWeek() {
-  const now = new Date();
-  const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-}
-
 function renderWeekFilter() {
   const wrap = document.getElementById('weekPills');
   if (!wrap) return;
   wrap.innerHTML = '';
-  const currentWeek = getCurrentWeek();
+  const currentWeek = CURRENT_WEEK;
   const allSel = allWeeks.length > 0 && selWeeks.size > 0 && allWeeks.every(w => selWeeks.has(w));
 
   function makeWPill(label, isActive, isCurrent, onClick, extraStyle) {
@@ -854,10 +894,26 @@ thead.appendChild(trH);
 tbl.appendChild(thead);
 const tbody = document.createElement('tbody');
 let prevWeek = null;
+let firstCurrentWeekMarked = false;
+// знаходимо індекс "тотал" магазину
+const totalStIdx = sts.findIndex(s => s.name.toLowerCase().includes('тотал'));
+
 data.forEach((r, idx) => {
 const tr = document.createElement('tr');
 if (r.isWE) tr.classList.add('weekend');
-if (r.week && r.week !== prevWeek) { tr.classList.add('wk-sep'); prevWeek = r.week; }
+const isNewWeek = r.week && r.week !== prevWeek;
+if (isNewWeek) { tr.classList.add('wk-sep'); prevWeek = r.week; }
+
+// ── Поточний тиждень: синя лінія зверху першого рядка ──
+if (r.week === CURRENT_WEEK && !firstCurrentWeekMarked) {
+  tr.classList.add('current-week-first');
+  firstCurrentWeekMarked = true;
+}
+// ── Поточний день ──
+const rowDateFmt = fmtDate(r.date);
+if (rowDateFmt === TODAY_STR) tr.classList.add('current-day');
+
+tr.dataset.date = r.date; // для збереження позиції скролу
 tr.appendChild(mkTd(fmtDate(r.date), 'c-l1'));
 tr.appendChild(mkTd(r.dowName ? r.dowName.slice(0,2) : '', 'c-l2'));
 sts.forEach((st, i) => {
@@ -880,10 +936,13 @@ if (showDiffYday && idx > 0) {
   diffTr.appendChild(mkTd('', 'c-l2'));
   sts.forEach((st, i) => {
     const bg = STORE_BG[i % STORE_BG.length];
+    // Тотал: не рахуємо відхилення для тижнів після поточного
+    const isTotal = i === totalStIdx;
+    const isFutureWeek = isTotal && r.week != null && r.week > CURRENT_WEEK;
     const cv = r.storeVals[st.name] || {};
     const pv = prev.storeVals[st.name] || {};
-    const cf = cv.foks ?? null, ck = cv.komf ?? null;
-    const pf = pv.foks ?? null, pk = pv.komf ?? null;
+    const cf = isFutureWeek ? null : (cv.foks ?? null), ck = isFutureWeek ? null : (cv.komf ?? null);
+    const pf = isFutureWeek ? null : (pv.foks ?? null), pk = isFutureWeek ? null : (pv.komf ?? null);
     const df = (cf != null && pf != null) ? cf - pf : null;
     const dk = (ck != null && pk != null) ? ck - pk : null;
     const cd = (cf != null && cf > 0) ? ck / cf : null;
@@ -906,10 +965,12 @@ if (showDiffWeek) {
     wkTr.appendChild(mkTd('\u2195 -7 днів', 'c-l1', {paddingLeft:'4px',color:'#0369a1',fontWeight:'600'}));
     wkTr.appendChild(mkTd('', 'c-l2'));
     sts.forEach((st, i) => {
+      const isTotal = i === totalStIdx;
+      const isFutureWeek = isTotal && r.week != null && r.week > CURRENT_WEEK;
       const cv = r.storeVals[st.name] || {};
       const wv = sameWkPrev.storeVals[st.name] || {};
-      const cf = cv.foks ?? null, ck = cv.komf ?? null;
-      const wf = wv.foks ?? null, wk = wv.komf ?? null;
+      const cf = isFutureWeek ? null : (cv.foks ?? null), ck = isFutureWeek ? null : (cv.komf ?? null);
+      const wf = isFutureWeek ? null : (wv.foks ?? null), wk = isFutureWeek ? null : (wv.komf ?? null);
       const df = (cf != null && wf != null) ? cf - wf : null;
       const dk = (ck != null && wk != null) ? ck - wk : null;
       const cd = (cf != null && cf > 0) ? ck / cf : null;
@@ -1531,6 +1592,15 @@ detect(rows);
 if (!stores.length) throw new Error('Не знайдено магазини у файлі (перевір структуру заголовків)');
 renderFilters();
 render();
+// ── Прокрутка до поточного тижня при першому завантаженні ──
+requestAnimationFrame(() => {
+  setTimeout(() => {
+    const wrap = document.querySelector('.table-wrap');
+    if (!wrap) return;
+    const curRow = wrap.querySelector('tr.current-week-first, tr.current-day');
+    if (curRow) curRow.scrollIntoView({block: 'start'});
+  }, 80);
+});
 } catch (e) {
 document.getElementById('tabContent').innerHTML = '<div class="table-card"><div class="status-box error">\u274c ' + e.message + '</div></div>';
 console.error('[daily-delta] init error:', e);
@@ -1538,7 +1608,5 @@ console.error('[daily-delta] init error:', e);
 }
 init();
 </script>
-<script src="auth.js"></script>
-<script src="page-guard.js"></script>
 </body>
 </html>
