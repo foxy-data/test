@@ -1366,7 +1366,8 @@ c2.appendChild(lbl);
 sts.forEach(st => {
 const b = document.createElement('button');
 b.className = 'pill' + (st.name === selChartStore ? ' active' : '');
-b.textContent = st.name.split(' ').slice(1,4).join(' ');
+const displayName = st.name.toLowerCase().includes('тотал') ? 'Тотал' : st.name.split(' ').slice(1,4).join(' ');
+b.textContent = displayName || st.name;
 b.title = st.name;
 if (st.name === selChartStore) { b.style.background = '#1d1d1f'; b.style.color = '#fff'; }
 b.onclick = () => { selChartStore = st.name; renderChart(); };
