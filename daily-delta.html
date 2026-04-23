@@ -189,9 +189,10 @@ padding: 7px 12px;
 border-bottom: 1px solid #f2f2f4;
 background: #fafafa;
 }
-table { border-collapse: collapse; min-width: 100%; table-layout: auto; }
-th.grp { min-width: 160px; max-width: 160px; width: 160px; }
-th.sub { min-width: 53px; max-width: 53px; width: 53px; }
+table { border-collapse: collapse; width: max-content; }
+th.grp { width: 159px; min-width: 159px; max-width: 159px; }
+th.sub { width: 53px; min-width: 53px; max-width: 53px; }
+td:not(.c-l1):not(.c-l2) { min-width: 53px; max-width: 53px; }
 th, td {
 padding: 4px 7px;
 border-bottom: 1px solid #f2f2f4;
@@ -375,11 +376,11 @@ tr.current-week-first td { border-top: 3px solid #0071e3 !important; }
 </div>
 </div>
 <div class="tabs" id="tabsEl">
-<button class="tab active" onclick="switchTab('table')">📋 Таблиця</button>
-<button class="tab" onclick="switchTab('weekday')">📅 Пн–Чт / Пт–Нд</button>
-<button class="tab" onclick="switchTab('weekly')">📆 По тижнях</button>
-<button class="tab" onclick="switchTab('monthly')">🗓 По місяцях</button>
-<button class="tab" onclick="switchTab('chart')">📈 Динаміка</button>
+<button class="tab active" data-tab="table" onclick="switchTab('table')">📋 Таблиця</button>
+<button class="tab" data-tab="weekday" onclick="switchTab('weekday')">📅 Пн–Чт / Пт–Нд</button>
+<button class="tab" data-tab="weekly" onclick="switchTab('weekly')">📆 По тижнях</button>
+<button class="tab" data-tab="monthly" onclick="switchTab('monthly')">🗓 По місяцях</button>
+<button class="tab" data-tab="chart" onclick="switchTab('chart')">📈 Динаміка</button>
 </div>
 <div class="filters-wrap" id="filtersWrap" style="display:none">
 <div class="filter-row">
@@ -1580,8 +1581,7 @@ ticks: { font: { size: isMobile ? 9 : 10 }, color: '#6b7280', callback: v => sel
 function switchTab(tab) {
 activeTab = tab;
 document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-const map = {table:'\u0422\u0430\u0431\u043b\u0438\u0446\u044f', weekday:'\u041f\u043d\u2013\u0427\u0442', weekly:'\u0422\u0438\u0436\u043d\u044f\u0445', monthly:'\u041c\u0456\u0441\u044f\u0446\u044f\u0445', chart:'\u0414\u0438\u043d\u0430\u043c\u0456\u043a\u0430'};
-const activeBtn = Array.from(document.querySelectorAll('.tab')).find(b => b.textContent.includes(map[tab] || ''));
+const activeBtn = document.querySelector(`.tab[data-tab="${tab}"]`);
 if (activeBtn) activeBtn.classList.add('active');
 render();
 }
