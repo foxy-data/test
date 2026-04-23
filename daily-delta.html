@@ -642,18 +642,6 @@ function renderWeekFilter() {
   });
   wrap.appendChild(allBtn);
 
-  // Швидкий вибір: останні N тижнів
-  [4, 8].forEach(n => {
-    const label = 'Ост. ' + n;
-    const lastN = allWeeks.slice(-n);
-    const isActive = lastN.length > 0 && lastN.every(w => selWeeks.has(w)) && selWeeks.size === lastN.length;
-    const btn = makeWPill(label, isActive, false, () => {
-      selWeeks = new Set(allWeeks.slice(-n));
-      renderWeekFilter(); render();
-    }, { borderStyle: 'dashed', marginRight: '4px' });
-    wrap.appendChild(btn);
-  });
-
   // Роздільник
   const sep = document.createElement('span');
   sep.style.cssText = 'color:#d2d2d7;font-size:14px;padding:0 2px;align-self:center;flex-shrink:0;';
@@ -708,13 +696,11 @@ yearsGrouped[year].push({key: ym, month: parseInt(month)});
 
 Object.keys(yearsGrouped).sort().forEach(year => {
 const yearDiv = document.createElement('div');
-yearDiv.style.cssText = 'display:flex;flex-direction:column;gap:2px;margin-right:12px;';
+yearDiv.style.cssText = 'display:flex;flex-direction:row;align-items:center;gap:2px;margin-right:6px;flex-shrink:0;';
 const yearHeader = document.createElement('div');
-yearHeader.style.cssText = 'font-weight:700;color:#374151;font-size:10px;margin-bottom:2px;';
-yearHeader.textContent = year;
+yearHeader.style.cssText = 'font-weight:700;color:#374151;font-size:9px;white-space:nowrap;margin-right:2px;';
+yearHeader.textContent = String(year).slice(2); // '25' instead of '2025'
 yearDiv.appendChild(yearHeader);
-const monthsContainer = document.createElement('div');
-monthsContainer.style.cssText = 'display:flex;gap:3px;flex-wrap:wrap;';
 yearsGrouped[year].forEach(ym => {
 const a = selYearMonths.has(ym.key);
 const b = mkPill(MONTHS_UK[ym.month-1].slice(0,3), a, '', () => {
@@ -723,9 +709,8 @@ else selYearMonths.add(ym.key);
 renderFilters(); render();
 });
 if (a) { b.style.background = '#1d1d1f'; b.style.color = '#fff'; }
-monthsContainer.appendChild(b);
+yearDiv.appendChild(b);
 });
-yearDiv.appendChild(monthsContainer);
 ymp.appendChild(yearDiv);
 });
 
@@ -738,26 +723,9 @@ renderFilters(); render();
 });
 sp.appendChild(baS);
 
-// Тотал-пілюля — просто ще один магазин
-const isTotalActive = stores.every(s => selStores.has(s.name));
-const bTotal = document.createElement('button');
-bTotal.className = 'pill' + (isTotalActive ? ' active' : '');
-bTotal.textContent = 'Тотал';
-bTotal.title = 'Усі магазини разом';
-if (isTotalActive) { bTotal.style.background = '#1d1d1f'; bTotal.style.color = '#fff'; }
-bTotal.onclick = () => {
-  if (stores.every(s => selStores.has(s.name))) {
-    // якщо всі вибрані — залишаємо як є (тотал = всі)
-  } else {
-    stores.forEach(s => selStores.add(s.name));
-    renderFilters(); render();
-  }
-};
-bTotal.onclick = () => { stores.forEach(s => selStores.add(s.name)); renderFilters(); render(); };
-sp.appendChild(bTotal);
 stores.filter(s => s.name && s.name.trim()).forEach(s => {
 const a = selStores.has(s.name);
-const displayName = s.name.split(' ').slice(1,4).join(' ');
+const displayName = s.name.toLowerCase().includes('тотал') ? 'Тотал' : s.name.split(' ').slice(1,4).join(' ');
 if (!displayName) return;
 const b = mkPill(displayName, a, '', () => {
 if (a) { if (selStores.size > 1) selStores.delete(s.name); }
@@ -904,8 +872,8 @@ tr.appendChild(mkTd(d != null ? d.toFixed(2) : null, deltaClass(d), {background:
 });
 tbody.appendChild(tr);
 
+// ── відхилення від вчора ──
 if (showDiffYday && idx > 0) {
-  // відхилення до попереднього дня
   const prev = data[idx - 1];
   const diffTr = document.createElement('tr'); diffTr.className = 'diff-row';
   diffTr.appendChild(mkTd('\u2195 вчора', 'c-l1', {paddingLeft:'4px',color:'#92400e',fontWeight:'600'}));
@@ -928,16 +896,16 @@ if (showDiffYday && idx > 0) {
     diffTr.appendChild(mkTd(fmtDd(dd), dd == null ? '' : (dd <= 0 ? 'diff-pos' : 'diff-neg'), {background:bg, fontSize:'10px'}));
   });
   tbody.appendChild(diffTr);
-
-  // відхилення до аналогічного дня минулого тижня (той самий день тижня)
+}
+// ── відхилення від аналогічного дня минулого тижня ──
+if (showDiffWeek) {
   const sameWkPrev = idx >= 7 ? data[idx - 7] : null;
-  if (showDiffWeek && sameWkPrev && sameWkPrev.dowNum === r.dowNum) {
+  if (sameWkPrev && sameWkPrev.dowNum === r.dowNum) {
     const wkTr = document.createElement('tr'); wkTr.className = 'diff-row';
     wkTr.style.cssText = 'background:#f0f9ff!important;';
     wkTr.appendChild(mkTd('\u2195 -7 днів', 'c-l1', {paddingLeft:'4px',color:'#0369a1',fontWeight:'600'}));
     wkTr.appendChild(mkTd('', 'c-l2'));
     sts.forEach((st, i) => {
-      const bg = STORE_BG[i % STORE_BG.length];
       const cv = r.storeVals[st.name] || {};
       const wv = sameWkPrev.storeVals[st.name] || {};
       const cf = cv.foks ?? null, ck = cv.komf ?? null;
