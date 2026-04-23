@@ -331,6 +331,11 @@ th, td { font-size: 10px; padding: 3px 5px; }
 }
 
 .pill { transition: all 0.15s ease; }
+.diff-btn { border: 1px solid #d2d2d7; font-size:11px; font-weight:600; padding:3px 9px; border-radius:7px; cursor:pointer; background:transparent; color:#6e6e73; font-family:inherit; white-space:nowrap; transition:all .15s; }
+.diff-btn:hover { background:#f2f2f7; color:#1d1d1f; }
+.diff-btn-active { background:#374151 !important; color:#fff !important; border-color:#374151 !important; }
+.diff-controls { display:flex; align-items:center; gap:4px; padding:6px 12px; background:#f7f7fa; border-bottom:1px solid #ebebf0; flex-wrap:wrap; }
+.diff-controls-label { font-size:10px; font-weight:700; color:#a0a0ab; text-transform:uppercase; letter-spacing:.06em; margin-right:4px; white-space:nowrap; }
 .chart-wrap canvas { transition: opacity 0.2s ease; }
 #btnTooltip.active { background: #1d1d1f !important; color: white !important; }
 #btnTooltip:not(.active) { background: #ef4444 !important; color: white !important; }
@@ -342,7 +347,6 @@ th, td { font-size: 10px; padding: 3px 5px; }
 <a href="index.html" class="back-link">← Назад</a>
 <div class="page-title">Дельта щоденна</div>
 </div>
-<button id="btnShowDiff" class="pill active" onclick="toggleDiff()" style="background:#374151;color:#fff;border:none;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">↕ Відхилення: ВКЛ</button>
 </div>
 <div class="tabs" id="tabsEl">
 <button class="tab active" onclick="switchTab('table')">📋 Таблиця</button>
@@ -389,15 +393,31 @@ let selYearMonths = new Set(), selStores = new Set(), selWeeks = new Set();
 let selSegments = new Set(['wd','we']);
 let activeTab = 'table', chartInstance = null;
 let selChartMode = 'store', selChartStore = '', selChartPeriod = 'day', selChartMetric = 'delta';
-let showDiff = true;
-function toggleDiff() {
-  showDiff = !showDiff;
-  const btn = document.getElementById('btnShowDiff');
-  if (btn) {
-    btn.textContent = showDiff ? '\u2195 Відхилення: ВКЛ' : '\u2195 Відхилення: ВИКЛ';
-    btn.style.background = showDiff ? '#374151' : '#e5e5ea';
-    btn.style.color = showDiff ? '#fff' : '#6e6e73';
-  }
+let showDiffYday = true;   // відхилення від вчора
+let showDiffWeek = true;   // відхилення від попереднього тижня
+
+function updateDiffButtons() {
+  const both = showDiffYday && showDiffWeek;
+  const none = !showDiffYday && !showDiffWeek;
+  ['btnDiffYday','btnDiffWeek','btnDiffBoth'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.background = '';
+    el.style.color = '';
+    el.classList.remove('diff-btn-active');
+  });
+  const bdY = document.getElementById('btnDiffYday');
+  const bdW = document.getElementById('btnDiffWeek');
+  const bdB = document.getElementById('btnDiffBoth');
+  if (bdY) { bdY.classList.toggle('diff-btn-active', showDiffYday && !showDiffWeek); }
+  if (bdW) { bdW.classList.toggle('diff-btn-active', showDiffWeek && !showDiffYday); }
+  if (bdB) { bdB.classList.toggle('diff-btn-active', both); }
+}
+
+function setDiffMode(yday, week) {
+  showDiffYday = yday;
+  showDiffWeek = week;
+  updateDiffButtons();
   render();
 }
 // -
@@ -623,8 +643,8 @@ function renderWeekFilter() {
   wrap.appendChild(allBtn);
 
   // Швидкий вибір: останні N тижнів
-  [4, 8, 13].forEach(n => {
-    const label = 'Ост.' + n;
+  [4, 8].forEach(n => {
+    const label = 'Ост. ' + n;
     const lastN = allWeeks.slice(-n);
     const isActive = lastN.length > 0 && lastN.every(w => selWeeks.has(w)) && selWeeks.size === lastN.length;
     const btn = makeWPill(label, isActive, false, () => {
@@ -718,15 +738,22 @@ renderFilters(); render();
 });
 sp.appendChild(baS);
 
-// Тотал-пілюля
-const isTotalActive = selStores.size === stores.length;
-const bTotal = mkPill('\u0422\u043e\u0442\u0430\u043b', isTotalActive, '', () => {
-  stores.forEach(s => selStores.add(s.name));
-  renderFilters(); render();
-});
-bTotal.title = '\u0423\u0441\u0456 \u043c\u0430\u0433\u0430\u0437\u0438\u043d\u0438 \u0440\u0430\u0437\u043e\u043c';
-if (isTotalActive) { bTotal.style.background = '#0071e3'; bTotal.style.color = '#fff'; }
-else { bTotal.style.border = '1px solid #0071e3'; bTotal.style.color = '#0071e3'; }
+// Тотал-пілюля — просто ще один магазин
+const isTotalActive = stores.every(s => selStores.has(s.name));
+const bTotal = document.createElement('button');
+bTotal.className = 'pill' + (isTotalActive ? ' active' : '');
+bTotal.textContent = 'Тотал';
+bTotal.title = 'Усі магазини разом';
+if (isTotalActive) { bTotal.style.background = '#1d1d1f'; bTotal.style.color = '#fff'; }
+bTotal.onclick = () => {
+  if (stores.every(s => selStores.has(s.name))) {
+    // якщо всі вибрані — залишаємо як є (тотал = всі)
+  } else {
+    stores.forEach(s => selStores.add(s.name));
+    renderFilters(); render();
+  }
+};
+bTotal.onclick = () => { stores.forEach(s => selStores.add(s.name)); renderFilters(); render(); };
 sp.appendChild(bTotal);
 stores.filter(s => s.name && s.name.trim()).forEach(s => {
 const a = selStores.has(s.name);
@@ -802,6 +829,33 @@ cont.innerHTML = '<div class="table-card"><div class="status-box">\u041d\u0435\u
 return;
 }
 const card = document.createElement('div'); card.className = 'table-card';
+
+// ── Панель керування відхиленнями ──
+const diffBar = document.createElement('div'); diffBar.className = 'diff-controls';
+const diffLbl = document.createElement('span'); diffLbl.className = 'diff-controls-label'; diffLbl.textContent = '↕ Відхилення:';
+diffBar.appendChild(diffLbl);
+
+const both = showDiffYday && showDiffWeek;
+const btnB = document.createElement('button'); btnB.className = 'diff-btn' + (both ? ' diff-btn-active' : ''); btnB.id = 'btnDiffBoth'; btnB.textContent = 'Обидва';
+btnB.onclick = () => setDiffMode(!both || !showDiffYday || !showDiffWeek ? true : !both, !both || !showDiffYday || !showDiffWeek ? true : !both);
+btnB.onclick = () => { const on = !(showDiffYday && showDiffWeek); setDiffMode(on, on); };
+diffBar.appendChild(btnB);
+
+const btnY = document.createElement('button'); btnY.className = 'diff-btn' + (showDiffYday && !showDiffWeek ? ' diff-btn-active' : ''); btnY.id = 'btnDiffYday'; btnY.textContent = '↕ Вчора';
+btnY.onclick = () => setDiffMode(!showDiffYday || showDiffWeek ? true : false, false);
+btnY.onclick = () => { if (showDiffYday && !showDiffWeek) { setDiffMode(false,false); } else { setDiffMode(true,false); } };
+diffBar.appendChild(btnY);
+
+const btnW = document.createElement('button'); btnW.className = 'diff-btn' + (!showDiffYday && showDiffWeek ? ' diff-btn-active' : ''); btnW.id = 'btnDiffWeek'; btnW.textContent = '↕ Тиждень';
+btnW.onclick = () => { if (!showDiffYday && showDiffWeek) { setDiffMode(false,false); } else { setDiffMode(false,true); } };
+diffBar.appendChild(btnW);
+
+const btnOff = document.createElement('button'); btnOff.className = 'diff-btn' + (!showDiffYday && !showDiffWeek ? ' diff-btn-active' : ''); btnOff.textContent = 'Вимк';
+btnOff.onclick = () => setDiffMode(false, false);
+diffBar.appendChild(btnOff);
+
+card.appendChild(diffBar);
+
 const hint = document.createElement('div'); hint.className = 'table-hint';
 hint.innerHTML = '\u041f\u043d\u2013\u0427\u0442 \u2014 \u0431\u0443\u0434\u043d\u0456 | \u041f\u0442\u2013\u041d\u0434 \u2014 <b style="color:#b45309">\u0432\u0438\u0445\u0456\u0434\u043d\u0456</b> | \u0394: <span class="d5"><0.8</span> <span class="d4">0.8\u20130.95</span> <span class="d3">~1</span> <span class="d2">1.05\u20131.25</span> <span class="d1">>1.25</span>';
 card.appendChild(hint);
@@ -850,7 +904,7 @@ tr.appendChild(mkTd(d != null ? d.toFixed(2) : null, deltaClass(d), {background:
 });
 tbody.appendChild(tr);
 
-if (showDiff && idx > 0) {
+if (showDiffYday && idx > 0) {
   // відхилення до попереднього дня
   const prev = data[idx - 1];
   const diffTr = document.createElement('tr'); diffTr.className = 'diff-row';
@@ -877,7 +931,7 @@ if (showDiff && idx > 0) {
 
   // відхилення до аналогічного дня минулого тижня (той самий день тижня)
   const sameWkPrev = idx >= 7 ? data[idx - 7] : null;
-  if (sameWkPrev && sameWkPrev.dowNum === r.dowNum) {
+  if (showDiffWeek && sameWkPrev && sameWkPrev.dowNum === r.dowNum) {
     const wkTr = document.createElement('tr'); wkTr.className = 'diff-row';
     wkTr.style.cssText = 'background:#f0f9ff!important;';
     wkTr.appendChild(mkTd('\u2195 -7 днів', 'c-l1', {paddingLeft:'4px',color:'#0369a1',fontWeight:'600'}));
@@ -1021,7 +1075,7 @@ tr.appendChild(mkTd(d != null ? d.toFixed(2) : null, deltaClass(d), {background:
 });
 });
 tbody.appendChild(tr);
-if (idx > 0 && showDiff) {
+if (idx > 0 && showDiffYday) {
 const prevK = keys[idx - 1];
 const prev = wMap.get(prevK);
 const diffTr = document.createElement('tr'); diffTr.className = 'diff-row';
@@ -1144,7 +1198,7 @@ tr.appendChild(mkTd(d != null ? d.toFixed(2) : null, deltaClass(d), {background:
 tbody.appendChild(tr);
 if (prevKey && groupMap.has(prevKey)) {
 const prevAgg = aggRows(groupMap.get(prevKey).rows, sts);
-if (showDiff) {
+if (showDiffYday) {
 const diffTr = document.createElement('tr'); diffTr.className = 'diff-row';
 diffTr.appendChild(mkTd('\u2194 vs \u043f\u043e\u043f\u0435\u0440.', 'c-l1', {textAlign: 'left', paddingLeft: '4px', color: '#92400e', fontWeight: '600'}));
 diffTr.appendChild(mkTd('', 'c-l2'));
