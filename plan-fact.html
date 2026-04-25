@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>План-Факт</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Oswald:wght@400;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #f0f2f5;
@@ -482,18 +482,44 @@
         .leader-val-main { font-size: 16px; font-weight: 800; }
         .leader-val-plan { font-size: 10px; color: var(--text3); margin-top: 2px; }
 
-        /* ── GAUGE / CYBER ── */
-        .gauge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
-        .cyber-card {
-            background: #0f1420; border-radius: 14px; border: 1px solid #1e2a45;
-            padding: 12px 10px 10px; display: flex; flex-direction: column;
-            align-items: center; gap: 6px; cursor: pointer; position: relative;
-            overflow: hidden; transition: transform .2s, box-shadow .2s;
-            animation: fadeUp .3s ease both;
+        /* ── HERO CARDS ── */
+        .hero-day-label {
+            font-size: 9px; font-weight: 700; letter-spacing: .12em;
+            text-transform: uppercase; opacity: .45;
+            text-align: center; padding: 2px 0 6px;
+            color: var(--text3);
+            font-family: 'Rajdhani', sans-serif;
         }
-        .cyber-card:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(0,0,0,.4); }
-        .cyber-name { font-size: 11px; font-weight: 700; color: #e0e6f0; text-align: center; line-height: 1.3; }
-        .cyber-val { font-size: 12px; font-weight: 900; text-align: center; }
+        .hero-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 9px;
+        }
+        .hero-card {
+            border-radius: 14px; overflow: hidden; position: relative;
+            cursor: pointer; transition: transform .2s, box-shadow .2s;
+            animation: fadeUp .35s ease both;
+        }
+        .hero-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 8px 28px rgba(0,0,0,.35); }
+        .hero-bg { position: absolute; inset: 0; z-index: 0; }
+        .hero-body { position: relative; z-index: 1; display: flex; flex-direction: column; padding: 0 0 9px; }
+        .hero-top-bar { display: flex; justify-content: space-between; align-items: center; padding: 7px 8px 3px; }
+        .hero-rank { font-family: 'Oswald', sans-serif; font-size: 17px; font-weight: 700; line-height: 1; text-shadow: 0 1px 6px rgba(0,0,0,.5); }
+        .hero-class-badge { font-size: 8px; font-weight: 700; letter-spacing: .07em; padding: 2px 6px; border-radius: 20px; text-transform: uppercase; }
+        .hero-icon-wrap { display: flex; justify-content: center; align-items: center; height: 52px; margin: 1px 0; font-size: 38px; filter: drop-shadow(0 2px 8px rgba(0,0,0,.4)); }
+        .hero-code { text-align: center; font-size: 8px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; padding: 0 4px 2px; opacity: .8; font-family: 'Rajdhani', sans-serif; }
+        .hero-name { font-family: 'Oswald', sans-serif; font-size: 10.5px; font-weight: 600; text-align: center; line-height: 1.2; padding: 0 5px; text-shadow: 0 1px 4px rgba(0,0,0,.5); }
+        .hero-stat-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 9px 0; }
+        .hero-fact { font-size: 9.5px; font-weight: 700; line-height: 1; font-family: 'Rajdhani', sans-serif; }
+        .hero-pct-badge { font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 700; padding: 2px 7px; border-radius: 7px; line-height: 1; }
+        .hero-progress-wrap { padding: 4px 8px 0; }
+        .hero-progress-track { height: 4px; border-radius: 4px; background: rgba(0,0,0,.3); overflow: hidden; }
+        .hero-progress-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+        .hero-power-row { display: flex; justify-content: space-around; padding: 5px 5px 0; gap: 3px; }
+        .hero-power-stat { display: flex; flex-direction: column; align-items: center; flex: 1; }
+        .hero-power-label { font-size: 7px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; opacity: .55; font-family: 'Rajdhani', sans-serif; }
+        .hero-power-val { font-family: 'Oswald', sans-serif; font-size: 10px; font-weight: 600; }
+        .hero-foil { position: absolute; inset: 0; z-index: 2; border-radius: 14px; pointer-events: none; }
 
         /* Skeleton cards */
         .rank-card-skel {
@@ -1023,40 +1049,93 @@ function renderBarView(grid, items, maxVal, m, getPctStr, getPctNum) {
     grid.appendChild(list);
 }
 
+// ── HERO DEFINITIONS (щоденна ротація) ──
+const HEROES_LIST = [
+    { icon:'⚡', title:'FLASH',   power:'Швидкість', bg:['#1a0a3d','#3b1e8c'], accent:'#a78bfa', text:'#e9d5ff', badge:'#7c3aed' },
+    { icon:'🔥', title:'PHOENIX', power:'Феникс',    bg:['#3d0a00','#8c2200'], accent:'#fb923c', text:'#fed7aa', badge:'#ea580c' },
+    { icon:'❄️', title:'FROST',   power:'Крига',     bg:['#012e4a','#035e8c'], accent:'#38bdf8', text:'#bae6fd', badge:'#0284c7' },
+    { icon:'🌩️', title:'STORM',  power:'Грім',      bg:['#1a2a0a','#3b5c1e'], accent:'#86efac', text:'#bbf7d0', badge:'#16a34a' },
+    { icon:'🦁', title:'TITAN',   power:'Сила',      bg:['#3d2d00','#8c6500'], accent:'#fbbf24', text:'#fde68a', badge:'#d97706' },
+    { icon:'🕸️', title:'VENOM',  power:'Павутина',  bg:['#0d1a00','#22400a'], accent:'#a3e635', text:'#d9f99d', badge:'#65a30d' },
+    { icon:'🌊', title:'AQUA',    power:'Море',      bg:['#00283d','#005c8c'], accent:'#22d3ee', text:'#a5f3fc', badge:'#0891b2' },
+    { icon:'🗡️', title:'BLADE',  power:'Меч',       bg:['#2d0a3d','#5c1e8c'], accent:'#e879f9', text:'#f0abfc', badge:'#a21caf' },
+    { icon:'☀️', title:'SOLAR',  power:'Сонце',     bg:['#3d2600','#8c5500'], accent:'#facc15', text:'#fef08a', badge:'#ca8a04' },
+    { icon:'🌑', title:'SHADOW',  power:'Тінь',      bg:['#111','#2a2a2a'],   accent:'#9ca3af', text:'#e5e7eb', badge:'#4b5563' },
+];
+
+// Призначити героїв на день (seed від поточної дати)
+function getDayHeroOffset() {
+    const d = new Date();
+    return d.getFullYear()*1000 + d.getMonth()*31 + d.getDate();
+}
+
 function renderGaugeView(grid, items, m, getPctStr, getPctNum) {
+    const dayOffset = getDayHeroOffset();
+    const today = new Date();
+    const dayStr = today.toLocaleDateString('uk-UA', { day:'numeric', month:'long' });
+
+    const labelEl = document.createElement('div');
+    labelEl.className = 'hero-day-label';
+    labelEl.textContent = '⚡ HEROES OF THE DAY — ' + dayStr.toUpperCase();
+    grid.appendChild(labelEl);
+
     const gGrid = document.createElement('div');
-    gGrid.className = 'gauge-grid';
+    gGrid.className = 'hero-grid';
+
+    function shortName(full) {
+        const parts = full.trim().split(' ');
+        if (parts.length === 1) return full;
+        return parts[0] + ' ' + parts.slice(1).map(p=>p[0]+'.').join(' ');
+    }
+
     items.forEach((item, i) => {
+        const hero = HEROES_LIST[(i + dayOffset) % HEROES_LIST.length];
         const pctNum = getPctNum(item);
-        const pctStr = pctNum!=null ? pctNum.toFixed(1)+'%' : null;
-        const fillColor = !pctNum ? '#4b5563' : pctNum>=100 ? '#22c55e' : pctNum>=80 ? '#f59e0b' : '#ef4444';
-        const cx=50, cy=62, r=38;
-        const startA = -Math.PI*0.75, endA = Math.PI*0.75;
-        const clamp = pctNum!=null ? Math.min(Math.max(pctNum/100,0),1) : 0;
-        const fillEnd = startA + (endA-startA)*clamp;
-        const toXY = (a,rr) => [cx+rr*Math.cos(a), cy+rr*Math.sin(a)];
-        const [tx,ty] = toXY(startA,r), [te,tf] = toXY(endA,r);
-        const trackPath = `M${tx.toFixed(1)},${ty.toFixed(1)} A${r},${r} 0 1 1 ${te.toFixed(1)},${tf.toFixed(1)}`;
-        let fillPath = null;
-        if (clamp > 0) {
-            const [fx,fy] = toXY(startA,r), [fe,ff] = toXY(fillEnd,r);
-            const la = (fillEnd-startA) > Math.PI ? 1 : 0;
-            fillPath = `M${fx.toFixed(1)},${fy.toFixed(1)} A${r},${r} 0 ${la} 1 ${fe.toFixed(1)},${ff.toFixed(1)}`;
-        }
-        const isTop = i===0;
+        const fillW = pctNum!=null ? Math.min(Math.max(pctNum/150*100, 0), 100).toFixed(1) : 0;
+        const pctColor = !pctNum ? '#9ca3af' : pctNum>=100 ? '#4ade80' : pctNum>=80 ? '#fbbf24' : '#f87171';
+        const pctBg    = !pctNum ? 'rgba(156,163,175,.18)' : pctNum>=100 ? 'rgba(34,197,94,.22)' : pctNum>=80 ? 'rgba(250,204,21,.2)' : 'rgba(239,68,68,.22)';
+        const rankStr  = i===0 ? '👑' : '#'+(i+1);
+
+        let tierLabel, tierBg, tierColor;
+        if (!pctNum || pctNum<60) { tierLabel='ТРЕЙНІ'; tierBg='rgba(239,68,68,.2)'; tierColor='#f87171'; }
+        else if (pctNum<80)       { tierLabel='СОЛДАТ'; tierBg='rgba(148,163,184,.2)'; tierColor='#94a3b8'; }
+        else if (pctNum<100)      { tierLabel='ГЕРОЙ';  tierBg='rgba(167,139,250,.2)'; tierColor=hero.accent; }
+        else                      { tierLabel='ЛЕГЕНДА';tierBg='rgba(250,204,21,.22)'; tierColor='#fbbf24'; }
+
         const card = document.createElement('div');
-        card.className = 'cyber-card';
+        card.className = 'hero-card';
         card.style.animationDelay = (i*0.05)+'s';
-        if (isTop) card.style.boxShadow = `0 0 18px ${fillColor}55`;
         card.innerHTML = `
-            <svg viewBox="0 0 100 80" width="100%" style="display:block">
-                <path d="${trackPath}" fill="none" stroke="#1e2330" stroke-width="9" stroke-linecap="round"/>
-                ${fillPath ? `<path d="${fillPath}" fill="none" stroke="${fillColor}" stroke-width="9" stroke-linecap="round"/>` : ''}
-                <text x="${cx}" y="${cy-2}" text-anchor="middle" font-size="9" font-weight="900" fill="${fillColor}" font-family="monospace">${pctStr||'—'}</text>
-                <text x="${cx}" y="${cy+7}" text-anchor="middle" font-size="6" font-weight="700" fill="#6e7a99" font-family="monospace">ПЛАН</text>
-            </svg>
-            <div class="cyber-name">${item.name}</div>
-            <div class="cyber-val" style="color:${fillColor}">${fmtRatingVal(item.val,m.fmt)}</div>`;
+            <div class="hero-bg" style="background:linear-gradient(160deg,${hero.bg[0]} 0%,${hero.bg[1]} 100%)"></div>
+            <div class="hero-body">
+                <div class="hero-top-bar">
+                    <span class="hero-rank" style="color:${hero.accent}">${rankStr}</span>
+                    <span class="hero-class-badge" style="background:${tierBg};color:${tierColor}">${tierLabel}</span>
+                </div>
+                <div class="hero-icon-wrap">${hero.icon}</div>
+                <div class="hero-code" style="color:${hero.accent}">${hero.title}</div>
+                <div class="hero-name" style="color:${hero.text}">${shortName(item.name)}</div>
+                <div class="hero-stat-row">
+                    <span class="hero-fact" style="color:${hero.text};opacity:.7">${fmtRatingVal(item.val,m.fmt)}</span>
+                    <span class="hero-pct-badge" style="background:${pctBg};color:${pctColor}">${pctNum!=null?pctNum.toFixed(1)+'%':'—'}</span>
+                </div>
+                <div class="hero-progress-wrap">
+                    <div class="hero-progress-track">
+                        <div class="hero-progress-fill" style="width:${fillW}%;background:${pctColor}"></div>
+                    </div>
+                </div>
+                <div class="hero-power-row">
+                    <div class="hero-power-stat">
+                        <span class="hero-power-label" style="color:${hero.text}">ПЛАН</span>
+                        <span class="hero-power-val" style="color:${hero.text};opacity:.65">${item.plan ? fmtRatingVal(item.plan,m.fmt) : '—'}</span>
+                    </div>
+                    <div class="hero-power-stat">
+                        <span class="hero-power-label" style="color:${hero.text}">КЛАС</span>
+                        <span class="hero-power-val" style="color:${hero.accent}">${hero.power}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-foil" style="border:1.5px solid ${hero.accent}30;box-shadow:inset 0 0 16px ${hero.accent}0d"></div>`;
         gGrid.appendChild(card);
     });
     grid.appendChild(gGrid);
