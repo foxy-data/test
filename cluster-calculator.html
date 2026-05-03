@@ -23,6 +23,25 @@
   --r6: 6px; --r10: 10px; --r14: 14px; --r20: 20px; --r28: 28px;
   --f: 'Inter', system-ui, sans-serif;
 }
+html.light {
+  --bg:     #F2F2F7;
+  --card:   #FFFFFF;
+  --card2:  #E5E5EA;
+  --border: #D1D1D6;
+  --text:   #000000;
+  --text2:  #3C3C43;
+  --text3:  #8E8E93;
+  --green:  #34C759;
+  --red:    #FF3B30;
+  --blue:   #007AFF;
+  --yellow: #FF9500;
+}
+html.light .ctrl-card select option { background: #fff; color: #000; }
+html.light .cl-sel { background: #fff; }
+html.light .finp { background: #F2F2F7; }
+html.light .mb-fi { background: #F2F2F7; }
+html.light table.mt tbody tr:hover { background: rgba(0,0,0,.03); }
+html.light table.mt tbody tr { border-bottom-color: rgba(0,0,0,.06); }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scrollbar-width: thin; scrollbar-color: var(–card2) var(–bg); }
@@ -723,47 +742,57 @@ function renderSummary(zto,zk,cc,nc){
 
 function renderChart(){
   const cc=CLUSTERS[curCl()],nc=nextCl()!==null?CLUSTERS[nextCl()]:null;
+  const light=document.documentElement.classList.contains('light');
   const labels=MONTHS.map(m=>m.n.slice(0,3));
   const factData=factSales.map(f=>f!==null&&f>0?f:null);
   const planR=MONTHS.map((_,i)=>nc?Math.round(nc.toMin*getKSez(i)):null);
   const planC=MONTHS.map((_,i)=>Math.round(cc.toMin*getKSez(i)));
   const ctx=document.getElementById('toChart').getContext('2d');
   if(chartInst)chartInst.destroy();
+  const green=light?'#34C759':'#30D158';
+  const yellow=light?'#FF9500':'#FFD60A';
+  const red=light?'#FF3B30':'#FF453A';
+  const gc=light?'rgba(0,0,0,.06)':'rgba(255,255,255,.05)';
+  const tc=light?'#8E8E93':'#636366';
+  const ttbg=light?'#fff':'#2C2C2E';
+  const ttbd=light?'#D1D1D6':'#48484A';
+  const tttitle=light?'#000':'#fff';
+  const ttbody=light?'#3C3C43':'#AEAEB2';
   chartInst=new Chart(ctx,{
     type:'bar',
     data:{labels,datasets:[
       {
         label:'Факт ТО',data:factData,
         backgroundColor:factData.map((v,i)=>{
-          if(!v)return'rgba(255,255,255,.06)';
-          if(nc&&v>=planR[i])return'rgba(48,209,88,.45)';
-          if(v>=planC[i])return'rgba(255,255,255,.25)';
-          return'rgba(255,69,58,.45)';
+          if(!v)return light?'rgba(0,0,0,.06)':'rgba(255,255,255,.06)';
+          if(nc&&v>=planR[i])return light?'rgba(52,199,89,.35)':'rgba(48,209,88,.45)';
+          if(v>=planC[i])return light?'rgba(0,122,255,.25)':'rgba(255,255,255,.25)';
+          return light?'rgba(255,59,48,.3)':'rgba(255,69,58,.45)';
         }),
         borderColor:factData.map((v,i)=>{
-          if(!v)return'rgba(255,255,255,.1)';
-          if(nc&&v>=planR[i])return'#30D158';
-          if(v>=planC[i])return'rgba(255,255,255,.5)';
-          return'#FF453A';
+          if(!v)return light?'rgba(0,0,0,.12)':'rgba(255,255,255,.1)';
+          if(nc&&v>=planR[i])return green;
+          if(v>=planC[i])return light?'rgba(0,122,255,.6)':'rgba(255,255,255,.5)';
+          return red;
         }),
         borderWidth:1,borderRadius:4,order:3,
       },
-      {label:'Підняття',data:planR,type:'line',borderColor:'rgba(48,209,88,.7)',backgroundColor:'transparent',borderWidth:1.5,borderDash:[4,3],pointRadius:2,pointBackgroundColor:'#30D158',tension:.3,order:1},
-      {label:'Підтвердження',data:planC,type:'line',borderColor:'rgba(255,214,10,.7)',backgroundColor:'transparent',borderWidth:1.5,borderDash:[5,4],pointRadius:2,pointBackgroundColor:'#FFD60A',tension:.3,order:2},
+      {label:'Підняття',data:planR,type:'line',borderColor:green+'bb',backgroundColor:'transparent',borderWidth:1.5,borderDash:[4,3],pointRadius:2,pointBackgroundColor:green,tension:.3,order:1},
+      {label:'Підтвердження',data:planC,type:'line',borderColor:yellow+'bb',backgroundColor:'transparent',borderWidth:1.5,borderDash:[5,4],pointRadius:2,pointBackgroundColor:yellow,tension:.3,order:2},
     ]},
     options:{
       responsive:true,maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
       plugins:{legend:{display:false},tooltip:{
-        backgroundColor:'#2C2C2E',borderColor:'#48484A',borderWidth:1,
-        titleColor:'#fff',bodyColor:'#AEAEB2',
+        backgroundColor:ttbg,borderColor:ttbd,borderWidth:1,
+        titleColor:tttitle,bodyColor:ttbody,
         titleFont:{family:'Inter',size:12,weight:'700'},bodyFont:{family:'Inter',size:12},
         padding:12,cornerRadius:10,boxPadding:4,
         callbacks:{label(ctx){const v=ctx.raw;if(v==null)return ctx.dataset.label+': —';return ctx.dataset.label+': '+Math.round(v).toLocaleString('uk-UA')}}
       }},
       scales:{
-        x:{grid:{color:'rgba(255,255,255,.05)',drawBorder:false},ticks:{color:'#636366',font:{family:'Inter',size:10,weight:'500'}}},
-        y:{grid:{color:'rgba(255,255,255,.05)',drawBorder:false},ticks:{color:'#636366',font:{family:'Inter',size:10},callback(v){return(v/1e6).toFixed(0)+' млн'}}}
+        x:{grid:{color:gc,drawBorder:false},ticks:{color:tc,font:{family:'Inter',size:10,weight:'500'}}},
+        y:{grid:{color:gc,drawBorder:false},ticks:{color:tc,font:{family:'Inter',size:10},callback(v){return(v/1e6).toFixed(0)+' млн'}}}
       }
     }
   });
@@ -783,7 +812,20 @@ function onClusterChange(){renderClusterRef();renderClusterInfo();renderQuarters
 function onCityChange(){const c=cityData();document.getElementById('kTer').value=c.kTer;renderClusterRef();renderClusterInfo();renderQuarters()}
 function calculate(){renderClusterInfo();renderQuarters()}
 function resetAll(){factSales=new Array(12).fill(null);document.querySelectorAll('input[id^="fact_"],input[id^="mob_fact_"]').forEach(i=>i.value='');calculate()}
-function toggleTheme(){} // dark only
+function toggleTheme(){
+  const isLight=document.documentElement.classList.toggle('light');
+  document.getElementById('themeBtn').textContent=isLight?'🌙':'☀️';
+  localStorage.setItem('th',isLight?'l':'d');
+  renderChart();
+}
+(function(){
+  const s=localStorage.getItem('th');
+  // Default: dark. Switch to light only if explicitly saved.
+  if(s==='l'){
+    document.documentElement.classList.add('light');
+    document.getElementById('themeBtn').textContent='🌙';
+  }
+})();
 
 initCitySelect();renderClusterRef();renderClusterInfo();renderQuarters();
 </script>
