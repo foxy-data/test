@@ -57,8 +57,9 @@
         #main-content { display: none; }
 
         nav {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             position: sticky; top: 0; z-index: 1000;
             border-bottom: 1px solid var(--color-border);
             height: 48px; display: flex; align-items: center;
@@ -68,7 +69,72 @@
             padding: 0 20px; display: flex; justify-content: space-between; align-items: center;
         }
         .nav-logo { font-weight: 600; font-size: 17px; cursor: pointer; }
-        .logout-btn { font-size: 12px; color: var(--color-text-secondary); cursor: pointer; border: none; background: none; }
+        .logout-btn { font-size: 12px; color: var(--color-text-secondary); cursor: pointer; border: none; background: none; font-family: inherit; }
+
+        /* Apple-style nav menu */
+        .nav-menu { display: flex; align-items: center; gap: 0; position: relative; }
+        .nav-item { position: relative; }
+        .nav-item-btn {
+            background: none; border: none; font-family: inherit;
+            font-size: 13px; font-weight: 500; color: var(--color-text-secondary);
+            padding: 0 14px; height: 48px; cursor: pointer;
+            display: flex; align-items: center; gap: 4px;
+            transition: color 0.15s; white-space: nowrap;
+        }
+        .nav-item-btn:hover { color: var(--color-text); }
+        .nav-item-arrow {
+            font-size: 9px; display: inline-block;
+            transition: transform 0.2s; opacity: 0.6;
+        }
+        .nav-item:hover .nav-item-arrow { transform: rotate(180deg); }
+
+        /* Dropdown panel */
+        .nav-dropdown {
+            position: absolute; top: calc(100% + 1px); left: 50%;
+            transform: translateX(-50%) translateY(-6px);
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--color-border);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+            min-width: 340px; max-width: 520px;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.18s ease, transform 0.18s ease;
+            overflow: hidden;
+        }
+        .nav-item:hover .nav-dropdown {
+            opacity: 1; pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+        /* Посилення/КМОТ — wider */
+        .nav-dropdown.wide { min-width: 480px; max-width: 640px; }
+        .nav-dropdown-inner {
+            max-height: calc(100dvh - 80px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .nav-dropdown-inner::-webkit-scrollbar { width: 3px; }
+        .nav-dropdown-inner::-webkit-scrollbar-thumb { background: #d2d2d7; border-radius: 10px; }
+
+        /* Dropdown header bar */
+        .nav-dd-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 14px 8px;
+            border-bottom: 1px solid var(--color-border);
+            background: #f5f5f7;
+            position: sticky; top: 0; z-index: 1;
+        }
+        .nav-dd-title { font-size: 12px; font-weight: 700; color: var(--color-text); display: flex; align-items: center; gap: 6px; }
+        .nav-dd-refresh {
+            background: none; border: 1px solid var(--color-border); border-radius: 7px;
+            padding: 3px 8px; font-size: 11px; color: var(--color-text-secondary);
+            cursor: pointer; font-family: inherit; transition: all 0.2s;
+        }
+        .nav-dd-refresh:hover { color: var(--color-accent); border-color: var(--color-accent); }
+
+        /* Content wrappers inside dropdown */
+        .nav-dd-gsheet { padding: 0; }
+        .nav-dd-pcheck { padding: 12px 14px 16px; }
 
         .container { max-width: 1100px; margin: 0 auto; padding: 20px 16px; }
         @media (min-width: 1200px) { .container { max-width: 1280px; padding: 40px 30px; } }
@@ -240,6 +306,17 @@
         @media (max-width: 600px) {
             header h1 { font-size: 32px; }
             .avatar { width: 50px; height: 50px; font-size: 18px; }
+        }
+
+
+        /* Mobile nav — tap to open */
+        @media (max-width: 700px) {
+            .nav-menu { gap: 0; }
+            .nav-item-btn { font-size: 11px; padding: 0 8px; gap: 2px; }
+            .nav-dropdown { min-width: calc(100vw - 32px) !important; max-width: calc(100vw - 32px) !important;
+                left: 50%; transform: translateX(-50%) translateY(-6px); }
+            .nav-item:hover .nav-dropdown { transform: translateX(-50%) translateY(0); }
+            .nav-dropdown.nav-open { opacity: 1 !important; pointer-events: auto !important; transform: translateX(-50%) translateY(0) !important; }
         }
 
         /* --- GSHEET БЛОК (Посилення + КМОТ) --- */
@@ -651,7 +728,53 @@ const AUTH = {
 <div id="main-content">
     <nav>
         <div class="nav-content">
-            <div class="nav-logo" onclick="showHome()">Gorodok Sales Dashboard</div>
+            <div class="nav-logo" onclick="showHome()">Gorodok</div>
+
+            <div class="nav-menu">
+                <!-- ПОСИЛЕННЯ -->
+                <div class="nav-item">
+                    <button class="nav-item-btn">📋 Посилення <span class="nav-item-arrow">▾</span></button>
+                    <div class="nav-dropdown wide">
+                        <div class="nav-dropdown-inner">
+                            <div class="nav-dd-header">
+                                <span class="nav-dd-title">📋 ПОСИЛЕННЯ</span>
+                                <button class="nav-dd-refresh" onclick="loadGSheet()">↻ Оновити</button>
+                            </div>
+                            <div class="nav-dd-gsheet">
+                                <div id="nav-gsheet-content"><div class="gsheet-loading"><div class="gsheet-loading-spinner"></div>Завантаження...</div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- КМОТ -->
+                <div class="nav-item">
+                    <button class="nav-item-btn">📊 КМОТ <span class="nav-item-arrow">▾</span></button>
+                    <div class="nav-dropdown wide">
+                        <div class="nav-dropdown-inner">
+                            <div class="nav-dd-header">
+                                <span class="nav-dd-title">📊 КМОТ</span>
+                                <button class="nav-dd-refresh" onclick="loadKMOT()">↻ Оновити</button>
+                            </div>
+                            <div class="nav-dd-gsheet">
+                                <div id="nav-kmot-content"><div class="gsheet-loading"><div class="gsheet-loading-spinner"></div>Завантаження...</div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- ПРАВИЛЬНИЙ ЧЕК -->
+                <div class="nav-item">
+                    <button class="nav-item-btn">🧾 Правильний чек <span class="nav-item-arrow">▾</span></button>
+                    <div class="nav-dropdown" style="min-width:520px;max-width:620px;">
+                        <div class="nav-dropdown-inner">
+                            <div class="nav-dd-header">
+                                <span class="nav-dd-title">🧾 ПРАВИЛЬНИЙ ЧЕК</span>
+                            </div>
+                            <div id="nav-pcheck-content" class="nav-dd-pcheck"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <button class="logout-btn" onclick="logout()">Вийти</button>
         </div>
     </nav>
@@ -663,7 +786,7 @@ const AUTH = {
         </header>
 
         <!-- БЛОК ПОСИЛЕННЯ -->
-        <div class="gsheet-block collapsed" id="gsheet-block">
+        <div class="gsheet-block collapsed" id="gsheet-block" style="display:none">
             <div class="gsheet-block-header">
                 <div class="gsheet-block-title">
                     <span>📋</span>
@@ -688,7 +811,7 @@ const AUTH = {
         </div>
 
         <!-- БЛОК КМОТ -->
-        <div class="gsheet-block collapsed" id="kmot-block">
+        <div class="gsheet-block collapsed" id="kmot-block" style="display:none">
             <div class="gsheet-block-header">
                 <div class="gsheet-block-title">
                     <span>📊</span>
@@ -713,7 +836,7 @@ const AUTH = {
         </div>
 
         <!-- БЛОК ПРАВИЛЬНИЙ ЧЕК -->
-        <div class="gsheet-block collapsed" id="pcheck-block">
+        <div class="gsheet-block collapsed" id="pcheck-block" style="display:none">
             <div class="gsheet-block-header">
                 <div class="gsheet-block-title">
                     <span>🧾</span>
@@ -902,6 +1025,12 @@ const AUTH = {
         document.getElementById('main-content').style.display = 'block';
         loadGSheet();
         loadKMOT();
+        // Copy pcheck content to nav dropdown
+        setTimeout(() => {
+            const src = document.querySelector('#pcheck-block .pcheck-body');
+            const dst = document.getElementById('nav-pcheck-content');
+            if (src && dst) dst.innerHTML = src.innerHTML;
+        }, 100);
         function renderSkeletons(count = 5) {
         const container = document.getElementById('sales-cards');
         container.innerHTML = '';
@@ -1043,8 +1172,9 @@ const AUTH = {
 
     function renderGSheetTable(csv) {
         const el = document.getElementById('gsheet-content');
+        const navEl = document.getElementById('nav-gsheet-content');
         const rows = parseCSV(csv);
-        if (!rows.length) { el.innerHTML = `<div class="gsheet-error">Порожня таблиця</div>`; return; }
+        if (!rows.length) { el.innerHTML = `<div class="gsheet-error">Порожня таблиця</div>`; if (navEl) navEl.innerHTML = el.innerHTML; return; }
         const headers = rows[0];
         const sellerIdx = headers.findIndex(h => /продав|seller|прод\./i.test(h));
         const colWidths = [8, 24, 18, 18, 18, 14];
@@ -1076,6 +1206,7 @@ const AUTH = {
         });
         html += `</tbody></table></div>`;
         el.innerHTML = html;
+        if (navEl) navEl.innerHTML = html;
     }
 
     // --- КМОТ ---
@@ -1103,8 +1234,9 @@ const AUTH = {
 
     function renderKMOTTable(csv) {
         const el = document.getElementById('kmot-content');
+        const navKmotEl = document.getElementById('nav-kmot-content');
         const rows = parseCSV(csv);
-        if (!rows.length) { el.innerHTML = `<div class="gsheet-error">Порожня таблиця</div>`; return; }
+        if (!rows.length) { el.innerHTML = `<div class="gsheet-error">Порожня таблиця</div>`; if (navEl) navEl.innerHTML = el.innerHTML; return; }
 
         const headers = rows[0];
         const dataRows = rows.slice(1).filter(r => r[0] && r[0].trim());
@@ -1212,6 +1344,7 @@ const AUTH = {
 
         html += `</tbody></table></div>`;
         el.innerHTML = html;
+        if (navKmotEl) navKmotEl.innerHTML = html;
     }
 
     // --- PLAN DATA ---
