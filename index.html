@@ -754,12 +754,12 @@ const AUTH = {
                 <div class="nav-item" id="nav-item-gsheet">
                     <button class="nav-item-btn" id="nav-btn-gsheet"
                         onclick="toggleNavDropdown('gsheet')">
-                        📋 Посилення <span class="nav-item-arrow">▾</span>
+                        Посилення <span class="nav-item-arrow">▾</span>
                     </button>
                     <div class="nav-dropdown" id="nav-dd-gsheet">
                         <div class="nav-dropdown-inner">
                             <div class="nav-dd-header">
-                                <span class="nav-dd-title">📋 ПОСИЛЕННЯ</span>
+                                <span class="nav-dd-title">ПОСИЛЕННЯ</span>
                                 <button class="nav-dd-refresh" onclick="loadGSheet()">↻ Оновити</button>
                             </div>
                             <div id="nav-gsheet-content">
@@ -773,12 +773,12 @@ const AUTH = {
                 <div class="nav-item" id="nav-item-kmot">
                     <button class="nav-item-btn" id="nav-btn-kmot"
                         onclick="toggleNavDropdown('kmot')">
-                        📊 КМОТ <span class="nav-item-arrow">▾</span>
+                        КМОТ <span class="nav-item-arrow">▾</span>
                     </button>
                     <div class="nav-dropdown" id="nav-dd-kmot">
                         <div class="nav-dropdown-inner">
                             <div class="nav-dd-header">
-                                <span class="nav-dd-title">📊 КМОТ</span>
+                                <span class="nav-dd-title">КМОТ</span>
                                 <button class="nav-dd-refresh" onclick="loadKMOT()">↻ Оновити</button>
                             </div>
                             <div id="nav-kmot-content">
@@ -792,12 +792,12 @@ const AUTH = {
                 <div class="nav-item" id="nav-item-pcheck">
                     <button class="nav-item-btn" id="nav-btn-pcheck"
                         onclick="toggleNavDropdown('pcheck')">
-                        🧾 Прав. чек <span class="nav-item-arrow">▾</span>
+                        Правильний чек <span class="nav-item-arrow">▾</span>
                     </button>
                     <div class="nav-dropdown" id="nav-dd-pcheck">
                         <div class="nav-dropdown-inner">
                             <div class="nav-dd-header">
-                                <span class="nav-dd-title">🧾 ПРАВИЛЬНИЙ ЧЕК</span>
+                                <span class="nav-dd-title">ПРАВИЛЬНИЙ ЧЕК</span>
                             </div>
                             <div id="nav-pcheck-content" class="nav-dd-pcheck"></div>
                         </div>
@@ -819,7 +819,6 @@ const AUTH = {
         <div class="gsheet-block collapsed" id="gsheet-block" style="display:none">
             <div class="gsheet-block-header">
                 <div class="gsheet-block-title">
-                    <span>📋</span>
                     <span id="gsheet-title">ПОСИЛЕННЯ</span>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px">
@@ -844,7 +843,6 @@ const AUTH = {
         <div class="gsheet-block collapsed" id="kmot-block" style="display:none">
             <div class="gsheet-block-header">
                 <div class="gsheet-block-title">
-                    <span>📊</span>
                     <span>КМОТ</span>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px">
@@ -869,7 +867,6 @@ const AUTH = {
         <div class="gsheet-block collapsed" id="pcheck-block" style="display:none">
             <div class="gsheet-block-header">
                 <div class="gsheet-block-title">
-                    <span>🧾</span>
                     <span>ПРАВИЛЬНИЙ ЧЕК</span>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px">
@@ -990,7 +987,7 @@ const AUTH = {
         <div class="store-metrics-block" id="store-metrics-block">
             <div class="store-metrics-header">
                 <div class="store-metrics-title">
-                    <span>🏪</span> Показники магазину
+                    Показники магазину
                     <span class="store-metrics-date" id="sm-date">—</span>
                 </div>
                 <button class="store-metrics-refresh" onclick="loadStoreMetrics()">↻ Оновити</button>
@@ -1006,9 +1003,9 @@ const AUTH = {
                 <span id="sm-day-status"></span>
             </div>
             <div class="sm-metric-bar">
-                <button class="sm-metric-btn active" onclick="setMetric('to', this)">💰 ТО</button>
-                <button class="sm-metric-btn" onclick="setMetric('serv', this)">🛠 Послуги</button>
-                <button class="sm-metric-btn" onclick="setMetric('acc', this)">🎧 АСС</button>
+                <button class="sm-metric-btn active" onclick="setMetric('to', this)">ТО</button>
+                <button class="sm-metric-btn" onclick="setMetric('serv', this)">Послуги</button>
+                <button class="sm-metric-btn" onclick="setMetric('acc', this)">АСС</button>
             </div>
             <div class="sm-target-bar">
                 <span class="sm-target-label">Ціль:</span>
@@ -1589,8 +1586,8 @@ const AUTH = {
                 if (dailyDelta.serv) parts.push('Посл: +' + formatFull(dailyDelta.serv));
                 if (dailyDelta.acc)  parts.push('АСС: +' + formatFull(dailyDelta.acc));
                 statusEl.innerHTML = parts.length
-                    ? '<span class="sm-day-badge">📅 ' + parts.join(' · ') + '</span>'
-                    : '<span class="sm-day-badge">📅 дані завантажено</span>';
+                    ? '<span class="sm-day-badge">' + parts.join(' · ') + '</span>'
+                    : '<span class="sm-day-badge">дані завантажено</span>';
             }
         } catch(e) {
             dailyDelta = null;
@@ -1740,9 +1737,9 @@ const AUTH = {
         }
 
         const dayLabel = smMode === 'day' && dailyDelta ? ' <span style="font-size:9px;font-weight:600;color:#34c759">(+день)</span>' : '';
-        const grpTo   = group('sm-group-to',   '💰', 'ТО' + dayLabel,      toPlan,   toFactFinal,   null, toPrognTempo,   toPrognPlan,   null, null,                                               (smMode==='day'&&dailyDelta&&dailyDelta.to)   ? dailyDelta.to   : null);
-        const grpServ = group('sm-group-serv', '🛠', 'Послуги' + dayLabel, servPlan, servFactFinal, null, servPrognTempo, servPrognPlan, null, servDola ? 'Доля: ' + fDola(servDola) : null,      (smMode==='day'&&dailyDelta&&dailyDelta.serv) ? dailyDelta.serv : null);
-        const grpAcc  = group('sm-group-acc',  '🎧', 'АСС' + dayLabel,     accPlan,  accFactFinal,  null, accPrognTempo,  accPrognPlan,  null, accDola  ? 'Доля: ' + fDola(accDola)  : null,      (smMode==='day'&&dailyDelta&&dailyDelta.acc)  ? dailyDelta.acc  : null);
+        const grpTo   = group('sm-group-to',   '', 'ТО' + dayLabel,      toPlan,   toFactFinal,   null, toPrognTempo,   toPrognPlan,   null, null,                                               (smMode==='day'&&dailyDelta&&dailyDelta.to)   ? dailyDelta.to   : null);
+        const grpServ = group('sm-group-serv', '', 'Послуги' + dayLabel, servPlan, servFactFinal, null, servPrognTempo, servPrognPlan, null, servDola ? 'Доля: ' + fDola(servDola) : null,      (smMode==='day'&&dailyDelta&&dailyDelta.serv) ? dailyDelta.serv : null);
+        const grpAcc  = group('sm-group-acc',  '', 'АСС' + dayLabel,     accPlan,  accFactFinal,  null, accPrognTempo,  accPrognPlan,  null, accDola  ? 'Доля: ' + fDola(accDola)  : null,      (smMode==='day'&&dailyDelta&&dailyDelta.acc)  ? dailyDelta.acc  : null);
         const isMobile = window.innerWidth <= 768;
         const activeGroup = { to: grpTo, serv: grpServ, acc: grpAcc }[smMetric];
         const html = `<div class="store-metrics-groups">${isMobile ? activeGroup : grpTo + grpServ + grpAcc}</div>`;
@@ -2027,7 +2024,7 @@ const AUTH = {
         const _sF = (m['Послуги грн']||{value:0}).value;
         const _planBlock = _pl ? (
             '<div class="detail-plan-section">' +
-                '<div style="font-size:13px;font-weight:700;margin-bottom:4px">📊 План / Факт / Залишок</div>' +
+                '<div style="font-size:13px;font-weight:700;margin-bottom:4px">План / Факт / Залишок</div>' +
                 '<div class="detail-plan-grid">' +
                     '<div class="detail-plan-card"><div class="dpc-label">ТО</div><div class="dpc-plan">План: ' + formatFull(_pl.to) + ' грн</div><div class="dpc-fact">' + formatFull(_tF) + ' грн</div><div class="dpc-rest">Вик.: ' + (_pl.to ? Math.round(_tF/_pl.to*100) : 0) + '% &nbsp; Зал.: ' + fmtRest(_tF,_pl.to) + '</div></div>' +
                     '<div class="detail-plan-card"><div class="dpc-label">АСС</div><div class="dpc-plan">План: ' + formatFull(_pl.acc) + ' грн</div><div class="dpc-fact">' + formatFull(_aF) + ' грн</div><div class="dpc-rest">Вик.: ' + (_pl.acc ? Math.round(_aF/_pl.acc*100) : 0) + '% &nbsp; Зал.: ' + fmtRest(_aF,_pl.acc) + '</div></div>' +
@@ -2041,13 +2038,13 @@ const AUTH = {
                 <div><h1 style="font-size:32px">${person.name}</h1><p style="color:var(--color-text-secondary)">${person.position}</p></div>
             </div>
             ${_planBlock}
-            <div class="group-title">💰 Продажі та Обіг</div>
+            <div class="group-title">Продажі та Обіг</div>
             <div class="metric-group group-sales">${block('ТО')} ${block('ASP')} ${block('Ср. Чек')}</div>
-            <div class="group-title">⚡ Ефективність</div>
+            <div class="group-title">Ефективність</div>
             <div class="metric-group group-eff">${block('Шт.')} ${block('Чеки')} ${block('ПЧ')} ${block('КПЧ')} ${block('Конверсія ПК')}</div>
-            <div class="group-title">🎧 Аксесуари (ACC)</div>
+            <div class="group-title">Аксесуари (ACC)</div>
             <div class="metric-group group-acc">${block('ACC')} ${block('% Доля ACC')}</div>
-            <div class="group-title">🛠 Послуги та УДС</div>
+            <div class="group-title">Послуги та УДС</div>
             <div class="metric-group group-services">${block('Послуги грн')} ${block('Доля Послуг')} ${block('УДС')} ${block('Доля УДС')}</div>`;
         document.getElementById('detail-page').classList.add('active');
         document.getElementById('home-page').style.display = 'none';
