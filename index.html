@@ -234,10 +234,23 @@
 
         .banner-top { display: flex; align-items: flex-start; }
 
-        .banner-content { flex: 1; min-width: 0; }
+        /* Watermark abbr */
+        .banner-watermark {
+            position: absolute;
+            bottom: -10px; right: -4px;
+            font-size: 88px; font-weight: 800;
+            line-height: 1;
+            color: rgba(0,0,0,0.065);
+            letter-spacing: -4px;
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .banner-content { flex: 1; min-width: 0; position: relative; z-index: 1; }
         .banner-content h2 { font-size: 14px; font-weight: 700; margin-bottom: 3px; line-height: 1.3; color: #1d1d1f; }
         .banner-content p  { font-size: 11px; color: #6e6e73; line-height: 1.35; }
-        .banner-footer { }
+        .banner-footer { position: relative; z-index: 1; }
         .banner-cta {
             font-size: 11px; font-weight: 600;
             color: #555; opacity: 0.6;
@@ -1914,7 +1927,7 @@ const AUTH = {
         const carouselWrapper = document.createElement('div');
         carouselWrapper.className = 'carousel-wrapper';
 
-        const createBanner = (title, subtitle, icon, colorClass, href, isBlank = false) => {
+        const createBanner = (title, subtitle, icon, colorClass, href, isBlank = false, abbr = '') => {
             const filename = href.split('/').pop().split('?')[0];
             const locked = AUTH.adminOnly.includes(filename) && AUTH.getRole() !== 'admin';
             const banner = document.createElement(locked ? 'div' : 'a');
@@ -1924,6 +1937,7 @@ const AUTH = {
                 if (isBlank) banner.target = '_blank';
             }
             banner.innerHTML = `
+                <div class="banner-watermark">${abbr}</div>
                 <div class="banner-top">
                     <div class="banner-content"><h2>${title}</h2><p>${locked ? 'Тільки для адміністратора' : subtitle}</p></div>
                 </div>
@@ -1931,17 +1945,17 @@ const AUTH = {
             return banner;
         };
 
-        carouselWrapper.appendChild(createBanner('Щоденні продажі', 'Аналітика по днях',        {bg:'rgba(0,113,227,0.12)'}, 'special',     'daily.html'));
-        carouselWrapper.appendChild(createBanner('Графік виходу',   'Google Sheets',             {bg:'rgba(255,149,0,0.12)'}, 'chart',       'https://docs.google.com/spreadsheets/d/1-sUZg6C6w3-lImTpIv2ezkW-mKtK8zXZ_zf4bCK83R8/edit#gid=973370496', true));
-        carouselWrapper.appendChild(createBanner('МІСЯЦЬ план/факт','Аналітика виконання',       {bg:'rgba(52,199,89,0.12)'}, 'plan-fact',   'plan-fact.html'));
-        carouselWrapper.appendChild(createBanner('Вечірній звіт',   'Розширена аналітика',       {bg:'rgba(175,82,222,0.12)'}, 'plan-fact-2', 'plan-fact-2.html'));
-        carouselWrapper.appendChild(createBanner('Акційний бюлетень','АБ та постійні акції',     {bg:'rgba(0,122,255,0.12)'}, 'documents',   'document-viewer.html'));
-        carouselWrapper.appendChild(createBanner('Динаміка показників','Тренди по місяцях',      {bg:'rgba(88,86,214,0.12)'}, 'dynamics',    'dynamics.html'));
-        carouselWrapper.appendChild(createBanner('Дельта конкурента',  'Порівняння з конкурентом',{bg:'rgba(255,59,48,0.10)'}, 'competitor',  'competitor-delta.html'));
-        carouselWrapper.appendChild(createBanner('Дельта щоденна',    'По днях і тижнях',         {bg:'rgba(0,179,136,0.10)'}, 'daily-delta', 'daily-delta.html'));
-        carouselWrapper.appendChild(createBanner('Звіт по продавцях','Рейтинг та деталі',       {bg:'rgba(255,149,0,0.12)'}, 'sellers',     'sellers-report.html'));
-        carouselWrapper.appendChild(createBanner('Мотивація продавців','Бренди та винагороди',  {bg:'rgba(88,86,214,0.10)'}, 'motivation',  'motivation.html'));
-        carouselWrapper.appendChild(createBanner('Кластер ТО',         'Калькулятор кластеру',  {bg:'rgba(0,199,219,0.10)'}, 'cluster',     'cluster-calculator.html'));
+        carouselWrapper.appendChild(createBanner('Щоденні продажі', 'Аналітика по днях',        {bg:'rgba(0,113,227,0.12)'}, 'special',     'daily.html',    false, 'ЩД'));
+        carouselWrapper.appendChild(createBanner('Графік виходу',   'Google Sheets',             {bg:'rgba(255,149,0,0.12)'}, 'chart',       'https://docs.google.com/spreadsheets/d/1-sUZg6C6w3-lImTpIv2ezkW-mKtK8zXZ_zf4bCK83R8/edit#gid=973370496', true, 'ГВ'));
+        carouselWrapper.appendChild(createBanner('МІСЯЦЬ план/факт','Аналітика виконання',       {bg:'rgba(52,199,89,0.12)'}, 'plan-fact',   'plan-fact.html', false, 'МПФ'));
+        carouselWrapper.appendChild(createBanner('Вечірній звіт',   'Розширена аналітика',       {bg:'rgba(175,82,222,0.12)'}, 'plan-fact-2', 'plan-fact-2.html', false, 'ВЗ'));
+        carouselWrapper.appendChild(createBanner('Акційний бюлетень','АБ та постійні акції',     {bg:'rgba(0,122,255,0.12)'}, 'documents',   'document-viewer.html', false, 'АБ'));
+        carouselWrapper.appendChild(createBanner('Динаміка показників','Тренди по місяцях',      {bg:'rgba(88,86,214,0.12)'}, 'dynamics',    'dynamics.html',  false, 'ДП'));
+        carouselWrapper.appendChild(createBanner('Дельта конкурента',  'Порівняння з конкурентом',{bg:'rgba(255,59,48,0.10)'}, 'competitor',  'competitor-delta.html', false, 'ДК'));
+        carouselWrapper.appendChild(createBanner('Дельта щоденна',    'По днях і тижнях',         {bg:'rgba(0,179,136,0.10)'}, 'daily-delta', 'daily-delta.html', false, 'ДЩ'));
+        carouselWrapper.appendChild(createBanner('Звіт по продавцях','Рейтинг та деталі',       {bg:'rgba(255,149,0,0.12)'}, 'sellers',     'sellers-report.html', false, 'ЗП'));
+        carouselWrapper.appendChild(createBanner('Мотивація продавців','Бренди та винагороди',  {bg:'rgba(88,86,214,0.10)'}, 'motivation',  'motivation.html', false, 'МП'));
+        carouselWrapper.appendChild(createBanner('Кластер ТО',         'Калькулятор кластеру',  {bg:'rgba(0,199,219,0.10)'}, 'cluster',     'cluster-calculator.html', false, 'КТО'));
 
         carouselContainer.appendChild(carouselWrapper);
         container.appendChild(carouselContainer);
