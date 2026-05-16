@@ -584,14 +584,17 @@ if (!curStore) continue;
 const sub = (subRowData[i] || '').toLowerCase().trim();
 if (!sub) continue;
 let type = null;
-// спочатку перевіряємо складені типи (Городок)
-if (sub.includes('\u0433\u0443\u0440\u0442') && sub.includes('\u0444\u043e\u043a\u0441')) type = 'gurt_foks';
-else if (sub.includes('\u0433\u0443\u0440\u0442') && (sub.includes('\u043a\u043e\u043c\u0444') || sub.includes('\u043a\u043e\u043c\u0456'))) type = 'gurt_komf';
-else if ((sub.includes('\u0434\u0435\u043b\u044c\u0442') || sub.includes('delta')) && sub.includes('\u0433\u0443\u0440\u0442') && (sub.includes('\u043a\u043e\u043c\u0444') || sub.includes('\u043a\u043e\u043c\u0456'))) type = 'delta_no_gurt_komf';
-else if ((sub.includes('\u0434\u0435\u043b\u044c\u0442') || sub.includes('delta')) && sub.includes('\u0433\u0443\u0440\u0442')) type = 'delta_no_gurt';
-else if (sub.includes('\u0444\u043e\u043a\u0441') || sub === '\u0444\u043e\u043a\u0441\u0442\u0440\u043e\u0442') type = 'foks';
-else if (sub.includes('\u043a\u043e\u043c\u0444') || sub === '\u043a\u043e\u043c\u0444\u0456') type = 'komf';
-else if (sub.includes('\u0434\u0435\u043b\u044c\u0442') || sub.includes('delta')) type = 'delta';
+const isDelta = sub.includes('дельт') || sub.includes('delta');
+const hasGurt = sub.includes('гурт');
+const hasKomf = sub.includes('комф') || sub.includes('комі');
+const hasFoks = sub.includes('фокс');
+if      (isDelta && hasGurt && hasKomf) type = 'delta_no_gurt_komf';
+else if (isDelta && hasGurt)            type = 'delta_no_gurt';
+else if (isDelta)                       type = 'delta';
+else if (hasGurt && hasFoks)            type = 'gurt_foks';
+else if (hasGurt && hasKomf)            type = 'gurt_komf';
+else if (hasFoks || sub === 'фокстрот') type = 'foks';
+else if (hasKomf || sub === 'комфі')                   type = 'komf';
 if (!type) continue;
 let st = stores.find(s => s.name === curStore);
 if (!st) { st = { name: curStore, cols: [] }; stores.push(st); }
@@ -1138,17 +1141,18 @@ sts.forEach((st, i) => {
 const c = STORE_HDR[i % STORE_HDR.length];
 const th = mkTh(st.name, 'grp', {background:c});
 if (i > 0) th.style.borderLeft = '2px solid rgba(255,255,255,0.2)';
-th.colSpan = segsToShow.length * 3; th.title = st.name;
+th.colSpan = segsToShow.length * (storeHasGurt(st) ? 7 : 3); th.title = st.name;
 trG.appendChild(th);
 });
 thead.appendChild(trG);
 const trSeg = document.createElement('tr');
 sts.forEach((st, i) => {
 const c = STORE_HDR[i % STORE_HDR.length];
+const gurtCols = storeHasGurt(st) ? 4 : 0;
 segsToShow.forEach((sdef, jSeg) => {
 const th = mkTh(sdef.lbl, 'grp', {background: (sdef.key === 'wd') ? c : c + '99'});
 if (i > 0 && jSeg === 0) th.style.borderLeft = '2px solid rgba(255,255,255,0.2)';
-th.colSpan = 3;
+th.colSpan = 3 + gurtCols;
 trSeg.appendChild(th);
 });
 });
@@ -1158,7 +1162,7 @@ sts.forEach((st, i) => {
 const c = STORE_HDR[i % STORE_HDR.length];
 segsToShow.forEach((sdef, jSeg) => {
 const segBg = (sdef.key === 'wd') ? c : c + '99';
-['\u0424\u043e\u043a\u0441','\u041a\u043e\u043c\u0444\u0456','\u0394'].forEach((l, k2) => {
+['Фокс','Комфі','Δ'].forEach((l, k2) => {
 const th = mkTh(l, 'sub', {background: segBg});
 if (k2 === 0) {
 if (i > 0 && jSeg === 0) th.style.borderLeft = '2px solid rgba(255,255,255,0.2)';
@@ -1166,6 +1170,13 @@ else if (jSeg > 0) th.style.borderLeft = '1px solid rgba(255,255,255,0.15)';
 }
 trH.appendChild(th);
 });
+if (storeHasGurt(st)) {
+  ['ГФокс','ГКомф','Δ -ГК','Δ -Гурт'].forEach((l, j) => {
+    const th = mkTh(l, 'sub', {background: '#7c3aed'});
+    if (j === 0) th.style.borderLeft = '2px solid rgba(255,255,255,0.3)';
+    trH.appendChild(th);
+  });
+}
 });
 });
 thead.appendChild(trH);
@@ -1181,18 +1192,31 @@ sts.forEach((st, i) => {
 const bg = STORE_BG[i % STORE_BG.length];
 segsToShow.forEach((sdef, jSeg) => {
 const rowsForSeg = (sdef.key === 'wd') ? w.wd : w.we;
-let f = 0, kv = 0;
+let f = 0, kv = 0, gf = 0, gk = 0;
+let dngkSum = 0, dngkCnt = 0, dngSum = 0, dngCnt = 0;
 rowsForSeg.forEach(r => {
 const v = r.storeVals[st.name] || {};
 if (v.foks != null) f += v.foks;
 if (v.komf != null) kv += v.komf;
+if (v.gurt_foks != null) gf += v.gurt_foks;
+if (v.gurt_komf != null) gk += v.gurt_komf;
+if (v.delta_no_gurt_komf != null) { dngkSum += v.delta_no_gurt_komf; dngkCnt++; }
+if (v.delta_no_gurt != null) { dngSum += v.delta_no_gurt; dngCnt++; }
 });
 const d = f > 0 ? kv / f : null;
+const dngk = dngkCnt > 0 ? dngkSum / dngkCnt : null;
+const dng  = dngCnt  > 0 ? dngSum  / dngCnt  : null;
 const isFirstSeg = jSeg === 0;
 const bl = (isFirstSeg && i > 0) ? '2px solid #d0d0da' : (jSeg > 0 ? '1px solid #e8e8ec' : '');
 tr.appendChild(mkTd(fmt(f), '', {background: bg, borderLeft: bl}));
 tr.appendChild(mkTd(fmt(kv), '', {background: bg}));
 tr.appendChild(mkTd(d != null ? d.toFixed(2) : null, deltaClass(d), {background: bg}));
+if (storeHasGurt(st)) {
+  tr.appendChild(mkTd(fmt(gf),  '', {background: '#f5f3ff', borderLeft: '2px solid #c4b5fd'}));
+  tr.appendChild(mkTd(fmt(gk),  '', {background: '#f5f3ff'}));
+  tr.appendChild(mkTd(dngk != null ? dngk.toFixed(2) : null, deltaClass(dngk), {background: '#f5f3ff'}));
+  tr.appendChild(mkTd(dng  != null ? dng.toFixed(2)  : null, deltaClass(dng),  {background: '#f5f3ff'}));
+}
 });
 });
 tbody.appendChild(tr);
@@ -1200,7 +1224,7 @@ if (idx > 0 && showDiffYday) {
 const prevK = keys[idx - 1];
 const prev = wMap.get(prevK);
 const diffTr = document.createElement('tr'); diffTr.className = 'diff-row';
-diffTr.appendChild(mkTd('\u2194 vs T' + prev.week, 'c-l1', {textAlign: 'left', paddingLeft: '6px', color: '#92400e', fontWeight: '600', fontSize: '10px'}));
+diffTr.appendChild(mkTd('↔ vs T' + prev.week, 'c-l1', {textAlign: 'left', paddingLeft: '6px', color: '#92400e', fontWeight: '600', fontSize: '10px'}));
 diffTr.appendChild(mkTd('', 'c-l2'));
 sts.forEach((st, i) => {
 const bg = STORE_BG[i % STORE_BG.length];
@@ -1208,15 +1232,43 @@ segsToShow.forEach((sdef, jSeg) => {
 const rowsForSeg = (sdef.key === 'wd') ? w.wd : w.we;
 const pRowsForSeg = (sdef.key === 'wd') ? prev.wd : prev.we;
 let cf = 0, ck = 0, pf = 0, pk = 0;
-rowsForSeg.forEach(r => { const v = r.storeVals[st.name] || {}; if (v.foks != null) cf += v.foks; if (v.komf != null) ck += v.komf; });
-pRowsForSeg.forEach(r => { const v = r.storeVals[st.name] || {}; if (v.foks != null) pf += v.foks; if (v.komf != null) pk += v.komf; });
+let cgf = 0, cgk = 0, pgf = 0, pgk = 0;
+let cdngkS = 0, cdngkN = 0, pdngkS = 0, pdngkN = 0;
+let cdngS = 0, cdngN = 0, pdngS = 0, pdngN = 0;
+rowsForSeg.forEach(r => {
+  const v = r.storeVals[st.name] || {};
+  if (v.foks != null) cf += v.foks; if (v.komf != null) ck += v.komf;
+  if (v.gurt_foks != null) cgf += v.gurt_foks; if (v.gurt_komf != null) cgk += v.gurt_komf;
+  if (v.delta_no_gurt_komf != null) { cdngkS += v.delta_no_gurt_komf; cdngkN++; }
+  if (v.delta_no_gurt != null) { cdngS += v.delta_no_gurt; cdngN++; }
+});
+pRowsForSeg.forEach(r => {
+  const v = r.storeVals[st.name] || {};
+  if (v.foks != null) pf += v.foks; if (v.komf != null) pk += v.komf;
+  if (v.gurt_foks != null) pgf += v.gurt_foks; if (v.gurt_komf != null) pgk += v.gurt_komf;
+  if (v.delta_no_gurt_komf != null) { pdngkS += v.delta_no_gurt_komf; pdngkN++; }
+  if (v.delta_no_gurt != null) { pdngS += v.delta_no_gurt; pdngN++; }
+});
 const df = cf - pf, dk = ck - pk;
 const dd = (pf > 0 && cf > 0) ? (ck / cf) - (pk / pf) : null;
+const dgf = cgf - pgf, dgk = cgk - pgk;
+const cdngk = cdngkN > 0 ? cdngkS / cdngkN : null;
+const pdngk = pdngkN > 0 ? pdngkS / pdngkN : null;
+const cdng  = cdngN  > 0 ? cdngS  / cdngN  : null;
+const pdng  = pdngN  > 0 ? pdngS  / pdngN  : null;
+const ddngk = (cdngk != null && pdngk != null) ? cdngk - pdngk : null;
+const ddng  = (cdng  != null && pdng  != null) ? cdng  - pdng  : null;
 const isFirstSeg = jSeg === 0;
 const bl = (isFirstSeg && i > 0) ? '2px solid #d0d0da' : (jSeg > 0 ? '1px solid #e8e8ec' : '');
-diffTr.appendChild(mkTd((df >= 0 ? '+' : '') + fmt(Math.abs(df)) + (df >= 0 ? ' \u2191' : ' \u2193'), df >= 0 ? 'diff-pos' : 'diff-neg', {background: bg, borderLeft: bl, fontSize: '10px'}));
-diffTr.appendChild(mkTd((dk >= 0 ? '+' : '') + fmt(Math.abs(dk)) + (dk >= 0 ? ' \u2191' : ' \u2193'), dk >= 0 ? 'diff-pos' : 'diff-neg', {background: bg, fontSize: '10px'}));
+diffTr.appendChild(mkTd((df >= 0 ? '+' : '') + fmt(Math.abs(df)) + (df >= 0 ? ' ↑' : ' ↓'), df >= 0 ? 'diff-pos' : 'diff-neg', {background: bg, borderLeft: bl, fontSize: '10px'}));
+diffTr.appendChild(mkTd((dk >= 0 ? '+' : '') + fmt(Math.abs(dk)) + (dk >= 0 ? ' ↑' : ' ↓'), dk >= 0 ? 'diff-pos' : 'diff-neg', {background: bg, fontSize: '10px'}));
 diffTr.appendChild(mkTd(dd != null ? (dd >= 0 ? '+' : '') + dd.toFixed(2) : null, dd == null ? '' : (dd <= 0 ? 'diff-pos' : 'diff-neg'), {background: bg, fontSize: '10px'}));
+if (storeHasGurt(st)) {
+  diffTr.appendChild(mkTd((dgf >= 0 ? '+' : '') + fmt(Math.abs(dgf)) + (dgf >= 0 ? ' ↑' : ' ↓'), dgf >= 0 ? 'diff-pos' : 'diff-neg', {background: '#f5f3ff', borderLeft: '2px solid #c4b5fd', fontSize: '10px'}));
+  diffTr.appendChild(mkTd((dgk >= 0 ? '+' : '') + fmt(Math.abs(dgk)) + (dgk >= 0 ? ' ↑' : ' ↓'), dgk >= 0 ? 'diff-pos' : 'diff-neg', {background: '#f5f3ff', fontSize: '10px'}));
+  diffTr.appendChild(mkTd(ddngk != null ? (ddngk >= 0 ? '+' : '') + ddngk.toFixed(2) : null, ddngk == null ? '' : (ddngk <= 0 ? 'diff-pos' : 'diff-neg'), {background: '#f5f3ff', fontSize: '10px'}));
+  diffTr.appendChild(mkTd(ddng  != null ? (ddng  >= 0 ? '+' : '') + ddng.toFixed(2)  : null, ddng  == null ? '' : (ddng  <= 0 ? 'diff-pos' : 'diff-neg'), {background: '#f5f3ff', fontSize: '10px'}));
+}
 });
 });
 tbody.appendChild(diffTr);
@@ -1287,18 +1339,25 @@ sts.forEach((st, i) => {
 const c = STORE_HDR[i % STORE_HDR.length];
 const th = mkTh(st.name, 'grp', {background: c});
 if (i > 0) th.style.borderLeft = '2px solid rgba(255,255,255,0.2)';
-th.colSpan = 3; th.title = st.name;
+th.colSpan = storeHasGurt(st) ? 7 : 3; th.title = st.name;
 trG.appendChild(th);
 });
 thead.appendChild(trG);
 const trH = document.createElement('tr');
 sts.forEach((st, i) => {
 const c = STORE_HDR[i % STORE_HDR.length];
-['\u0424\u043e\u043a\u0441','\u041a\u043e\u043c\u0444\u0456','\u0394'].forEach((l, j) => {
+['Фокс','Комфі','Δ'].forEach((l, j) => {
 const th = mkTh(l, 'sub', {background: c});
 if (j === 0 && i > 0) th.style.borderLeft = '2px solid rgba(255,255,255,0.2)';
 trH.appendChild(th);
 });
+if (storeHasGurt(st)) {
+  ['ГФокс','ГКомф','Δ -ГК','Δ -Гурт'].forEach((l, j) => {
+    const th = mkTh(l, 'sub', {background: '#7c3aed'});
+    if (j === 0) th.style.borderLeft = '2px solid rgba(255,255,255,0.3)';
+    trH.appendChild(th);
+  });
+}
 });
 thead.appendChild(trH);
 tbl.appendChild(thead);
@@ -1312,17 +1371,23 @@ tr.appendChild(mkTd(label.split('_')[0] || label, 'c-l1'));
 tr.appendChild(mkTd(col2fmt(label), 'c-l2'));
 sts.forEach((st, i) => {
 const bg = STORE_BG[i % STORE_BG.length];
-const {f, k: kv, d} = agg[st.name] || {f:0, k:0, d:null};
+const {f, k: kv, d, gf, gk, dngk, dng} = agg[st.name] || {f:0, k:0, d:null, gf:0, gk:0, dngk:null, dng:null};
 tr.appendChild(mkTd(fmt(f), '', {background: bg, borderLeft: i > 0 ? '2px solid #d0d0da' : ''}));
 tr.appendChild(mkTd(fmt(kv), '', {background: bg}));
 tr.appendChild(mkTd(d != null ? d.toFixed(2) : null, deltaClass(d), {background: bg}));
+if (storeHasGurt(st)) {
+  tr.appendChild(mkTd(fmt(gf),  '', {background: '#f5f3ff', borderLeft: '2px solid #c4b5fd'}));
+  tr.appendChild(mkTd(fmt(gk),  '', {background: '#f5f3ff'}));
+  tr.appendChild(mkTd(dngk != null ? dngk.toFixed(2) : null, deltaClass(dngk), {background: '#f5f3ff'}));
+  tr.appendChild(mkTd(dng  != null ? dng.toFixed(2)  : null, deltaClass(dng),  {background: '#f5f3ff'}));
+}
 });
 tbody.appendChild(tr);
 if (prevKey && groupMap.has(prevKey)) {
 const prevAgg = aggRows(groupMap.get(prevKey).rows, sts);
 if (showDiffYday) {
 const diffTr = document.createElement('tr'); diffTr.className = 'diff-row';
-diffTr.appendChild(mkTd('\u2194 vs \u043f\u043e\u043f\u0435\u0440.', 'c-l1', {textAlign: 'left', paddingLeft: '4px', color: '#92400e', fontWeight: '600'}));
+diffTr.appendChild(mkTd('↔ vs попер.', 'c-l1', {textAlign: 'left', paddingLeft: '4px', color: '#92400e', fontWeight: '600'}));
 diffTr.appendChild(mkTd('', 'c-l2'));
 sts.forEach((st, i) => {
 const bg = STORE_BG[i % STORE_BG.length];
@@ -1330,9 +1395,48 @@ const pf = prevAgg[st.name]?.f || 0, pk = prevAgg[st.name]?.k || 0;
 const cf = agg[st.name]?.f || 0, ck = agg[st.name]?.k || 0;
 const df = cf - pf, dk = ck - pk;
 const dd = (pf > 0 && cf > 0) ? (ck / cf) - (pk / pf) : null;
-diffTr.appendChild(mkTd((df >= 0 ? '+' : '') + fmt(Math.abs(df)) + (df >= 0 ? ' \u2191' : ' \u2193'), df >= 0 ? 'diff-pos' : 'diff-neg', {background: bg, borderLeft: i > 0 ? '2px solid #d0d0da' : '', fontSize: '10px'}));
-diffTr.appendChild(mkTd((dk >= 0 ? '+' : '') + fmt(Math.abs(dk)) + (dk >= 0 ? ' \u2191' : ' \u2193'), dk >= 0 ? 'diff-pos' : 'diff-neg', {background: bg, fontSize: '10px'}));
+diffTr.appendChild(mkTd((df >= 0 ? '+' : '') + fmt(Math.abs(df)) + (df >= 0 ? ' ↑' : ' ↓'), df >= 0 ? 'diff-pos' : 'diff-neg', {background: bg, borderLeft: i > 0 ? '2px solid #d0d0da' : '', fontSize: '10px'}));
+diffTr.appendChild(mkTd((dk >= 0 ? '+' : '') + fmt(Math.abs(dk)) + (dk >= 0 ? ' ↑' : ' ↓'), dk >= 0 ? 'diff-pos' : 'diff-neg', {background: bg, fontSize: '10px'}));
 diffTr.appendChild(mkTd(dd != null ? (dd >= 0 ? '+' : '') + dd.toFixed(2) : null, dd == null ? '' : (dd <= 0 ? 'diff-pos' : 'diff-neg'), {background: bg, fontSize: '10px'}));
+if (storeHasGurt(st)) {
+  const pgf = prevAgg[st.name]?.gf || 0, pgk = prevAgg[st.name]?.gk || 0;
+  const cgf = agg[st.name]?.gf || 0,  cgk = agg[st.name]?.gk || 0;
+  const pdngk = prevAgg[st.name]?.dngk ?? null, cdngk = agg[st.name]?.dngk ?? null;
+  const pdng  = prevAgg[st.name]?.dng  ?? null, cdng  = agg[st.name]?.dng  ?? null;
+  const dgf = cgf - pgf, dgk = cgk - pgk;
+  const ddngk = (cdngk != null && pdngk != null) ? cdngk - pdngk : null;
+  const ddng  = (cdng  != null && pdng  != null) ? cdng  - pdng  : null;
+  diffTr.appendChild(mkTd((dgf >= 0 ? '+' : '') + fmt(Math.abs(dgf)) + (dgf >= 0 ? ' ↑' : ' ↓'), dgf >= 0 ? 'diff-pos' : 'diff-neg', {background: '#f5f3ff', borderLeft: '2px solid #c4b5fd', fontSize: '10px'}));
+  diffTr.appendChild(mkTd((dgk >= 0 ? '+' : '') + fmt(Math.abs(dgk)) + (dgk >= 0 ? ' ↑' : ' ↓'), dgk >= 0 ? 'diff-pos' : 'diff-neg', {background: '#f5f3ff', fontSize: '10px'}));
+  diffTr.appendChild(mkTd(ddngk != null ? (ddngk >= 0 ? '+' : '') + ddngk.toFixed(2) : null, ddngk == null ? '' : (ddngk <= 0 ? 'diff-pos' : 'diff-neg'), {background: '#f5f3ff', fontSize: '10px'}));
+  diffTr.appendChild(mkTd(ddng  != null ? (ddng  >= 0 ? '+' : '') + ddng.toFixed(2)  : null, ddng  == null ? '' : (ddng  <= 0 ? 'diff-pos' : 'diff-neg'), {background: '#f5f3ff', fontSize: '10px'}));
+}
+});
+tbody.appendChild(diffTr);
+}
+}
+});
+const bg = STORE_BG[i % STORE_BG.length];
+const pf = prevAgg[st.name]?.f || 0, pk = prevAgg[st.name]?.k || 0;
+const cf = agg[st.name]?.f || 0, ck = agg[st.name]?.k || 0;
+const df = cf - pf, dk = ck - pk;
+const dd = (pf > 0 && cf > 0) ? (ck / cf) - (pk / pf) : null;
+diffTr.appendChild(mkTd((df >= 0 ? '+' : '') + fmt(Math.abs(df)) + (df >= 0 ? ' ↑' : ' ↓'), df >= 0 ? 'diff-pos' : 'diff-neg', {background: bg, borderLeft: i > 0 ? '2px solid #d0d0da' : '', fontSize: '10px'}));
+diffTr.appendChild(mkTd((dk >= 0 ? '+' : '') + fmt(Math.abs(dk)) + (dk >= 0 ? ' ↑' : ' ↓'), dk >= 0 ? 'diff-pos' : 'diff-neg', {background: bg, fontSize: '10px'}));
+diffTr.appendChild(mkTd(dd != null ? (dd >= 0 ? '+' : '') + dd.toFixed(2) : null, dd == null ? '' : (dd <= 0 ? 'diff-pos' : 'diff-neg'), {background: bg, fontSize: '10px'}));
+if (storeHasGurt(st)) {
+  const pgf = prevAgg[st.name]?.gf || 0, pgk = prevAgg[st.name]?.gk || 0;
+  const cgf = agg[st.name]?.gf || 0,  cgk = agg[st.name]?.gk || 0;
+  const pdngk = prevAgg[st.name]?.dngk ?? null, cdngk = agg[st.name]?.dngk ?? null;
+  const pdng  = prevAgg[st.name]?.dng  ?? null, cdng  = agg[st.name]?.dng  ?? null;
+  const dgf = cgf - pgf, dgk = cgk - pgk;
+  const ddngk = (cdngk != null && pdngk != null) ? cdngk - pdngk : null;
+  const ddng  = (cdng  != null && pdng  != null) ? cdng  - pdng  : null;
+  diffTr.appendChild(mkTd((dgf >= 0 ? '+' : '') + fmt(Math.abs(dgf)) + (dgf >= 0 ? ' ↑' : ' ↓'), dgf >= 0 ? 'diff-pos' : 'diff-neg', {background: '#f5f3ff', borderLeft: '2px solid #c4b5fd', fontSize: '10px'}));
+  diffTr.appendChild(mkTd((dgk >= 0 ? '+' : '') + fmt(Math.abs(dgk)) + (dgk >= 0 ? ' ↑' : ' ↓'), dgk >= 0 ? 'diff-pos' : 'diff-neg', {background: '#f5f3ff', fontSize: '10px'}));
+  diffTr.appendChild(mkTd(ddngk != null ? (ddngk >= 0 ? '+' : '') + ddngk.toFixed(2) : null, ddngk == null ? '' : (ddngk <= 0 ? 'diff-pos' : 'diff-neg'), {background: '#f5f3ff', fontSize: '10px'}));
+  diffTr.appendChild(mkTd(ddng  != null ? (ddng  >= 0 ? '+' : '') + ddng.toFixed(2)  : null, ddng  == null ? '' : (ddng  <= 0 ? 'diff-pos' : 'diff-neg'), {background: '#f5f3ff', fontSize: '10px'}));
+}
 });
 tbody.appendChild(diffTr);
 }
@@ -1347,13 +1451,23 @@ cont.appendChild(card);
 function aggRows(rows, sts) {
 const r = {};
 sts.forEach(st => {
-let f = 0, k = 0;
+let f = 0, k = 0, gf = 0, gk = 0;
+let dngkSum = 0, dngkCnt = 0, dngSum = 0, dngCnt = 0;
 rows.forEach(row => {
 const v = row.storeVals[st.name] || {};
 if (v.foks != null) f += v.foks;
 if (v.komf != null) k += v.komf;
+if (v.gurt_foks != null) gf += v.gurt_foks;
+if (v.gurt_komf != null) gk += v.gurt_komf;
+if (v.delta_no_gurt_komf != null) { dngkSum += v.delta_no_gurt_komf; dngkCnt++; }
+if (v.delta_no_gurt != null) { dngSum += v.delta_no_gurt; dngCnt++; }
 });
-r[st.name] = { f, k, d: f > 0 ? k / f : null };
+r[st.name] = {
+  f, k, d: f > 0 ? k / f : null,
+  gf, gk,
+  dngk: dngkCnt > 0 ? dngkSum / dngkCnt : null,
+  dng:  dngCnt  > 0 ? dngSum  / dngCnt  : null
+};
 });
 return r;
 }
