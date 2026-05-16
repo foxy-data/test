@@ -1416,32 +1416,6 @@ tbody.appendChild(diffTr);
 }
 }
 });
-const bg = STORE_BG[i % STORE_BG.length];
-const pf = prevAgg[st.name]?.f || 0, pk = prevAgg[st.name]?.k || 0;
-const cf = agg[st.name]?.f || 0, ck = agg[st.name]?.k || 0;
-const df = cf - pf, dk = ck - pk;
-const dd = (pf > 0 && cf > 0) ? (ck / cf) - (pk / pf) : null;
-diffTr.appendChild(mkTd((df >= 0 ? '+' : '') + fmt(Math.abs(df)) + (df >= 0 ? ' ↑' : ' ↓'), df >= 0 ? 'diff-pos' : 'diff-neg', {background: bg, borderLeft: i > 0 ? '2px solid #d0d0da' : '', fontSize: '10px'}));
-diffTr.appendChild(mkTd((dk >= 0 ? '+' : '') + fmt(Math.abs(dk)) + (dk >= 0 ? ' ↑' : ' ↓'), dk >= 0 ? 'diff-pos' : 'diff-neg', {background: bg, fontSize: '10px'}));
-diffTr.appendChild(mkTd(dd != null ? (dd >= 0 ? '+' : '') + dd.toFixed(2) : null, dd == null ? '' : (dd <= 0 ? 'diff-pos' : 'diff-neg'), {background: bg, fontSize: '10px'}));
-if (storeHasGurt(st)) {
-  const pgf = prevAgg[st.name]?.gf || 0, pgk = prevAgg[st.name]?.gk || 0;
-  const cgf = agg[st.name]?.gf || 0,  cgk = agg[st.name]?.gk || 0;
-  const pdngk = prevAgg[st.name]?.dngk ?? null, cdngk = agg[st.name]?.dngk ?? null;
-  const pdng  = prevAgg[st.name]?.dng  ?? null, cdng  = agg[st.name]?.dng  ?? null;
-  const dgf = cgf - pgf, dgk = cgk - pgk;
-  const ddngk = (cdngk != null && pdngk != null) ? cdngk - pdngk : null;
-  const ddng  = (cdng  != null && pdng  != null) ? cdng  - pdng  : null;
-  diffTr.appendChild(mkTd((dgf >= 0 ? '+' : '') + fmt(Math.abs(dgf)) + (dgf >= 0 ? ' ↑' : ' ↓'), dgf >= 0 ? 'diff-pos' : 'diff-neg', {background: '#f5f3ff', borderLeft: '2px solid #c4b5fd', fontSize: '10px'}));
-  diffTr.appendChild(mkTd((dgk >= 0 ? '+' : '') + fmt(Math.abs(dgk)) + (dgk >= 0 ? ' ↑' : ' ↓'), dgk >= 0 ? 'diff-pos' : 'diff-neg', {background: '#f5f3ff', fontSize: '10px'}));
-  diffTr.appendChild(mkTd(ddngk != null ? (ddngk >= 0 ? '+' : '') + ddngk.toFixed(2) : null, ddngk == null ? '' : (ddngk <= 0 ? 'diff-pos' : 'diff-neg'), {background: '#f5f3ff', fontSize: '10px'}));
-  diffTr.appendChild(mkTd(ddng  != null ? (ddng  >= 0 ? '+' : '') + ddng.toFixed(2)  : null, ddng  == null ? '' : (ddng  <= 0 ? 'diff-pos' : 'diff-neg'), {background: '#f5f3ff', fontSize: '10px'}));
-}
-});
-tbody.appendChild(diffTr);
-}
-}
-});
 tbl.appendChild(tbody);
 wrap.appendChild(tbl);
 card.appendChild(wrap);
