@@ -423,6 +423,7 @@ let activeTab = 'table', chartInstance = null;
 let selChartMode = 'store', selChartStore = '', selChartPeriod = 'day', selChartMetric = 'delta';
 let showDiffYday = true;   // відхилення від вчора
 let showDiffWeek = true;   // відхилення від попереднього тижня
+let showGurt = true;       // показувати гурт-колонки
 
 // ── Поточна дата ──
 const _today = new Date();
@@ -889,6 +890,15 @@ function mkDiffBar() {
   const btnOff = document.createElement('button'); btnOff.className = 'diff-btn' + (!showDiffYday && !showDiffWeek ? ' diff-btn-active' : ''); btnOff.textContent = 'Вимк';
   btnOff.onclick = () => setDiffMode(false, false);
   diffBar.appendChild(btnOff);
+
+  const sep = document.createElement('span'); sep.style.cssText = 'width:1px;background:#d1d5db;margin:0 6px;align-self:stretch;display:inline-block;';
+  diffBar.appendChild(sep);
+  const btnGurt = document.createElement('button');
+  btnGurt.className = 'diff-btn' + (showGurt ? ' diff-btn-active' : '');
+  btnGurt.style.cssText = showGurt ? 'background:#7c3aed!important;color:#fff!important;border-color:#7c3aed!important;' : '';
+  btnGurt.textContent = showGurt ? '🔵 З гуртом' : '⚪ Без гурту';
+  btnGurt.onclick = () => { showGurt = !showGurt; render(); };
+  diffBar.appendChild(btnGurt);
   return diffBar;
 }
 // -
@@ -896,6 +906,7 @@ function mkDiffBar() {
 // -
 // helper: чи є у магазину гурт-колонки
 function storeHasGurt(st) {
+  if (!showGurt) return false;
   return st.cols.some(c => c.type === 'gurt_foks' || c.type === 'gurt_komf' || c.type === 'delta_no_gurt_komf' || c.type === 'delta_no_gurt');
 }
 const GURT_COLOR = '#7c3aed';
