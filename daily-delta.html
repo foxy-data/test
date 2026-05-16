@@ -894,6 +894,12 @@ function mkDiffBar() {
 // -
 // ТАБЛИЦЯ
 // -
+// helper: чи є у магазину гурт-колонки
+function storeHasGurt(st) {
+  return st.cols.some(c => c.type === 'gurt_foks' || c.type === 'gurt_komf' || c.type === 'delta_no_gurt_komf' || c.type === 'delta_no_gurt');
+}
+const GURT_COLOR = '#7c3aed';
+const GURT_BG    = '#f5f3ff';
 function renderTable() {
 const cont = document.getElementById('tabContent');
 const data = activeData();
@@ -911,12 +917,6 @@ card.appendChild(hint);
 const wrap = document.createElement('div'); wrap.className = 'table-wrap';
 const tbl = document.createElement('table');
 const thead = document.createElement('thead');
-// helper: чи є у магазину гурт-колонки
-function storeHasGurt(st) {
-  return st.cols.some(c => c.type === 'gurt_foks' || c.type === 'gurt_komf' || c.type === 'delta_no_gurt_komf' || c.type === 'delta_no_gurt');
-}
-const GURT_COLOR = '#7c3aed'; // фіолетовий для гурт-блоку
-const GURT_BG    = '#f5f3ff';
 const trG = document.createElement('tr');
 const th1 = mkTh('\u0414\u0430\u0442\u0430', 'c-l1', {background:'#374151',color:'#fff'}); th1.rowSpan = 2; trG.appendChild(th1);
 const th2 = mkTh('', 'c-l2', {background:'#374151',color:'#fff'}); th2.rowSpan = 2; trG.appendChild(th2);
