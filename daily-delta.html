@@ -584,7 +584,12 @@ if (!curStore) continue;
 const sub = (subRowData[i] || '').toLowerCase().trim();
 if (!sub) continue;
 let type = null;
-if (sub.includes('\u0444\u043e\u043a\u0441') || sub === '\u0444\u043e\u043a\u0441\u0442\u0440\u043e\u0442') type = 'foks';
+// спочатку перевіряємо складені типи (Городок)
+if (sub.includes('\u0433\u0443\u0440\u0442') && sub.includes('\u0444\u043e\u043a\u0441')) type = 'gurt_foks';
+else if (sub.includes('\u0433\u0443\u0440\u0442') && (sub.includes('\u043a\u043e\u043c\u0444') || sub.includes('\u043a\u043e\u043c\u0456'))) type = 'gurt_komf';
+else if ((sub.includes('\u0434\u0435\u043b\u044c\u0442') || sub.includes('delta')) && sub.includes('\u0433\u0443\u0440\u0442') && (sub.includes('\u043a\u043e\u043c\u0444') || sub.includes('\u043a\u043e\u043c\u0456'))) type = 'delta_no_gurt_komf';
+else if ((sub.includes('\u0434\u0435\u043b\u044c\u0442') || sub.includes('delta')) && sub.includes('\u0433\u0443\u0440\u0442')) type = 'delta_no_gurt';
+else if (sub.includes('\u0444\u043e\u043a\u0441') || sub === '\u0444\u043e\u043a\u0441\u0442\u0440\u043e\u0442') type = 'foks';
 else if (sub.includes('\u043a\u043e\u043c\u0444') || sub === '\u043a\u043e\u043c\u0444\u0456') type = 'komf';
 else if (sub.includes('\u0434\u0435\u043b\u044c\u0442') || sub.includes('delta')) type = 'delta';
 if (!type) continue;
@@ -622,14 +627,22 @@ if (dowLo === k || dowLo.startsWith(k)) { dowNum = v; break; }
 }
 const storeVals = {};
 stores.forEach(st => {
-const fCol = st.cols.find(c => c.type === 'foks');
-const kCol = st.cols.find(c => c.type === 'komf');
-const dCol = st.cols.find(c => c.type === 'delta');
-const fv = fCol ? toN(row[fCol.colIdx]) : null;
-const kv = kCol ? toN(row[kCol.colIdx]) : null;
-let dv = dCol ? toN(row[dCol.colIdx]) : null;
+const fCol   = st.cols.find(c => c.type === 'foks');
+const kCol   = st.cols.find(c => c.type === 'komf');
+const dCol   = st.cols.find(c => c.type === 'delta');
+const gfCol  = st.cols.find(c => c.type === 'gurt_foks');
+const gkCol  = st.cols.find(c => c.type === 'gurt_komf');
+const dngkCol= st.cols.find(c => c.type === 'delta_no_gurt_komf');
+const dngCol = st.cols.find(c => c.type === 'delta_no_gurt');
+const fv  = fCol  ? toN(row[fCol.colIdx])  : null;
+const kv  = kCol  ? toN(row[kCol.colIdx])  : null;
+let   dv  = dCol  ? toN(row[dCol.colIdx])  : null;
 if (dv === null && fv != null && kv != null && fv !== 0) dv = kv / fv;
-storeVals[st.name] = { foks: fv, komf: kv, delta: dv };
+const gfv   = gfCol   ? toN(row[gfCol.colIdx])   : null;
+const gkv   = gkCol   ? toN(row[gkCol.colIdx])   : null;
+const dngkv = dngkCol ? toN(row[dngkCol.colIdx]) : null;
+const dngv  = dngCol  ? toN(row[dngCol.colIdx])  : null;
+storeVals[st.name] = { foks: fv, komf: kv, delta: dv, gurt_foks: gfv, gurt_komf: gkv, delta_no_gurt_komf: dngkv, delta_no_gurt: dngv };
 });
 const isWE = dowNum >= 5 || (dowNum === 0 && isWeekend(dowName));
 const yearMonthKey = year + '_' + String(mo).padStart(2, '0');
@@ -895,25 +908,40 @@ card.appendChild(hint);
 const wrap = document.createElement('div'); wrap.className = 'table-wrap';
 const tbl = document.createElement('table');
 const thead = document.createElement('thead');
+// helper: чи є у магазину гурт-колонки
+function storeHasGurt(st) {
+  return st.cols.some(c => c.type === 'gurt_foks' || c.type === 'gurt_komf' || c.type === 'delta_no_gurt_komf' || c.type === 'delta_no_gurt');
+}
+const GURT_COLOR = '#7c3aed'; // фіолетовий для гурт-блоку
+const GURT_BG    = '#f5f3ff';
 const trG = document.createElement('tr');
 const th1 = mkTh('\u0414\u0430\u0442\u0430', 'c-l1', {background:'#374151',color:'#fff'}); th1.rowSpan = 2; trG.appendChild(th1);
 const th2 = mkTh('', 'c-l2', {background:'#374151',color:'#fff'}); th2.rowSpan = 2; trG.appendChild(th2);
 sts.forEach((st, i) => {
 const c = STORE_HDR[i % STORE_HDR.length];
+const hasGurt = storeHasGurt(st);
+const span = hasGurt ? 7 : 3;
 const th = mkTh(st.name, 'grp', {background:c});
 if (i > 0) th.style.borderLeft = '2px solid rgba(255,255,255,0.2)';
-th.colSpan = 3; th.title = st.name;
+th.colSpan = span; th.title = st.name;
 trG.appendChild(th);
 });
 thead.appendChild(trG);
 const trH = document.createElement('tr');
 sts.forEach((st, i) => {
 const c = STORE_HDR[i % STORE_HDR.length];
+const hasGurt = storeHasGurt(st);
 ['\u0424\u043e\u043a\u0441','\u041a\u043e\u043c\u0444\u0456','\u0394'].forEach((l, j) => {
 const th = mkTh(l, 'sub', {background:c});
 if (j === 0 && i > 0) th.style.borderLeft = '2px solid rgba(255,255,255,0.2)';
 trH.appendChild(th);
 });
+if (hasGurt) {
+  ['\u0413\u0424\u043e\u043a\u0441','\u0413\u041a\u043e\u043c\u0444','\u0394 -\u0413\u041a','\u0394 -\u0413\u0443\u0440\u0442'].forEach((l, j) => {
+    const th = mkTh(l, 'sub', {background: GURT_COLOR, borderLeft: j===0 ? '2px solid rgba(255,255,255,0.3)' : ''});
+    trH.appendChild(th);
+  });
+}
 });
 thead.appendChild(trH);
 tbl.appendChild(thead);
@@ -950,6 +978,16 @@ const d = v.delta ?? (f != null && k != null && f !== 0 ? k / f : null);
 tr.appendChild(mkTd(fmt(f), '', {background:bg, borderLeft: i > 0 ? '2px solid #d0d0da' : ''}));
 tr.appendChild(mkTd(fmt(k), '', {background:bg}));
 tr.appendChild(mkTd(d != null ? d.toFixed(2) : null, deltaClass(d), {background:bg}));
+if (storeHasGurt(st)) {
+  const gf = v.gurt_foks ?? null;
+  const gk = v.gurt_komf ?? null;
+  const dngk = v.delta_no_gurt_komf ?? null;
+  const dng  = v.delta_no_gurt ?? null;
+  tr.appendChild(mkTd(fmt(gf),  '', {background:GURT_BG, borderLeft:'2px solid #c4b5fd'}));
+  tr.appendChild(mkTd(fmt(gk),  '', {background:GURT_BG}));
+  tr.appendChild(mkTd(dngk != null ? dngk.toFixed(2) : null, deltaClass(dngk), {background:GURT_BG}));
+  tr.appendChild(mkTd(dng  != null ? dng.toFixed(2)  : null, deltaClass(dng),  {background:GURT_BG}));
+}
 });
 tbody.appendChild(tr);
 
@@ -961,7 +999,6 @@ if (showDiffYday && idx > 0) {
   diffTr.appendChild(mkTd('', 'c-l2'));
   sts.forEach((st, i) => {
     const bg = STORE_BG[i % STORE_BG.length];
-    // Тотал: не рахуємо відхилення для тижнів після поточного
     const isTotal = i === totalStIdx;
     const isFutureWeek = isTotal && r.week != null && r.week > CURRENT_WEEK;
     const cv = r.storeVals[st.name] || {};
@@ -978,6 +1015,20 @@ if (showDiffYday && idx > 0) {
     diffTr.appendChild(mkTd(fmtDiff(df), df == null ? '' : (df >= 0 ? 'diff-pos' : 'diff-neg'), {background:bg, borderLeft: i > 0 ? '2px solid #d0d0da' : '', fontSize:'10px'}));
     diffTr.appendChild(mkTd(fmtDiff(dk), dk == null ? '' : (dk >= 0 ? 'diff-pos' : 'diff-neg'), {background:bg, fontSize:'10px'}));
     diffTr.appendChild(mkTd(fmtDd(dd), dd == null ? '' : (dd <= 0 ? 'diff-pos' : 'diff-neg'), {background:bg, fontSize:'10px'}));
+    if (storeHasGurt(st)) {
+      const cgf = cv.gurt_foks ?? null, cgk = cv.gurt_komf ?? null;
+      const pgf = pv.gurt_foks ?? null, pgk = pv.gurt_komf ?? null;
+      const cdngk = cv.delta_no_gurt_komf ?? null, pdngk = pv.delta_no_gurt_komf ?? null;
+      const cdng  = cv.delta_no_gurt ?? null,  pdng  = pv.delta_no_gurt ?? null;
+      const dgf  = (cgf  != null && pgf  != null) ? cgf  - pgf  : null;
+      const dgk  = (cgk  != null && pgk  != null) ? cgk  - pgk  : null;
+      const ddngk = (cdngk != null && pdngk != null) ? cdngk - pdngk : null;
+      const ddng  = (cdng  != null && pdng  != null) ? cdng  - pdng  : null;
+      diffTr.appendChild(mkTd(fmtDiff(dgf),  dgf  == null ? '' : (dgf  >= 0 ? 'diff-pos' : 'diff-neg'), {background:GURT_BG, borderLeft:'2px solid #c4b5fd', fontSize:'10px'}));
+      diffTr.appendChild(mkTd(fmtDiff(dgk),  dgk  == null ? '' : (dgk  >= 0 ? 'diff-pos' : 'diff-neg'), {background:GURT_BG, fontSize:'10px'}));
+      diffTr.appendChild(mkTd(fmtDd(ddngk), ddngk == null ? '' : (ddngk <= 0 ? 'diff-pos' : 'diff-neg'), {background:GURT_BG, fontSize:'10px'}));
+      diffTr.appendChild(mkTd(fmtDd(ddng),  ddng  == null ? '' : (ddng  <= 0 ? 'diff-pos' : 'diff-neg'), {background:GURT_BG, fontSize:'10px'}));
+    }
   });
   tbody.appendChild(diffTr);
 }
@@ -1006,6 +1057,21 @@ if (showDiffWeek) {
       wkTr.appendChild(mkTd(fmtDiff(df), df == null ? '' : (df >= 0 ? 'diff-pos' : 'diff-neg'), {background: STORE_BG[i % STORE_BG.length] + 'cc', borderLeft: i > 0 ? '2px solid #d0d0da' : '', fontSize:'10px'}));
       wkTr.appendChild(mkTd(fmtDiff(dk), dk == null ? '' : (dk >= 0 ? 'diff-pos' : 'diff-neg'), {background: STORE_BG[i % STORE_BG.length] + 'cc', fontSize:'10px'}));
       wkTr.appendChild(mkTd(fmtDd(dd), dd == null ? '' : (dd <= 0 ? 'diff-pos' : 'diff-neg'), {background: STORE_BG[i % STORE_BG.length] + 'cc', fontSize:'10px'}));
+      if (storeHasGurt(st)) {
+        const cgf = cv.gurt_foks ?? null, cgk = cv.gurt_komf ?? null;
+        const wgf = wv.gurt_foks ?? null, wgk = wv.gurt_komf ?? null;
+        const cdngk = cv.delta_no_gurt_komf ?? null, wdngk = wv.delta_no_gurt_komf ?? null;
+        const cdng  = cv.delta_no_gurt ?? null,  wdng  = wv.delta_no_gurt ?? null;
+        const dgf  = (cgf  != null && wgf  != null) ? cgf  - wgf  : null;
+        const dgk  = (cgk  != null && wgk  != null) ? cgk  - wgk  : null;
+        const ddngk = (cdngk != null && wdngk != null) ? cdngk - wdngk : null;
+        const ddng  = (cdng  != null && wdng  != null) ? cdng  - wdng  : null;
+        const gBG = GURT_BG + 'cc';
+        wkTr.appendChild(mkTd(fmtDiff(dgf),  dgf  == null ? '' : (dgf  >= 0 ? 'diff-pos' : 'diff-neg'), {background:gBG, borderLeft:'2px solid #c4b5fd', fontSize:'10px'}));
+        wkTr.appendChild(mkTd(fmtDiff(dgk),  dgk  == null ? '' : (dgk  >= 0 ? 'diff-pos' : 'diff-neg'), {background:gBG, fontSize:'10px'}));
+        wkTr.appendChild(mkTd(fmtDd(ddngk), ddngk == null ? '' : (ddngk <= 0 ? 'diff-pos' : 'diff-neg'), {background:gBG, fontSize:'10px'}));
+        wkTr.appendChild(mkTd(fmtDd(ddng),  ddng  == null ? '' : (ddng  <= 0 ? 'diff-pos' : 'diff-neg'), {background:gBG, fontSize:'10px'}));
+      }
     });
     tbody.appendChild(wkTr);
   }
