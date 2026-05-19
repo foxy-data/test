@@ -126,22 +126,26 @@ main { padding: 16px; }
 .section-lbl::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
 /* TABLE */
-.tbl-wrap { overflow-x: auto; border-radius: 14px; box-shadow: var(--shadow); }
+.tbl-wrap { overflow-x: auto; border-radius: 14px; box-shadow: var(--shadow); max-height: calc(100vh - 180px); overflow-y: auto; }
 table { border-collapse: collapse; font-size: 12px; white-space: nowrap; width: 100%; background: var(--card); }
 th, td { border: 1px solid #ebebf0; }
 th { padding: 7px 10px; text-align: center; font-weight: 600; font-size: 11px; background: #f9f9fb; }
 td { padding: 6px 10px; text-align: right; }
 td:first-child {
-  text-align: left; min-width: 160px; color: var(--text-sec);
+  text-align: left; min-width: 180px; color: var(--text-sec);
   font-size: 11px; position: sticky; left: 0;
   background: var(--card); z-index: 5; border-right: 2px solid #e5e5ea;
 }
 tr:hover td { background: #f9f9ff; }
 tr:hover td:first-child { background: #f2f2f7; }
 
+/* Sticky thead rows */
+thead tr:nth-child(1) th { position: sticky; top: 0; z-index: 11; }
+thead tr:nth-child(2) th { position: sticky; top: 31px; z-index: 11; }
+
 /* TH variants */
 .th-name {
-  text-align: left; min-width: 160px; position: sticky; left: 0; z-index: 10;
+  text-align: left; min-width: 180px; position: sticky; left: 0; top: 0; z-index: 20;
   background: #f2f2f7; border-right: 2px solid #e5e5ea; font-size: 11px; color: var(--text-sec);
 }
 .th-date { background: #f2f2f7; font-size: 11px; font-weight: 700; color: var(--text); border-bottom: 2px solid #d2d2d7; }
@@ -164,6 +168,13 @@ tr:hover td:first-child { background: #f2f2f7; }
 .cat-row td { background: #f5f5f7; }
 .cat-row td:first-child { font-weight: 700; color: var(--text); font-size: 12px; background: #ededf2; }
 .sub-row td:first-child { padding-left: 22px; color: #999; }
+
+/* Section separator rows */
+.sec-row td { background: rgba(0,113,227,0.04); border-top: 2px solid var(--border); }
+.sec-row td:first-child { font-weight: 700; color: var(--accent); font-size: 11px; background: rgba(0,113,227,0.07); text-transform: uppercase; letter-spacing: .04em; }
+
+/* KPI block rows (ТО тиждень, СерЧек etc) */
+.kpi-row td:first-child { color: var(--text); font-weight: 600; background: #fafafa; }
 
 .pct-badge {
   display: inline-block; font-size: 9px; font-weight: 600;
@@ -294,8 +305,10 @@ function fmtPct(v) { if (v===null||!isFinite(v)) return '—'; return (v>=0?'+':
 function fmtDelta(v) { if (v===null||!isFinite(v)) return '—'; return v.toFixed(2); }
 function signCls(v) { if (v===null||!isFinite(v)||v===0) return 'neu'; return v>0?'pos':'neg'; }
 function isPct(name) { return /коп|кредит|pickup|пікап/i.test(name); }
-function isCatRow(name) { return name.trim().length > 0 && /телеком|смарти|ноути|^тв$|холодильники|пралки|iphone|samsung|кавомашин|мультипек|пилосос|кондиціон|водонагрів|мікрух|планшет|ігров|енергетик|обігрів/i.test(name.trim()); }
+function isCatRow(name) { return name.trim().length > 0 && /^(смарти|ноути|тв|холодильники|пралки|iphone|samsung|кавомашин|мультипе|пилосос|кондиціон|водонагрів|мікрух|планшет|ігров|енергетик|обігрів)/i.test(name.trim()); }
 function isSubRow(name) { return /^(сума|кількість|шт\.?)$/i.test(name.trim()); }
+function isKpiRow(name) { return /^(ТО.?тиждень|ТО.?вихідн|трафік|серчек|коп|кредит|pickup|пікап)/i.test(name.trim()); }
+function isServiceRow(name) { return /^(телеком|кт|впт|ав|дпт|асс|сервіс)/i.test(name.trim()); }
 function getVal(row, col) { if (col<0||col>=row.length) return null; return parseVal(row[col]); }
 
 // ── LOAD DATA ────────────────────────────────────────────────────────────────
@@ -408,7 +421,7 @@ function renderTable(vis) {
     const col1 = (row[1]||'').trim();
     const name = col0 || col1;
     if (!name) return;
-    const trCls = isCatRow(col0)?'cat-row':isSubRow(col1||col0)?'sub-row':'';
+    const trCls = isCatRow(col0)?'cat-row':isSubRow(col1||col0)?'sub-row':isKpiRow(col1||col0)?'kpi-row':isServiceRow(col1||col0)?'sec-row':'';
     const pct = isPct(col1||col0);
     const displayName = col0 ? (col1 ? col0 + ' · ' + col1 : col0) : col1;
 
