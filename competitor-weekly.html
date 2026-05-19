@@ -134,17 +134,20 @@ main {
 
 /* TABLE */
 .tbl-wrap { overflow-x: auto; overflow-y: auto; border-radius: 14px; box-shadow: var(--shadow); flex: 1 1 0; min-height: 0; }
-table { border-collapse: collapse; font-size: 12px; white-space: nowrap; background: var(--card); table-layout: fixed; }
-th, td { border: 1px solid #ebebf0; }
+table { border-collapse: separate; border-spacing: 0; font-size: 12px; white-space: nowrap; background: var(--card); table-layout: fixed; }
+th, td { border-right: 1px solid #ebebf0; border-bottom: 1px solid #ebebf0; }
+th:first-child, td:first-child { border-left: 1px solid #ebebf0; }
+thead tr:first-child th { border-top: 1px solid #ebebf0; }
 th { padding: 7px 10px; text-align: center; font-weight: 600; font-size: 11px; background: #f9f9fb; }
 td { padding: 6px 10px; text-align: right; }
 td:first-child {
   text-align: left; min-width: 180px; color: var(--text-sec);
   font-size: 11px; position: sticky; left: 0;
-  background: var(--card); z-index: 8; border-right: 2px solid #e5e5ea;
+  background: #ffffff; z-index: 8;
+  border-right: 2px solid #c8c8d0 !important;
 }
-tr:hover td { background: #f9f9ff; }
-tr:hover td:first-child { background: #f2f2f7; z-index: 8; }
+tr:hover td { background: #f5f5ff; }
+tr:hover td:first-child { background: #ededf5 !important; z-index: 8; }
 
 /* Sticky thead rows */
 thead tr:nth-child(1) th { position: sticky; top: 0; z-index: 12; }
@@ -154,37 +157,37 @@ thead tr:nth-child(2) th { position: sticky; top: 31px; z-index: 12; }
 .th-name {
   text-align: left; min-width: 180px;
   position: sticky; left: 0; top: 0; z-index: 30;
-  background: #f2f2f7; border-right: 2px solid #e5e5ea; font-size: 11px; color: var(--text-sec);
+  background: #f2f2f7 !important; border-right: 2px solid #c8c8d0 !important; font-size: 11px; color: var(--text-sec);
 }
 .th-date { background: #f2f2f7; font-size: 11px; font-weight: 700; color: var(--text); border-bottom: 2px solid #d2d2d7; border-left: 2px solid #c0c0cc !important; }
-.th-comfy { background: var(--comfy-bg); color: var(--comfy); border-bottom: 2px solid var(--comfy); font-weight: 700; width: 90px; min-width: 90px; max-width: 90px; border-left: 2px solid #c0c0cc !important; }
+.th-comfy { background: var(--comfy-bg); color: var(--comfy); border-bottom: 2px solid var(--comfy); font-weight: 700; width: 90px; min-width: 90px; max-width: 90px; border-left: 3px solid #b0b0c0 !important; }
 .th-fox   { background: var(--fox-bg);   color: var(--fox);   border-bottom: 2px solid var(--fox);   font-weight: 700; width: 90px; min-width: 90px; max-width: 90px; }
-.th-dc    { background: var(--delta-bg); color: var(--delta); border-bottom: 2px solid var(--delta); font-size: 10px; width: 52px; min-width: 52px; max-width: 52px; border-left: 2px solid #d0d0d8 !important; }
+.th-dc    { background: var(--delta-bg); color: var(--delta); border-bottom: 2px solid var(--delta); font-size: 10px; width: 52px; min-width: 52px; max-width: 52px; border-left: 2px solid #d8d8e0 !important; }
 .th-dev   { background: var(--dev-bg);   color: var(--dev-c); border-bottom: 2px solid var(--dev-c); font-size: 10px; width: 80px; min-width: 80px; max-width: 80px; }
-.th-total { background: var(--total-bg); color: var(--total-c); border-bottom: 2px solid var(--total-c); font-size: 10px; width: 90px; min-width: 90px; max-width: 90px; border-left: 2px solid #d0d0d8 !important; }
+.th-total { background: var(--total-bg); color: var(--total-c); border-bottom: 2px solid var(--total-c); font-size: 10px; width: 90px; min-width: 90px; max-width: 90px; border-left: 2px solid #d8d8e0 !important; }
 .th-name  { width: 180px; min-width: 180px; max-width: 180px; }
 
 /* TD value colors */
-.vc { color: var(--comfy); font-weight: 500; width: 90px; min-width: 90px; max-width: 90px; border-left: 2px solid #c0c0cc !important; overflow: hidden; text-overflow: ellipsis; }
+.vc { color: var(--comfy); font-weight: 500; width: 90px; min-width: 90px; max-width: 90px; border-left: 3px solid #b0b0c0 !important; overflow: hidden; text-overflow: ellipsis; }
 .vf { color: var(--fox);   font-weight: 500; width: 90px; min-width: 90px; max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
-.vd { color: var(--delta); width: 52px; min-width: 52px; max-width: 52px; border-left: 2px solid #d0d0d8 !important; overflow: hidden; text-overflow: ellipsis; }
+.vd { color: var(--delta); width: 52px; min-width: 52px; max-width: 52px; border-left: 2px solid #d8d8e0 !important; overflow: hidden; text-overflow: ellipsis; }
 .pos { color: var(--green); font-weight: 500; }
 .neg { color: var(--red);   font-weight: 500; }
 .neu { color: var(--text-sec); }
-.vtotal { color: var(--total-c); font-weight: 500; width: 90px; min-width: 90px; max-width: 90px; border-left: 2px solid #d0d0d8 !important; overflow: hidden; text-overflow: ellipsis; }
+.vtotal { color: var(--total-c); font-weight: 500; width: 90px; min-width: 90px; max-width: 90px; border-left: 2px solid #d8d8e0 !important; overflow: hidden; text-overflow: ellipsis; }
 .vdev { width: 80px; min-width: 80px; max-width: 80px; overflow: hidden; text-overflow: ellipsis; }
 
 /* Special rows */
 .cat-row td { background: #f5f5f7; }
-.cat-row td:first-child { font-weight: 700; color: var(--text); font-size: 12px; background: #ededf2; z-index: 8; }
+.cat-row td:first-child { font-weight: 700; color: var(--text); font-size: 12px; background: #ededf2 !important; z-index: 8; }
 .sub-row td:first-child { padding-left: 22px; color: #999; }
 
 /* Section separator rows */
 .sec-row td { background: rgba(0,113,227,0.04); border-top: 2px solid var(--border); }
-.sec-row td:first-child { font-weight: 700; color: var(--accent); font-size: 11px; background: rgba(0,113,227,0.07); text-transform: uppercase; letter-spacing: .04em; z-index: 8; }
+.sec-row td:first-child { font-weight: 700; color: var(--accent); font-size: 11px; background: #e8f0fb !important; text-transform: uppercase; letter-spacing: .04em; z-index: 8; }
 
 /* KPI block rows (ТО тиждень, СерЧек etc) */
-.kpi-row td:first-child { color: var(--text); font-weight: 600; background: #fafafa; z-index: 8; }
+.kpi-row td:first-child { color: var(--text); font-weight: 600; background: #f5f5f5 !important; z-index: 8; }
 
 .pct-badge {
   display: inline-block; font-size: 9px; font-weight: 600;
