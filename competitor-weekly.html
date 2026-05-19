@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Аналіз конкурентів по тижнях</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #f5f5f7;
+  --text: #1d1d1f;
+  --text-sec: #6e6e73;
+  --accent: #0071e3;
+  --border: #d2d2d7;
+  --card: #fff;
+  --shadow: 0 4px 20px rgba(0,0,0,0.06);
+  --comfy: #6e3ff3;
+  --comfy-bg: rgba(110,63,243,0.09);
+  --fox: #f97316;
+  --fox-bg: rgba(249,115,22,0.09);
+  --delta: #0071e3;
+  --delta-bg: rgba(0,113,227,0.08);
+  --dev-c: #1a9e5c;
+  --dev-bg: rgba(26,158,92,0.08);
+  --total-c: #b45309;
+  --total-bg: rgba(180,83,9,0.07);
+  --green: #1a9e5c;
+  --red: #ff3b30;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* TOP BAR */
+.top-bar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; flex-wrap: wrap;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+}
+.back-link {
+  color: var(--accent); text-decoration: none;
+  font-weight: 600; font-size: 14px; flex-shrink: 0;
+}
+.back-link:hover { opacity: 0.75; }
+.page-title { font-size: 17px; font-weight: 700; }
+.top-right { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+.btn {
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--text); padding: 6px 14px; border-radius: 8px;
+  cursor: pointer; font-size: 13px; font-weight: 500;
+  font-family: inherit; transition: all .15s;
+}
+.btn:hover { background: var(--bg); border-color: #bbb; }
+.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn.primary:hover { background: #005bbf; border-color: #005bbf; }
+
+/* STATUS */
+#status-bar {
+  padding: 6px 16px; font-size: 12px; color: var(--text-sec);
+  display: flex; align-items: center; gap: 7px;
+  border-bottom: 1px solid var(--border); background: var(--card);
+}
+.dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; flex-shrink: 0; }
+.dot.ok { background: var(--green); }
+.dot.loading { background: #f59e0b; animation: blink 1s infinite; }
+.dot.err { background: var(--red); }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* MAIN */
+main { padding: 16px; }
+
+/* SUMMARY CARDS */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px; margin-bottom: 16px;
+}
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 12px 14px;
+  box-shadow: var(--shadow);
+}
+.card-lbl { font-size: 10px; font-weight: 600; color: var(--text-sec); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+.card-val { font-size: 19px; font-weight: 700; line-height: 1.2; }
+.card-sub { font-size: 11px; color: var(--text-sec); margin-top: 3px; }
+
+/* WEEK FILTER */
+.week-filter-wrap {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 10px 14px; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  box-shadow: var(--shadow);
+}
+.wf-label { font-size: 11px; font-weight: 600; color: var(--text-sec); text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+.wbtn {
+  background: #f2f2f7; border: 1px solid var(--border); color: var(--text-sec);
+  padding: 4px 12px; border-radius: 20px; cursor: pointer;
+  font-size: 12px; font-weight: 500; font-family: inherit; transition: all .15s;
+}
+.wbtn:hover { border-color: var(--accent); color: var(--accent); }
+.wbtn.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* LEGEND */
+.legend {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  margin-bottom: 12px; font-size: 12px; color: var(--text-sec);
+}
+.li { display: flex; align-items: center; gap: 5px; }
+.ldot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+/* SECTION LABEL */
+.section-lbl {
+  font-size: 10px; font-weight: 700; color: var(--text-sec);
+  text-transform: uppercase; letter-spacing: .08em;
+  margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+}
+.section-lbl::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* TABLE */
+.tbl-wrap { overflow-x: auto; border-radius: 14px; box-shadow: var(--shadow); }
+table { border-collapse: collapse; font-size: 12px; white-space: nowrap; width: 100%; background: var(--card); }
+th, td { border: 1px solid #ebebf0; }
+th { padding: 7px 10px; text-align: center; font-weight: 600; font-size: 11px; background: #f9f9fb; }
+td { padding: 6px 10px; text-align: right; }
+td:first-child {
+  text-align: left; min-width: 160px; color: var(--text-sec);
+  font-size: 11px; position: sticky; left: 0;
+  background: var(--card); z-index: 5; border-right: 2px solid #e5e5ea;
+}
+tr:hover td { background: #f9f9ff; }
+tr:hover td:first-child { background: #f2f2f7; }
+
+/* TH variants */
+.th-name {
+  text-align: left; min-width: 160px; position: sticky; left: 0; z-index: 10;
+  background: #f2f2f7; border-right: 2px solid #e5e5ea; font-size: 11px; color: var(--text-sec);
+}
+.th-date { background: #f2f2f7; font-size: 11px; font-weight: 700; color: var(--text); border-bottom: 2px solid #d2d2d7; }
+.th-comfy { background: var(--comfy-bg); color: var(--comfy); border-bottom: 2px solid var(--comfy); font-weight: 700; }
+.th-fox   { background: var(--fox-bg);   color: var(--fox);   border-bottom: 2px solid var(--fox);   font-weight: 700; }
+.th-dc    { background: var(--delta-bg); color: var(--delta); border-bottom: 2px solid var(--delta); font-size: 10px; }
+.th-dev   { background: var(--dev-bg);   color: var(--dev-c); border-bottom: 2px solid var(--dev-c); font-size: 10px; }
+.th-total { background: var(--total-bg); color: var(--total-c); border-bottom: 2px solid var(--total-c); font-size: 10px; }
+
+/* TD value colors */
+.vc { color: var(--comfy); font-weight: 500; }
+.vf { color: var(--fox);   font-weight: 500; }
+.vd { color: var(--delta); }
+.pos { color: var(--green); font-weight: 500; }
+.neg { color: var(--red);   font-weight: 500; }
+.neu { color: var(--text-sec); }
+.vtotal { color: var(--total-c); font-weight: 500; }
+
+/* Special rows */
+.cat-row td { background: #f5f5f7; }
+.cat-row td:first-child { font-weight: 700; color: var(--text); font-size: 12px; background: #ededf2; }
+.sub-row td:first-child { padding-left: 22px; color: #999; }
+
+.pct-badge {
+  display: inline-block; font-size: 9px; font-weight: 600;
+  padding: 1px 5px; border-radius: 4px; margin-left: 4px; vertical-align: middle;
+}
+.pct-pos { background: rgba(26,158,92,0.13); color: var(--green); }
+.pct-neg { background: rgba(255,59,48,0.12); color: var(--red); }
+
+/* ERR / EMPTY */
+.empty { text-align: center; padding: 60px 20px; color: var(--text-sec); }
+.empty h3 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+.err-box {
+  background: rgba(255,59,48,0.07); border: 1px solid rgba(255,59,48,0.25);
+  border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;
+  font-size: 12px; color: var(--red);
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="index.html" class="back-link">← Назад</a>
+  <span class="page-title">Аналіз конкурентів · По тижнях</span>
+  <div class="top-right">
+    <button class="btn primary" onclick="loadData()">↻ Оновити</button>
+    <button class="btn" onclick="toggleAllWeeks()">Всі / Жодного</button>
+  </div>
+</div>
+
+<div id="status-bar">
+  <div class="dot loading" id="dot"></div>
+  <span id="status-txt">Завантаження даних...</span>
+</div>
+
+<main>
+  <div id="err-area"></div>
+  <div id="cards" class="cards"></div>
+
+  <div class="week-filter-wrap" id="week-filter" style="display:none">
+    <span class="wf-label">Тижні:</span>
+    <div id="week-btns" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+  </div>
+
+  <div class="legend">
+    <div class="li"><div class="ldot" style="background:var(--comfy)"></div>Comfy</div>
+    <div class="li"><div class="ldot" style="background:var(--fox)"></div>Foxtrot</div>
+    <div class="li"><div class="ldot" style="background:var(--delta)"></div>Δ C÷F</div>
+    <div class="li"><div class="ldot" style="background:var(--dev-c)"></div>Відхилення від попереднього тижня</div>
+    <div class="li"><div class="ldot" style="background:var(--total-c)"></div>C+F загальна сума</div>
+  </div>
+
+  <div class="section-lbl">Таблиця показників по тижнях</div>
+  <div class="tbl-wrap">
+    <div id="tbl-area"><div class="empty"><h3>Завантаження...</h3></div></div>
+  </div>
+</main>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTndND7IKRwTHgc9zewbJRS3LbLV96eVEQWGNIQnxqTzN49--EXQMwUARgqF46FzeJxbqpTL9Rluz28/pub?output=csv';
+
+let allWeeks = [], allRows = [], activeWeeks = new Set();
+
+// ── CSV PARSER ───────────────────────────────────────────────────────────────
+function parseCSV(text) {
+  return text.split('\n').map(line => {
+    const cells = []; let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { cells.push(cur.trim()); cur = ''; }
+      else cur += ch;
+    }
+    cells.push(cur.trim());
+    return cells;
+  });
+}
+
+function parseVal(s) {
+  if (!s) return null;
+  const n = parseFloat(String(s).replace(/[\s\u00a0]/g,'').replace(',','.').replace('%',''));
+  return isNaN(n) ? null : n;
+}
+
+// ── STRUCTURE DETECTION ──────────────────────────────────────────────────────
+function detectStructure(rows) {
+  let numRow=-1, dateRow=-1, hdrRow=-1;
+  for (let i = 0; i < Math.min(20, rows.length); i++) {
+    const r = rows[i];
+    if (hdrRow < 0 && r.some(c=>/comfy/i.test(c)) && r.some(c=>/foxtrot/i.test(c))) { hdrRow=i; continue; }
+    if (dateRow < 0 && r.filter(c=>/\d{1,2}[.\-]\d{2}/.test(c)).length >= 2) { dateRow=i; continue; }
+    if (numRow < 0 && r.filter(c=>/^\d{1,2}$/.test(c.trim())&&+c>=1&&+c<=52).length >= 2) numRow=i;
+  }
+  return {numRow, dateRow, hdrRow};
+}
+
+function buildWeeks(rows, numRow, dateRow, hdrRow) {
+  const hdr   = rows[hdrRow]  || [];
+  const dateR = dateRow >= 0  ? rows[dateRow]  : [];
+  const numR  = numRow  >= 0  ? rows[numRow]   : [];
+  const weeks = [];
+  for (let c = 1; c < hdr.length; c++) {
+    if (/comfy/i.test(hdr[c])) {
+      const foxCol = c + 2; // Цитрус = c+1 — пропускаємо
+      if (foxCol < hdr.length && /foxtrot/i.test(hdr[foxCol])) {
+        let date='', num='';
+        for (let dc=c; dc>=0; dc--) { if (dateR[dc]&&/\d{1,2}[.\-]\d{2}/.test(dateR[dc])) { date=dateR[dc]; break; } }
+        for (let nc=c; nc>=0; nc--) { if (numR[nc]&&/^\d{1,2}$/.test(numR[nc].trim())&&+numR[nc]>=1&&+numR[nc]<=52) { num=numR[nc].trim(); break; } }
+        weeks.push({ comfyCol:c, foxCol, date, num, label: date || (num?`Тиждень ${num}`:`W${weeks.length+1}`) });
+      }
+    }
+  }
+  return weeks;
+}
+
+// ── FORMAT HELPERS ───────────────────────────────────────────────────────────
+function fmtNum(v) { if (v===null||!isFinite(v)) return '—'; return Math.round(v).toLocaleString('uk-UA'); }
+function fmtSign(v, pct=false) { if (v===null||!isFinite(v)) return '—'; const s=v>=0?'+':''; return pct?s+v.toFixed(1)+'%':s+fmtNum(v); }
+function fmtPct(v) { if (v===null||!isFinite(v)) return '—'; return (v>=0?'+':'')+v.toFixed(1)+'%'; }
+function fmtDelta(v) { if (v===null||!isFinite(v)) return '—'; return v.toFixed(2); }
+function signCls(v) { if (v===null||!isFinite(v)||v===0) return 'neu'; return v>0?'pos':'neg'; }
+function isPct(name) { return /коп|кредит|pickup|пікап/i.test(name); }
+function isCatRow(name) { return /телеком|смарти|ноути|^тв$|холодильники|пралки|iphone|samsung/i.test(name.trim()); }
+function isSubRow(name) { return /^(сума|кількість|шт)$/i.test(name.trim()); }
+function getVal(row, col) { if (col<0||col>=row.length) return null; return parseVal(row[col]); }
+
+// ── LOAD DATA ────────────────────────────────────────────────────────────────
+async function loadData() {
+  setStatus('loading','Завантаження CSV...');
+  document.getElementById('err-area').innerHTML = '';
+
+  const urls = [
+    SHEET_URL,
+    'https://corsproxy.io/?' + encodeURIComponent(SHEET_URL),
+    'https://api.allorigins.win/raw?url=' + encodeURIComponent(SHEET_URL),
+  ];
+
+  for (const url of urls) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) continue;
+      const text = await res.text();
+      if (text.includes(',') && text.length > 100) { process(text); return; }
+    } catch(e) { /* next proxy */ }
+  }
+
+  setStatus('err','Не вдалось завантажити дані');
+  showErr('Перевір що таблиця опублікована: Файл → Поділитися → Опублікувати в інтернеті → CSV.');
+}
+
+function process(text) {
+  const rows = parseCSV(text);
+  const {numRow, dateRow, hdrRow} = detectStructure(rows);
+
+  if (hdrRow < 0) {
+    setStatus('err','Не знайдено рядок з Comfy/Foxtrot');
+    showErr('Структура не розпізнана. Перевір CSV — має бути рядок з "Comfy" та "Foxtrot".');
+    return;
+  }
+
+  allWeeks = buildWeeks(rows, numRow, dateRow, hdrRow);
+  if (!allWeeks.length) {
+    setStatus('err','Тижні не знайдені');
+    showErr('Не вдалось знайти тижневі блоки в таблиці.');
+    return;
+  }
+
+  allRows = rows.slice(hdrRow+1).filter(r => r.some(c => c.length > 0));
+  activeWeeks = new Set(allWeeks.map((_,i)=>i));
+  buildWeekFilter();
+  render();
+  setStatus('ok', `Завантажено: ${allWeeks.length} тижн., ${allRows.length} рядків показників`);
+}
+
+// ── WEEK FILTER ──────────────────────────────────────────────────────────────
+function buildWeekFilter() {
+  const wf = document.getElementById('week-filter');
+  const wb = document.getElementById('week-btns');
+  wf.style.display = 'flex';
+  wb.innerHTML = '';
+  allWeeks.forEach((w,i) => {
+    const b = document.createElement('button');
+    b.className = 'wbtn on'; b.textContent = w.label;
+    b.onclick = () => toggleWeek(i, b);
+    wb.appendChild(b);
+  });
+}
+function toggleWeek(i, btn) {
+  if (activeWeeks.has(i)) { activeWeeks.delete(i); btn.classList.remove('on'); }
+  else { activeWeeks.add(i); btn.classList.add('on'); }
+  render();
+}
+function toggleAllWeeks() {
+  const allOn = activeWeeks.size === allWeeks.length;
+  if (allOn) { activeWeeks.clear(); document.querySelectorAll('.wbtn').forEach(b=>b.classList.remove('on')); }
+  else { allWeeks.forEach((_,i)=>activeWeeks.add(i)); document.querySelectorAll('.wbtn').forEach(b=>b.classList.add('on')); }
+  render();
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────────────
+function render() {
+  const vis = allWeeks.map((w,i)=>({...w,idx:i})).filter(w=>activeWeeks.has(w.idx));
+  if (!vis.length) {
+    document.getElementById('tbl-area').innerHTML = '<div class="empty"><h3>Виберіть хоча б один тиждень</h3></div>';
+    document.getElementById('cards').innerHTML = '';
+    return;
+  }
+  renderTable(vis);
+  renderCards(vis);
+}
+
+function renderTable(vis) {
+  let h = '<table><thead>';
+
+  // Рядок 1 — тижні
+  h += '<tr><th class="th-name" rowspan="2">Показник</th>';
+  vis.forEach(w => { h += `<th class="th-date" colspan="6">${w.label}</th>`; });
+  h += '</tr>';
+
+  // Рядок 2 — підзаголовки
+  h += '<tr>';
+  vis.forEach(() => {
+    h += '<th class="th-comfy">Comfy</th>';
+    h += '<th class="th-fox">Foxtrot</th>';
+    h += '<th class="th-dc">Δ C÷F</th>';
+    h += '<th class="th-dev">±abs (C)</th>';
+    h += '<th class="th-dev">±% (C)</th>';
+    h += '<th class="th-total">C+F Δ</th>';
+  });
+  h += '</tr></thead><tbody>';
+
+  allRows.forEach(row => {
+    const name = (row[0]||'').trim();
+    if (!name) return;
+    const trCls = isCatRow(name)?'cat-row':isSubRow(name)?'sub-row':'';
+    const pct = isPct(name);
+
+    h += `<tr class="${trCls}"><td>${name}</td>`;
+
+    vis.forEach(w => {
+      const c = getVal(row, w.comfyCol);
+      const f = getVal(row, w.foxCol);
+
+      const delta = (c!==null&&f!==null&&f!==0) ? c/Math.abs(f) : null;
+
+      const realIdx = allWeeks.findIndex(x=>x.comfyCol===w.comfyCol);
+      const prevW = realIdx>0 ? allWeeks[realIdx-1] : null;
+      const prevC = prevW ? getVal(row,prevW.comfyCol) : null;
+      const prevF = prevW ? getVal(row,prevW.foxCol)   : null;
+
+      const devAbs = (c!==null&&prevC!==null) ? c-prevC : null;
+      const devPct = (devAbs!==null&&prevC!==null&&prevC!==0) ? devAbs/Math.abs(prevC)*100 : null;
+
+      const total    = (c!==null&&f!==null) ? c+f : null;
+      const prevTot  = (prevC!==null&&prevF!==null) ? prevC+prevF : null;
+      const totalDev = (total!==null&&prevTot!==null) ? total-prevTot : null;
+
+      const fC = pct ? (c!==null?c.toFixed(2)+'%':'—') : fmtNum(c);
+      const fF = pct ? (f!==null?f.toFixed(2)+'%':'—') : fmtNum(f);
+
+      let devAbsStr = devAbs!==null ? (pct?fmtSign(devAbs,true):fmtSign(devAbs)) : '—';
+      let devPctStr = (devPct!==null&&!pct) ? fmtPct(devPct) : '—';
+
+      let totalStr = pct?'—':fmtNum(total);
+      let totalBadge = '';
+      if (totalDev!==null&&!pct) {
+        const cls = totalDev>=0?'pct-pos':'pct-neg';
+        totalBadge = `<span class="pct-badge ${cls}">${fmtSign(totalDev)}</span>`;
+      }
+
+      h += `<td class="vc">${fC}</td>`;
+      h += `<td class="vf">${fF}</td>`;
+      h += `<td class="vd">${fmtDelta(delta)}</td>`;
+      h += `<td class="${signCls(devAbs)}">${devAbsStr}</td>`;
+      h += `<td class="${signCls(devPct)}">${devPctStr}</td>`;
+      h += `<td class="vtotal">${totalStr}${totalBadge}</td>`;
+    });
+    h += '</tr>';
+  });
+
+  h += '</tbody></table>';
+  document.getElementById('tbl-area').innerHTML = h;
+}
+
+function renderCards(vis) {
+  const ca = document.getElementById('cards');
+  const lastW = vis[vis.length-1];
+  const realIdx = allWeeks.findIndex(x=>x.comfyCol===lastW.comfyCol);
+  const prevW = realIdx>0 ? allWeeks[realIdx-1] : null;
+
+  const toRow = allRows.find(r=>/ТО.?тиждень/i.test(r[0]||''));
+  let cVal=null,fVal=null,prevC=null,prevF=null;
+  if (toRow) {
+    cVal=getVal(toRow,lastW.comfyCol); fVal=getVal(toRow,lastW.foxCol);
+    if (prevW) { prevC=getVal(toRow,prevW.comfyCol); prevF=getVal(toRow,prevW.foxCol); }
+  }
+
+  const delta  = (cVal!==null&&fVal!==null&&fVal!==0) ? (cVal/Math.abs(fVal)).toFixed(2) : '—';
+  const total  = (cVal!==null&&fVal!==null) ? cVal+fVal : null;
+  const prevTot= (prevC!==null&&prevF!==null) ? prevC+prevF : null;
+  const totDev = (total!==null&&prevTot!==null) ? total-prevTot : null;
+  const totPct = (totDev!==null&&prevTot&&prevTot!==0) ? totDev/Math.abs(prevTot)*100 : null;
+  const devC   = (cVal!==null&&prevC!==null) ? cVal-prevC : null;
+  const devF   = (fVal!==null&&prevF!==null) ? fVal-prevF : null;
+
+  const arw = v => v===null?'':v>=0?'▲ +':'▼ ';
+  const sub = (v, prev) => v!==null&&prev!==null
+    ? `<span style="color:${v-prev>=0?'var(--green)':'var(--red)'}">${arw(v-prev)}${fmtNum(Math.abs(v-prev))} від попер.</span>`
+    : '';
+
+  ca.innerHTML = `
+    <div class="card">
+      <div class="card-lbl">Останній тиждень</div>
+      <div class="card-val" style="font-size:14px;color:var(--accent)">${lastW.label}</div>
+      <div class="card-sub">${vis.length} тижн. відображено</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">ТО Comfy</div>
+      <div class="card-val" style="color:var(--comfy)">${fmtNum(cVal)}</div>
+      <div class="card-sub">${sub(cVal,prevC)}</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">ТО Foxtrot</div>
+      <div class="card-val" style="color:var(--fox)">${fmtNum(fVal)}</div>
+      <div class="card-sub">${sub(fVal,prevF)}</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Дельта C÷F</div>
+      <div class="card-val" style="color:var(--delta)">${delta}</div>
+      <div class="card-sub">Comfy ÷ |Foxtrot|</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">C+F загальна сума</div>
+      <div class="card-val" style="color:var(--total-c)">${fmtNum(total)}</div>
+      <div class="card-sub">${totDev!==null?`<span style="color:${totDev>=0?'var(--green)':'var(--red)'}">${arw(totDev)}${fmtNum(Math.abs(totDev))} (${fmtPct(totPct)})</span>`:''}</div>
+    </div>`;
+}
+
+function setStatus(state, msg) {
+  document.getElementById('dot').className = 'dot '+state;
+  document.getElementById('status-txt').textContent = msg;
+}
+function showErr(msg) {
+  document.getElementById('err-area').innerHTML = `<div class="err-box">⚠ ${msg}</div>`;
+}
+
+loadData();
+</script>
+</body>
+</html>
