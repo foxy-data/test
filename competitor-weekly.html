@@ -134,7 +134,7 @@ main {
 
 /* TABLE */
 .tbl-wrap { overflow-x: auto; overflow-y: auto; border-radius: 14px; box-shadow: var(--shadow); flex: 1 1 0; min-height: 0; }
-table { border-collapse: collapse; font-size: 12px; white-space: nowrap; width: 100%; background: var(--card); }
+table { border-collapse: collapse; font-size: 12px; white-space: nowrap; background: var(--card); table-layout: fixed; }
 th, td { border: 1px solid #ebebf0; }
 th { padding: 7px 10px; text-align: center; font-weight: 600; font-size: 11px; background: #f9f9fb; }
 td { padding: 6px 10px; text-align: right; }
@@ -156,21 +156,23 @@ thead tr:nth-child(2) th { position: sticky; top: 31px; z-index: 12; }
   position: sticky; left: 0; top: 0; z-index: 30;
   background: #f2f2f7; border-right: 2px solid #e5e5ea; font-size: 11px; color: var(--text-sec);
 }
-.th-date { background: #f2f2f7; font-size: 11px; font-weight: 700; color: var(--text); border-bottom: 2px solid #d2d2d7; }
-.th-comfy { background: var(--comfy-bg); color: var(--comfy); border-bottom: 2px solid var(--comfy); font-weight: 700; }
-.th-fox   { background: var(--fox-bg);   color: var(--fox);   border-bottom: 2px solid var(--fox);   font-weight: 700; }
-.th-dc    { background: var(--delta-bg); color: var(--delta); border-bottom: 2px solid var(--delta); font-size: 10px; }
-.th-dev   { background: var(--dev-bg);   color: var(--dev-c); border-bottom: 2px solid var(--dev-c); font-size: 10px; }
-.th-total { background: var(--total-bg); color: var(--total-c); border-bottom: 2px solid var(--total-c); font-size: 10px; }
+.th-date { background: #f2f2f7; font-size: 11px; font-weight: 700; color: var(--text); border-bottom: 2px solid #d2d2d7; border-left: 2px solid #c0c0cc !important; }
+.th-comfy { background: var(--comfy-bg); color: var(--comfy); border-bottom: 2px solid var(--comfy); font-weight: 700; width: 90px; min-width: 90px; max-width: 90px; border-left: 2px solid #c0c0cc !important; }
+.th-fox   { background: var(--fox-bg);   color: var(--fox);   border-bottom: 2px solid var(--fox);   font-weight: 700; width: 90px; min-width: 90px; max-width: 90px; }
+.th-dc    { background: var(--delta-bg); color: var(--delta); border-bottom: 2px solid var(--delta); font-size: 10px; width: 52px; min-width: 52px; max-width: 52px; border-left: 2px solid #d0d0d8 !important; }
+.th-dev   { background: var(--dev-bg);   color: var(--dev-c); border-bottom: 2px solid var(--dev-c); font-size: 10px; width: 80px; min-width: 80px; max-width: 80px; }
+.th-total { background: var(--total-bg); color: var(--total-c); border-bottom: 2px solid var(--total-c); font-size: 10px; width: 90px; min-width: 90px; max-width: 90px; border-left: 2px solid #d0d0d8 !important; }
+.th-name  { width: 180px; min-width: 180px; max-width: 180px; }
 
 /* TD value colors */
-.vc { color: var(--comfy); font-weight: 500; }
-.vf { color: var(--fox);   font-weight: 500; }
-.vd { color: var(--delta); }
+.vc { color: var(--comfy); font-weight: 500; width: 90px; min-width: 90px; max-width: 90px; border-left: 2px solid #c0c0cc !important; overflow: hidden; text-overflow: ellipsis; }
+.vf { color: var(--fox);   font-weight: 500; width: 90px; min-width: 90px; max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
+.vd { color: var(--delta); width: 52px; min-width: 52px; max-width: 52px; border-left: 2px solid #d0d0d8 !important; overflow: hidden; text-overflow: ellipsis; }
 .pos { color: var(--green); font-weight: 500; }
 .neg { color: var(--red);   font-weight: 500; }
 .neu { color: var(--text-sec); }
-.vtotal { color: var(--total-c); font-weight: 500; }
+.vtotal { color: var(--total-c); font-weight: 500; width: 90px; min-width: 90px; max-width: 90px; border-left: 2px solid #d0d0d8 !important; overflow: hidden; text-overflow: ellipsis; }
+.vdev { width: 80px; min-width: 80px; max-width: 80px; overflow: hidden; text-overflow: ellipsis; }
 
 /* Special rows */
 .cat-row td { background: #f5f5f7; }
@@ -416,7 +418,13 @@ function render() {
 }
 
 function renderTable(vis) {
-  let h = '<table><thead>';
+  // colgroup enforces fixed widths regardless of content
+  let cols = '<colgroup><col style="width:180px;min-width:180px">';
+  vis.forEach(() => {
+    cols += '<col style="width:90px"><col style="width:90px"><col style="width:52px"><col style="width:80px"><col style="width:80px"><col style="width:90px">';
+  });
+  cols += '</colgroup>';
+  let h = '<table>' + cols + '<thead>';
 
   // Рядок 1 — тижні
   h += '<tr><th class="th-name" rowspan="2">Показник</th>';
@@ -480,8 +488,8 @@ function renderTable(vis) {
       h += `<td class="vc">${fC}</td>`;
       h += `<td class="vf">${fF}</td>`;
       h += `<td class="vd">${fmtDelta(delta)}</td>`;
-      h += `<td class="${signCls(devAbs)}">${devAbsStr}</td>`;
-      h += `<td class="${signCls(devPct)}">${devPctStr}</td>`;
+      h += `<td class="vdev ${signCls(devAbs)}">${devAbsStr}</td>`;
+      h += `<td class="vdev ${signCls(devPct)}">${devPctStr}</td>`;
       h += `<td class="vtotal">${totalStr}${totalBadge}</td>`;
     });
     h += '</tr>';
