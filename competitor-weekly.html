@@ -164,7 +164,14 @@ thead tr:nth-child(2) th { position: sticky; top: 31px; z-index: 12; }
 .th-fox   { background: #feeee0; color: var(--fox);   border-bottom: 2px solid var(--fox);   font-weight: 700; width: 100px; min-width: 100px; }
 .th-dc    { background: #e5f0fd; color: var(--delta); border-bottom: 2px solid var(--delta); font-size: 10px; width: 52px; min-width: 52px; border-left: 2px solid #d8d8e0 !important; }
 .th-dev   { background: #e4f5ec; color: var(--dev-c); border-bottom: 2px solid var(--dev-c); font-size: 10px; width: 88px; min-width: 88px; }
+.th-dev-f { background: #feeee0; color: var(--fox);   border-bottom: 2px solid var(--fox);   font-size: 10px; width: 88px; min-width: 88px; }
 .th-total { background: #fdf0e3; color: var(--total-c); border-bottom: 2px solid var(--total-c); font-size: 10px; width: 110px; min-width: 110px; border-left: 2px solid #d8d8e0 !important; }
+
+/* Toggle dev columns */
+.btn-toggle-dev { background: var(--card); border: 1px solid var(--border); color: var(--text-sec); padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 500; font-family: inherit; transition: all .15s; white-space: nowrap; }
+.btn-toggle-dev:hover { border-color: var(--dev-c); color: var(--dev-c); }
+.btn-toggle-dev.on { background: var(--dev-c); color: #fff; border-color: var(--dev-c); }
+.col-dev-hidden .dev-col { display: none; }
 .th-name  { width: 180px; min-width: 180px; max-width: 180px; }
 
 /* TD value colors */
@@ -176,6 +183,7 @@ thead tr:nth-child(2) th { position: sticky; top: 31px; z-index: 12; }
 .neu { color: var(--text-sec); }
 .vtotal { color: var(--total-c); font-weight: 500; width: 110px; min-width: 110px; border-left: 2px solid #d8d8e0 !important; }
 .vdev { width: 88px; min-width: 88px; }
+.vdev-f { width: 88px; min-width: 88px; }
 
 /* Special rows */
 .cat-row td { background: #f5f5f7; }
@@ -212,6 +220,7 @@ thead tr:nth-child(2) th { position: sticky; top: 31px; z-index: 12; }
   <a href="index.html" class="back-link">← Назад</a>
   <span class="page-title">Аналіз конкурентів · По тижнях</span>
   <div class="top-right">
+    <button class="btn-toggle-dev on" id="btn-toggle-dev" onclick="toggleDevCols()">±abs/% C+F</button>
     <button class="btn primary" onclick="loadData()">↻ Оновити</button>
     <button class="btn" onclick="toggleAllWeeks()">Всі / Жодного</button>
   </div>
@@ -424,14 +433,14 @@ function renderTable(vis) {
   // colgroup enforces fixed widths regardless of content
   let cols = '<colgroup><col style="width:180px;min-width:180px">';
   vis.forEach(() => {
-    cols += '<col style="width:100px"><col style="width:100px"><col style="width:52px"><col style="width:88px"><col style="width:88px"><col style="width:110px">';
+    cols += '<col style="width:100px"><col style="width:100px"><col style="width:52px"><col class="dev-col" style="width:88px"><col class="dev-col" style="width:88px"><col class="dev-col" style="width:88px"><col class="dev-col" style="width:88px"><col style="width:110px">';
   });
   cols += '</colgroup>';
   let h = '<table>' + cols + '<thead>';
 
   // Рядок 1 — тижні
   h += '<tr><th class="th-name" rowspan="2">Показник</th>';
-  vis.forEach(w => { h += `<th class="th-date" colspan="6">${w.label}</th>`; });
+  vis.forEach(w => { h += `<th class="th-date" colspan="8">${w.label}</th>`; });
   h += '</tr>';
 
   // Рядок 2 — підзаголовки
@@ -440,8 +449,10 @@ function renderTable(vis) {
     h += '<th class="th-comfy">Comfy</th>';
     h += '<th class="th-fox">Foxtrot</th>';
     h += '<th class="th-dc">Δ</th>';
-    h += '<th class="th-dev">±abs (C)</th>';
-    h += '<th class="th-dev">±% (C)</th>';
+    h += '<th class="th-dev dev-col">±abs (C)</th>';
+    h += '<th class="th-dev dev-col">±% (C)</th>';
+    h += '<th class="th-dev-f dev-col">±abs (F)</th>';
+    h += '<th class="th-dev-f dev-col">±% (F)</th>';
     h += '<th class="th-total">C+F Δ</th>';
   });
   h += '</tr></thead><tbody>';
@@ -471,6 +482,9 @@ function renderTable(vis) {
       const devAbs = (c!==null&&prevC!==null) ? c-prevC : null;
       const devPct = (devAbs!==null&&prevC!==null&&prevC!==0) ? devAbs/Math.abs(prevC)*100 : null;
 
+      const foxDevAbs = (f!==null&&prevF!==null) ? f-prevF : null;
+      const foxDevPct = (foxDevAbs!==null&&prevF!==null&&prevF!==0) ? foxDevAbs/Math.abs(prevF)*100 : null;
+
       const total    = (c!==null&&f!==null) ? c+f : null;
       const prevTot  = (prevC!==null&&prevF!==null) ? prevC+prevF : null;
       const totalDev = (total!==null&&prevTot!==null) ? total-prevTot : null;
@@ -480,6 +494,9 @@ function renderTable(vis) {
 
       let devAbsStr = devAbs!==null ? (pct?fmtSign(devAbs,true):fmtSign(devAbs)) : '—';
       let devPctStr = (devPct!==null&&!pct) ? fmtPct(devPct) : '—';
+
+      let foxDevAbsStr = foxDevAbs!==null ? (pct?fmtSign(foxDevAbs,true):fmtSign(foxDevAbs)) : '—';
+      let foxDevPctStr = (foxDevPct!==null&&!pct) ? fmtPct(foxDevPct) : '—';
 
       let totalStr = pct?'—':fmtNum(total);
       let totalBadge = '';
@@ -491,8 +508,10 @@ function renderTable(vis) {
       h += `<td class="vc">${fC}</td>`;
       h += `<td class="vf">${fF}</td>`;
       h += `<td class="vd">${fmtDelta(delta)}</td>`;
-      h += `<td class="vdev ${signCls(devAbs)}">${devAbsStr}</td>`;
-      h += `<td class="vdev ${signCls(devPct)}">${devPctStr}</td>`;
+      h += `<td class="vdev dev-col ${signCls(devAbs)}">${devAbsStr}</td>`;
+      h += `<td class="vdev dev-col ${signCls(devPct)}">${devPctStr}</td>`;
+      h += `<td class="vdev-f dev-col ${signCls(foxDevAbs)}">${foxDevAbsStr}</td>`;
+      h += `<td class="vdev-f dev-col ${signCls(foxDevPct)}">${foxDevPctStr}</td>`;
       h += `<td class="vtotal">${totalStr}${totalBadge}</td>`;
     });
     h += '</tr>';
@@ -562,6 +581,21 @@ function setStatus(state, msg) {
 }
 function showErr(msg) {
   document.getElementById('err-area').innerHTML = `<div class="err-box">⚠ ${msg}</div>`;
+}
+
+// ── TOGGLE DEV COLUMNS ───────────────────────────────────────────────────────
+let devColsVisible = true;
+function toggleDevCols() {
+  devColsVisible = !devColsVisible;
+  const tbl = document.getElementById('tbl-area');
+  const btn = document.getElementById('btn-toggle-dev');
+  if (devColsVisible) {
+    tbl.classList.remove('col-dev-hidden');
+    btn.classList.add('on');
+  } else {
+    tbl.classList.add('col-dev-hidden');
+    btn.classList.remove('on');
+  }
 }
 
 loadData();
