@@ -253,10 +253,12 @@ function detectStructure(rows) {
   let numRow=-1, dateRow=-1, hdrRow=-1;
   for (let i = 0; i < Math.min(20, rows.length); i++) {
     const r = rows[i];
-    if (hdrRow < 0 && r.some(c=>/comfy/i.test(c)) && r.some(c=>/foxtrot/i.test(c))) { hdrRow=i; continue; }
-    if (dateRow < 0 && r.filter(c=>/\d{1,2}[.\-]\d{2}/.test(c)).length >= 2) { dateRow=i; continue; }
+    console.log('[CW] row ' + i + ':', JSON.stringify(r.slice(0,10)));
+    if (hdrRow < 0 && r.some(c=>/comfy/i.test(c)) && r.some(c=>/foxtrot/i.test(c))) hdrRow=i;
+    if (dateRow < 0 && r.filter(c=>/\d{1,2}[.\-]\d{2}/.test(c)).length >= 2) dateRow=i;
     if (numRow < 0 && r.filter(c=>/^\d{1,2}$/.test(c.trim())&&+c>=1&&+c<=52).length >= 2) numRow=i;
   }
+  console.log('[CW] detectStructure → numRow=' + numRow + ' dateRow=' + dateRow + ' hdrRow=' + hdrRow);
   return {numRow, dateRow, hdrRow};
 }
 
@@ -265,10 +267,15 @@ function buildWeeks(rows, numRow, dateRow, hdrRow) {
   const dateR = dateRow >= 0  ? rows[dateRow]  : [];
   const numR  = numRow  >= 0  ? rows[numRow]   : [];
   const weeks = [];
+  console.log('[CW] hdr row:', JSON.stringify(hdr.slice(0,24)));
   for (let c = 1; c < hdr.length; c++) {
     if (/comfy/i.test(hdr[c])) {
-      const foxCol = c + 2; // Цитрус = c+1 — пропускаємо
-      if (foxCol < hdr.length && /foxtrot/i.test(hdr[foxCol])) {
+      // Foxtrot може бути на c+1 або c+2 (якщо між ними Цитрус/інший)
+      let foxCol = -1;
+      if (c+1 < hdr.length && /foxtrot/i.test(hdr[c+1])) foxCol = c+1;
+      else if (c+2 < hdr.length && /foxtrot/i.test(hdr[c+2])) foxCol = c+2;
+      console.log('[CW] Comfy col=' + c + ' foxCol=' + foxCol);
+      if (foxCol > 0) {
         let date='', num='';
         for (let dc=c; dc>=0; dc--) { if (dateR[dc]&&/\d{1,2}[.\-]\d{2}/.test(dateR[dc])) { date=dateR[dc]; break; } }
         for (let nc=c; nc>=0; nc--) { if (numR[nc]&&/^\d{1,2}$/.test(numR[nc].trim())&&+numR[nc]>=1&&+numR[nc]<=52) { num=numR[nc].trim(); break; } }
@@ -276,6 +283,7 @@ function buildWeeks(rows, numRow, dateRow, hdrRow) {
       }
     }
   }
+  console.log('[CW] weeks found:', weeks.length, weeks.map(w=>w.label));
   return weeks;
 }
 
@@ -286,8 +294,8 @@ function fmtPct(v) { if (v===null||!isFinite(v)) return '—'; return (v>=0?'+':
 function fmtDelta(v) { if (v===null||!isFinite(v)) return '—'; return v.toFixed(2); }
 function signCls(v) { if (v===null||!isFinite(v)||v===0) return 'neu'; return v>0?'pos':'neg'; }
 function isPct(name) { return /коп|кредит|pickup|пікап/i.test(name); }
-function isCatRow(name) { return /телеком|смарти|ноути|^тв$|холодильники|пралки|iphone|samsung/i.test(name.trim()); }
-function isSubRow(name) { return /^(сума|кількість|шт)$/i.test(name.trim()); }
+function isCatRow(name) { return name.trim().length > 0 && /телеком|смарти|ноути|^тв$|холодильники|пралки|iphone|samsung|кавомашин|мультипек|пилосос|кондиціон|водонагрів|мікрух|планшет|ігров|енергетик|обігрів/i.test(name.trim()); }
+function isSubRow(name) { return /^(сума|кількість|шт\.?)$/i.test(name.trim()); }
 function getVal(row, col) { if (col<0||col>=row.length) return null; return parseVal(row[col]); }
 
 // ── LOAD DATA ────────────────────────────────────────────────────────────────
@@ -388,7 +396,7 @@ function renderTable(vis) {
   vis.forEach(() => {
     h += '<th class="th-comfy">Comfy</th>';
     h += '<th class="th-fox">Foxtrot</th>';
-    h += '<th class="th-dc">Δ C÷F</th>';
+    h += '<th class="th-dc">Δ</th>';
     h += '<th class="th-dev">±abs (C)</th>';
     h += '<th class="th-dev">±% (C)</th>';
     h += '<th class="th-total">C+F Δ</th>';
@@ -396,12 +404,15 @@ function renderTable(vis) {
   h += '</tr></thead><tbody>';
 
   allRows.forEach(row => {
-    const name = (row[0]||'').trim();
+    const col0 = (row[0]||'').trim();
+    const col1 = (row[1]||'').trim();
+    const name = col0 || col1;
     if (!name) return;
-    const trCls = isCatRow(name)?'cat-row':isSubRow(name)?'sub-row':'';
-    const pct = isPct(name);
+    const trCls = isCatRow(col0)?'cat-row':isSubRow(col1||col0)?'sub-row':'';
+    const pct = isPct(col1||col0);
+    const displayName = col0 ? (col1 ? col0 + ' · ' + col1 : col0) : col1;
 
-    h += `<tr class="${trCls}"><td>${name}</td>`;
+    h += `<tr class="${trCls}"><td>${displayName}</td>`;
 
     vis.forEach(w => {
       const c = getVal(row, w.comfyCol);
