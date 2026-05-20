@@ -89,7 +89,14 @@ main {
 .cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 10px; margin-bottom: 16px; flex-shrink: 0;
+  gap: 10px; margin-bottom: 12px; flex-shrink: 0;
+}
+@media (max-width: 480px) {
+  .cards { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .card { padding: 9px 11px; }
+  .card-val { font-size: 15px !important; }
+  .card-lbl { font-size: 9px; }
+  .card-sub { font-size: 10px; }
 }
 .card {
   background: var(--card); border: 1px solid var(--border);
@@ -127,19 +134,27 @@ main {
 
 /* LEGEND */
 .legend {
-  display: flex; gap: 14px; flex-wrap: wrap;
-  margin-bottom: 12px; font-size: 12px; color: var(--text-sec); flex-shrink: 0;
+  display: flex; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 8px; font-size: 11px; color: var(--text-sec); flex-shrink: 0;
 }
-.li { display: flex; align-items: center; gap: 5px; }
-.ldot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.li { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.ldot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+@media (max-width: 480px) {
+  .legend { gap: 6px 12px; margin-bottom: 6px; font-size: 10px; }
+  .legend .li-long { display: none; } /* приховати довгі підписи на мобільному */
+}
 
 /* SECTION LABEL */
 .section-lbl {
   font-size: 10px; font-weight: 700; color: var(--text-sec);
   text-transform: uppercase; letter-spacing: .08em;
-  margin-bottom: 10px; display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+  margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-shrink: 0;
 }
 .section-lbl::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+@media (max-width: 480px) {
+  main { padding: 10px; }
+  .week-filter-wrap { margin-bottom: 8px; padding: 6px 10px; }
+}
 
 /* TABLE */
 .tbl-wrap { overflow-x: auto; overflow-y: auto; border-radius: 14px; box-shadow: var(--shadow); flex: 1 1 0; min-height: 0; }
@@ -256,8 +271,8 @@ thead tr:nth-child(2) th { position: sticky; top: 31px; z-index: 12; }
     <div class="li"><div class="ldot" style="background:var(--comfy)"></div>Comfy</div>
     <div class="li"><div class="ldot" style="background:var(--fox)"></div>Foxtrot</div>
     <div class="li"><div class="ldot" style="background:var(--delta)"></div>Δ C÷F</div>
-    <div class="li"><div class="ldot" style="background:var(--dev-c)"></div>Відхилення від попереднього тижня</div>
-    <div class="li"><div class="ldot" style="background:var(--total-c)"></div>C+F загальна сума</div>
+    <div class="li li-long"><div class="ldot" style="background:var(--dev-c)"></div>±відхилення від попер. тижня</div>
+    <div class="li li-long"><div class="ldot" style="background:var(--total-c)"></div>C+F загальна сума</div>
   </div>
 
   <div class="section-lbl">Таблиця показників по тижнях</div>
