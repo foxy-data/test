@@ -588,7 +588,6 @@
         <button class="vs-btn on" id="vsBtnPodium" onclick="setRatingView('podium')">🏆 Подіум</button>
         <button class="vs-btn" id="vsBtnLeader" onclick="setRatingView('leader')">👑 Лідер</button>
         <button class="vs-btn" id="vsBtnBar" onclick="setRatingView('bar')">📊 Бари</button>
-        <button class="vs-btn" id="vsBtnGauge" onclick="setRatingView('gauge')">🎯 Gauge</button>
     </div>
     <div id="rankingGrid"></div>
 
@@ -625,6 +624,7 @@ function colInfo(h) {
     else if (u.includes(' ТО') || u.startsWith('ТО') || u.endsWith('ТО')) g = 'to';
     else if (u.includes('ДОХІД') || u.includes('ДОХОД') || u.includes('INCOME') || u.includes('MARGIN') || u.includes('МАРЖА')) g = 'income';
     else if ((u.includes('СР') && (u.includes('ЧЕК') || u.includes('CHECK'))) || u === 'ASP' || u.includes('AVG CHECK')) g = 'avgcheck';
+    else if (u.includes('КТЧ') || u.includes('KTCh') || u.includes('KTCH')) g = 'ktch';
     if      (u.includes('ПЛАН'))                         t = 'plan';
     else if (u.includes('%') || u.includes('ВИКО'))      t = 'pct';
     else if (u.includes('ДОЛЯ') || u.includes('SHARE'))  t = 'share';
@@ -637,9 +637,11 @@ function toNum(v) {
     if (!v) return 0;
     return parseFloat(v.toString().replace('%','').replace(/\s/g,'').replace(',','.')) || 0;
 }
-function fmtInt(v) {
+function fmtInt(v, g) {
     const n = toNum(v);
-    return n ? Math.round(n).toLocaleString('uk-UA') : (v || '');
+    if (!n) return v || '';
+    if (g === 'ktch') return n.toFixed(2);
+    return Math.round(n).toLocaleString('uk-UA');
 }
 function fmtPct(v) {
     let n = toNum(v);
@@ -710,7 +712,7 @@ function setRatingView(v) {
     document.getElementById('vsBtnPodium').classList.toggle('on', v === 'podium');
     document.getElementById('vsBtnLeader').classList.toggle('on', v === 'leader');
     document.getElementById('vsBtnBar').classList.toggle('on', v === 'bar');
-    document.getElementById('vsBtnGauge').classList.toggle('on', v === 'gauge');
+
     renderRankingCards();
 }
 
@@ -890,6 +892,7 @@ const RATING_DEFS = [
     { key:'checks',    label:'Чеки',         color:'#af52de', gFilter:'checks',   tFilter:'fact'  },
     { key:'income',    label:'Дохід',        color:'#00b388', gFilter:'income',   tFilter:'fact'  },
     { key:'avgcheck',  label:'Серед. чек',   color:'#5856d6', gFilter:'avgcheck', tFilter:'fact'  },
+    { key:'ktch',       label:'КТЧ',          color:'#e91e8c', gFilter:'ktch',     tFilter:'fact'  },
 ];
 let activeRatingKey = 'to';
 
@@ -926,6 +929,7 @@ const INSIGHT_DEFS = [
     { key:'checks',   label:'Найбільше чеків',           icon:'🧾', color:'#af52de', iconBg:'rgba(175,82,222,0.12)', gFilter:'checks', tFilter:'fact' },
     { key:'income',   label:'Заробив найбільше',         icon:'💵', color:'#00b388', iconBg:'rgba(0,179,136,0.12)', gFilter:'income', tFilter:'fact' },
     { key:'avgcheck', label:'Найвищий середній чек',     icon:'📊', color:'#5856d6', iconBg:'rgba(88,86,214,0.12)', gFilter:'avgcheck',tFilter:'fact' },
+    { key:'ktch',     label:'Найвищий КТЧ',              icon:'⭐', color:'#e91e8c', iconBg:'rgba(233,30,140,0.12)',  gFilter:'ktch',    tFilter:'fact' },
 ];
 
 function getTopPerson(gFilter, tFilter) {
@@ -959,6 +963,7 @@ function fmtInsightVal(val, gFilter) {
     if (gFilter === 'checks') return Math.round(n).toLocaleString('uk-UA') + ' чек.';
     if (gFilter === 'avgcheck') return Math.round(n).toLocaleString('uk-UA') + ' грн';
     if (gFilter === 'income') return Math.round(n).toLocaleString('uk-UA') + ' грн';
+    if (gFilter === 'ktch') return n.toFixed(2);
     return Math.round(n).toLocaleString('uk-UA') + ' ₴';
 }
 
@@ -1097,6 +1102,7 @@ function renderRankingCards() {
             if (!v) return '—';
             if (def.tFilter === 'share') return Number(v).toLocaleString('uk-UA', {minimumFractionDigits:2, maximumFractionDigits:2});
             if (['income','avgcheck'].includes(def.gFilter)) return Math.round(v).toLocaleString('uk-UA') + ' грн';
+            if (def.gFilter === 'ktch') return Number(v).toFixed(2);
             return Math.round(v).toLocaleString('uk-UA');
         };
         const banner = document.createElement('div');
@@ -1144,6 +1150,7 @@ function renderRankingCards() {
         if (isNaN(n)) return String(v);
         if (def.tFilter === 'share') return n.toLocaleString('uk-UA', {minimumFractionDigits:2, maximumFractionDigits:2});
         if (['income','avgcheck'].includes(def.gFilter)) return Math.round(n).toLocaleString('uk-UA') + ' грн';
+            if (def.gFilter === 'ktch') return n.toFixed(2);
         return Number.isInteger(n) ? n.toLocaleString('uk-UA') : n.toLocaleString('uk-UA', {minimumFractionDigits:2, maximumFractionDigits:2});
     };
 
@@ -1175,8 +1182,6 @@ function renderRankingCards() {
         renderPodiumView(grid, items, maxVal, def, valFmt, getPctStr, getPctNum);
     } else if (activeRatingView === 'bar') {
         renderBarChartView(grid, items, maxVal, def, valFmt, getPctStr, getPctNum, pctClass);
-    } else if (activeRatingView === 'gauge') {
-        renderGaugeView(grid, items, def, valFmt, getPctStr, getPctNum);
     } else {
         renderLeaderboardView(grid, items, maxVal, def, valFmt, getPctStr, getPctNum, pctClass);
     }
