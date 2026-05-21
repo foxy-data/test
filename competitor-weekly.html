@@ -141,9 +141,6 @@ main {
 .ldot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 @media (max-width: 600px) {
   .legend { display: none; }
-  /* Перший стовпець вужчий на мобільному */
-  td:first-child { min-width: 120px !important; }
-  .th-name { width: 120px !important; min-width: 120px !important; max-width: 120px !important; }
 }
 
 /* SECTION LABEL */
@@ -167,7 +164,7 @@ thead tr:first-child th { border-top: 1px solid #ebebf0; }
 th { padding: 7px 10px; text-align: center; font-weight: 600; font-size: 11px; background: #f5f5f7; }
 td { padding: 6px 10px; text-align: right; }
 td:first-child {
-  text-align: left; min-width: 180px; color: var(--text-sec);
+  text-align: left; min-width: min(180px, 33vw); max-width: min(180px, 33vw); color: var(--text-sec);
   font-size: 11px; position: sticky; left: 0;
   background: #ffffff; z-index: 8;
   border-right: 2px solid #c8c8d0 !important;
@@ -198,7 +195,7 @@ thead tr:nth-child(2) th { position: sticky; top: 31px; z-index: 12; }
 .btn-toggle-dev:hover { border-color: var(--dev-c); color: var(--dev-c); }
 .btn-toggle-dev.on { background: var(--dev-c); color: #fff; border-color: var(--dev-c); }
 .col-dev-hidden .dev-col { display: none; }
-.th-name  { width: 180px; min-width: 180px; max-width: 180px; }
+.th-name  { width: min(180px, 33vw); min-width: min(180px, 33vw); max-width: min(180px, 33vw); }
 
 /* TD value colors */
 .vc { color: var(--comfy); font-weight: 500; width: 100px; min-width: 100px; border-left: 3px solid #b0b0c0 !important; }
@@ -269,13 +266,7 @@ thead tr:nth-child(2) th { position: sticky; top: 31px; z-index: 12; }
     </div>
   </div>
 
-  <div class="legend">
-    <div class="li"><div class="ldot" style="background:var(--comfy)"></div>Comfy</div>
-    <div class="li"><div class="ldot" style="background:var(--fox)"></div>Foxtrot</div>
-    <div class="li"><div class="ldot" style="background:var(--delta)"></div>Δ C÷F</div>
-    <div class="li li-long"><div class="ldot" style="background:var(--dev-c)"></div>±відхилення від попер. тижня</div>
-    <div class="li li-long"><div class="ldot" style="background:var(--total-c)"></div>C+F загальна сума</div>
-  </div>
+
 
   <div class="section-lbl">Таблиця показників по тижнях</div>
   <div class="tbl-wrap">
@@ -464,7 +455,7 @@ function render() {
 
 function renderTable(vis) {
   // colgroup enforces fixed widths regardless of content
-  const col0w = window.innerWidth <= 600 ? 120 : 180;
+  const col0w = Math.min(180, Math.floor(window.innerWidth * 0.33));
   let cols = `<colgroup><col style="width:${col0w}px;min-width:${col0w}px">`;
   vis.forEach(() => {
     cols += '<col style="width:100px"><col style="width:100px"><col style="width:52px"><col class="dev-col" style="width:88px"><col class="dev-col" style="width:88px"><col class="dev-col" style="width:88px"><col class="dev-col" style="width:88px"><col style="width:110px">';
