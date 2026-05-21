@@ -160,10 +160,11 @@ thead tr:first-child th { border-top: 1px solid #ebebf0; }
 th { padding: 7px 10px; text-align: center; font-weight: 600; font-size: 11px; background: #f5f5f7; }
 td { padding: 6px 10px; text-align: right; }
 td:first-child {
-  text-align: left; min-width: min(180px, 33vw); max-width: min(180px, 33vw); color: var(--text-sec);
-  font-size: 11px; position: sticky; left: 0;
+  text-align: left; min-width: min(180px, 33vw); max-width: min(180px, 33vw); width: min(180px, 33vw);
+  color: var(--text-sec); font-size: 11px; position: sticky; left: 0;
   background: #ffffff; z-index: 8;
   border-right: 2px solid #c8c8d0 !important;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 tr:hover td { background: #f5f5ff; }
 tr:hover td:first-child { background: #ededf5 !important; z-index: 8; }
