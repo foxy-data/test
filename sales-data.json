@@ -7,77 +7,77 @@
     "gradient": "linear-gradient(135deg, #434343 0%, #000000 100%)",
     "metrics": {
       "ТО": {
-        "value": 17156790.0,
+        "value": 17478570.0,
         "label": "ТО",
         "unit": "грн"
       },
       "Шт.": {
-        "value": 2335.0,
+        "value": 2370.0,
         "label": "Шт.",
         "unit": "шт"
       },
       "Чеки": {
-        "value": 1611.0,
+        "value": 1622.0,
         "label": "Чеки",
         "unit": "шт"
       },
       "ASP": {
-        "value": 7345,
+        "value": 7381,
         "label": "ASP",
         "unit": "грн"
       },
       "Ср. Чек": {
-        "value": 10650,
+        "value": 10776,
         "label": "Ср. Чек",
         "unit": "грн"
       },
       "КПЧ": {
-        "value": 1.45,
+        "value": 1.46,
         "label": "КПЧ",
         "unit": "грн"
       },
       "ACC": {
-        "value": 1208502.0,
+        "value": 1218635.0,
         "label": "ACC",
         "unit": "грн"
       },
       "Послуги грн": {
-        "value": 580971.0,
+        "value": 606988.0,
         "label": "Послуги грн",
         "unit": "грн"
       },
       "ПЧ": {
-        "value": 109.0,
+        "value": 114.0,
         "label": "ПЧ",
         "unit": "шт"
       },
       "УДС": {
-        "value": 3671901.0,
+        "value": 3725011.0,
         "label": "УДС",
         "unit": "грн"
       },
       "% Доля ACC": {
-        "value": 7.04,
+        "value": 6.97,
         "label": "% Доля ACC",
         "unit": "%"
       },
       "Доля Послуг": {
-        "value": 3.39,
+        "value": 3.47,
         "label": "Доля Послуг",
         "unit": "%"
       },
       "Конверсія ПК": {
-        "value": 10.18,
+        "value": 11.21,
         "label": "Конверсія ПК",
         "unit": "%"
       },
       "Конверсія ПК Offline": {
-        "value": 13.32,
+        "value": 14.69,
         "label": "Конверсія ПК Offline",
         "unit": "%"
       },
       "Доля УДС": {
-        "value": 10.57,
+        "value": 10.32,
         "label": "Доля УДС",
         "unit": "%"
       }
@@ -91,27 +91,27 @@
     "gradient": "linear-gradient(135deg, #FF6B6B 0%, #EE5253 100%)",
     "metrics": {
       "ТО": {
-        "value": 7005104.0,
+        "value": 7432273.0,
         "label": "ТО",
         "unit": "грн"
       },
       "Шт.": {
-        "value": 720.0,
+        "value": 766.0,
         "label": "Шт.",
         "unit": "шт"
       },
       "Чеки": {
-        "value": 493.0,
+        "value": 523.0,
         "label": "Чеки",
         "unit": "шт"
       },
       "ASP": {
-        "value": 9729.0,
+        "value": 9703.0,
         "label": "ASP",
         "unit": "грн"
       },
       "Ср. Чек": {
-        "value": 14209.0,
+        "value": 14211.0,
         "label": "Ср. Чек",
         "unit": "грн"
       },
@@ -121,47 +121,47 @@
         "unit": "грн"
       },
       "ACC": {
-        "value": 522202.0,
+        "value": 531336.0,
         "label": "ACC",
         "unit": "грн"
       },
       "% Доля ACC": {
-        "value": 7.45,
+        "value": 7.15,
         "label": "% Доля ACC",
         "unit": "%"
       },
       "Послуги грн": {
-        "value": 294922.0,
+        "value": 319412.0,
         "label": "Послуги грн",
         "unit": "грн"
       },
       "Доля Послуг": {
-        "value": 4.21,
+        "value": 4.3,
         "label": "Доля Послуг",
         "unit": "%"
       },
       "ПЧ": {
-        "value": 35.0,
+        "value": 37.0,
         "label": "ПЧ",
         "unit": "шт"
       },
       "Конверсія ПК": {
-        "value": 40.15,
+        "value": 40.49,
         "label": "Конверсія ПК",
         "unit": "%"
       },
       "Конверсія ПК Offline": {
-        "value": 47.92,
+        "value": 48.82,
         "label": "Конверсія ПК Offline",
         "unit": "%"
       },
       "УДС": {
-        "value": 1861198.0,
+        "value": 1941401.0,
         "label": "УДС",
         "unit": "грн"
       },
       "Доля УДС": {
-        "value": 26.57,
+        "value": 26.12,
         "label": "Доля УДС",
         "unit": "%"
       }
@@ -175,67 +175,67 @@
     "gradient": "linear-gradient(135deg, #4834d4 0%, #686de0 100%)",
     "metrics": {
       "ТО": {
-        "value": 3400931.0,
+        "value": 3696114.0,
         "label": "ТО",
         "unit": "грн"
       },
       "Шт.": {
-        "value": 471.0,
+        "value": 497.0,
         "label": "Шт.",
         "unit": "шт"
       },
       "Чеки": {
-        "value": 301.0,
+        "value": 317.0,
         "label": "Чеки",
         "unit": "шт"
       },
       "ASP": {
-        "value": 7221.0,
+        "value": 7437.0,
         "label": "ASP",
         "unit": "грн"
       },
       "Ср. Чек": {
-        "value": 11299.0,
+        "value": 11660.0,
         "label": "Ср. Чек",
         "unit": "грн"
       },
       "КПЧ": {
-        "value": 1.56,
+        "value": 1.57,
         "label": "КПЧ",
         "unit": "грн"
       },
       "ACC": {
-        "value": 261371.0,
+        "value": 276797.0,
         "label": "ACC",
         "unit": "грн"
       },
       "% Доля ACC": {
-        "value": 7.69,
+        "value": 7.49,
         "label": "% Доля ACC",
         "unit": "%"
       },
       "Послуги грн": {
-        "value": 139943.0,
+        "value": 141742.0,
         "label": "Послуги грн",
         "unit": "грн"
       },
       "Доля Послуг": {
-        "value": 4.11,
+        "value": 3.83,
         "label": "Доля Послуг",
         "unit": "%"
       },
       "ПЧ": {
-        "value": 32.0,
+        "value": 33.0,
         "label": "ПЧ",
         "unit": "шт"
       },
       "Конверсія ПК": {
-        "value": 24.51,
+        "value": 24.54,
         "label": "Конверсія ПК",
         "unit": "%"
       },
       "Конверсія ПК Offline": {
-        "value": 32.19,
+        "value": 32.29,
         "label": "Конверсія ПК Offline",
         "unit": "%"
       },
@@ -245,7 +245,7 @@
         "unit": "грн"
       },
       "Доля УДС": {
-        "value": 20.29,
+        "value": 18.67,
         "label": "Доля УДС",
         "unit": "%"
       }
@@ -259,27 +259,27 @@
     "gradient": "linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)",
     "metrics": {
       "ТО": {
-        "value": 3373883.0,
+        "value": 3645300.0,
         "label": "ТО",
         "unit": "грн"
       },
       "Шт.": {
-        "value": 526.0,
+        "value": 565.0,
         "label": "Шт.",
         "unit": "шт"
       },
       "Чеки": {
-        "value": 361.0,
+        "value": 388.0,
         "label": "Чеки",
         "unit": "шт"
       },
       "ASP": {
-        "value": 6414.0,
+        "value": 6452.0,
         "label": "ASP",
         "unit": "грн"
       },
       "Ср. Чек": {
-        "value": 9346.0,
+        "value": 9395.0,
         "label": "Ср. Чек",
         "unit": "грн"
       },
@@ -289,42 +289,42 @@
         "unit": "грн"
       },
       "ACC": {
-        "value": 204096.0,
+        "value": 217210.0,
         "label": "ACC",
         "unit": "грн"
       },
       "% Доля ACC": {
-        "value": 6.05,
+        "value": 5.96,
         "label": "% Доля ACC",
         "unit": "%"
       },
       "Послуги грн": {
-        "value": 75698.0,
+        "value": 79194.0,
         "label": "Послуги грн",
         "unit": "грн"
       },
       "Доля Послуг": {
-        "value": 2.24,
+        "value": 2.17,
         "label": "Доля Послуг",
         "unit": "%"
       },
       "ПЧ": {
-        "value": 24.0,
+        "value": 26.0,
         "label": "ПЧ",
         "unit": "шт"
       },
       "Конверсія ПК": {
-        "value": 29.4,
+        "value": 30.04,
         "label": "Конверсія ПК",
         "unit": "%"
       },
       "Конверсія ПК Offline": {
-        "value": 40.14,
+        "value": 40.89,
         "label": "Конверсія ПК Offline",
         "unit": "%"
       },
       "УДС": {
-        "value": 654256.0,
+        "value": 706790.0,
         "label": "УДС",
         "unit": "грн"
       },
@@ -398,12 +398,12 @@
         "unit": "шт"
       },
       "Конверсія ПК": {
-        "value": 11.97,
+        "value": 11.38,
         "label": "Конверсія ПК",
         "unit": "%"
       },
       "Конверсія ПК Offline": {
-        "value": 16.21,
+        "value": 15.41,
         "label": "Конверсія ПК Offline",
         "unit": "%"
       },
@@ -482,12 +482,12 @@
         "unit": "шт"
       },
       "Конверсія ПК": {
-        "value": 10.91,
+        "value": 10.37,
         "label": "Конверсія ПК",
         "unit": "%"
       },
       "Конверсія ПК Offline": {
-        "value": 14.17,
+        "value": 13.47,
         "label": "Конверсія ПК Offline",
         "unit": "%"
       },
@@ -505,13 +505,13 @@
   },
   {
     "id": 6,
-    "name": "пк",
-    "position": "пк",
-    "initials": "П",
+    "name": "Новікова Анна Тарасівна",
+    "position": "продавец-консультант",
+    "initials": "НА",
     "gradient": "linear-gradient(135deg, #4834d4 0%, #686de0 100%)",
     "metrics": {
       "ТО": {
-        "value": 748693.0,
+        "value": 462296.0,
         "label": "ТО",
         "unit": "грн"
       },
@@ -521,42 +521,42 @@
         "unit": "шт"
       },
       "Чеки": {
-        "value": 82.0,
+        "value": 78.0,
         "label": "Чеки",
         "unit": "шт"
       },
       "ASP": {
-        "value": 7269.0,
+        "value": 4488.0,
         "label": "ASP",
         "unit": "грн"
       },
       "Ср. Чек": {
-        "value": 9130.0,
+        "value": 5927.0,
         "label": "Ср. Чек",
         "unit": "грн"
       },
       "КПЧ": {
-        "value": 1.26,
+        "value": 1.32,
         "label": "КПЧ",
         "unit": "грн"
       },
       "ACC": {
-        "value": 31954.0,
+        "value": 37046.0,
         "label": "ACC",
         "unit": "грн"
       },
       "% Доля ACC": {
-        "value": 4.27,
+        "value": 8.01,
         "label": "% Доля ACC",
         "unit": "%"
       },
       "Послуги грн": {
-        "value": 3867.0,
+        "value": 3596.0,
         "label": "Послуги грн",
         "unit": "грн"
       },
       "Доля Послуг": {
-        "value": 0.52,
+        "value": 0.78,
         "label": "Доля Послуг",
         "unit": "%"
       },
@@ -566,96 +566,12 @@
         "unit": "шт"
       },
       "Конверсія ПК": {
-        "value": 0.0,
+        "value": 6.04,
         "label": "Конверсія ПК",
         "unit": "%"
       },
       "Конверсія ПК Offline": {
-        "value": 0.0,
-        "label": "Конверсія ПК Offline",
-        "unit": "%"
-      },
-      "УДС": {
-        "value": 79627.0,
-        "label": "УДС",
-        "unit": "грн"
-      },
-      "Доля УДС": {
-        "value": 10.64,
-        "label": "Доля УДС",
-        "unit": "%"
-      }
-    }
-  },
-  {
-    "id": 7,
-    "name": "Новікова Анна Тарасівна",
-    "position": "продавец-консультант",
-    "initials": "НА",
-    "gradient": "linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)",
-    "metrics": {
-      "ТО": {
-        "value": 385592.0,
-        "label": "ТО",
-        "unit": "грн"
-      },
-      "Шт.": {
-        "value": 76.0,
-        "label": "Шт.",
-        "unit": "шт"
-      },
-      "Чеки": {
-        "value": 58.0,
-        "label": "Чеки",
-        "unit": "шт"
-      },
-      "ASP": {
-        "value": 5074.0,
-        "label": "ASP",
-        "unit": "грн"
-      },
-      "Ср. Чек": {
-        "value": 6648.0,
-        "label": "Ср. Чек",
-        "unit": "грн"
-      },
-      "КПЧ": {
-        "value": 1.31,
-        "label": "КПЧ",
-        "unit": "грн"
-      },
-      "ACC": {
-        "value": 32633.0,
-        "label": "ACC",
-        "unit": "грн"
-      },
-      "% Доля ACC": {
-        "value": 8.46,
-        "label": "% Доля ACC",
-        "unit": "%"
-      },
-      "Послуги грн": {
-        "value": 3497.0,
-        "label": "Послуги грн",
-        "unit": "грн"
-      },
-      "Доля Послуг": {
-        "value": 0.91,
-        "label": "Доля Послуг",
-        "unit": "%"
-      },
-      "ПЧ": {
-        "value": 0.0,
-        "label": "ПЧ",
-        "unit": "шт"
-      },
-      "Конверсія ПК": {
-        "value": 4.72,
-        "label": "Конверсія ПК",
-        "unit": "%"
-      },
-      "Конверсія ПК Offline": {
-        "value": 5.31,
+        "value": 6.99,
         "label": "Конверсія ПК Offline",
         "unit": "%"
       },
@@ -665,18 +581,18 @@
         "unit": "грн"
       },
       "Доля УДС": {
-        "value": 3.65,
+        "value": 3.04,
         "label": "Доля УДС",
         "unit": "%"
       }
     }
   },
   {
-    "id": 8,
+    "id": 7,
     "name": "Дідик Олександр Сергійович",
     "position": "техник-грузчик",
     "initials": "ДО",
-    "gradient": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+    "gradient": "linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)",
     "metrics": {
       "ТО": {
         "value": 112571.0,
@@ -734,12 +650,12 @@
         "unit": "шт"
       },
       "Конверсія ПК": {
-        "value": 0.43,
+        "value": 0.41,
         "label": "Конверсія ПК",
         "unit": "%"
       },
       "Конверсія ПК Offline": {
-        "value": 3.93,
+        "value": 3.74,
         "label": "Конверсія ПК Offline",
         "unit": "%"
       },
@@ -756,11 +672,11 @@
     }
   },
   {
-    "id": 9,
+    "id": 8,
     "name": "Дєєв Вячеслав Сергійович",
     "position": "заместитель директора магазина",
     "initials": "ДВ",
-    "gradient": "linear-gradient(135deg, #FF6B6B 0%, #EE5253 100%)",
+    "gradient": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
     "metrics": {
       "ТО": {
         "value": 4105.0,
@@ -823,7 +739,7 @@
         "unit": "%"
       },
       "Конверсія ПК Offline": {
-        "value": 0.41,
+        "value": 0.39,
         "label": "Конверсія ПК Offline",
         "unit": "%"
       },
@@ -840,11 +756,11 @@
     }
   },
   {
-    "id": 10,
+    "id": 9,
     "name": "Малка Вікторія Володимирівна",
     "position": "кассир торгового зала",
     "initials": "МВ",
-    "gradient": "linear-gradient(135deg, #4834d4 0%, #686de0 100%)",
+    "gradient": "linear-gradient(135deg, #FF6B6B 0%, #EE5253 100%)",
     "metrics": {
       "ТО": {
         "value": 439.0,
@@ -924,11 +840,11 @@
     }
   },
   {
-    "id": 11,
+    "id": 10,
     "name": "Новак-Михальська Тетяна Сергіївна",
     "position": "товаровед",
     "initials": "НТ",
-    "gradient": "linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)",
+    "gradient": "linear-gradient(135deg, #4834d4 0%, #686de0 100%)",
     "metrics": {
       "ТО": {
         "value": -3571.0,
@@ -991,7 +907,7 @@
         "unit": "%"
       },
       "Конверсія ПК Offline": {
-        "value": -0.14,
+        "value": -0.13,
         "label": "Конверсія ПК Offline",
         "unit": "%"
       },
@@ -1008,11 +924,11 @@
     }
   },
   {
-    "id": 12,
+    "id": 11,
     "name": "Ніколаєв Євген Едуардович",
     "position": "директор магазина",
     "initials": "НЄ",
-    "gradient": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+    "gradient": "linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)",
     "metrics": {
       "ТО": {
         "value": -10366.0,
@@ -1075,7 +991,7 @@
         "unit": "%"
       },
       "Конверсія ПК Offline": {
-        "value": -0.27,
+        "value": -0.26,
         "label": "Конверсія ПК Offline",
         "unit": "%"
       },
