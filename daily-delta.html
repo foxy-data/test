@@ -644,8 +644,14 @@ let   dv  = dCol  ? toN(row[dCol.colIdx])  : null;
 if (dv === null && fv != null && kv != null && fv !== 0) dv = kv / fv;
 const gfv   = gfCol   ? toN(row[gfCol.colIdx])   : null;
 const gkv   = gkCol   ? toN(row[gkCol.colIdx])   : null;
-const dngkv = dngkCol ? toN(row[dngkCol.colIdx]) : null;
-const dngv  = dngCol  ? toN(row[dngCol.colIdx])  : null;
+let dngkv = dngkCol ? toN(row[dngkCol.colIdx]) : null;
+// fallback: (комфі - гурт_комфі) / фокстрот
+if (dngkv === null && kv != null && gkv != null && fv != null && fv !== 0)
+  dngkv = (kv - gkv) / fv;
+let dngv  = dngCol  ? toN(row[dngCol.colIdx])  : null;
+// fallback: (комфі - гурт_комфі) / (фокстрот - гурт_фокстрот)
+if (dngv === null && kv != null && gkv != null && fv != null && gfv != null && (fv - gfv) !== 0)
+  dngv = (kv - gkv) / (fv - gfv);
 storeVals[st.name] = { foks: fv, komf: kv, delta: dv, gurt_foks: gfv, gurt_komf: gkv, delta_no_gurt_komf: dngkv, delta_no_gurt: dngv };
 });
 const isWE = dowNum >= 5 || (dowNum === 0 && isWeekend(dowName));
