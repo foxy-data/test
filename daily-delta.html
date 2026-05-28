@@ -651,9 +651,6 @@ let dngkv = (kv != null && fv != null && fv !== 0) ? (kv - gkv0) / fv : (dngkCol
 // Δ-Гурт = (комфі - гурт_комфі) / (фокстрот - гурт_фокстрот) — завжди рахуємо з сирих даних
 const fNetGurt = fv != null ? fv - gfv0 : null;
 let dngv = (kv != null && fNetGurt != null && fNetGurt !== 0) ? (kv - gkv0) / fNetGurt : (dngCol ? toN(row[dngCol.colIdx]) : null);
-if (gfv != null || gkv != null) {
-  console.log('[DEBUG]', st.name, 'fv=', fv, 'kv=', kv, 'gfv=', gfv, 'gkv=', gkv, 'gkv0=', gkv0, 'gfv0=', gfv0, 'dngkv=', dngkv, 'dngv=', dngv);
-}
 storeVals[st.name] = { foks: fv, komf: kv, delta: dv, gurt_foks: gfv, gurt_komf: gkv, delta_no_gurt_komf: dngkv, delta_no_gurt: dngv };
 });
 const isWE = dowNum >= 5 || (dowNum === 0 && isWeekend(dowName));
@@ -1212,19 +1209,17 @@ const bg = STORE_BG[i % STORE_BG.length];
 segsToShow.forEach((sdef, jSeg) => {
 const rowsForSeg = (sdef.key === 'wd') ? w.wd : w.we;
 let f = 0, kv = 0, gf = 0, gk = 0;
-let dngkSum = 0, dngkCnt = 0, dngSum = 0, dngCnt = 0;
 rowsForSeg.forEach(r => {
 const v = r.storeVals[st.name] || {};
 if (v.foks != null) f += v.foks;
 if (v.komf != null) kv += v.komf;
 if (v.gurt_foks != null) gf += v.gurt_foks;
 if (v.gurt_komf != null) gk += v.gurt_komf;
-if (v.delta_no_gurt_komf != null) { dngkSum += v.delta_no_gurt_komf; dngkCnt++; }
-if (v.delta_no_gurt != null) { dngSum += v.delta_no_gurt; dngCnt++; }
 });
 const d = f > 0 ? kv / f : null;
-const dngk = dngkCnt > 0 ? dngkSum / dngkCnt : null;
-const dng  = dngCnt  > 0 ? dngSum  / dngCnt  : null;
+const dngk = f > 0 ? (kv - gk) / f : null;
+const fNet = f - gf;
+const dng  = fNet > 0 ? (kv - gk) / fNet : null;
 const isFirstSeg = jSeg === 0;
 const bl = (isFirstSeg && i > 0) ? '2px solid #d0d0da' : (jSeg > 0 ? '1px solid #e8e8ec' : '');
 tr.appendChild(mkTd(fmt(f), '', {background: bg, borderLeft: bl}));
@@ -1252,29 +1247,24 @@ const rowsForSeg = (sdef.key === 'wd') ? w.wd : w.we;
 const pRowsForSeg = (sdef.key === 'wd') ? prev.wd : prev.we;
 let cf = 0, ck = 0, pf = 0, pk = 0;
 let cgf = 0, cgk = 0, pgf = 0, pgk = 0;
-let cdngkS = 0, cdngkN = 0, pdngkS = 0, pdngkN = 0;
-let cdngS = 0, cdngN = 0, pdngS = 0, pdngN = 0;
 rowsForSeg.forEach(r => {
   const v = r.storeVals[st.name] || {};
   if (v.foks != null) cf += v.foks; if (v.komf != null) ck += v.komf;
   if (v.gurt_foks != null) cgf += v.gurt_foks; if (v.gurt_komf != null) cgk += v.gurt_komf;
-  if (v.delta_no_gurt_komf != null) { cdngkS += v.delta_no_gurt_komf; cdngkN++; }
-  if (v.delta_no_gurt != null) { cdngS += v.delta_no_gurt; cdngN++; }
 });
 pRowsForSeg.forEach(r => {
   const v = r.storeVals[st.name] || {};
   if (v.foks != null) pf += v.foks; if (v.komf != null) pk += v.komf;
   if (v.gurt_foks != null) pgf += v.gurt_foks; if (v.gurt_komf != null) pgk += v.gurt_komf;
-  if (v.delta_no_gurt_komf != null) { pdngkS += v.delta_no_gurt_komf; pdngkN++; }
-  if (v.delta_no_gurt != null) { pdngS += v.delta_no_gurt; pdngN++; }
 });
 const df = cf - pf, dk = ck - pk;
 const dd = (pf > 0 && cf > 0) ? (ck / cf) - (pk / pf) : null;
 const dgf = cgf - pgf, dgk = cgk - pgk;
-const cdngk = cdngkN > 0 ? cdngkS / cdngkN : null;
-const pdngk = pdngkN > 0 ? pdngkS / pdngkN : null;
-const cdng  = cdngN  > 0 ? cdngS  / cdngN  : null;
-const pdng  = pdngN  > 0 ? pdngS  / pdngN  : null;
+const cdngk = cf > 0 ? (ck - cgk) / cf : null;
+const pdngk = pf > 0 ? (pk - pgk) / pf : null;
+const cfNet = cf - cgf, pfNet = pf - pgf;
+const cdng  = cfNet > 0 ? (ck - cgk) / cfNet : null;
+const pdng  = pfNet > 0 ? (pk - pgk) / pfNet : null;
 const ddngk = (cdngk != null && pdngk != null) ? cdngk - pdngk : null;
 const ddng  = (cdng  != null && pdng  != null) ? cdng  - pdng  : null;
 const isFirstSeg = jSeg === 0;
@@ -1445,22 +1435,19 @@ function aggRows(rows, sts) {
 const r = {};
 sts.forEach(st => {
 let f = 0, k = 0, gf = 0, gk = 0;
-let dngkSum = 0, dngkCnt = 0, dngSum = 0, dngCnt = 0;
 rows.forEach(row => {
 const v = row.storeVals[st.name] || {};
 if (v.foks != null) f += v.foks;
 if (v.komf != null) k += v.komf;
 if (v.gurt_foks != null) gf += v.gurt_foks;
 if (v.gurt_komf != null) gk += v.gurt_komf;
-if (v.delta_no_gurt_komf != null) { dngkSum += v.delta_no_gurt_komf; dngkCnt++; }
-if (v.delta_no_gurt != null) { dngSum += v.delta_no_gurt; dngCnt++; }
 });
-r[st.name] = {
-  f, k, d: f > 0 ? k / f : null,
-  gf, gk,
-  dngk: dngkCnt > 0 ? dngkSum / dngkCnt : null,
-  dng:  dngCnt  > 0 ? dngSum  / dngCnt  : null
-};
+// Δ-ГК = (комфі - гурт_комфі) / фокстрот
+const dngk = (f > 0) ? (k - gk) / f : null;
+// Δ-Гурт = (комфі - гурт_комфі) / (фокстрот - гурт_фокстрот)
+const fNet = f - gf;
+const dng  = (fNet > 0) ? (k - gk) / fNet : null;
+r[st.name] = { f, k, d: f > 0 ? k / f : null, gf, gk, dngk, dng };
 });
 return r;
 }
