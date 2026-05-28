@@ -651,6 +651,9 @@ let dngkv = (kv != null && fv != null && fv !== 0) ? (kv - gkv0) / fv : (dngkCol
 // Δ-Гурт = (комфі - гурт_комфі) / (фокстрот - гурт_фокстрот) — завжди рахуємо з сирих даних
 const fNetGurt = fv != null ? fv - gfv0 : null;
 let dngv = (kv != null && fNetGurt != null && fNetGurt !== 0) ? (kv - gkv0) / fNetGurt : (dngCol ? toN(row[dngCol.colIdx]) : null);
+if (gfv != null || gkv != null) {
+  console.log('[DEBUG]', st.name, 'fv=', fv, 'kv=', kv, 'gfv=', gfv, 'gkv=', gkv, 'gkv0=', gkv0, 'gfv0=', gfv0, 'dngkv=', dngkv, 'dngv=', dngv);
+}
 storeVals[st.name] = { foks: fv, komf: kv, delta: dv, gurt_foks: gfv, gurt_komf: gkv, delta_no_gurt_komf: dngkv, delta_no_gurt: dngv };
 });
 const isWE = dowNum >= 5 || (dowNum === 0 && isWeekend(dowName));
