@@ -297,7 +297,12 @@ if(!lastYear)continue;
 const mo=mNum((row[1]||'').trim());
 if(!mo)continue;
 const vals={};
-allCols.forEach(c=>{vals[c.key]=toN(row[c.colIdx]);});
+allCols.forEach(c=>{
+let v=toN(row[c.colIdx]);
+// Delta values stored as percentage (e.g. 145.45 instead of 1.4545) — normalize
+if(c.isDelta && v!==null && Math.abs(v)>10) v=v/100;
+vals[c.key]=v;
+});
 dataRows.push({year:lastYear,month:mo,vals,key:lastYear+'_'+mo});
 yrs.add(lastYear);mos.add(mo);
 }
